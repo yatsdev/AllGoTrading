@@ -31,17 +31,17 @@ public class QuotingStrategy extends StrategyBase {
     {
         if(shuttingDown) return;
         if(receipt.getRejectReason().length()>0) {
-            log.info("Received rejection! Stopping for now!");
+            log.error("Received rejection! Stopping for now!");
             System.exit(-1);
         }
         if(!receipt.isForProduct(tradeProduct))                        {
-            log.info("Received receipt for unknown product: "+receipt);
+            log.error("Received receipt for unknown product: " + receipt);
             return;
         }
         if(receipt.isForOrder(lastBidOrder)) {
             receivedOrderReceiptBidSide =true;
         }
-        log.info("Received receipt: "+receipt);
+        log.debug("Received receipt: " + receipt);
         position += receipt.getPositionChange();
     }
 
@@ -68,23 +68,26 @@ public class QuotingStrategy extends StrategyBase {
     public QuotingStrategy() {
         super();
         lastBidOrder = OrderNew.NULL;
-//        tradeProduct = new Product("4663747", "IBM", "XNAS");
-        tradeProduct = new Product("4663789", "SAP", "XETR");
+        tradeProduct = new Product("4663747", "IBM", "XNAS");
+//        tradeProduct = new Product("4663789", "SAP", "XETR");
         shuttingDown=false;
+        previousMarketData = MarketData.NULL;
     }
 
 
     private void handleMarketDataBidSide(MarketData marketData) {
 
-        double newBid = marketData.getBid() - 0.05;
+        double newBid = Math.min(0.995* marketData.getBid(), marketData.getBid() -0.05);
+
 
         if(isInMarketBidSide()) {
+            boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
             double bidChange = Math.abs(lastBidOrder.getLimit() - newBid);
-            if(bidChange>0.001) {
-                log.info("price: "+marketData);
+            if(changedSinceLastTick && bidChange>0.01) {
+                log.info("price: " + marketData);
             }
 
-            boolean bidChangedEnoughForOrderUpdate = bidChange > 0.01;
+            boolean bidChangedEnoughForOrderUpdate = bidChange > 0.02;
             if(!bidChangedEnoughForOrderUpdate) return;
 
             if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
@@ -93,7 +96,7 @@ public class QuotingStrategy extends StrategyBase {
         if(!isInMarketBidSide() && position<1) {
             sendOrderBidSide(newBid);
         }
-
+        previousMarketData=marketData;
     }
 
     private void sendOrderBidSide(double bid)
@@ -127,6 +130,7 @@ public class QuotingStrategy extends StrategyBase {
     private Product tradeProduct;
     IProvideProperties config;
     private OrderNew lastBidOrder;
+    private MarketData previousMarketData;
     private boolean receivedOrderReceiptBidSide;
 
 } // class

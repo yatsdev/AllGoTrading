@@ -7,6 +7,9 @@ public abstract class BookSide {
     public static Ask ASK = new Ask();
 
     public abstract int toDirection();
+    public static BookSide fromDirection(int direction) {
+        return direction < 0 ? ASK : BID;
+    }
 
 
 
@@ -15,7 +18,6 @@ public abstract class BookSide {
         public int toDirection() { return -1; }
         @Override
         public String toString() {return "ASK";}
-
     } // class Ask
 
     public static class Bid extends BookSide {

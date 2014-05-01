@@ -11,7 +11,7 @@ public class OrderCancel extends OrderBase {
     public String toString() {
         return "OrderCancel{" +
                 "oid="+getOrderId()+
-                ""+product +
+                ","+product +
                 ",bookSide=" + bookSide +
                 ",externalAccount=" + externalAccount +
                 ",timestamp=" + timestamp +
@@ -54,6 +54,11 @@ public class OrderCancel extends OrderBase {
         return this;
     }
 
+    public OrderCancel withTimestamp(DateTime d) {
+        timestamp=d;
+        return this;
+    }
+
     public OrderCancel withProduct(Product p) {
         product=p;
         return this;
@@ -64,7 +69,7 @@ public class OrderCancel extends OrderBase {
         return this;
     }
 
-    public OrderCancel withAccount(String a) {
+    public OrderCancel withExternalAccount(String a) {
         externalAccount =a;
         return this;
     }

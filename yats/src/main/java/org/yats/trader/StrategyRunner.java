@@ -31,7 +31,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
 
     @Override
     public void onReceipt(Receipt receipt) {
-//        log.info("received {}", receipt);
+        log.info("Received: {}", receipt);
         fillReceiptWithOrderData(receipt);
         receiptQueue.add(receipt);
         updatedProductQueue.add(receipt.getSecurityId());
@@ -39,12 +39,13 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
 
     private void fillReceiptWithOrderData(Receipt receipt) {
         if(!orderMap.containsKey(receipt.getOrderId().toString())) {
-            log.info("received receipt for unknown order: {}", receipt);
+            log.error("received receipt for unknown order: {}", receipt);
             return;
         }
-
-        OrderNew order = orderMap.get(receipt.getOrderId().toString());
+        String key = receipt.getOrderId().toString();
+        OrderNew order = orderMap.get(key);
         receipt.setInternalAccount(order.getInternalAccount());
+        if(receipt.isEndState()) orderMap.remove(key);
     }
 
     @Override

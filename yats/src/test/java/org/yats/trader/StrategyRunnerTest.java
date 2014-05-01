@@ -131,7 +131,7 @@ public class StrategyRunnerTest {
             OrderCancel o = OrderCancel.create()
                     .withProduct(lastReceipt.getProduct())
                     .withBookSide(lastReceipt.getBookSide())
-                    .withAccount(lastReceipt.getExternalAccount())
+                    .withExternalAccount(lastReceipt.getExternalAccount())
                     .withOrderId(lastReceipt.getOrderId())
                     ;
             sendOrderCancel(o);
