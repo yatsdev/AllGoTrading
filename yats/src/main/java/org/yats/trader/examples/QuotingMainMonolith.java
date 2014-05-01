@@ -1,54 +1,53 @@
 package org.yats.trader.examples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
-import org.yats.connectivity.messagebus.GenericConnection;
+import org.yats.connectivity.fix.OrderConnection;
+import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ReceiptStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 /*
-    This is an example of connecting to a FIX server, receiving prices and keeping an order on bid side at fixed distance
-    from best bid.
-    In this example a message bus is used to connect to a server that takes care of the FIX connection.
-    To run the example please install and start the RabbitMQ server you can download from rabbitmq.com and start the
-    FIX server connection yats.connectivity.fix.ServerMain. This server will connect to the FIX server and provide a
-    message bus interface this example strategy will use.
-    For an example with the FIX connectivity within the same binary have a look at QuotingMainMonolith.java
-    The message bus allows to decentralize different services like connectivity, persistence of orders and receipts,
-    running of strategies as well as visualisation and control tools.
+    An example of connecting to a FIX server, receiving prices and keeping an order on bid side at fixed distance
+    from best bid. This example uses the FIX connection in the same executable.
  */
 
-public class QuotingMain {
+public class QuotingMainMonolith {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
 
-    final Logger log = LoggerFactory.getLogger(QuotingMain.class);
+    final Logger log = LoggerFactory.getLogger(QuotingMainMonolith.class);
 
 
     public void go() throws InterruptedException, IOException
     {
-        GenericConnection priceAndOrderConnection = new GenericConnection();
+//        PriceFeed priceFeed = PriceFeed.create();
+        PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
 
         QuotingStrategy strategy = new QuotingStrategy();
         ReceiptStorage receiptStorage = new ReceiptStorage();
 
         StrategyRunner strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(priceAndOrderConnection);
+        strategyRunner.setPriceFeed(priceFeed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.addReceiptConsumer(receiptStorage);
+        priceFeed.logon();
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(receiptStorage);
         strategy.setProfitProvider(receiptStorage);
 
+//        OrderConnection orderConnection = OrderConnection.create();
+        OrderConnection orderConnection = OrderConnection.createFromConfigFile("config/configOrder.cfg");
+        orderConnection.logon();
 
-        strategyRunner.setOrderSender(priceAndOrderConnection);
-        priceAndOrderConnection.setReceiptConsumer(strategyRunner);
+        strategyRunner.setOrderSender(orderConnection);
+        orderConnection.setReceiptConsumer(strategyRunner);
         strategy.setOrderSender(strategyRunner);
 
         // QuotingMain.properties needs to provide the external account number of the user in the form "externalAccount=1234"
@@ -72,19 +71,21 @@ public class QuotingMain {
 
         System.exit(0);
 
+//        final CountDownLatch shutdownLatch = new CountDownLatch(1);
+//        shutdownLatch.await();
+
     }
 
-    public QuotingMain() {
+    public QuotingMainMonolith() {
     }
 
     public static void main(String args[]) throws Exception {
-        QuotingMain q = new QuotingMain();
+        QuotingMainMonolith q = new QuotingMainMonolith();
 
         try {
             q.go();
         } catch (RuntimeException r)
         {
-            r.printStackTrace();
             System.exit(-1);
         }
         System.exit(0);

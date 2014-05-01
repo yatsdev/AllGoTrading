@@ -14,7 +14,7 @@ public class OrderNew extends OrderBase {
         return OrderCancel.create()
                 .withProduct(product)
                 .withBookSide(bookSide)
-                .withAccount(externalAccount)
+                .withExternalAccount(externalAccount)
                 .withOrderId(orderId)
                 ;
     }
@@ -24,13 +24,13 @@ public class OrderNew extends OrderBase {
     public String toString() {
         return "OrderNew{" +
                 "oid="+getOrderId()+
-                ",product=" + product +
+                ","+product +
                 ",bookSide=" + bookSide +
                 ",limit=" + limit +
                 ",size=" + size +
                 ",externalAccount=" + externalAccount +
                 ",internalAccount=" + internalAccount +
-                "timestamp=" + timestamp +
+                ",timestamp=" + timestamp +
                 '}';
     }
 
@@ -74,6 +74,11 @@ public class OrderNew extends OrderBase {
         return externalAccount;
     }
 
+
+    public OrderNew withTimestamp(DateTime d) {
+        timestamp=d;
+        return this;
+    }
 
     public OrderNew withOrderId(UniqueId i) {
         setOrderId(i);

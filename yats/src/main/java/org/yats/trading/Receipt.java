@@ -18,7 +18,7 @@ public class Receipt {
         return OrderCancel.create()
                 .withProduct(product)
                 .withBookSide(bookSide)
-                .withAccount(externalAccount)
+                .withExternalAccount(externalAccount)
                 .withOrderId(orderId)
                 ;
     }

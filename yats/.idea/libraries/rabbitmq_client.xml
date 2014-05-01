@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="rabbitmq-client">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../3rdpartylibs/rabbitmq-client.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../3rdpartylibs/commons-io-1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../3rdpartylibs/commons-cli-1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -6,10 +6,14 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 import flexjson.JSONDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class Receiver<T> {
+
+    final Logger log = LoggerFactory.getLogger(Receiver.class);
 
     public Receiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
         tClass=_tClass;
@@ -32,7 +36,9 @@ public class Receiver<T> {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
             lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
+            log.debug("Receiver: "+jsonMessage);
             T msg = new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
+            log.debug("Receiver parsed: "+msg.toString());
             return msg;
         } catch (InterruptedException e) {
 //            e.printStackTrace();
@@ -40,10 +46,12 @@ public class Receiver<T> {
         }
     }
 
-    public T tryReceive()
+    public T tryReceive(int timeoutMillisec)
     {
+
         try {
-            QueueingConsumer.Delivery delivery = consumer.nextDelivery();
+            QueueingConsumer.Delivery delivery = consumer.nextDelivery(timeoutMillisec);
+            if(delivery==null) return null;
             lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
             T msg = new JSONDeserializer<T>().deserialize(jsonMessage, tClass);

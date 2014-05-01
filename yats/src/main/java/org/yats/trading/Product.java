@@ -9,10 +9,11 @@ public class Product {
 
     @Override
     public String toString() {
-        return "id="+id
-                +",symbol="+symbol
-                +",exchange="+exchange
-                ;
+        return "Product{" +
+                "id=" + id +
+                ",symbol=" + symbol +
+                ",exchange=" + exchange +
+                '}';
     }
 
     public boolean isSameAs(Product other) {
