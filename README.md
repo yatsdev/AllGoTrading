@@ -8,3 +8,10 @@ A suite of unit tests is waiting for implementation of their respective classes.
 
 A simple example strategy shows how to receive market data, send new orders and cancel existing orders:
 https://github.com/yatsdev/AllGoTrading/tree/master/yats/src/yats/trader/examples 
+
+
+Tutorial 1: Software installation
+https://www.youtube.com/watch?v=p8rWtEdfUY8
+
+Tutorial 2: IDEA config, unit tests, example setup
+https://www.youtube.com/watch?v=3Wq3p5LPhQU
