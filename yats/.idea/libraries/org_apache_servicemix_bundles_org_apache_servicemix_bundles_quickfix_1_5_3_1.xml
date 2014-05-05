@@ -2,11 +2,9 @@
   <library name="org.apache.servicemix.bundles:org.apache.servicemix.bundles.quickfix:1.5.3_1" type="repository">
     <properties maven-id="org.apache.servicemix.bundles:org.apache.servicemix.bundles.quickfix:1.5.3_1" />
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/org.apache.servicemix.bundles.quickfix-1.5.3_1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/servicemix/bundles/org.apache.servicemix.bundles.quickfix/1.5.3_1/org.apache.servicemix.bundles.quickfix-1.5.3_1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib/org.apache.servicemix.bundles.quickfix-1.5.3_1-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

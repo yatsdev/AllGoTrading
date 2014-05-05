@@ -2,8 +2,6 @@ package org.yats.trader;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.trading.*;
@@ -14,11 +12,6 @@ public class StrategyRunnerTest {
         http://www.slf4j.org/faq.html#IllegalAccessError
         Remove from Maven's lib directory all SLF4J JARs with versions before 1.5.6 and their entries in ProjectSettings->Libraries
      */
-
-    // the configuration file log4j.properties for Log4J has to be provided in the working directory
-    // an example of such a file is at config/log4j.properties.
-    // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
 
     private static String SECURITY_ID_SAP ="SAP";
@@ -226,7 +219,7 @@ public class StrategyRunnerTest {
             Receipt receipt = lastOrderNew.createReceiptDefault();
             receipt.setCurrentTradedSize(fillSize);
             receipt.setTotalTradedSize(filledSizeOfOrder);
-            receipt.setEndState(filledSizeOfOrder>=lastOrderNew.getSize()?true:false);
+            receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize());
             receiptConsumer.onReceipt(receipt);
         }
 
