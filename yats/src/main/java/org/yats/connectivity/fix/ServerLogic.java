@@ -61,8 +61,8 @@ public class ServerLogic extends StrategyBase implements IAmCalledBack {
     private void sendAllReceivedSubscription() {
         while(receiverSubscription.hasMoreMessages()) {
             SubscriptionMsg m = receiverSubscription.get();
-            Product p = new Product(m.id, m.symbol, m.exchange);
-            subscribe(p);
+            Product p = getProductForProductId(m.productId);
+            subscribe(p.getProductId());
         }
     }
 

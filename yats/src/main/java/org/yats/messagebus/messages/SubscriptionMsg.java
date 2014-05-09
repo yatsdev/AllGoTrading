@@ -1,24 +1,18 @@
 package org.yats.messagebus.messages;
 
-import org.yats.trading.Product;
-
 public class SubscriptionMsg {
 
     @Override
     public String toString() {
         return "SubscriptionMsg{" +
-                "id=" + id +
-                ",symbol=" + symbol +
-                ",exchange=" + exchange +
+                "productId=" + productId +
                 '}';
     }
 
-    public static SubscriptionMsg createFromProduct(Product product)
+    public static SubscriptionMsg createFromProductId(String pid)
     {
         SubscriptionMsg m = new SubscriptionMsg();
-        m.id=product.getId();
-        m.symbol=product.getSymbol();
-        m.exchange=product.getExchange();
+        m.productId = pid;
         return m;
     }
 
@@ -26,7 +20,5 @@ public class SubscriptionMsg {
     }
 
 
-    public String id;
-    public String symbol;
-    public String exchange;
+    public String productId;
 } // class

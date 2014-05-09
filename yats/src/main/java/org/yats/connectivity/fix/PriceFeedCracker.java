@@ -1,5 +1,6 @@
 package org.yats.connectivity.fix;
 
+import org.yats.common.UniqueId;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.MarketData;
 import org.joda.time.DateTime;
@@ -75,7 +76,7 @@ public class PriceFeedCracker extends MessageCracker implements Application {
 		MDEntrySize MDEntrySize = new MDEntrySize();
 
         String symbol = message.get(new Symbol()).getValue();
-        String securityId = message.get(new SecurityID()).getValue();
+        String productId = message.get(new SecurityID()).getValue();
 
         try {
             message.getGroup(1, group);
@@ -93,7 +94,7 @@ public class PriceFeedCracker extends MessageCracker implements Application {
             double ask = MDEntryPx.getValue();
             double askSize = MDEntrySize.getValue();
 
-            MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),securityId,bid,ask,bidSize,askSize);
+            MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId,bid,ask,bidSize,askSize);
 //        log.debug("FIX: "+m.toString());
             marketDataConsumer.onMarketData(m);
 
@@ -113,9 +114,17 @@ public class PriceFeedCracker extends MessageCracker implements Application {
     private IConsumeMarketData marketDataConsumer;
 
     private class MarketDataConsumerDummy implements IConsumeMarketData {
+        private MarketDataConsumerDummy() {
+            id = UniqueId.create();
+        }
         @Override
         public void onMarketData(MarketData marketData) {
             throw new RuntimeException("MarketDataConsumerDummy can not handle market data!");
         }
+        @Override
+        public UniqueId getConsumerId() {
+            return id;
+        }
+        private UniqueId id;
     }
 }

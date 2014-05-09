@@ -31,7 +31,7 @@ public class Sender<T>
 
     public void init() {
         try{
-            factory = new ConnectionFactory();
+            ConnectionFactory factory = new ConnectionFactory();
             factory.setHost(rabbitServerAddress);
             connection = factory.newConnection();
             channel = connection.createChannel();
@@ -58,7 +58,6 @@ public class Sender<T>
         }
     }
 
-    private ConnectionFactory factory;
     private Connection connection;
     private Channel channel;
     private String exchangeName;

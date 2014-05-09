@@ -13,27 +13,31 @@ public class Receipt {
         return rejectReason.length() > 0;
     }
 
-    public OrderCancel createCancelOrder()
-    {
-        return OrderCancel.create()
-                .withProduct(product)
-                .withBookSide(bookSide)
-                .withExternalAccount(externalAccount)
-                .withOrderId(orderId)
-                ;
-    }
+//    public OrderCancel createCancelOrder()
+//    {
+//        return OrderCancel.create()
+//                .withProductId(productId)
+//                .withBookSide(bookSide)
+//                .withExternalAccount(externalAccount)
+//                .withOrderId(orderId)
+//                ;
+//    }
 
     public boolean isForOrder(OrderNew order) {
         return orderId.isSameAs(order.getOrderId());
     }
 
-    public boolean isForSameProductAs(Receipt other)
-    {
-        return isForProduct(other.getProduct());
-    }
+//    public boolean isForSameProductAs(Receipt other)
+//    {
+//        return other.hasProductId(productId);
+//    }
 
     public boolean isForProduct(Product p) {
-        return product.isSameAs(p);
+        return p.hasProductId(productId);
+    }
+
+    public boolean hasProductId(String pid) {
+        return productId.compareTo(pid) == 0;
     }
 
     @Override
@@ -43,7 +47,7 @@ public class Receipt {
                 ",orderId=" + orderId +
                 ",externalAccount=" + externalAccount +
                 ",internalAccount=" + internalAccount +
-                ",product=" + product +
+                ",productId=" + productId +
                 ",bookSide=" + bookSide +
                 ",residualSize=" + residualSize +
                 ",currentTradedSize=" + currentTradedSize +
@@ -55,23 +59,25 @@ public class Receipt {
     }
 
     public boolean isForSameOrderAs(Receipt other) {
-        if(other == NULL) return false;
-        return orderId.isSameAs(other.getOrderId());
+        return other != NULL && orderId.isSameAs(other.getOrderId());
     }
 
     public double getPositionChange() {
         return (double)bookSide.toDirection() * currentTradedSize;
     }
 
-    public boolean isNewOrModifiedUnfilledOrderInMarket() {
-        return !endState && (residualSize>0) && (totalTradedSize==0);
-    }
+//    public boolean isNewOrModifiedUnfilledOrderInMarket() {
+//        return !endState && (residualSize>0) && (totalTradedSize==0);
+//    }
 
-    public String getSecurityId()
+    public String getProductId()
     {
-        return product.getId();
+        return productId;
     }
 
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
 
     public UniqueId getOrderId() {
         return orderId;
@@ -87,14 +93,6 @@ public class Receipt {
 
     public void setExternalAccount(String externalAccount) {
         this.externalAccount = externalAccount;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public BookSide getBookSide() {
@@ -125,7 +123,6 @@ public class Receipt {
         return price;
     }
 
-    //todo: replace double with fixed decimal type
     public void setPrice(double price) {
         this.price = price;
     }
@@ -183,8 +180,8 @@ public class Receipt {
         return this;
     }
 
-    public Receipt withProduct(Product p) {
-        product = p;
+    public Receipt withProductId(String pid) {
+        productId = pid;
         return this;
     }
 
@@ -237,7 +234,7 @@ public class Receipt {
 
     public Receipt() {
         endState=false;
-        product = Product.NULL;
+        productId = "";
         bookSide = BookSide.NULL;
         timestamp = DateTime.now(DateTimeZone.UTC);
         orderId = UniqueId.create();
@@ -254,7 +251,7 @@ public class Receipt {
     private UniqueId orderId;
     private String externalAccount;
     private String internalAccount;
-    private Product product;
+    private String productId;
     private BookSide bookSide;
     private double residualSize;
     private double currentTradedSize;

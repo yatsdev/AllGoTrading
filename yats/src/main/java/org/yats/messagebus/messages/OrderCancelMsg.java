@@ -4,7 +4,6 @@ import org.joda.time.DateTime;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.OrderCancel;
-import org.yats.trading.Product;
 
 public class OrderCancelMsg {
 
@@ -19,9 +18,7 @@ public class OrderCancelMsg {
         m.timestamp = r.getTimestamp().toString();
         m.orderId=r.getOrderId().toString();
         m.externalAccount=r.getExternalAccount();
-        m.productId = r.getProduct().getId();
-        m.symbol = r.getProduct().getSymbol();
-        m.exchange = r.getProduct().getExchange();
+        m.productId = r.getProductId();
         m.bookSide = r.getBookSide();
         return m;
     }
@@ -31,7 +28,7 @@ public class OrderCancelMsg {
                 .withTimestamp(DateTime.parse(timestamp))
                 .withOrderId(UniqueId.createFromString(orderId))
                 .withExternalAccount(externalAccount)
-                .withProduct(new Product(productId, symbol, exchange))
+                .withProductId(productId)
                 .withBookSide(bookSide);
     }
 
@@ -42,8 +39,6 @@ public class OrderCancelMsg {
                 ", orderId='" + orderId + '\'' +
                 ", externalAccount='" + externalAccount + '\'' +
                 ", productId='" + productId + '\'' +
-                ", symbol='" + symbol + '\'' +
-                ", exchange='" + exchange + '\'' +
                 ", bookSide=" + bookSide +
                 '}';
     }
@@ -55,8 +50,6 @@ public class OrderCancelMsg {
     public String orderId;
     public String externalAccount;
     public String productId;
-    public String symbol;
-    public String exchange;
     public BookSide bookSide;
 
 } // class

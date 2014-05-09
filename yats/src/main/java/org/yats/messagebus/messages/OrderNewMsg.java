@@ -4,7 +4,6 @@ import org.joda.time.DateTime;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.OrderNew;
-import org.yats.trading.Product;
 
 public class OrderNewMsg {
 
@@ -20,9 +19,7 @@ public class OrderNewMsg {
         m.orderId=r.getOrderId().toString();
         m.externalAccount=r.getExternalAccount();
         m.internalAccount=r.getExternalAccount();
-        m.productId = r.getProduct().getId();
-        m.symbol = r.getProduct().getSymbol();
-        m.exchange = r.getProduct().getExchange();
+        m.productId = r.getProductId();
         m.bookSideDirection = r.getBookSide().toDirection();
         m.size=r.getSize();
         m.limit=r.getLimit();
@@ -35,7 +32,7 @@ public class OrderNewMsg {
                 .withOrderId(UniqueId.createFromString(orderId))
                 .withExternalAccount(externalAccount)
                 .withInternalAccount(internalAccount)
-                .withProduct(new Product(productId, symbol, exchange))
+                .withProductId(productId)
                 .withBookSide(BookSide.fromDirection(bookSideDirection))
                 .withSize(size)
                 .withLimit(limit);

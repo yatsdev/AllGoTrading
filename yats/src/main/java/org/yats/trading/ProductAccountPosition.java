@@ -15,7 +15,7 @@ public class ProductAccountPosition {
     }
 
     public String getKey() {
-        return productId+","+internalAccount;
+        return productId +","+internalAccount;
     }
 
     public ProductAccountPosition(String productId, String internalAccount, double size) {
@@ -28,9 +28,8 @@ public class ProductAccountPosition {
         return new ProductAccountPosition(productId, internalAccount, size+other.size);
     }
 
-
-    String productId;
     String internalAccount;
+    String productId;
     double size;
 
 } // class
