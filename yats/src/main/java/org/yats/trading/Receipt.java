@@ -4,6 +4,8 @@ import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.math.BigDecimal;
+
 public class Receipt {
 
     public static ReceiptNULL NULL = new ReceiptNULL();
@@ -59,12 +61,12 @@ public class Receipt {
         return orderId.isSameAs(other.getOrderId());
     }
 
-    public double getPositionChange() {
-        return (double)bookSide.toDirection() * currentTradedSize;
+    public java.math.BigDecimal getPositionChange() {
+        return  currentTradedSize.multiply(java.math.BigDecimal.valueOf(bookSide.toDirection()));
     }
 
     public boolean isNewOrModifiedUnfilledOrderInMarket() {
-        return !endState && (residualSize>0) && (totalTradedSize==0);
+        return !endState && (residualSize.compareTo(BigDecimal.ZERO)>0) && (totalTradedSize==BigDecimal.ZERO);
     }
 
     public String getSecurityId()
@@ -105,28 +107,28 @@ public class Receipt {
         this.bookSide = bookSide;
     }
 
-    public double getResidualSize() {
+    public java.math.BigDecimal getResidualSize() {
         return residualSize;
     }
 
-    public void setResidualSize(double residualSize) {
+    public void setResidualSize(java.math.BigDecimal residualSize) {
         this.residualSize = residualSize;
     }
 
-    public double getCurrentTradedSize() {
+    public java.math.BigDecimal getCurrentTradedSize() {
         return currentTradedSize;
     }
 
-    public void setCurrentTradedSize(double currentTradedSize) {
+    public void setCurrentTradedSize(java.math.BigDecimal currentTradedSize) {
         this.currentTradedSize = currentTradedSize;
     }
 
-    public double getPrice() {
+    public java.math.BigDecimal getPrice() {
         return price;
     }
 
     //todo: replace double with fixed decimal type
-    public void setPrice(double price) {
+    public void setPrice(java.math.BigDecimal price) {
         this.price = price;
     }
 
@@ -154,11 +156,11 @@ public class Receipt {
         this.timestamp = timestamp;
     }
 
-    public double getTotalTradedSize() {
+    public java.math.BigDecimal getTotalTradedSize() {
         return totalTradedSize;
     }
 
-    public void setTotalTradedSize(double totalTradedSize) {
+    public void setTotalTradedSize(java.math.BigDecimal totalTradedSize) {
         this.totalTradedSize = totalTradedSize;
     }
 
@@ -193,22 +195,22 @@ public class Receipt {
         return this;
     }
 
-    public Receipt withResidualSize(double d) {
+    public Receipt withResidualSize(java.math.BigDecimal d) {
         residualSize=d;
         return this;
     }
 
-    public Receipt withCurrentTradedSize(double d) {
+    public Receipt withCurrentTradedSize(java.math.BigDecimal d) {
         currentTradedSize=d;
         return this;
     }
 
-    public Receipt withTotalTradedSize(double d) {
+    public Receipt withTotalTradedSize(java.math.BigDecimal d) {
         totalTradedSize=d;
         return this;
     }
 
-    public Receipt withPrice(double p) {
+    public Receipt withPrice(java.math.BigDecimal p) {
         price=p;
         return this;
     }
@@ -241,11 +243,11 @@ public class Receipt {
         bookSide = BookSide.NULL;
         timestamp = DateTime.now(DateTimeZone.UTC);
         orderId = UniqueId.create();
-        currentTradedSize=0;
-        residualSize=0;
-        totalTradedSize=0;
+        currentTradedSize=BigDecimal.ZERO;
+        residualSize=BigDecimal.ZERO;
+        totalTradedSize=BigDecimal.ZERO;
         rejectReason="";
-        price=0.0;
+        price=BigDecimal.ZERO;
         externalAccount="";
         internalAccount="";
     }
@@ -256,10 +258,10 @@ public class Receipt {
     private String internalAccount;
     private Product product;
     private BookSide bookSide;
-    private double residualSize;
-    private double currentTradedSize;
-    private double totalTradedSize;
-    private double price;
+    private java.math.BigDecimal residualSize;
+    private java.math.BigDecimal currentTradedSize;
+    private java.math.BigDecimal totalTradedSize;
+    private java.math.BigDecimal price;
     private String rejectReason;
     private boolean endState;
 
