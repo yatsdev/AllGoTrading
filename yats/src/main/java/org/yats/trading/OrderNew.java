@@ -25,7 +25,7 @@ public class OrderNew extends OrderBase {
     public String toString() {
         return "OrderNew{" +
                 "oid="+getOrderId()+
-                ", productId"+ productId +
+                ",productId="+ productId +
                 ",bookSide=" + bookSide +
                 ",limit=" + limit +
                 ",size=" + size +

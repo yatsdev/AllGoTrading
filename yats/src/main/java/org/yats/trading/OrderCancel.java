@@ -10,7 +10,7 @@ public class OrderCancel extends OrderBase {
     public String toString() {
         return "OrderCancel{" +
                 "oid="+getOrderId()+
-                ",pid="+ productId +
+                ",productId="+ productId +
                 ",bookSide=" + bookSide +
                 ",externalAccount=" + externalAccount +
                 ",timestamp=" + timestamp +
