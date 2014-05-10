@@ -1,22 +1,16 @@
 package org.yats.connectivity.fix;
 
-import org.yats.common.UniqueId;
-import org.yats.trading.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import quickfix.Application;
-import quickfix.DoNotSend;
-import quickfix.FieldNotFound;
-import quickfix.IncorrectDataFormat;
-import quickfix.IncorrectTagValue;
-import quickfix.RejectLogon;
-import quickfix.SessionID;
-import quickfix.UnsupportedMessageType;
-import quickfix.field.OrderQty;
-import quickfix.field.Price;
+import org.yats.common.UniqueId;
+import org.yats.trading.BookSide;
+import org.yats.trading.IConsumeReceipt;
+import org.yats.trading.Receipt;
+import quickfix.*;
 import quickfix.fix42.*;
+import quickfix.fix42.MessageCracker;
 
 
 public class OrderResponseCracker extends MessageCracker implements Application {
@@ -59,6 +53,7 @@ public class OrderResponseCracker extends MessageCracker implements Application 
 			crack(message, sessionID);
 
 		} catch (Exception e) {
+            log.error(e.getMessage());
 		}
 
 	}
@@ -70,20 +65,20 @@ public class OrderResponseCracker extends MessageCracker implements Application 
 		super.onMessage(message, sessionID);
 	}
 
-	public void onMessage(quickfix.fix42.NewOrderSingle order,
-			SessionID sessionID) {
-
-		log.info("NOT IMPLEMENTED YET:::::::::::::::NEWORDERSINGLE!!");
-		try {
-			OrderQty orderQty = order.getOrderQty();
-			System.out.println(orderQty.toString());
-			Price price = order.getPrice();
-			System.out.println(price.toString());
-		} catch (FieldNotFound e) {
-			e.printStackTrace();
-		}
-
-	}
+//	public void onMessage(quickfix.fix42.NewOrderSingle order,
+//			SessionID sessionID) {
+//
+//		log.info("NOT IMPLEMENTED YET:::::::::::::::NEWORDERSINGLE!!");
+//		try {
+//			OrderQty orderQty = order.getOrderQty();
+//			System.out.println(orderQty.toString());
+//			Price price = order.getPrice();
+//			System.out.println(price.toString());
+//		} catch (FieldNotFound e) {
+//			e.printStackTrace();
+//		}
+//
+//	}
 
 	public void onMessage(ExecutionReport report, SessionID sessionID)
     {
@@ -100,15 +95,10 @@ public class OrderResponseCracker extends MessageCracker implements Application 
             r.setTimestamp(DateTime.now(DateTimeZone.UTC));
 
             r.setExternalAccount(report.getAccount().getValue());
-            Product p = new Product(
-                    report.getSecurityID().getValue(),
-                    report.getSymbol().getValue(),
-                    report.getSecurityExchange().getValue());
-            r.setProduct(p);
+            r.setProductId(report.getSecurityID().getValue());
             r.setPrice(report.getPrice().getValue());
             r.setResidualSize(report.getLeavesQty().getValue());
             r.setCurrentTradedSize(report.getLastShares().getValue());
-
             r.setOrderId(UniqueId.createFromString(report.getClOrdID().getValue()));
             if(cancelTypes.indexOf(report.getExecType().getValue())>=0) { // cancel
                 r.setOrderId(UniqueId.createFromString(report.getOrigClOrdID().getValue()));
@@ -190,14 +180,12 @@ public class OrderResponseCracker extends MessageCracker implements Application 
             E = Pending Replace (e.g. result of Order Cancel/Replace Request <G>)
          */
         String interestingTypes = "012458C";
-        boolean interesting = interestingTypes.indexOf(type.getValue()) >= 0;
-        return interesting;
+        return interestingTypes.indexOf(type.getValue()) >= 0;
     }
 
     private boolean isInEndState(char fixOrderStatus) {
         String fixCodesForEndState = "23478C";
-        boolean endState = fixCodesForEndState.indexOf(fixOrderStatus) >=0;
-        return endState;
+        return fixCodesForEndState.indexOf(fixOrderStatus) >=0;
     }
 
 

@@ -5,24 +5,27 @@ package org.yats.trading;
 
 public class Product {
 
-    public static ProductNULL NULL = new ProductNULL();
+//    public static ProductNULL NULL = new ProductNULL();
 
     @Override
     public String toString() {
         return "Product{" +
-                "id=" + id +
+                "product=" + productId +
                 ",symbol=" + symbol +
                 ",exchange=" + exchange +
                 '}';
     }
 
-    public boolean isSameAs(Product other) {
-        boolean same = id.compareTo(other.id) == 0;
-        return same;
+//    public boolean isSameAs(Product other) {
+//        return other.hasProductId(productId);
+//    }
+
+    public boolean hasProductId(String pid) {
+        return pid.compareTo(productId) == 0;
     }
 
-    public String getId() {
-        return id;
+    public String getProductId() {
+        return productId;
     }
 
     public String getSymbol() {
@@ -33,26 +36,27 @@ public class Product {
         return exchange;
     }
 
-    public Product(String id, String symbol, String exchange) {
-        this.id = id;
+    public Product(String productId, String symbol, String exchange) {
+        this.productId = productId;
         this.symbol = symbol;
         this.exchange = exchange;
     }
 
 
-    private String id;
+    private String productId;
     private String symbol;
     private String exchange;
 
-     private static class ProductNULL extends Product {
-        public String getId() { throw new RuntimeException("This is null object!");}
-        public String getSymbol() {
-            throw new RuntimeException("This is null object!");
-        }
-        public String getExchange() {
-            throw new RuntimeException("This is null object!");
-        }
-        private ProductNULL() { super("NULL","NULL","NULL");}
-    }
+
+//    private static class ProductNULL extends Product {
+//        public String getProductId() { throw new RuntimeException("This is null object!");}
+//        public String getSymbol() {
+//            throw new RuntimeException("This is null object!");
+//        }
+//        public String getExchange() {
+//            throw new RuntimeException("This is null object!");
+//        }
+//        private ProductNULL() { super("NULL","NULL","NULL");}
+//    }
 
 } // class

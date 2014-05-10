@@ -1,11 +1,16 @@
 package org.yats.trader;
 
+import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
+
     @Override
     public abstract void onMarketData(MarketData marketData);
+
+    @Override
+    public UniqueId getConsumerId() { return consumerId; }
 
     @Override
     public abstract void onReceipt(Receipt receipt);
@@ -14,9 +19,9 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     public abstract void shutdown();
 
-    public void subscribe(Product product)
+    public void subscribe(String productId)
     {
-        priceProvider.subscribe(product, this);
+        priceProvider.subscribe(productId, this);
     }
 
     public void sendNewOrder(OrderNew order)
@@ -29,14 +34,18 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         orderSender.sendOrderCancel(order);
     }
 
-    double getPositionForProduct(Product product)
-    {
-        return positionProvider.getInternalAccountPositionForProduct(getInternalAccount(), product);
+    public Product getProductForProductId(String productId) {
+        return productProvider.getProductForProductId(productId);
     }
 
-    double getProfitForProduct(Product product)
+    double getPositionForProduct(String productId)
     {
-        return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), product);
+        return positionProvider.getInternalAccountPositionForProduct(getInternalAccount(), productId);
+    }
+
+    double getProfitForProduct(String productId)
+    {
+        return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), productId);
     }
 
     public String getExternalAccount() {
@@ -71,8 +80,14 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.internalAccount = internalAccount;
     }
 
-    public StrategyBase() {
+    public void setProductProvider(IProvideProduct productProvider) {
+        this.productProvider = productProvider;
     }
+
+    public StrategyBase() {
+        consumerId = UniqueId.create();
+    }
+
 
     private String externalAccount;
     private String internalAccount;
@@ -82,5 +97,9 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     private IProvidePosition positionProvider;
     private IProvideProfit profitProvider;
+    private IProvideProduct productProvider;
+
+    private final UniqueId consumerId;
+
 
 }

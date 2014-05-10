@@ -1,27 +1,26 @@
 package org.yats.connectivity.fix;
 
-import java.io.*;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Scanner;
-
-import org.yats.common.UniqueId;
-import org.yats.trading.ISendOrder;
-import org.yats.trading.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.UniqueId;
+import org.yats.trading.*;
+import org.yats.trading.Product;
 import quickfix.*;
 import quickfix.field.*;
 import quickfix.fix42.NewOrderSingle;
 import quickfix.fix42.OrderCancelRequest;
 
-// todo: decouple with pricefeed into separate binary with connection over rabbitmq
+import java.io.*;
+import java.util.Date;
+import java.util.Scanner;
+
 public class OrderConnection implements ISendOrder {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(OrderResponseCracker.class);
+
 
 
     public synchronized void logon() {
@@ -31,12 +30,11 @@ public class OrderConnection implements ISendOrder {
                 initiatorStarted = true;
 
             } catch (Exception e) {
-
+                log.error(e.getMessage());
+                System.exit(-1);
             }
         } else {
-            Iterator<SessionID> sessionIds = initiator.getSessions().iterator();
-            while (sessionIds.hasNext()) {
-                SessionID sessionId = (SessionID) sessionIds.next();
+            for (SessionID sessionId : initiator.getSessions()) {
                 Session.lookupSession(sessionId).logon();
             }
         }
@@ -143,7 +141,8 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new OrigClOrdID(orderCancel.getOrderId().toString()));
         fixOrder.set(new ClOrdID(UniqueId.create().toString()));
         fixOrder.set(new Account(orderCancel.getExternalAccount()));
-        fixOrder.set(new Symbol(orderCancel.getProduct().getSymbol()));
+        Product p = productProvider.getProductForProductId(orderCancel.getProductId());
+        fixOrder.set(new Symbol(p.getSymbol()));
         if (orderCancel.getSide().toDirection()>0) {
             fixOrder.set(new Side(Side.BUY));
         } else {
@@ -158,10 +157,10 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new TransactTime(new Date(0)));
         fixOrder.set(new HandlInst('1'));
         fixOrder.set(new Account(order.getExternalAccount()));
-        org.yats.trading.Product p = order.getProduct();
+        Product p = productProvider.getProductForProductId(order.getProductId());
         BookSide side = order.getBookSide();
         fixOrder.set(new Symbol(p.getSymbol()));
-        fixOrder.set(new SecurityID(p.getId()));
+        fixOrder.set(new SecurityID(p.getProductId()));
         fixOrder.set(new SecurityExchange(p.getExchange()));
         fixOrder.set(new Price(order.getLimit()));
         if (side.toDirection()==1) {
@@ -180,9 +179,15 @@ public class OrderConnection implements ISendOrder {
         orderResponseCracker.setReceiptConsumer(r);
     }
 
+    public void setProductProvider(IProvideProduct productProvider) {
+        this.productProvider = productProvider;
+    }
+
+
     private OrderResponseCracker orderResponseCracker;
     private boolean initiatorStarted = false;
     private Initiator initiator = null;
+    private IProvideProduct productProvider;
 
 
 }

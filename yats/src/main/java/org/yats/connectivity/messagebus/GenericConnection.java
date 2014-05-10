@@ -3,6 +3,7 @@ package org.yats.connectivity.messagebus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
+import org.yats.common.UniqueId;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
@@ -18,9 +19,9 @@ public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCall
 
 
     @Override
-    public void subscribe(Product p, IConsumeMarketData consumer) {
+    public void subscribe(String productId, IConsumeMarketData consumer) {
         setMarketDataConsumer(consumer);
-        SubscriptionMsg m = SubscriptionMsg.createFromProduct(p);
+        SubscriptionMsg m = SubscriptionMsg.createFromProductId(productId);
         senderSubscription.publish(Config.TOPIC_FOR_SUBSCRIPTIONS_DEFAULT, m);
         log.debug("Published "+m);
     }
@@ -99,9 +100,19 @@ public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCall
     BufferingReceiver<ReceiptMsg> receiverReceipt;
 
     private static class MarketDataConsumerDummy implements IConsumeMarketData {
+        private MarketDataConsumerDummy() {
+            id=new UniqueId();
+        }
+
         @Override
         public void onMarketData(MarketData marketData) {
         }
+
+        @Override
+        public UniqueId getConsumerId() {
+            return id;
+        }
+        private UniqueId id;
     }
 
     private static class ReceiptConsumerDummy implements IConsumeReceipt  {

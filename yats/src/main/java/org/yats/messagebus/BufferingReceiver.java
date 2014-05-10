@@ -22,7 +22,7 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
 
     @Override
     public void run() {
-        while(true) {
+        while(!shutdown) {
             T m = receive();
             buffer.add(m);
             observer.onCallback();
@@ -32,6 +32,11 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
     public void start() {
         thread.start();
     }
+//todo: shutdown procedure for threads would be nice
+//    public void stop() {
+//        shutdown=true;
+//        thread.interrupt();
+//    }
 
     public void setObserver(IAmCalledBack observer) {
         this.observer = observer;
@@ -42,12 +47,14 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
         thread = new Thread(this);
         buffer = new LinkedBlockingQueue<T>();
         observer = new IamCalledBackDummy();
+        shutdown=false;
     }
 
 
     private IAmCalledBack observer;
     private Thread thread;
     private LinkedBlockingQueue<T> buffer;
+    private boolean shutdown;
 
     private static class IamCalledBackDummy implements IAmCalledBack {
         @Override

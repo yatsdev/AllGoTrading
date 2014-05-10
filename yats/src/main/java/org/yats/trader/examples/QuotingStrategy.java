@@ -1,10 +1,10 @@
 package org.yats.trader.examples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /*
@@ -23,6 +23,7 @@ public class QuotingStrategy extends StrategyBase {
     public void onMarketData(MarketData marketData)
     {
         if(shuttingDown) return;
+        if(!marketData.hasProductId(tradeProductId)) return;
         handleMarketDataBidSide(marketData);
     }
 
@@ -34,7 +35,7 @@ public class QuotingStrategy extends StrategyBase {
             log.error("Received rejection! Stopping for now!");
             System.exit(-1);
         }
-        if(!receipt.isForProduct(tradeProduct))                        {
+        if(!receipt.hasProductId(tradeProductId)){
             log.error("Received receipt for unknown product: " + receipt);
             return;
         }
@@ -50,8 +51,8 @@ public class QuotingStrategy extends StrategyBase {
     {
         setExternalAccount(config.get("externalAccount"));
         setInternalAccount("quoting1");
-
-        subscribe(tradeProduct);
+        tradeProductId = config.get("tradeProductId");
+        subscribe(tradeProductId);
     }
 
     @Override
@@ -68,8 +69,6 @@ public class QuotingStrategy extends StrategyBase {
     public QuotingStrategy() {
         super();
         lastBidOrder = OrderNew.NULL;
-        tradeProduct = new Product("4663747", "IBM", "XNAS");
-//        tradeProduct = new Product("4663789", "SAP", "XETR");
         shuttingDown=false;
         previousMarketData = MarketData.NULL;
     }
@@ -77,14 +76,11 @@ public class QuotingStrategy extends StrategyBase {
 
     private void handleMarketDataBidSide(MarketData marketData) {
 
-        double newBid = Math.min(0.995* marketData.getBid(), marketData.getBid() -0.05);
-
-
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            double bidChange = Math.abs(lastBidOrder.getLimit() - newBid);
+            double bidChange = Math.abs(lastBidOrder.getLimit() - getNewBid(marketData));
             if(changedSinceLastTick && bidChange>0.01) {
-                log.info("price: " + marketData);
+                log.info("changed price since last order: " + marketData);
             }
 
             boolean bidChangedEnoughForOrderUpdate = bidChange > 0.02;
@@ -94,15 +90,19 @@ public class QuotingStrategy extends StrategyBase {
         }
 
         if(!isInMarketBidSide() && position<1) {
-            sendOrderBidSide(newBid);
+            sendOrderBidSide(getNewBid(marketData));
         }
         previousMarketData=marketData;
+    }
+
+    private double getNewBid(MarketData marketData) {
+        return Math.min(0.995* marketData.getBid(), marketData.getBid() -0.05);
     }
 
     private void sendOrderBidSide(double bid)
     {
         lastBidOrder = OrderNew.create()
-                .withProduct(tradeProduct)
+                .withProductId(tradeProductId)
                 .withExternalAccount(getExternalAccount())
                 .withInternalAccount(getInternalAccount())
                 .withBookSide(BookSide.BID)
@@ -127,7 +127,7 @@ public class QuotingStrategy extends StrategyBase {
     private double position;
     private boolean shuttingDown;
 
-    private Product tradeProduct;
+    private String tradeProductId;
     IProvideProperties config;
     private OrderNew lastBidOrder;
     private MarketData previousMarketData;

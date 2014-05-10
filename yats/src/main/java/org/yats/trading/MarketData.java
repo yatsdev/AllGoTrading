@@ -9,14 +9,16 @@ public class MarketData
     public static MarketDataNULL NULL = new MarketDataNULL();
 
 
+    public boolean hasProductId(String pid) {
+        return productId.compareTo(pid) == 0;
+    }
 
     public boolean isPriceAndSizeSame(MarketData other) {
         if(other==NULL) return false;
         if(bid!=other.bid) return false;
         if(ask!=other.ask) return false;
         if(bidSize!=other.bidSize) return false;
-        if(askSize!=other.askSize) return false;
-        return true;
+        return askSize == other.askSize;
     }
 
     public boolean isSameAs(MarketData other) {
@@ -25,7 +27,7 @@ public class MarketData
         if(ask!=other.ask) return false;
         if(bidSize!=other.bidSize) return false;
         if(askSize!=other.askSize) return false;
-        if(securityId.compareTo(other.securityId)!=0) return false;
+        if(productId.compareTo(other.productId)!=0) return false;
         if(timestamp.toString().compareTo(other.timestamp.toString())!=0) return false;
         return true;
     }
@@ -34,9 +36,9 @@ public class MarketData
         return true;
     }
 
-    public MarketData(DateTime timestamp, String securityId, double bid, double ask, double bidSize, double askSize) {
+    public MarketData(DateTime timestamp, String productId, double bid, double ask, double bidSize, double askSize) {
         this.timestamp = timestamp;
-        this.securityId = securityId;
+        this.productId = productId;
         this.bid = bid;
         this.ask = ask;
         this.bidSize = bidSize;
@@ -46,65 +48,66 @@ public class MarketData
     @Override
     public String toString() {
         String timeString = timestamp.toString(ISODateTimeFormat.basicDateTime());
-        return securityId+", "+bidSize+"@"+bid+" | "+askSize+"@"+ask+"  "+timeString;
+        return productId +", "+bidSize+"@"+bid+" | "+askSize+"@"+ask+"  "+timeString;
     }
 
     public DateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
+//    public void setTimestamp(DateTime timestamp) {
+//        this.timestamp = timestamp;
+//    }
+
+    public String getProductId() {
+        return productId;
     }
 
-    public String getSecurityId() {
-        return securityId;
-    }
-
-    public void setSecurityId(String securityId) {
-        this.securityId = securityId;
-    }
+//    public void setProductId(String productId) {
+//        this.productId = productId;
+//    }
 
     public double getBid() {
         return bid;
     }
 
-    public void setBid(double bid) {
-        this.bid = bid;
-    }
+//    public void setBid(double bid) {
+//        this.bid = bid;
+//    }
 
     public double getAsk() {
         return ask;
     }
 
-    public void setAsk(double ask) {
-        this.ask = ask;
-    }
+//    public void setAsk(double ask) {
+//        this.ask = ask;
+//    }
 
     public double getBidSize() {
         return bidSize;
     }
 
-    public void setBidSize(double bidSize) {
-        this.bidSize = bidSize;
-    }
+//    public void setBidSize(double bidSize) {
+//        this.bidSize = bidSize;
+//    }
 
     public double getAskSize() {
         return askSize;
     }
 
-    public void setAskSize(double askSize) {
-        this.askSize = askSize;
-    }
+//    public void setAskSize(double askSize) {
+//        this.askSize = askSize;
+//    }
 
 
 
     DateTime timestamp;
-    String securityId;
+    String productId;
     double bid;
     double ask;
     double bidSize;
     double askSize;
+
 
 
     private static class MarketDataNULL extends MarketData {
@@ -120,7 +123,7 @@ public class MarketData
         }
 
         @Override
-        public String getSecurityId() {
+        public String getProductId() {
             throw new RuntimeException("This is NULL!");
         }
 

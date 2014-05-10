@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
 import org.yats.trader.StrategyRunner;
+import org.yats.trading.ProductList;
 
 import java.io.IOException;
 
@@ -25,19 +26,25 @@ public class ServerMain {
     public void go() throws InterruptedException, IOException
     {
 //        PriceFeed priceFeed = PriceFeed.create();
+        ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
+
         PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
+        priceFeed.setProductProvider(products);
 
         ServerLogic strategy = new ServerLogic();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
         strategyRunner.addStrategy(strategy);
+        strategyRunner.setProductProvider(products);
         priceFeed.logon();
 
         strategy.setPriceProvider(strategyRunner);
+        strategy.setProductProvider(products);
 
 //        OrderConnection orderConnection = OrderConnection.create();
         OrderConnection orderConnection = OrderConnection.createFromConfigFile("config/configOrder.cfg");
+        orderConnection.setProductProvider(products);
         orderConnection.logon();
 
         strategyRunner.setOrderSender(orderConnection);
