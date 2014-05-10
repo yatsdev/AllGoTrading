@@ -9,10 +9,11 @@ public class OrderNew extends OrderBase {
     public static OrderNew NULL = new OrderNewNull();
 
 
+
     public OrderCancel createCancelOrder()
     {
         return OrderCancel.create()
-                .withProduct(product)
+                .withProductId(productId)
                 .withBookSide(bookSide)
                 .withExternalAccount(externalAccount)
                 .withOrderId(orderId)
@@ -24,7 +25,7 @@ public class OrderNew extends OrderBase {
     public String toString() {
         return "OrderNew{" +
                 "oid="+getOrderId()+
-                ","+product +
+                ",productId="+ productId +
                 ",bookSide=" + bookSide +
                 ",limit=" + limit +
                 ",size=" + size +
@@ -35,27 +36,17 @@ public class OrderNew extends OrderBase {
     }
 
     public Receipt createReceiptDefault() {
-        Receipt r = Receipt.create()
+        return Receipt.create()
                 .withOrderId(getOrderId())
                 .withExternalAccount(externalAccount)
-                .withProduct(product)
+                .withProductId(productId)
                 .withBookSide(bookSide)
                 .withPrice(limit)
                 .withResidualSize(size)
                 .withTotalTradedSize(0)
                 .withCurrentTradedSize(0)
-                .withRejectReason("")
-                ;
-        return r;
+                .withRejectReason("");
     }
-
-    public Product getProduct() {
-        return product;
-    }
-
-//    public void setProduct(Product product) {
-//        this.product = product;
-//    }
 
     public BookSide getBookSide() {
         return bookSide;
@@ -95,8 +86,8 @@ public class OrderNew extends OrderBase {
         return this;
     }
 
-    public OrderNew withProduct(Product p) {
-        product=p;
+    public OrderNew withProductId(String pid) {
+        productId =pid;
         return this;
     }
 
@@ -120,7 +111,6 @@ public class OrderNew extends OrderBase {
     }
 
     public OrderNew() {
-        product = Product.NULL;
         bookSide = BookSide.BID;
         externalAccount ="";
         setOrderId(UniqueId.create());
@@ -132,21 +122,32 @@ public class OrderNew extends OrderBase {
         return timestamp;
     }
 
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
-    }
+//    public void setTimestamp(DateTime timestamp) {
+//        this.timestamp = timestamp;
+//    }
 
     public String getInternalAccount() {
         return internalAccount;
     }
 
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+
     private DateTime timestamp;
     private String externalAccount;
     private String internalAccount;
-    private Product product;
+//    private Product product;
     private BookSide bookSide;
     private double size;
     private double limit;
+    private String productId;
+
 
     private static class OrderNewNull extends OrderNew {
 

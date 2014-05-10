@@ -13,9 +13,12 @@ public class StrategyRunnerTest {
         Remove from Maven's lib directory all SLF4J JARs with versions before 1.5.6 and their entries in ProjectSettings->Libraries
      */
 
+    // the configuration file log4j.properties for Log4J has to be provided in the working directory
+    // an example of such a file is at config/log4j.properties.
+    // if Log4J gives error message that it need to be configured, copy this file to the working directory
+//    final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
-    private static String SECURITY_ID_SAP ="SAP";
-    private static Product testProduct = new Product(SECURITY_ID_SAP, "", "");
+
 
     @Test
     public void canDoSubscriptionForMarketData()
@@ -85,6 +88,8 @@ public class StrategyRunnerTest {
 
     @BeforeMethod
     public void setUp() {
+        ProductList products = new ProductList();
+        products.add(testProduct);
         feed = new PriceFeedMock();
         strategy = new StrategyMock();
         strategyRunner = new StrategyRunner();
@@ -94,6 +99,7 @@ public class StrategyRunnerTest {
         strategyRunner.setOrderSender(orderConnection);
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
+        strategyRunner.setProductProvider(products);
         data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP,10,11,1,1);
     }
 
@@ -104,6 +110,9 @@ public class StrategyRunnerTest {
     private StrategyMock strategy;
     private MarketData data1;
 
+    private static String SECURITY_ID_SAP ="SAP";
+    private static Product testProduct = new Product(SECURITY_ID_SAP, "", "");
+
     private class StrategyMock extends StrategyBase {
 
         public double getPosition() {
@@ -112,7 +121,7 @@ public class StrategyRunnerTest {
 
         public void sendBuyOrder(){
             OrderNew order = OrderNew.create()
-                    .withProduct(testProduct)
+                    .withProductId(testProduct.getProductId())
                     .withBookSide(BookSide.BID)
                     .withLimit(50)
                     .withSize(5);
@@ -120,9 +129,9 @@ public class StrategyRunnerTest {
         }
 
         public void cancelBuyOrder() {
-            lastReceipt.getProduct().getId();
+            lastReceipt.getProductId();
             OrderCancel o = OrderCancel.create()
-                    .withProduct(lastReceipt.getProduct())
+                    .withProductId(lastReceipt.getProductId())
                     .withBookSide(lastReceipt.getBookSide())
                     .withExternalAccount(lastReceipt.getExternalAccount())
                     .withOrderId(lastReceipt.getOrderId())
@@ -151,7 +160,7 @@ public class StrategyRunnerTest {
 
         @Override
         public void init() {
-            subscribe(testProduct);
+            subscribe(testProduct.getProductId());
         }
 
         @Override
@@ -172,7 +181,7 @@ public class StrategyRunnerTest {
 
     private class PriceFeedMock implements IProvidePriceFeed {
         @Override
-        public void subscribe(Product p, IConsumeMarketData consumer) {
+        public void subscribe(String productId, IConsumeMarketData consumer) {
             this.consumer=consumer;
         }
         IConsumeMarketData consumer;
@@ -210,7 +219,7 @@ public class StrategyRunnerTest {
         private void rejectCancelForUnknownOrder(OrderCancel orderCancel) {
             Receipt receipt = orderCancel.createReceiptDefault();
             receipt.setEndState(true);
-            receipt.setRejectReason("order id unknown");
+            receipt.setRejectReason("order productId unknown");
             receiptConsumer.onReceipt(receipt);
         }
 

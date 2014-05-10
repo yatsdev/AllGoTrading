@@ -19,22 +19,22 @@ public class Receiver<T> {
         tClass=_tClass;
         exchangeName = _exchange;
         topic = _topic;
-        lastTopic="";
+//        lastTopic="";
         rabbitServerAddress=_rabbitServerAddress;
         init();
     }
 
     private String rabbitServerAddress;
 
-    public String getLastTopic() {
-        return lastTopic;
-    }
+//    public String getLastTopic() {
+//        return lastTopic;
+//    }
 
     public T receive()
     {
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
-            lastTopic = delivery.getEnvelope().getRoutingKey();
+//            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
             log.debug("Receiver: "+jsonMessage);
             T msg = new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
@@ -52,10 +52,9 @@ public class Receiver<T> {
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(timeoutMillisec);
             if(delivery==null) return null;
-            lastTopic = delivery.getEnvelope().getRoutingKey();
+//            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
-            T msg = new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
-            return msg;
+            return new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
         } catch (InterruptedException e) {
 //            e.printStackTrace();
             throw new RuntimeException("Receiver: problem with receiving message!");
@@ -87,6 +86,6 @@ public class Receiver<T> {
     QueueingConsumer consumer;
     private String exchangeName;
     private String topic;
-    private String lastTopic;
+//    private String lastTopic;
     private Class<T> tClass;
 }

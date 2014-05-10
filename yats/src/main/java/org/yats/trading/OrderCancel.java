@@ -6,12 +6,11 @@ import org.joda.time.DateTimeZone;
 
 public class OrderCancel extends OrderBase {
 
-
     @Override
     public String toString() {
         return "OrderCancel{" +
                 "oid="+getOrderId()+
-                ","+product +
+                ",productId="+ productId +
                 ",bookSide=" + bookSide +
                 ",externalAccount=" + externalAccount +
                 ",timestamp=" + timestamp +
@@ -19,22 +18,20 @@ public class OrderCancel extends OrderBase {
     }
 
     public Receipt createReceiptDefault() {
-        Receipt r = Receipt.create()
+        return Receipt.create()
                 .withOrderId(orderId)
-                .withProduct(product)
+                .withProductId(productId)
                 .withBookSide(bookSide)
                 .withExternalAccount(externalAccount)
-                .withEndState(false)
-                ;
-        return r;
+                .withEndState(false);
     }
 
     public BookSide getSide() {
         return bookSide;
     }
 
-    public Product getProduct() {
-        return product;
+    public String getProductId() {
+        return productId;
     }
 
     public DateTime getTimestamp() {
@@ -59,8 +56,8 @@ public class OrderCancel extends OrderBase {
         return this;
     }
 
-    public OrderCancel withProduct(Product p) {
-        product=p;
+    public OrderCancel withProductId(String pid) {
+        productId=pid;
         return this;
     }
 
@@ -79,16 +76,16 @@ public class OrderCancel extends OrderBase {
     }
 
     public OrderCancel() {
-        product = Product.NULL;
+        productId = "";
         bookSide = BookSide.BID;
         externalAccount ="";
         orderId = UniqueId.create();
         timestamp = DateTime.now(DateTimeZone.UTC);
     }
 
-    DateTime timestamp;
-    Product product;
-    BookSide bookSide;
-    String externalAccount;
+    private DateTime timestamp;
+    private String productId;
+    private BookSide bookSide;
+    private String externalAccount;
 
 } // class

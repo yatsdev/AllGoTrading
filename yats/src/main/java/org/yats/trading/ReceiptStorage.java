@@ -16,21 +16,21 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     public void onReceipt(Receipt receipt) {
         if(receipt.isRejection()) return;
         receiptList.add(receipt);
-        ProductAccountPosition positionChange = new ProductAccountPosition(receipt.getSecurityId(), receipt.getInternalAccount(), receipt.getPositionChange());
+        ProductAccountPosition positionChange = new ProductAccountPosition(receipt.getProductId(), receipt.getInternalAccount(), receipt.getPositionChange());
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public double getInternalAccountPositionForProduct(String internalAccount, Product product)
+    public double getInternalAccountPositionForProduct(String internalAccount, String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public double getInternalAccountProfitForProduct(String internalAccount, Product product)
+    public double getInternalAccountProfitForProduct(String internalAccount, String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public double getPositionForProduct(Product product)
+    public double getPositionForProduct(String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }

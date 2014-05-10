@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class PositionSnapshot {
 
     public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
-        throw new RuntimeException("not yet implemented!");
+        throw new RuntimeException("not yet implemented!"+prod1+account1);
     }
 
     public void add(ProductAccountPosition p) {
