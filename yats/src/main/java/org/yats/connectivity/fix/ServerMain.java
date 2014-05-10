@@ -51,7 +51,10 @@ public class ServerMain {
         orderConnection.setReceiptConsumer(strategyRunner);
         strategy.setOrderSender(strategyRunner);
 
-        // FIXServer.properties needs to provide the external account number of the user in the form "externalAccount=1234"
+        /*
+        config/FIXServer.properties needs to provide the external account number of the user in the form:
+        externalAccount=1234
+         */
         PropertiesReader config = PropertiesReader.createFromConfigFile("config/FIXServer.properties");
 //        PropertiesReader config = PropertiesReader.create();
         strategy.setConfig(config);

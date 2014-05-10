@@ -55,7 +55,7 @@ public class QuotingMain {
         strategy.setOrderSender(strategyRunner);
 
         /*
-        QuotingMain.properties needs to provide settings for the strategy.
+        config/QuotingMain.properties needs to provide settings for the strategy.
 
         # Comments have a leading hash
         # your AllGoTrading account number
