@@ -10,8 +10,8 @@ import org.yats.trading.ReceiptStorage;
 import java.io.IOException;
 
 /*
-    This is an example of connecting to a FIX server, receiving prices and keeping an order on bid side at fixed distance
-    from best bid.
+    This is an example of connecting to the FIX server of AllGoTrading, receiving prices and keeping
+    an order on bid side at fixed distance from best bid.
     In this example a message bus is used to connect to a server that takes care of the FIX connection.
     To run the example please install and start the RabbitMQ server you can download from rabbitmq.com and start the
     FIX server connection yats.connectivity.fix.ServerMain. This server will connect to the FIX server and provide a
