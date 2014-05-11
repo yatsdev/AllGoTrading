@@ -1,6 +1,7 @@
 package org.yats.messagebus.messages;
 
 import org.joda.time.DateTime;
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.OrderNew;
@@ -65,7 +66,7 @@ public class OrderNewMsg {
     public String symbol;
     public String exchange;
     public int bookSideDirection;
-    public java.math.BigDecimal size;
-    public java.math.BigDecimal limit;
+    public Decimal size;
+    public Decimal limit;
 
 } // class

@@ -1,9 +1,10 @@
 package org.yats.trading;
 
 import org.testng.annotations.BeforeMethod;
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 
-import java.math.BigDecimal;
+
 
 public class ReceiptStorageTest {
 
@@ -70,59 +71,59 @@ public class ReceiptStorageTest {
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(BigDecimal.ONE)
-                .withTotalTradedSize(BigDecimal.ONE)
-                .withPrice(BigDecimal.valueOf(50))
-                .withResidualSize(BigDecimal.ZERO)
+                .withCurrentTradedSize(Decimal.ONE)
+                .withTotalTradedSize(Decimal.ONE)
+                .withPrice(Decimal.createFromDouble(50))
+                .withResidualSize(Decimal.ZERO)
                 ;
         receipt2 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(BigDecimal.ONE)
-                .withTotalTradedSize(BigDecimal.ONE)
-                .withPrice(BigDecimal.valueOf(50))
-                .withResidualSize(BigDecimal.ONE)
+                .withCurrentTradedSize(Decimal.ONE)
+                .withTotalTradedSize(Decimal.ONE)
+                .withPrice(Decimal.createFromDouble(50))
+                .withResidualSize(Decimal.ONE)
                 ;
         receipt3 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(BigDecimal.ONE)
-                .withTotalTradedSize(BigDecimal.valueOf(2))
-                .withPrice(BigDecimal.valueOf(50))
-                .withResidualSize(BigDecimal.ZERO)
+                .withCurrentTradedSize(Decimal.ONE)
+                .withTotalTradedSize(Decimal.createFromDouble(2))
+                .withPrice(Decimal.createFromDouble(50))
+                .withResidualSize(Decimal.ZERO)
                 ;
         receipt4 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("4"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT2)
-                .withCurrentTradedSize(BigDecimal.valueOf(9))
-                .withTotalTradedSize(BigDecimal.valueOf(9))
-                .withPrice(BigDecimal.valueOf(87))
-                .withResidualSize(BigDecimal.ZERO)
+                .withCurrentTradedSize(Decimal.createFromDouble(9))
+                .withTotalTradedSize(Decimal.createFromDouble(9))
+                .withPrice(Decimal.createFromDouble(87))
+                .withResidualSize(Decimal.ZERO)
                 ;
         receipt5 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("5"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(BigDecimal.valueOf(-2))
-                .withTotalTradedSize(BigDecimal.valueOf(-2))
-                .withPrice(BigDecimal.valueOf(48))
-                .withResidualSize(BigDecimal.ZERO)
+                .withCurrentTradedSize(Decimal.createFromDouble(-2))
+                .withTotalTradedSize(Decimal.createFromDouble(-2))
+                .withPrice(Decimal.createFromDouble(48))
+                .withResidualSize(Decimal.ZERO)
                 ;
 
 
 
         processReceipts();
         positionSnapshot = new PositionSnapshot();
-        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, BigDecimal.valueOf(10)));
+        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.createFromDouble(10)));
         profitSnapshot = new ProfitSnapshot();
-        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, BigDecimal.valueOf(-5)));
+        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.createFromDouble(-5)));
     }
 
     private void processReceipts()

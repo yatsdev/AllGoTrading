@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.IConsumeReceipt;
@@ -12,7 +13,7 @@ import quickfix.*;
 import quickfix.fix42.*;
 import quickfix.fix42.MessageCracker;
 
-import java.math.BigDecimal;
+
 
 
 public class OrderResponseCracker extends MessageCracker implements Application {
@@ -98,9 +99,9 @@ public class OrderResponseCracker extends MessageCracker implements Application 
 
             r.setExternalAccount(report.getAccount().getValue());
             r.setProductId(report.getSecurityID().getValue());
-            r.setPrice(report.getPrice().getValue());
-            r.setResidualSize(report.getLeavesQty().getValue());
-            r.setCurrentTradedSize(report.getLastShares().getValue());
+            r.setPrice(new Decimal(report.getPrice().getValue()));
+            r.setResidualSize(new Decimal(report.getLeavesQty().getValue()));
+            r.setCurrentTradedSize(new Decimal(report.getLastShares().getValue()));
             r.setOrderId(UniqueId.createFromString(report.getClOrdID().getValue()));
             if(cancelTypes.indexOf(report.getExecType().getValue())>=0) { // cancel
                 r.setOrderId(UniqueId.createFromString(report.getOrigClOrdID().getValue()));
@@ -112,7 +113,7 @@ public class OrderResponseCracker extends MessageCracker implements Application 
             r.setBookSide(BookSide.ASK);
             if(report.getSide().getValue()=='1') r.setBookSide(BookSide.BID);
 
-            if(r.getResidualSize().compareTo(BigDecimal.ZERO)==0) r.setEndState(true);
+            if(r.getResidualSize().isEqualTo(Decimal.ZERO)) r.setEndState(true);
 
             r.setEndState(isInEndState(report.getOrdStatus().getValue()));
 
