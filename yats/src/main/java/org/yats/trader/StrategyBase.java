@@ -38,12 +38,12 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         return productProvider.getProductForProductId(productId);
     }
 
-    double getPositionForProduct(String productId)
+    java.math.BigDecimal getPositionForProduct(String productId)
     {
         return positionProvider.getInternalAccountPositionForProduct(getInternalAccount(), productId);
     }
 
-    double getProfitForProduct(String productId)
+    java.math.BigDecimal getProfitForProduct(String productId)
     {
         return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), productId);
     }

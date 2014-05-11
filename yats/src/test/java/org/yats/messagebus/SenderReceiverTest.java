@@ -7,6 +7,8 @@ import org.testng.annotations.Test;
 import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.trading.MarketData;
 
+import java.math.BigDecimal;
+
 public class SenderReceiverTest {
 
     // can only be executed successfully if RabbitMQ server ip is set correctly
@@ -34,7 +36,7 @@ public class SenderReceiverTest {
         sender.init();
         receiver = new Receiver<MarketDataMsg>(MarketDataMsg.class, EXCHANGE,
                 TOPIC_FOR_ALL_TEST_MarketDataMsg, SERVERIP);
-        data = new MarketData(new DateTime(DateTimeZone.UTC), "test", 11, 12, 20, 30 );
+        data = new MarketData(new DateTime(DateTimeZone.UTC), "test", BigDecimal.valueOf(11), BigDecimal.valueOf(12), BigDecimal.valueOf(20), BigDecimal.valueOf(30) );
         dataMsg = MarketDataMsg.createFrom(data);
     }
 

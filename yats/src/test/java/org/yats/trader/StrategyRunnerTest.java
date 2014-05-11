@@ -6,6 +6,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.trading.*;
 
+import java.math.BigDecimal;
+
 public class StrategyRunnerTest {
 
     /*
@@ -100,7 +102,7 @@ public class StrategyRunnerTest {
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP,10,11,1,1);
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, BigDecimal.valueOf(10),BigDecimal.valueOf(11),BigDecimal.ONE,BigDecimal.ONE);
     }
 
 
@@ -123,8 +125,8 @@ public class StrategyRunnerTest {
             OrderNew order = OrderNew.create()
                     .withProductId(testProduct.getProductId())
                     .withBookSide(BookSide.BID)
-                    .withLimit(50)
-                    .withSize(5);
+                    .withLimit(BigDecimal.valueOf(50))
+                    .withSize(BigDecimal.valueOf(5));
             sendNewOrder(order);
         }
 
@@ -154,7 +156,7 @@ public class StrategyRunnerTest {
             if(!receipt.isForSameOrderAs(lastReceipt)) numberOfOrderInMarket++;
             if(receipt.isEndState()) numberOfOrderInMarket--;
 
-            position += receipt.getPositionChange();
+            position += receipt.getPositionChange().intValue();
             lastReceipt=receipt;
         }
 
@@ -201,7 +203,7 @@ public class StrategyRunnerTest {
             if(fillOrderImmediately) {
                 receipt.setTotalTradedSize(orderNew.getSize());
                 receipt.setCurrentTradedSize(orderNew.getSize());
-                receipt.setResidualSize(0);
+                receipt.setResidualSize(BigDecimal.ZERO);
                 receipt.setEndState(true);
 
             }
@@ -224,11 +226,11 @@ public class StrategyRunnerTest {
         }
 
         public void partialFillOrder(int fillSize) {
-            filledSizeOfOrder = Math.min(filledSizeOfOrder + fillSize, (int) lastOrderNew.getSize());
+            filledSizeOfOrder = Math.min(filledSizeOfOrder + fillSize, (int) lastOrderNew.getSize().doubleValue());
             Receipt receipt = lastOrderNew.createReceiptDefault();
-            receipt.setCurrentTradedSize(fillSize);
-            receipt.setTotalTradedSize(filledSizeOfOrder);
-            receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize());
+            receipt.setCurrentTradedSize(BigDecimal.valueOf(fillSize));
+            receipt.setTotalTradedSize(BigDecimal.valueOf(filledSizeOfOrder));
+            receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize().doubleValue());
             receiptConsumer.onReceipt(receipt);
         }
 

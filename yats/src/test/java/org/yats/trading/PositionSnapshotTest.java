@@ -2,6 +2,8 @@ package org.yats.trading;
 
 import org.testng.annotations.BeforeMethod;
 
+import java.math.BigDecimal;
+
 public class PositionSnapshotTest {
 
 //    @Test
@@ -15,9 +17,9 @@ public class PositionSnapshotTest {
     @BeforeMethod
     public void setUp() {
         positionSnapshot = new PositionSnapshot();
-        position1 = new ProductAccountPosition("prod1", "account1", 1);
-        position2 = new ProductAccountPosition("prod2", "account1", 2);
-        position3 = new ProductAccountPosition("prod3", "account1", 3);
+        position1 = new ProductAccountPosition("prod1", "account1", BigDecimal.ONE);//Better BigDecimal.ONE that BigDecimal.valueOf(1), because you don't instantiate a new object, thus you save resources!
+        position2 = new ProductAccountPosition("prod2", "account1", BigDecimal.valueOf(2));
+        position3 = new ProductAccountPosition("prod3", "account1", BigDecimal.valueOf(3));
         positionSnapshot.add(position1);
         positionSnapshot.add(position2);
         positionSnapshot.add(position3);

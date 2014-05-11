@@ -6,6 +6,8 @@ import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
+import java.math.BigDecimal;
+
 
 /*
     This example keeps a bid five cents below the current best bid of the market. The order is canceled and
@@ -43,7 +45,7 @@ public class QuotingStrategy extends StrategyBase {
             receivedOrderReceiptBidSide =true;
         }
         log.debug("Received receipt: " + receipt);
-        position += receipt.getPositionChange();
+        position = receipt.getPositionChange().add(position);
     }
 
     @Override
@@ -78,28 +80,33 @@ public class QuotingStrategy extends StrategyBase {
 
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            double bidChange = Math.abs(lastBidOrder.getLimit() - getNewBid(marketData));
-            if(changedSinceLastTick && bidChange>0.01) {
+            java.math.BigDecimal bidChange_temporary=lastBidOrder.getLimit().subtract(getNewBid(marketData));
+           // System.out.println(bidChange_temporary+" temporary non absolute number"); uncomment to test
+            java.math.BigDecimal bidChange=bidChange_temporary.abs();
+           // System.out.println(bidChange+" definitive absolute number");  uncomment to test
+           //attention to the two lines above. Had to create a BigDecimal object since abs() is non static.
+            if(changedSinceLastTick && bidChange.compareTo(java.math.BigDecimal.valueOf(0.01))>0) {
                 log.info("changed price since last order: " + marketData);
             }
 
-            boolean bidChangedEnoughForOrderUpdate = bidChange > 0.02;
+            boolean bidChangedEnoughForOrderUpdate = bidChange.compareTo(java.math.BigDecimal.valueOf(0.02)) > 0;
             if(!bidChangedEnoughForOrderUpdate) return;
 
             if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
         }
 
-        if(!isInMarketBidSide() && position<1) {
+        if(!isInMarketBidSide() && position.compareTo(BigDecimal.ONE)<0) {
             sendOrderBidSide(getNewBid(marketData));
         }
         previousMarketData=marketData;
     }
 
-    private double getNewBid(MarketData marketData) {
-        return Math.min(0.995* marketData.getBid(), marketData.getBid() -0.05);
+    private java.math.BigDecimal getNewBid(MarketData marketData) {
+        return marketData.getBid().multiply(java.math.BigDecimal.valueOf(0.995)).min(marketData.getBid().subtract(java.math.BigDecimal.valueOf(0.05)));
+    //be careful about the line above, anyway it should work as per http://www.tutorialspoint.com/java/math/bigdecimal_min.htm exemplum
     }
 
-    private void sendOrderBidSide(double bid)
+    private void sendOrderBidSide(java.math.BigDecimal bid)
     {
         lastBidOrder = OrderNew.create()
                 .withProductId(tradeProductId)
@@ -107,7 +114,7 @@ public class QuotingStrategy extends StrategyBase {
                 .withInternalAccount(getInternalAccount())
                 .withBookSide(BookSide.BID)
                 .withLimit(bid)
-                .withSize(0.01);
+                .withSize(BigDecimal.valueOf(0.01));
         receivedOrderReceiptBidSide = false;
         sendNewOrder(lastBidOrder);
     }
@@ -124,7 +131,7 @@ public class QuotingStrategy extends StrategyBase {
     }
 
 
-    private double position;
+    private java.math.BigDecimal position;
     private boolean shuttingDown;
 
     private String tradeProductId;

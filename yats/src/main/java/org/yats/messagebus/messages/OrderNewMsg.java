@@ -65,7 +65,7 @@ public class OrderNewMsg {
     public String symbol;
     public String exchange;
     public int bookSideDirection;
-    public double size;
-    public double limit;
+    public java.math.BigDecimal size;
+    public java.math.BigDecimal limit;
 
 } // class

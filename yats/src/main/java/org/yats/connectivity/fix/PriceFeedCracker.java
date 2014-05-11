@@ -84,15 +84,15 @@ public class PriceFeedCracker extends MessageCracker implements Application {
             group.get(MDEntrySize);
             group.get(MDEntryPx);
 
-            double bid = MDEntryPx.getValue();
-            double bidSize = MDEntrySize.getValue();
+            java.math.BigDecimal bid = MDEntryPx.getValue();
+            java.math.BigDecimal bidSize = MDEntrySize.getValue();
 
             message.getGroup(2, group);
             group.get(MDEntryType);
             group.get(MDEntrySize);
             group.get(MDEntryPx);
-            double ask = MDEntryPx.getValue();
-            double askSize = MDEntrySize.getValue();
+            java.math.BigDecimal ask = MDEntryPx.getValue();
+            java.math.BigDecimal askSize = MDEntrySize.getValue();
 
             MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId,bid,ask,bidSize,askSize);
 //        log.debug("FIX: "+m.toString());
