@@ -45,7 +45,7 @@ public class QuotingStrategy extends StrategyBase {
             receivedOrderReceiptBidSide =true;
         }
         log.debug("Received receipt: " + receipt);
-        position = receipt.getPositionChange().add(BigDecimal.ONE);
+        position = receipt.getPositionChange().add(position);
     }
 
     @Override
@@ -80,8 +80,10 @@ public class QuotingStrategy extends StrategyBase {
 
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            java.math.BigDecimal bidChange=lastBidOrder.getLimit().subtract(getNewBid(marketData));
-            bidChange.abs();
+            java.math.BigDecimal bidChange_temporary=lastBidOrder.getLimit().subtract(getNewBid(marketData));
+           // System.out.println(bidChange_temporary+" temporary non absolute number"); uncomment to test
+            java.math.BigDecimal bidChange=bidChange_temporary.abs();
+           // System.out.println(bidChange+" definitive absolute number");  uncomment to test
            //attention to the two lines above. Had to create a BigDecimal object since abs() is non static.
             if(changedSinceLastTick && bidChange.compareTo(java.math.BigDecimal.valueOf(0.01))>0) {
                 log.info("changed price since last order: " + marketData);
