@@ -17,7 +17,7 @@ public class PositionSnapshotTest {
     @BeforeMethod
     public void setUp() {
         positionSnapshot = new PositionSnapshot();
-        position1 = new ProductAccountPosition("prod1", "account1", BigDecimal.ONE);//Better BigDecimal.ONE that BigDecimal.valueOf(1), because you don't instantiate a new object, thus you save resources!!
+        position1 = new ProductAccountPosition("prod1", "account1", BigDecimal.ONE);//Better BigDecimal.ONE that BigDecimal.valueOf(1), because you don't instantiate a new object, thus you save resources!
         position2 = new ProductAccountPosition("prod2", "account1", BigDecimal.valueOf(2));
         position3 = new ProductAccountPosition("prod3", "account1", BigDecimal.valueOf(3));
         positionSnapshot.add(position1);
