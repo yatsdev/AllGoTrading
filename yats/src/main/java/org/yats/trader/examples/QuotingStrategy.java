@@ -78,11 +78,7 @@ public class QuotingStrategy extends StrategyBase {
 
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            Decimal bidChange_temporary=lastBidOrder.getLimit().subtract(getNewBid(marketData));
-           // System.out.println(bidChange_temporary+" temporary non absolute number"); uncomment to test
-            Decimal bidChange=bidChange_temporary.abs();
-           // System.out.println(bidChange+" definitive absolute number");  uncomment to test
-           //attention to the two lines above. Had to create a BigDecimal object since abs() is non static.
+            Decimal bidChange=lastBidOrder.getLimit().subtract(getNewBid(marketData)).abs();
             if(changedSinceLastTick && bidChange.isGreaterThan(Decimal.createFromDouble(0.01))) {
                 log.info("changed price since last order: " + marketData);
             }
@@ -100,8 +96,8 @@ public class QuotingStrategy extends StrategyBase {
     }
 
     private Decimal getNewBid(MarketData marketData) {
-        return marketData.getBid().multiply(Decimal.createFromDouble(0.995)).min(marketData.getBid().subtract(Decimal.createFromDouble(0.05)));
-    //be careful about the line above, anyway it should work as per http://www.tutorialspoint.com/java/math/bigdecimal_min.htm exemplum
+        return marketData.getBid().multiply(Decimal.createFromDouble(0.995))
+                .min(marketData.getBid().subtract(Decimal.createFromDouble(0.05)));
     }
 
     private void sendOrderBidSide(Decimal bid)
