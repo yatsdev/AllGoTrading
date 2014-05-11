@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="quickfixj-all-1.5.3-bd">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/quickfixj-all-1.5.3-bd.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
