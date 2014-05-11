@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.OrderNew;
+import java.math.BigDecimal;
 
 public class OrderNewMsg {
 
@@ -65,7 +66,7 @@ public class OrderNewMsg {
     public String symbol;
     public String exchange;
     public int bookSideDirection;
-    public java.math.BigDecimal size;
-    public java.math.BigDecimal limit;
+    public BigDecimal size;
+    public BigDecimal limit;
 
 } // class

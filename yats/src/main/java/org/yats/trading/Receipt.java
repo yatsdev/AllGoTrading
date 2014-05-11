@@ -64,8 +64,8 @@ public class Receipt {
         return other != NULL && orderId.isSameAs(other.getOrderId());
     }
 
-    public java.math.BigDecimal getPositionChange() {
-        return java.math.BigDecimal.valueOf(bookSide.toDirection()).multiply(currentTradedSize);
+    public BigDecimal getPositionChange() {
+        return BigDecimal.valueOf(bookSide.toDirection()).multiply(currentTradedSize);
     }
 
 
@@ -106,27 +106,27 @@ public class Receipt {
         this.bookSide = bookSide;
     }
 
-    public java.math.BigDecimal getResidualSize() {
+    public BigDecimal getResidualSize() {
         return residualSize;
     }
 
-    public void setResidualSize(java.math.BigDecimal residualSize) {
+    public void setResidualSize(BigDecimal residualSize) {
         this.residualSize = residualSize;
     }
 
-    public java.math.BigDecimal getCurrentTradedSize() {
+    public BigDecimal getCurrentTradedSize() {
         return currentTradedSize;
     }
 
-    public void setCurrentTradedSize(java.math.BigDecimal currentTradedSize) {
+    public void setCurrentTradedSize(BigDecimal currentTradedSize) {
         this.currentTradedSize = currentTradedSize;
     }
 
-    public java.math.BigDecimal getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(java.math.BigDecimal price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -154,11 +154,11 @@ public class Receipt {
         this.timestamp = timestamp;
     }
 
-    public java.math.BigDecimal getTotalTradedSize() {
+    public BigDecimal getTotalTradedSize() {
         return totalTradedSize;
     }
 
-    public void setTotalTradedSize(java.math.BigDecimal totalTradedSize) {
+    public void setTotalTradedSize(BigDecimal totalTradedSize) {
         this.totalTradedSize = totalTradedSize;
     }
 
@@ -193,22 +193,22 @@ public class Receipt {
         return this;
     }
 
-    public Receipt withResidualSize(java.math.BigDecimal d) {
+    public Receipt withResidualSize(BigDecimal d) {
         residualSize=d;
         return this;
     }
 
-    public Receipt withCurrentTradedSize(java.math.BigDecimal d) {
+    public Receipt withCurrentTradedSize(BigDecimal d) {
         currentTradedSize=d;
         return this;
     }
 
-    public Receipt withTotalTradedSize(java.math.BigDecimal d) {
+    public Receipt withTotalTradedSize(BigDecimal d) {
         totalTradedSize=d;
         return this;
     }
 
-    public Receipt withPrice(java.math.BigDecimal p) {
+    public Receipt withPrice(BigDecimal p) {
         price=p;
         return this;
     }
@@ -256,10 +256,10 @@ public class Receipt {
     private String internalAccount;
     private String productId;
     private BookSide bookSide;
-    private java.math.BigDecimal residualSize;
-    private java.math.BigDecimal currentTradedSize;
-    private java.math.BigDecimal totalTradedSize;
-    private java.math.BigDecimal price;
+    private BigDecimal residualSize;
+    private BigDecimal currentTradedSize;
+    private BigDecimal totalTradedSize;
+    private BigDecimal price;
     private String rejectReason;
     private boolean endState;
 

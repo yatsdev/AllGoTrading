@@ -80,16 +80,16 @@ public class QuotingStrategy extends StrategyBase {
 
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            java.math.BigDecimal bidChange_temporary=lastBidOrder.getLimit().subtract(getNewBid(marketData));
+            BigDecimal bidChange_temporary=lastBidOrder.getLimit().subtract(getNewBid(marketData));
            // System.out.println(bidChange_temporary+" temporary non absolute number"); uncomment to test
-            java.math.BigDecimal bidChange=bidChange_temporary.abs();
+            BigDecimal bidChange=bidChange_temporary.abs();
            // System.out.println(bidChange+" definitive absolute number");  uncomment to test
            //attention to the two lines above. Had to create a BigDecimal object since abs() is non static.
-            if(changedSinceLastTick && bidChange.compareTo(java.math.BigDecimal.valueOf(0.01))>0) {
+            if(changedSinceLastTick && bidChange.compareTo(BigDecimal.valueOf(0.01))>0) {
                 log.info("changed price since last order: " + marketData);
             }
 
-            boolean bidChangedEnoughForOrderUpdate = bidChange.compareTo(java.math.BigDecimal.valueOf(0.02)) > 0;
+            boolean bidChangedEnoughForOrderUpdate = bidChange.compareTo(BigDecimal.valueOf(0.02)) > 0;
             if(!bidChangedEnoughForOrderUpdate) return;
 
             if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
@@ -101,12 +101,12 @@ public class QuotingStrategy extends StrategyBase {
         previousMarketData=marketData;
     }
 
-    private java.math.BigDecimal getNewBid(MarketData marketData) {
-        return marketData.getBid().multiply(java.math.BigDecimal.valueOf(0.995)).min(marketData.getBid().subtract(java.math.BigDecimal.valueOf(0.05)));
+    private BigDecimal getNewBid(MarketData marketData) {
+        return marketData.getBid().multiply(BigDecimal.valueOf(0.995)).min(marketData.getBid().subtract(BigDecimal.valueOf(0.05)));
     //be careful about the line above, anyway it should work as per http://www.tutorialspoint.com/java/math/bigdecimal_min.htm exemplum
     }
 
-    private void sendOrderBidSide(java.math.BigDecimal bid)
+    private void sendOrderBidSide(BigDecimal bid)
     {
         lastBidOrder = OrderNew.create()
                 .withProductId(tradeProductId)
@@ -131,7 +131,7 @@ public class QuotingStrategy extends StrategyBase {
     }
 
 
-    private java.math.BigDecimal position;
+    private BigDecimal position;
     private boolean shuttingDown;
 
     private String tradeProductId;

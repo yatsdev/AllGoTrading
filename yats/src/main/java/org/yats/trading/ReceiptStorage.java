@@ -2,10 +2,11 @@ package org.yats.trading;
 
 
 import java.util.LinkedList;
+import java.math.BigDecimal;
 
 
 //todo: allow for multiple currencies. currently different currencies completely ignored
-//todo: all prices and sizes are in java.math.BigDecimals. need to be replaced by own classes, fixed decimal based, prices with currency
+//todo: all prices and sizes are in double. need to be replaced by own classes, fixed decimal based, prices with currency
 //todo: to calculate profit in a currency other than the one trades happened the historic exchange rate needs to be known!
 //todo: since this is not feasible, profit has to be a list of profits in different currencies that is only converted at
 //todo: current exchange rate to target currency
@@ -20,17 +21,17 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public java.math.BigDecimal getInternalAccountPositionForProduct(String internalAccount, String productId)
+    public BigDecimal getInternalAccountPositionForProduct(String internalAccount, String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public java.math.BigDecimal getInternalAccountProfitForProduct(String internalAccount, String productId)
+    public BigDecimal getInternalAccountProfitForProduct(String internalAccount, String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public java.math.BigDecimal getPositionForProduct(String productId)
+    public BigDecimal getPositionForProduct(String productId)
     {
         throw new RuntimeException("Not implemented yet.");
     }

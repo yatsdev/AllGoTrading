@@ -2,6 +2,7 @@ package org.yats.trader;
 
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
+import java.math.BigDecimal;
 
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
@@ -38,12 +39,12 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         return productProvider.getProductForProductId(productId);
     }
 
-    java.math.BigDecimal getPositionForProduct(String productId)
+    BigDecimal getPositionForProduct(String productId)
     {
         return positionProvider.getInternalAccountPositionForProduct(getInternalAccount(), productId);
     }
 
-    java.math.BigDecimal getProfitForProduct(String productId)
+    BigDecimal getProfitForProduct(String productId)
     {
         return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), productId);
     }

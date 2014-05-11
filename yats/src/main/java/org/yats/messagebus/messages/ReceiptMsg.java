@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.yats.common.UniqueId;
 import org.yats.trading.BookSide;
 import org.yats.trading.Receipt;
+import java.math.BigDecimal;
 
 public class ReceiptMsg {
 
@@ -74,10 +75,10 @@ public class ReceiptMsg {
     public String internalAccount;
     public String productId;
     public int bookSideDirection;
-    public java.math.BigDecimal residualSize;
-    public java.math.BigDecimal currentTradedSize;
-    public java.math.BigDecimal totalTradedSize;
-    public java.math.BigDecimal price;
+    public BigDecimal residualSize;
+    public BigDecimal currentTradedSize;
+    public BigDecimal totalTradedSize;
+    public BigDecimal price;
     public String rejectReason;
     public boolean endState;
 

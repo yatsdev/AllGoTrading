@@ -2,6 +2,7 @@ package org.yats.messagebus.messages;
 
 import org.joda.time.DateTime;
 import org.yats.trading.MarketData;
+import java.math.BigDecimal;
 
 public class MarketDataMsg {
 
@@ -53,9 +54,9 @@ public class MarketDataMsg {
 
     public String timestamp;
     public String productId;
-    public java.math.BigDecimal bid;
-    public java.math.BigDecimal ask;
-    public java.math.BigDecimal bidSize;
-    public java.math.BigDecimal askSize;
+    public BigDecimal bid;
+    public BigDecimal ask;
+    public BigDecimal bidSize;
+    public BigDecimal askSize;
 
 } // class
