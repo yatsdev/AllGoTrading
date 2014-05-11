@@ -43,10 +43,9 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public String toCSV() {
+    public void toCSV(String toCSV) {
         throw new RuntimeException("Not implemented yet.");
     }
-
 
     public static ReceiptStorage createFromCSV(String csv) {
         throw new RuntimeException("Not implemented yet.");
