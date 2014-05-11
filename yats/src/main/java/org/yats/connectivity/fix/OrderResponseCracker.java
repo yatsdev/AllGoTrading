@@ -12,6 +12,8 @@ import quickfix.*;
 import quickfix.fix42.*;
 import quickfix.fix42.MessageCracker;
 
+import java.math.BigDecimal;
+
 
 public class OrderResponseCracker extends MessageCracker implements Application {
 
@@ -110,7 +112,7 @@ public class OrderResponseCracker extends MessageCracker implements Application 
             r.setBookSide(BookSide.ASK);
             if(report.getSide().getValue()=='1') r.setBookSide(BookSide.BID);
 
-            if(r.getResidualSize()==0.0) r.setEndState(true);
+            if(r.getResidualSize().compareTo(BigDecimal.ZERO)==0) r.setEndState(true);
 
             r.setEndState(isInEndState(report.getOrdStatus().getValue()));
 

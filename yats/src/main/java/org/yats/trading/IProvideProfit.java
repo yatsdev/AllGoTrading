@@ -1,5 +1,5 @@
 package org.yats.trading;
 
 public interface IProvideProfit {
-    public double getInternalAccountProfitForProduct(String internalAccount, String productId);
+    public java.math.BigDecimal getInternalAccountProfitForProduct(String internalAccount, String productId);
 }

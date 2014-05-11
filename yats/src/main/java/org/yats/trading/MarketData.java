@@ -4,6 +4,8 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.ISODateTimeFormat;
 
+import java.math.BigDecimal;
+
 public class MarketData
 {
     public static MarketDataNULL NULL = new MarketDataNULL();
@@ -36,7 +38,7 @@ public class MarketData
         return true;
     }
 
-    public MarketData(DateTime timestamp, String productId, double bid, double ask, double bidSize, double askSize) {
+    public MarketData(DateTime timestamp, String productId, java.math.BigDecimal bid, java.math.BigDecimal ask, java.math.BigDecimal bidSize, java.math.BigDecimal askSize) {
         this.timestamp = timestamp;
         this.productId = productId;
         this.bid = bid;
@@ -67,35 +69,35 @@ public class MarketData
 //        this.productId = productId;
 //    }
 
-    public double getBid() {
+    public java.math.BigDecimal getBid() {
         return bid;
     }
 
-//    public void setBid(double bid) {
+//    public void setBid(java.math.BigDecimal bid) {
 //        this.bid = bid;
 //    }
 
-    public double getAsk() {
+    public java.math.BigDecimal getAsk() {
         return ask;
     }
 
-//    public void setAsk(double ask) {
+//    public void setAsk(java.math.BigDecimal ask) {
 //        this.ask = ask;
 //    }
 
-    public double getBidSize() {
+    public java.math.BigDecimal getBidSize() {
         return bidSize;
     }
 
-//    public void setBidSize(double bidSize) {
+//    public void setBidSize(java.math.BigDecimal bidSize) {
 //        this.bidSize = bidSize;
 //    }
 
-    public double getAskSize() {
+    public java.math.BigDecimal getAskSize() {
         return askSize;
     }
 
-//    public void setAskSize(double askSize) {
+//    public void setAskSize(java.math.BigDecimal askSize) {
 //        this.askSize = askSize;
 //    }
 
@@ -103,10 +105,10 @@ public class MarketData
 
     DateTime timestamp;
     String productId;
-    double bid;
-    double ask;
-    double bidSize;
-    double askSize;
+    java.math.BigDecimal bid;
+    java.math.BigDecimal ask;
+    java.math.BigDecimal bidSize;
+    java.math.BigDecimal askSize;
 
 
 
@@ -128,27 +130,27 @@ public class MarketData
         }
 
         @Override
-        public double getBid() {
+        public java.math.BigDecimal getBid() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public double getAsk() {
+        public java.math.BigDecimal getAsk() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public double getBidSize() {
+        public java.math.BigDecimal getBidSize() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public double getAskSize() {
+        public java.math.BigDecimal getAskSize() {
             throw new RuntimeException("This is NULL!");
         }
 
         private MarketDataNULL() {
-            super(DateTime.now(DateTimeZone.UTC),"",0,0,0,0);
+            super(DateTime.now(DateTimeZone.UTC),"", BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO);
         }
 
     }

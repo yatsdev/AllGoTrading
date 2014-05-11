@@ -53,9 +53,9 @@ public class MarketDataMsg {
 
     public String timestamp;
     public String productId;
-    public double bid;
-    public double ask;
-    public double bidSize;
-    public double askSize;
+    public java.math.BigDecimal bid;
+    public java.math.BigDecimal ask;
+    public java.math.BigDecimal bidSize;
+    public java.math.BigDecimal askSize;
 
 } // class

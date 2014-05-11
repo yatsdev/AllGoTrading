@@ -74,10 +74,10 @@ public class ReceiptMsg {
     public String internalAccount;
     public String productId;
     public int bookSideDirection;
-    public double residualSize;
-    public double currentTradedSize;
-    public double totalTradedSize;
-    public double price;
+    public java.math.BigDecimal residualSize;
+    public java.math.BigDecimal currentTradedSize;
+    public java.math.BigDecimal totalTradedSize;
+    public java.math.BigDecimal price;
     public String rejectReason;
     public boolean endState;
 

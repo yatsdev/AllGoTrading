@@ -3,6 +3,8 @@ package org.yats.trading;
 import org.testng.annotations.BeforeMethod;
 import org.yats.common.UniqueId;
 
+import java.math.BigDecimal;
+
 public class ReceiptStorageTest {
 
     private static String INTERNAL_ACCOUNT1 = "intAccount1";
@@ -68,59 +70,59 @@ public class ReceiptStorageTest {
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(1)
-                .withTotalTradedSize(1)
-                .withPrice(50)
-                .withResidualSize(0)
+                .withCurrentTradedSize(BigDecimal.ONE)
+                .withTotalTradedSize(BigDecimal.ONE)
+                .withPrice(BigDecimal.valueOf(50))
+                .withResidualSize(BigDecimal.ZERO)
                 ;
         receipt2 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(1)
-                .withTotalTradedSize(1)
-                .withPrice(50)
-                .withResidualSize(1)
+                .withCurrentTradedSize(BigDecimal.ONE)
+                .withTotalTradedSize(BigDecimal.ONE)
+                .withPrice(BigDecimal.valueOf(50))
+                .withResidualSize(BigDecimal.ONE)
                 ;
         receipt3 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(1)
-                .withTotalTradedSize(2)
-                .withPrice(50)
-                .withResidualSize(0)
+                .withCurrentTradedSize(BigDecimal.ONE)
+                .withTotalTradedSize(BigDecimal.valueOf(2))
+                .withPrice(BigDecimal.valueOf(50))
+                .withResidualSize(BigDecimal.ZERO)
                 ;
         receipt4 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("4"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT2)
-                .withCurrentTradedSize(9)
-                .withTotalTradedSize(9)
-                .withPrice(87)
-                .withResidualSize(0)
+                .withCurrentTradedSize(BigDecimal.valueOf(9))
+                .withTotalTradedSize(BigDecimal.valueOf(9))
+                .withPrice(BigDecimal.valueOf(87))
+                .withResidualSize(BigDecimal.ZERO)
                 ;
         receipt5 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("5"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(-2)
-                .withTotalTradedSize(-2)
-                .withPrice(48)
-                .withResidualSize(0)
+                .withCurrentTradedSize(BigDecimal.valueOf(-2))
+                .withTotalTradedSize(BigDecimal.valueOf(-2))
+                .withPrice(BigDecimal.valueOf(48))
+                .withResidualSize(BigDecimal.ZERO)
                 ;
 
 
 
         processReceipts();
         positionSnapshot = new PositionSnapshot();
-        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, 10));
+        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, BigDecimal.valueOf(10)));
         profitSnapshot = new ProfitSnapshot();
-        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, -5));
+        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, BigDecimal.valueOf(-5)));
     }
 
     private void processReceipts()

@@ -4,6 +4,8 @@ import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
+import java.math.BigDecimal;
+
 public class OrderNew extends OrderBase {
 
     public static OrderNew NULL = new OrderNewNull();
@@ -43,8 +45,8 @@ public class OrderNew extends OrderBase {
                 .withBookSide(bookSide)
                 .withPrice(limit)
                 .withResidualSize(size)
-                .withTotalTradedSize(0)
-                .withCurrentTradedSize(0)
+                .withTotalTradedSize(BigDecimal.ZERO)
+                .withCurrentTradedSize(BigDecimal.ZERO)
                 .withRejectReason("");
     }
 
@@ -52,11 +54,11 @@ public class OrderNew extends OrderBase {
         return bookSide;
     }
 
-    public double getSize() {
+    public java.math.BigDecimal getSize() {
         return size;
     }
 
-    public double getLimit() {
+    public java.math.BigDecimal getLimit() {
         return limit;
     }
 
@@ -96,12 +98,12 @@ public class OrderNew extends OrderBase {
         return this;
     }
 
-    public OrderNew withSize(double s) {
+    public OrderNew withSize(java.math.BigDecimal s) {
         size=s;
         return this;
     }
 
-    public OrderNew withLimit(double l) {
+    public OrderNew withLimit(java.math.BigDecimal l) {
         limit=l;
         return this;
     }
@@ -144,8 +146,8 @@ public class OrderNew extends OrderBase {
     private String internalAccount;
 //    private Product product;
     private BookSide bookSide;
-    private double size;
-    private double limit;
+    private java.math.BigDecimal size;
+    private java.math.BigDecimal limit;
     private String productId;
 
 
