@@ -4,10 +4,11 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.yats.common.Decimal;
 import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.trading.MarketData;
 
-import java.math.BigDecimal;
+
 
 public class SenderReceiverTest {
 
@@ -36,7 +37,8 @@ public class SenderReceiverTest {
         sender.init();
         receiver = new Receiver<MarketDataMsg>(MarketDataMsg.class, EXCHANGE,
                 TOPIC_FOR_ALL_TEST_MarketDataMsg, SERVERIP);
-        data = new MarketData(new DateTime(DateTimeZone.UTC), "test", BigDecimal.valueOf(11), BigDecimal.valueOf(12), BigDecimal.valueOf(20), BigDecimal.valueOf(30) );
+        data = new MarketData(new DateTime(DateTimeZone.UTC), "test", Decimal.createFromDouble(11),
+                Decimal.createFromDouble(12), Decimal.createFromDouble(20), Decimal.createFromDouble(30) );
         dataMsg = MarketDataMsg.createFrom(data);
     }
 

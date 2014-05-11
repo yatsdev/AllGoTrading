@@ -162,13 +162,13 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new Symbol(p.getSymbol()));
         fixOrder.set(new SecurityID(p.getProductId()));
         fixOrder.set(new SecurityExchange(p.getExchange()));
-        fixOrder.set(new Price(order.getLimit()));
+        fixOrder.set(new Price(order.getLimit().toBigDecimal()));
         if (side.toDirection()==1) {
             fixOrder.set(new Side(Side.BUY));
         } else {
             fixOrder.set(new Side(Side.SELL));
         }
-        fixOrder.set(new OrderQty(order.getSize()));
+        fixOrder.set(new OrderQty(order.getSize().toBigDecimal()));
         fixOrder.set(new OrdType(OrdType.LIMIT));
         fixOrder.set(new ClOrdID(order.getOrderId().toString()));
         return fixOrder;

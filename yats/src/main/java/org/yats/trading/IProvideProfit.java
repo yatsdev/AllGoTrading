@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
+
 public interface IProvideProfit {
-    public java.math.BigDecimal getInternalAccountProfitForProduct(String internalAccount, String productId);
+    public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId);
 }

@@ -4,9 +4,10 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.yats.common.Decimal;
 import org.yats.trading.*;
 
-import java.math.BigDecimal;
+
 
 public class StrategyRunnerTest {
 
@@ -102,7 +103,8 @@ public class StrategyRunnerTest {
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, BigDecimal.valueOf(10),BigDecimal.valueOf(11),BigDecimal.ONE,BigDecimal.ONE);
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, Decimal.createFromDouble(10)
+                ,Decimal.createFromDouble(11),Decimal.ONE,Decimal.ONE);
     }
 
 
@@ -125,8 +127,8 @@ public class StrategyRunnerTest {
             OrderNew order = OrderNew.create()
                     .withProductId(testProduct.getProductId())
                     .withBookSide(BookSide.BID)
-                    .withLimit(BigDecimal.valueOf(50))
-                    .withSize(BigDecimal.valueOf(5));
+                    .withLimit(Decimal.createFromDouble((50)))
+                    .withSize(Decimal.createFromDouble(5));
             sendNewOrder(order);
         }
 
@@ -156,7 +158,7 @@ public class StrategyRunnerTest {
             if(!receipt.isForSameOrderAs(lastReceipt)) numberOfOrderInMarket++;
             if(receipt.isEndState()) numberOfOrderInMarket--;
 
-            position += receipt.getPositionChange().intValue();
+            position += receipt.getPositionChange().toInt();
             lastReceipt=receipt;
         }
 
@@ -203,7 +205,7 @@ public class StrategyRunnerTest {
             if(fillOrderImmediately) {
                 receipt.setTotalTradedSize(orderNew.getSize());
                 receipt.setCurrentTradedSize(orderNew.getSize());
-                receipt.setResidualSize(BigDecimal.ZERO);
+                receipt.setResidualSize(Decimal.ZERO);
                 receipt.setEndState(true);
 
             }
@@ -226,11 +228,11 @@ public class StrategyRunnerTest {
         }
 
         public void partialFillOrder(int fillSize) {
-            filledSizeOfOrder = Math.min(filledSizeOfOrder + fillSize, (int) lastOrderNew.getSize().doubleValue());
+            filledSizeOfOrder = Math.min(filledSizeOfOrder + fillSize, (int) lastOrderNew.getSize().toDouble());
             Receipt receipt = lastOrderNew.createReceiptDefault();
-            receipt.setCurrentTradedSize(BigDecimal.valueOf(fillSize));
-            receipt.setTotalTradedSize(BigDecimal.valueOf(filledSizeOfOrder));
-            receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize().doubleValue());
+            receipt.setCurrentTradedSize(Decimal.createFromDouble(fillSize));
+            receipt.setTotalTradedSize(Decimal.createFromDouble(filledSizeOfOrder));
+            receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize().toDouble());
             receiptConsumer.onReceipt(receipt);
         }
 

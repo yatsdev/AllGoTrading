@@ -1,10 +1,11 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.math.BigDecimal;
+
 
 public class OrderNew extends OrderBase {
 
@@ -45,8 +46,8 @@ public class OrderNew extends OrderBase {
                 .withBookSide(bookSide)
                 .withPrice(limit)
                 .withResidualSize(size)
-                .withTotalTradedSize(BigDecimal.ZERO)
-                .withCurrentTradedSize(BigDecimal.ZERO)
+                .withTotalTradedSize(Decimal.ZERO)
+                .withCurrentTradedSize(Decimal.ZERO)
                 .withRejectReason("");
     }
 
@@ -54,11 +55,11 @@ public class OrderNew extends OrderBase {
         return bookSide;
     }
 
-    public java.math.BigDecimal getSize() {
+    public Decimal getSize() {
         return size;
     }
 
-    public java.math.BigDecimal getLimit() {
+    public Decimal getLimit() {
         return limit;
     }
 
@@ -98,12 +99,12 @@ public class OrderNew extends OrderBase {
         return this;
     }
 
-    public OrderNew withSize(java.math.BigDecimal s) {
+    public OrderNew withSize(Decimal s) {
         size=s;
         return this;
     }
 
-    public OrderNew withLimit(java.math.BigDecimal l) {
+    public OrderNew withLimit(Decimal l) {
         limit=l;
         return this;
     }
@@ -146,8 +147,8 @@ public class OrderNew extends OrderBase {
     private String internalAccount;
 //    private Product product;
     private BookSide bookSide;
-    private java.math.BigDecimal size;
-    private java.math.BigDecimal limit;
+    private Decimal size;
+    private Decimal limit;
     private String productId;
 
 

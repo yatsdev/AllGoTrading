@@ -1,10 +1,11 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-import java.math.BigDecimal;
+
 
 public class Receipt {
 
@@ -64,8 +65,8 @@ public class Receipt {
         return other != NULL && orderId.isSameAs(other.getOrderId());
     }
 
-    public java.math.BigDecimal getPositionChange() {
-        return java.math.BigDecimal.valueOf(bookSide.toDirection()).multiply(currentTradedSize);
+    public Decimal getPositionChange() {
+        return Decimal.createFromDouble(bookSide.toDirection()).multiply(currentTradedSize);
     }
 
 
@@ -106,27 +107,27 @@ public class Receipt {
         this.bookSide = bookSide;
     }
 
-    public java.math.BigDecimal getResidualSize() {
+    public Decimal getResidualSize() {
         return residualSize;
     }
 
-    public void setResidualSize(java.math.BigDecimal residualSize) {
+    public void setResidualSize(Decimal residualSize) {
         this.residualSize = residualSize;
     }
 
-    public java.math.BigDecimal getCurrentTradedSize() {
+    public Decimal getCurrentTradedSize() {
         return currentTradedSize;
     }
 
-    public void setCurrentTradedSize(java.math.BigDecimal currentTradedSize) {
+    public void setCurrentTradedSize(Decimal currentTradedSize) {
         this.currentTradedSize = currentTradedSize;
     }
 
-    public java.math.BigDecimal getPrice() {
+    public Decimal getPrice() {
         return price;
     }
 
-    public void setPrice(java.math.BigDecimal price) {
+    public void setPrice(Decimal price) {
         this.price = price;
     }
 
@@ -154,11 +155,11 @@ public class Receipt {
         this.timestamp = timestamp;
     }
 
-    public java.math.BigDecimal getTotalTradedSize() {
+    public Decimal getTotalTradedSize() {
         return totalTradedSize;
     }
 
-    public void setTotalTradedSize(java.math.BigDecimal totalTradedSize) {
+    public void setTotalTradedSize(Decimal totalTradedSize) {
         this.totalTradedSize = totalTradedSize;
     }
 
@@ -193,22 +194,22 @@ public class Receipt {
         return this;
     }
 
-    public Receipt withResidualSize(java.math.BigDecimal d) {
+    public Receipt withResidualSize(Decimal d) {
         residualSize=d;
         return this;
     }
 
-    public Receipt withCurrentTradedSize(java.math.BigDecimal d) {
+    public Receipt withCurrentTradedSize(Decimal d) {
         currentTradedSize=d;
         return this;
     }
 
-    public Receipt withTotalTradedSize(java.math.BigDecimal d) {
+    public Receipt withTotalTradedSize(Decimal d) {
         totalTradedSize=d;
         return this;
     }
 
-    public Receipt withPrice(java.math.BigDecimal p) {
+    public Receipt withPrice(Decimal p) {
         price=p;
         return this;
     }
@@ -241,11 +242,11 @@ public class Receipt {
         bookSide = BookSide.NULL;
         timestamp = DateTime.now(DateTimeZone.UTC);
         orderId = UniqueId.create();
-        currentTradedSize=BigDecimal.ZERO;   //The preferred way because it doesn't allocate a new object. We save on resources!!
-        residualSize=BigDecimal.ZERO;
-        totalTradedSize=BigDecimal.ZERO;
+        currentTradedSize=Decimal.ZERO;
+        residualSize=Decimal.ZERO;
+        totalTradedSize=Decimal.ZERO;
         rejectReason="";
-        price=BigDecimal.ZERO;
+        price=Decimal.ZERO;
         externalAccount="";
         internalAccount="";
     }
@@ -256,10 +257,10 @@ public class Receipt {
     private String internalAccount;
     private String productId;
     private BookSide bookSide;
-    private java.math.BigDecimal residualSize;
-    private java.math.BigDecimal currentTradedSize;
-    private java.math.BigDecimal totalTradedSize;
-    private java.math.BigDecimal price;
+    private Decimal residualSize;
+    private Decimal currentTradedSize;
+    private Decimal totalTradedSize;
+    private Decimal price;
     private String rejectReason;
     private boolean endState;
 

@@ -1,5 +1,6 @@
 package org.yats.connectivity.fix;
 
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.MarketData;
@@ -84,15 +85,15 @@ public class PriceFeedCracker extends MessageCracker implements Application {
             group.get(MDEntrySize);
             group.get(MDEntryPx);
 
-            java.math.BigDecimal bid = MDEntryPx.getValue();
-            java.math.BigDecimal bidSize = MDEntrySize.getValue();
+            Decimal bid = new Decimal(MDEntryPx.getValue());
+            Decimal bidSize = new Decimal(MDEntrySize.getValue());
 
             message.getGroup(2, group);
             group.get(MDEntryType);
             group.get(MDEntrySize);
             group.get(MDEntryPx);
-            java.math.BigDecimal ask = MDEntryPx.getValue();
-            java.math.BigDecimal askSize = MDEntrySize.getValue();
+            Decimal ask = new Decimal(MDEntryPx.getValue());
+            Decimal askSize = new Decimal(MDEntrySize.getValue());
 
             MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId,bid,ask,bidSize,askSize);
 //        log.debug("FIX: "+m.toString());

@@ -1,12 +1,14 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
+
 public class ProductAccountPosition {
 
     public String getProductId() {
         return productId;
     }
 
-    public java.math.BigDecimal getSize() {
+    public Decimal getSize() {
         return size;
     }
 
@@ -18,7 +20,7 @@ public class ProductAccountPosition {
         return productId +","+internalAccount;
     }
 
-    public ProductAccountPosition(String productId, String internalAccount, java.math.BigDecimal size) {
+    public ProductAccountPosition(String productId, String internalAccount, Decimal size) {
         this.productId = productId;
         this.internalAccount = internalAccount;
         this.size = size;
@@ -30,6 +32,6 @@ public class ProductAccountPosition {
 
     String internalAccount;
     String productId;
-    java.math.BigDecimal size;
+    Decimal size;
 
 } // class
