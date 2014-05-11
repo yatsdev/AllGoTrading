@@ -17,18 +17,18 @@ public class MarketData
 
     public boolean isPriceAndSizeSame(MarketData other) {
         if(other==NULL) return false;
-        if(bid!=other.bid) return false;
-        if(ask!=other.ask) return false;
-        if(bidSize!=other.bidSize) return false;
+        if(bid.compareTo(other.bid)!=0) return false;
+        if(ask.compareTo(other.ask)!=0) return false;
+        if(bidSize.compareTo(other.bidSize)!=0) return false;
         return askSize == other.askSize;
     }
 
     public boolean isSameAs(MarketData other) {
         if(other==NULL) return false;
-        if(bid!=other.bid) return false;
-        if(ask!=other.ask) return false;
-        if(bidSize!=other.bidSize) return false;
-        if(askSize!=other.askSize) return false;
+        if(bid.compareTo(other.bid)!=0) return false;
+        if(ask.compareTo(other.ask)!=0) return false;
+        if(bidSize.compareTo(other.bidSize)!=0) return false;
+        if(askSize.compareTo(other.askSize)!=0) return false;
         if(productId.compareTo(other.productId)!=0) return false;
         if(timestamp.toString().compareTo(other.timestamp.toString())!=0) return false;
         return true;

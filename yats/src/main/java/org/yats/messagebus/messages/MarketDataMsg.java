@@ -26,10 +26,10 @@ public class MarketDataMsg {
     }
 
     public boolean isSameAs(MarketDataMsg data) {
-        if(bid!=data.bid) return false;
-        if(ask!=data.ask) return false;
-        if(bidSize!=data.bidSize) return false;
-        if(askSize!=data.askSize) return false;
+        if(bid.compareTo(data.bid)!=0) return false;
+        if(ask.compareTo(data.ask)!=0) return false;
+        if(bidSize.compareTo(data.bidSize)!=0) return false;
+        if(askSize.compareTo(data.askSize)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         return true;
