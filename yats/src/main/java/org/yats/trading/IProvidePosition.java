@@ -1,5 +1,6 @@
 package org.yats.trading;
+import java.math.BigDecimal;
 
 public interface IProvidePosition {
-    public java.math.BigDecimal getInternalAccountPositionForProduct(String internalAccount, String productId);
+    public BigDecimal getInternalAccountPositionForProduct(String internalAccount, String productId);
 }

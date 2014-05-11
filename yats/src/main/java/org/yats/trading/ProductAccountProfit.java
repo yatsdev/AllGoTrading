@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import java.math.BigDecimal;
+
 public class ProductAccountProfit {
 
     public String getProductId() {
@@ -15,7 +17,7 @@ public class ProductAccountProfit {
         return productId+","+internalAccount;
     }
 
-    public ProductAccountProfit(String productId, String internalAccount, java.math.BigDecimal size) {
+    public ProductAccountProfit(String productId, String internalAccount, BigDecimal size) {
         this.productId = productId;
         this.internalAccount = internalAccount;
         this.profit = size;
@@ -27,5 +29,5 @@ public class ProductAccountProfit {
 
     String productId;
     String internalAccount;
-    java.math.BigDecimal profit;
+    BigDecimal profit;
 } // class

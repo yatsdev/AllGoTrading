@@ -38,7 +38,7 @@ public class MarketData
         return true;
     }
 
-    public MarketData(DateTime timestamp, String productId, java.math.BigDecimal bid, java.math.BigDecimal ask, java.math.BigDecimal bidSize, java.math.BigDecimal askSize) {
+    public MarketData(DateTime timestamp, String productId, BigDecimal bid, BigDecimal ask, BigDecimal bidSize, BigDecimal askSize) {
         this.timestamp = timestamp;
         this.productId = productId;
         this.bid = bid;
@@ -69,35 +69,35 @@ public class MarketData
 //        this.productId = productId;
 //    }
 
-    public java.math.BigDecimal getBid() {
+    public BigDecimal getBid() {
         return bid;
     }
 
-//    public void setBid(java.math.BigDecimal bid) {
+//    public void setBid(BigDecimal bid) {
 //        this.bid = bid;
 //    }
 
-    public java.math.BigDecimal getAsk() {
+    public BigDecimal getAsk() {
         return ask;
     }
 
-//    public void setAsk(java.math.BigDecimal ask) {
+//    public void setAsk(BigDecimal ask) {
 //        this.ask = ask;
 //    }
 
-    public java.math.BigDecimal getBidSize() {
+    public BigDecimal getBidSize() {
         return bidSize;
     }
 
-//    public void setBidSize(java.math.BigDecimal bidSize) {
+//    public void setBidSize(BigDecimal bidSize) {
 //        this.bidSize = bidSize;
 //    }
 
-    public java.math.BigDecimal getAskSize() {
+    public BigDecimal getAskSize() {
         return askSize;
     }
 
-//    public void setAskSize(java.math.BigDecimal askSize) {
+//    public void setAskSize(BigDecimal askSize) {
 //        this.askSize = askSize;
 //    }
 
@@ -105,10 +105,10 @@ public class MarketData
 
     DateTime timestamp;
     String productId;
-    java.math.BigDecimal bid;
-    java.math.BigDecimal ask;
-    java.math.BigDecimal bidSize;
-    java.math.BigDecimal askSize;
+    BigDecimal bid;
+    BigDecimal ask;
+    BigDecimal bidSize;
+    BigDecimal askSize;
 
 
 
@@ -130,22 +130,22 @@ public class MarketData
         }
 
         @Override
-        public java.math.BigDecimal getBid() {
+        public BigDecimal getBid() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public java.math.BigDecimal getAsk() {
+        public BigDecimal getAsk() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public java.math.BigDecimal getBidSize() {
+        public BigDecimal getBidSize() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public java.math.BigDecimal getAskSize() {
+        public BigDecimal getAskSize() {
             throw new RuntimeException("This is NULL!");
         }
 

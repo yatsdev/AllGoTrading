@@ -54,11 +54,11 @@ public class OrderNew extends OrderBase {
         return bookSide;
     }
 
-    public java.math.BigDecimal getSize() {
+    public BigDecimal getSize() {
         return size;
     }
 
-    public java.math.BigDecimal getLimit() {
+    public BigDecimal getLimit() {
         return limit;
     }
 
@@ -98,12 +98,12 @@ public class OrderNew extends OrderBase {
         return this;
     }
 
-    public OrderNew withSize(java.math.BigDecimal s) {
+    public OrderNew withSize(BigDecimal s) {
         size=s;
         return this;
     }
 
-    public OrderNew withLimit(java.math.BigDecimal l) {
+    public OrderNew withLimit(BigDecimal l) {
         limit=l;
         return this;
     }
@@ -146,8 +146,8 @@ public class OrderNew extends OrderBase {
     private String internalAccount;
 //    private Product product;
     private BookSide bookSide;
-    private java.math.BigDecimal size;
-    private java.math.BigDecimal limit;
+    private BigDecimal size;
+    private BigDecimal limit;
     private String productId;
 
 
