@@ -3,7 +3,6 @@ package org.yats.messagebus;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import flexjson.JSONSerializer;
 
 import java.io.IOException;
 
@@ -13,8 +12,7 @@ public class Sender<T>
     public void publish(String topic, T msg)
     {
         try{
-            JSONSerializer serializer = new JSONSerializer();
-            String msgString = serializer.serialize(msg);
+            String msgString = serializer.convertToString(msg);
             channel.basicPublish(exchangeName, topic, null, msgString.getBytes());
         } catch(IOException e)
         {
@@ -22,11 +20,14 @@ public class Sender<T>
         }
     }
 
-    public Sender(String _exchangeName, String _rabbitServerAddress)
-    {
-        exchangeName = _exchangeName;
-        rabbitServerAddress=_rabbitServerAddress;
-        init();
+    private void close()  {
+        try{
+            channel.close();
+            connection.close();
+        } catch(IOException e)
+        {
+            throw new RuntimeException(e.toString());
+        }
     }
 
     public void init() {
@@ -42,22 +43,21 @@ public class Sender<T>
         }
     }
 
+    public Sender(String _exchangeName, String _rabbitServerAddress)
+    {
+        serializer = new Serializer<T>();
+        exchangeName = _exchangeName;
+        rabbitServerAddress=_rabbitServerAddress;
+        init();
+    }
+
     protected void finalize( ) throws Throwable
     {
         close();
         super.finalize( );
     }
 
-    private void close()  {
-        try{
-            channel.close();
-            connection.close();
-        } catch(IOException e)
-        {
-            throw new RuntimeException(e.toString());
-        }
-    }
-
+    private Serializer<T> serializer;
     private Connection connection;
     private Channel channel;
     private String exchangeName;

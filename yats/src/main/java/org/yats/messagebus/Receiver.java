@@ -5,7 +5,6 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
-import flexjson.JSONDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,14 +14,6 @@ public class Receiver<T> {
 
     final Logger log = LoggerFactory.getLogger(Receiver.class);
 
-    public Receiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
-        tClass=_tClass;
-        exchangeName = _exchange;
-        topic = _topic;
-//        lastTopic="";
-        rabbitServerAddress=_rabbitServerAddress;
-        init();
-    }
 
     private String rabbitServerAddress;
 
@@ -37,7 +28,7 @@ public class Receiver<T> {
 //            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
             log.debug("Receiver: "+jsonMessage);
-            T msg = new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
+            T msg = deserializer.convertFromString(jsonMessage);
             log.debug("Receiver parsed: "+msg.toString());
             return msg;
         } catch (InterruptedException e) {
@@ -54,7 +45,7 @@ public class Receiver<T> {
             if(delivery==null) return null;
 //            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
-            return new JSONDeserializer<T>().deserialize(jsonMessage, tClass);
+            return deserializer.convertFromString(jsonMessage);
         } catch (InterruptedException e) {
 //            e.printStackTrace();
             throw new RuntimeException("Receiver: problem with receiving message!");
@@ -79,6 +70,17 @@ public class Receiver<T> {
         }
     }
 
+
+    public Receiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
+        deserializer = new Deserializer<T>(_tClass);
+        exchangeName = _exchange;
+        topic = _topic;
+//        lastTopic="";
+        rabbitServerAddress=_rabbitServerAddress;
+        init();
+    }
+
+    Deserializer<T> deserializer;
     ConnectionFactory factory;
     Connection connection;
     Channel channel;
@@ -87,5 +89,4 @@ public class Receiver<T> {
     private String exchangeName;
     private String topic;
 //    private String lastTopic;
-    private Class<T> tClass;
 }

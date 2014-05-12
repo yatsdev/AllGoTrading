@@ -19,9 +19,9 @@ public class SenderReceiverTest {
 
 
     @Test
-    public void canSendAndReceive()
+    public void canSendAndReceiveMarketData()
     {
-        sender.publish(dataMsg.getTopic(),dataMsg);
+        sender.publish(dataMsg.getTopic(), dataMsg);
         MarketDataMsg newDataMsg = receiver.tryReceive(1000);
         MarketData newData = newDataMsg.toMarketData();
 
