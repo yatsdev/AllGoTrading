@@ -22,10 +22,10 @@ public class ReceiptMsg {
         m.internalAccount=r.getExternalAccount();
         m.productId = r.getProductId();
         m.bookSideDirection = r.getBookSide().toDirection();
-        m.residualSize=r.getResidualSize();
-        m.currentTradedSize=r.getCurrentTradedSize();
-        m.totalTradedSize = r.getTotalTradedSize();
-        m.price=r.getPrice();
+        m.residualSize=r.getResidualSize().toString();
+        m.currentTradedSize=r.getCurrentTradedSize().toString();
+        m.totalTradedSize = r.getTotalTradedSize().toString();
+        m.price=r.getPrice().toString();
         m.rejectReason=r.getRejectReason();
         m.endState=r.isEndState();
         return m;
@@ -39,10 +39,10 @@ public class ReceiptMsg {
                 .withInternalAccount(internalAccount)
                 .withProductId(productId)
                 .withBookSide(BookSide.fromDirection(bookSideDirection))
-                .withResidualSize(residualSize)
-                .withCurrentTradedSize(currentTradedSize)
-                .withTotalTradedSize(totalTradedSize)
-                .withPrice(price)
+                .withResidualSize(new Decimal(residualSize))
+                .withCurrentTradedSize(new Decimal(currentTradedSize))
+                .withTotalTradedSize(new Decimal(totalTradedSize))
+                .withPrice(new Decimal(price))
                 .withRejectReason(rejectReason)
                 .withEndState(endState);
     }
@@ -75,10 +75,10 @@ public class ReceiptMsg {
     public String internalAccount;
     public String productId;
     public int bookSideDirection;
-    public Decimal residualSize;
-    public Decimal currentTradedSize;
-    public Decimal totalTradedSize;
-    public Decimal price;
+    public String residualSize;
+    public String currentTradedSize;
+    public String totalTradedSize;
+    public String price;
     public String rejectReason;
     public boolean endState;
 

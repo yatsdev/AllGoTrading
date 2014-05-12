@@ -22,8 +22,8 @@ public class OrderNewMsg {
         m.internalAccount=r.getExternalAccount();
         m.productId = r.getProductId();
         m.bookSideDirection = r.getBookSide().toDirection();
-        m.size=r.getSize();
-        m.limit=r.getLimit();
+        m.size=r.getSize().toString();
+        m.limit=r.getLimit().toString();
         return m;
     }
 
@@ -35,8 +35,8 @@ public class OrderNewMsg {
                 .withInternalAccount(internalAccount)
                 .withProductId(productId)
                 .withBookSide(BookSide.fromDirection(bookSideDirection))
-                .withSize(size)
-                .withLimit(limit);
+                .withSize(new Decimal(size))
+                .withLimit(new Decimal(limit));
     }
 
     @Override
@@ -66,7 +66,7 @@ public class OrderNewMsg {
     public String symbol;
     public String exchange;
     public int bookSideDirection;
-    public Decimal size;
-    public Decimal limit;
+    public String size;
+    public String limit;
 
 } // class
