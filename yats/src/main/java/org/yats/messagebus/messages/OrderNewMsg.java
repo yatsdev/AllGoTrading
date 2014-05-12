@@ -58,6 +58,22 @@ public class OrderNewMsg {
     public OrderNewMsg() {
     }
 
+  public boolean isSameAs(OrderNewMsg data) {
+
+        if(timestamp.compareTo(data.timestamp)!=0) return false;
+        if(orderId.compareTo(data.orderId)!=0) return false;
+        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
+        if(internalAccount.compareTo(data.internalAccount)!=0) return false;
+        if(productId.compareTo(data.productId)!=0) return false;
+        if(symbol.compareTo(data.symbol)!=0) return false;
+        if(exchange.compareTo(data.exchange)!=0) return false;
+        if(!(bookSideDirection==data.bookSideDirection))return false; //Beware could be wrong!!!
+        if(size.compareTo(data.size)!=0) return false;
+        if(limit.compareTo(data.limit)!=0) return false;
+
+        return true;
+    }
+
     public String timestamp;
     public String orderId;
     public String externalAccount;
