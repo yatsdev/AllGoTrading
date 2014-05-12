@@ -66,12 +66,6 @@ public class QuotingStrategy extends StrategyBase {
         this.config = config;
     }
 
-    public QuotingStrategy() {
-        super();
-        lastBidOrder = OrderNew.NULL;
-        shuttingDown=false;
-        previousMarketData = MarketData.NULL;
-    }
 
 
     private void handleMarketDataBidSide(MarketData marketData) {
@@ -89,7 +83,8 @@ public class QuotingStrategy extends StrategyBase {
             if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
         }
 
-        if(!isInMarketBidSide() && position.isLessThan(Decimal.ONE)) {
+        boolean positionLessThanMaximum = position.isLessThan(Decimal.ONE);
+        if(!isInMarketBidSide() && positionLessThanMaximum) {
             sendOrderBidSide(getNewBid(marketData));
         }
         previousMarketData=marketData;
@@ -124,6 +119,14 @@ public class QuotingStrategy extends StrategyBase {
         return lastBidOrder != OrderNew.NULL;
     }
 
+
+    public QuotingStrategy() {
+        super();
+        lastBidOrder = OrderNew.NULL;
+        shuttingDown=false;
+        previousMarketData = MarketData.NULL;
+        position = Decimal.ZERO;
+    }
 
     private Decimal position;
     private boolean shuttingDown;

@@ -113,13 +113,6 @@ public class OrderNew extends OrderBase {
         return new OrderNew();
     }
 
-    public OrderNew() {
-        bookSide = BookSide.BID;
-        externalAccount ="";
-        setOrderId(UniqueId.create());
-        timestamp = DateTime.now(DateTimeZone.UTC);
-        internalAccount="";
-    }
 
     public DateTime getTimestamp() {
         return timestamp;
@@ -141,6 +134,15 @@ public class OrderNew extends OrderBase {
         this.productId = productId;
     }
 
+    public OrderNew() {
+        bookSide = BookSide.BID;
+        externalAccount ="";
+        setOrderId(UniqueId.create());
+        timestamp = DateTime.now(DateTimeZone.UTC);
+        internalAccount="";
+        size = Decimal.ZERO;
+        limit = Decimal.ZERO;
+    }
 
     private DateTime timestamp;
     private String externalAccount;
