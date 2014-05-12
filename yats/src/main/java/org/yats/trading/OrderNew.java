@@ -144,6 +144,20 @@ public class OrderNew extends OrderBase {
         limit = Decimal.ZERO;
     }
 
+ public boolean isSameAs(OrderNew data) {
+
+        if(timestamp.compareTo(data.timestamp)!=0) return false;
+
+        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
+        if(internalAccount.compareTo(data.internalAccount)!=0) return false;
+        if(!(bookSide.equals(data.bookSide))) return false;
+        if(!(size.isEqualTo(data.size)))return false; //Beware..uncertain of the SEMANTICS isEqualTo()
+        if(!(limit.isEqualTo(data.limit)))return false;
+        if(productId.compareTo(data.productId)!=0) return false;
+        return true;
+    }
+    
+
     private DateTime timestamp;
     private String externalAccount;
     private String internalAccount;
