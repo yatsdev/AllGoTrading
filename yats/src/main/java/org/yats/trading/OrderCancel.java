@@ -82,6 +82,16 @@ public class OrderCancel extends OrderBase {
         orderId = UniqueId.create();
         timestamp = DateTime.now(DateTimeZone.UTC);
     }
+    
+     public boolean isSameAs(OrderCancel data) {
+
+        if(timestamp.compareTo(data.timestamp)!=0) return false;
+        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
+        if(productId.compareTo(data.productId)!=0) return false;
+        if(bookSide.equals(data.bookSide)==false) return false; //Beware!!!!!! Could be an error!!!
+        return true;
+    }
+
 
     private DateTime timestamp;
     private String productId;
