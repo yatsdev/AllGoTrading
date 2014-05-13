@@ -151,7 +151,7 @@ public class OrderNew extends OrderBase {
         if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(internalAccount.compareTo(data.internalAccount)!=0) return false;
         if(!(bookSide.equals(data.bookSide))) return false;
-        if(!(size.isEqualTo(data.size)))return false; //Beware..uncertain of the SEMANTICS isEqualTo()
+        if(!(size.isEqualTo(data.size)))return false; 
         if(!(limit.isEqualTo(data.limit)))return false;
         if(productId.compareTo(data.productId)!=0) return false;
         return true;
