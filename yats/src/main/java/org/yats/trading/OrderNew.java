@@ -147,7 +147,6 @@ public class OrderNew extends OrderBase {
  public boolean isSameAs(OrderNew data) {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
-
         if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(internalAccount.compareTo(data.internalAccount)!=0) return false;
         if(!(bookSide.equals(data.bookSide))) return false;
