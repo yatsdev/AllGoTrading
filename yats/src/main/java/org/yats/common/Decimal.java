@@ -54,15 +54,15 @@ public class Decimal  {
         return new Decimal(value.abs());
     }
 
-    public Decimal min(Decimal other) {
-        return isLessThan(other) ? this : other;
+    public static Decimal min(Decimal one, Decimal another) {
+        return one.isLessThan(another) ? one : another;
     }
 
-    public Decimal max(Decimal other) {
-        return isGreaterThan(other) ? this : other;
+    public static Decimal max(Decimal one, Decimal another) {
+        return one.isGreaterThan(another) ? one : another;
     }
 
-    public static Decimal createFromDouble(double d) {
+    public static Decimal fromDouble(double d) {
         return new Decimal(Double.toString(d));
     }
 

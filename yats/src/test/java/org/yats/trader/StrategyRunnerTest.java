@@ -103,8 +103,8 @@ public class StrategyRunnerTest {
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, Decimal.createFromDouble(10)
-                ,Decimal.createFromDouble(11),Decimal.ONE,Decimal.ONE);
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, Decimal.fromDouble(10)
+                ,Decimal.fromDouble(11),Decimal.ONE,Decimal.ONE);
     }
 
 
@@ -127,8 +127,8 @@ public class StrategyRunnerTest {
             OrderNew order = OrderNew.create()
                     .withProductId(testProduct.getProductId())
                     .withBookSide(BookSide.BID)
-                    .withLimit(Decimal.createFromDouble((50)))
-                    .withSize(Decimal.createFromDouble(5));
+                    .withLimit(Decimal.fromDouble((50)))
+                    .withSize(Decimal.fromDouble(5));
             sendNewOrder(order);
         }
 
@@ -230,8 +230,8 @@ public class StrategyRunnerTest {
         public void partialFillOrder(int fillSize) {
             filledSizeOfOrder = Math.min(filledSizeOfOrder + fillSize, (int) lastOrderNew.getSize().toDouble());
             Receipt receipt = lastOrderNew.createReceiptDefault();
-            receipt.setCurrentTradedSize(Decimal.createFromDouble(fillSize));
-            receipt.setTotalTradedSize(Decimal.createFromDouble(filledSizeOfOrder));
+            receipt.setCurrentTradedSize(Decimal.fromDouble(fillSize));
+            receipt.setTotalTradedSize(Decimal.fromDouble(filledSizeOfOrder));
             receipt.setEndState(filledSizeOfOrder >= lastOrderNew.getSize().toDouble());
             receiptConsumer.onReceipt(receipt);
         }
