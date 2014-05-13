@@ -1,4 +1,4 @@
-package org.yats.connectivity.fix;
+package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,12 +9,12 @@ import org.yats.messagebus.messages.*;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
-public class ServerLogic extends StrategyBase implements IAmCalledBack {
+public class FixServerLogic extends StrategyBase implements IAmCalledBack {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(ServerLogic.class);
+    final Logger log = LoggerFactory.getLogger(FixServerLogic.class);
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -84,7 +84,7 @@ public class ServerLogic extends StrategyBase implements IAmCalledBack {
         }
     }
 
-    public ServerLogic() {
+    public FixServerLogic() {
         super();
         shuttingDown=false;
 

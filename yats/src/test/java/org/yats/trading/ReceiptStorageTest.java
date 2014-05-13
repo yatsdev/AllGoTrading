@@ -73,7 +73,7 @@ public class ReceiptStorageTest {
                 .withInternalAccount(INTERNAL_ACCOUNT1)
                 .withCurrentTradedSize(Decimal.ONE)
                 .withTotalTradedSize(Decimal.ONE)
-                .withPrice(Decimal.createFromDouble(50))
+                .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
                 ;
         receipt2 = Receipt.create()
@@ -83,7 +83,7 @@ public class ReceiptStorageTest {
                 .withInternalAccount(INTERNAL_ACCOUNT1)
                 .withCurrentTradedSize(Decimal.ONE)
                 .withTotalTradedSize(Decimal.ONE)
-                .withPrice(Decimal.createFromDouble(50))
+                .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ONE)
                 ;
         receipt3 = Receipt.create()
@@ -92,8 +92,8 @@ public class ReceiptStorageTest {
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
                 .withCurrentTradedSize(Decimal.ONE)
-                .withTotalTradedSize(Decimal.createFromDouble(2))
-                .withPrice(Decimal.createFromDouble(50))
+                .withTotalTradedSize(Decimal.fromDouble(2))
+                .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
                 ;
         receipt4 = Receipt.create()
@@ -101,9 +101,9 @@ public class ReceiptStorageTest {
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT2)
-                .withCurrentTradedSize(Decimal.createFromDouble(9))
-                .withTotalTradedSize(Decimal.createFromDouble(9))
-                .withPrice(Decimal.createFromDouble(87))
+                .withCurrentTradedSize(Decimal.fromDouble(9))
+                .withTotalTradedSize(Decimal.fromDouble(9))
+                .withPrice(Decimal.fromDouble(87))
                 .withResidualSize(Decimal.ZERO)
                 ;
         receipt5 = Receipt.create()
@@ -111,9 +111,9 @@ public class ReceiptStorageTest {
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.createFromDouble(-2))
-                .withTotalTradedSize(Decimal.createFromDouble(-2))
-                .withPrice(Decimal.createFromDouble(48))
+                .withCurrentTradedSize(Decimal.fromDouble(-2))
+                .withTotalTradedSize(Decimal.fromDouble(-2))
+                .withPrice(Decimal.fromDouble(48))
                 .withResidualSize(Decimal.ZERO)
                 ;
 
@@ -121,9 +121,9 @@ public class ReceiptStorageTest {
 
         processReceipts();
         positionSnapshot = new PositionSnapshot();
-        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.createFromDouble(10)));
+        positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(10)));
         profitSnapshot = new ProfitSnapshot();
-        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.createFromDouble(-5)));
+        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(-5)));
     }
 
     private void processReceipts()

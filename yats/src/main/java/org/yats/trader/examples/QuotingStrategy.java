@@ -72,12 +72,14 @@ public class QuotingStrategy extends StrategyBase {
 
         if(isInMarketBidSide()) {
             boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-            Decimal bidChange=lastBidOrder.getLimit().subtract(getNewBid(marketData)).abs();
-            if(changedSinceLastTick && bidChange.isGreaterThan(Decimal.createFromDouble(0.01))) {
+            Decimal lastBid = lastBidOrder.getLimit();
+            Decimal bid = marketData.getBid();
+            Decimal bidChange=lastBid.subtract(getNewBid(bid)).abs();
+            if(changedSinceLastTick && bidChange.isGreaterThan(Decimal.fromDouble(0.01))) {
                 log.info("changed price since last order: " + marketData);
             }
 
-            boolean bidChangedEnoughForOrderUpdate = bidChange.isGreaterThan(Decimal.createFromDouble(0.02));
+            boolean bidChangedEnoughForOrderUpdate = bidChange.isGreaterThan(Decimal.fromDouble(0.02));
             if(!bidChangedEnoughForOrderUpdate) return;
 
             if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
@@ -85,14 +87,16 @@ public class QuotingStrategy extends StrategyBase {
 
         boolean positionLessThanMaximum = position.isLessThan(Decimal.ONE);
         if(!isInMarketBidSide() && positionLessThanMaximum) {
-            sendOrderBidSide(getNewBid(marketData));
+            Decimal bid = marketData.getBid();
+            sendOrderBidSide(getNewBid(bid));
         }
         previousMarketData=marketData;
     }
 
-    private Decimal getNewBid(MarketData marketData) {
-        return marketData.getBid().multiply(Decimal.createFromDouble(0.995))
-                .min(marketData.getBid().subtract(Decimal.createFromDouble(0.05)));
+    private Decimal getNewBid(Decimal oldBid) {
+        Decimal bidRelative = oldBid.multiply(Decimal.fromDouble(0.995));
+        Decimal bidAbsolute = oldBid.subtract(Decimal.fromDouble(0.05));
+        return Decimal.min(bidRelative, bidAbsolute);
     }
 
     private void sendOrderBidSide(Decimal bid)
@@ -103,7 +107,7 @@ public class QuotingStrategy extends StrategyBase {
                 .withInternalAccount(getInternalAccount())
                 .withBookSide(BookSide.BID)
                 .withLimit(bid)
-                .withSize(Decimal.createFromDouble(0.01));
+                .withSize(Decimal.fromDouble(0.01));
         receivedOrderReceiptBidSide = false;
         sendNewOrder(lastBidOrder);
     }

@@ -1,8 +1,10 @@
-package org.yats.connectivity.fix;
+package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
+import org.yats.connectivity.fix.OrderConnection;
+import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ProductList;
 
@@ -14,13 +16,13 @@ import java.io.IOException;
     back to the to the message bus.
  */
 
-public class ServerMain {
+public class FixServerMain {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
 
-    final Logger log = LoggerFactory.getLogger(ServerMain.class);
+    final Logger log = LoggerFactory.getLogger(FixServerMain.class);
 
 
     public void go() throws InterruptedException, IOException
@@ -31,7 +33,7 @@ public class ServerMain {
         PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
         priceFeed.setProductProvider(products);
 
-        ServerLogic strategy = new ServerLogic();
+        FixServerLogic strategy = new FixServerLogic();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
@@ -76,11 +78,11 @@ public class ServerMain {
         System.exit(0);
     }
 
-    public ServerMain() {
+    public FixServerMain() {
     }
 
     public static void main(String args[]) throws Exception {
-        ServerMain q = new ServerMain();
+        FixServerMain q = new FixServerMain();
 
         try {
             q.go();

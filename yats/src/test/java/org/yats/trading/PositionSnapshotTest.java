@@ -18,8 +18,8 @@ public class PositionSnapshotTest {
     public void setUp() {
         positionSnapshot = new PositionSnapshot();
         position1 = new ProductAccountPosition("prod1", "account1", Decimal.ONE);
-        position2 = new ProductAccountPosition("prod2", "account1", Decimal.createFromDouble(2));
-        position3 = new ProductAccountPosition("prod3", "account1", Decimal.createFromDouble(3));
+        position2 = new ProductAccountPosition("prod2", "account1", Decimal.fromDouble(2));
+        position3 = new ProductAccountPosition("prod3", "account1", Decimal.fromDouble(3));
         positionSnapshot.add(position1);
         positionSnapshot.add(position2);
         positionSnapshot.add(position3);

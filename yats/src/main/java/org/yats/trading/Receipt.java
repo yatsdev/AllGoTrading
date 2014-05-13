@@ -66,7 +66,7 @@ public class Receipt {
     }
 
     public Decimal getPositionChange() {
-        return Decimal.createFromDouble(bookSide.toDirection()).multiply(currentTradedSize);
+        return Decimal.fromDouble(bookSide.toDirection()).multiply(currentTradedSize);
     }
 
 
