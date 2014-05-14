@@ -8,7 +8,7 @@ import org.yats.trading.OrderCancel;
 public class OrderCancelMsg {
 
     public String getTopic() {
-        return MarketDataMsg.class.getSimpleName()+"."+orderId;
+        return ""+orderId;
     }
 
 

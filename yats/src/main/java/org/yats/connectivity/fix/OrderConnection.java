@@ -21,7 +21,7 @@ public class OrderConnection implements ISendOrder {
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(OrderResponseCracker.class);
 
-
+    private static final String ROUTE = "RouteAGT";
 
     public synchronized void logon() {
         if (!initiatorStarted) {
@@ -91,25 +91,22 @@ public class OrderConnection implements ISendOrder {
     }
 
 
-    public OrderConnection(SessionSettings settings) throws Exception {
-
+    public OrderConnection(SessionSettings settings) throws Exception
+    {
         boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "true"));
-
         orderResponseCracker = new OrderResponseCracker();
-
         MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
         LogFactory logFactory = new ScreenLogFactory(true, true, true,
                 logHeartbeats);
         MessageFactory messageFactory = new DefaultMessageFactory();
-
         initiator = new SocketInitiator(orderResponseCracker, messageStoreFactory, settings, logFactory, messageFactory);
-
     }
 
     @Override
-    public void sendOrderNew(OrderNew _order)
+    public void sendOrderNew(OrderNew orderNew)
     {
-		NewOrderSingle fixOrder = createFixNewOrder(_order);
+        if(!isCorrectRoute(orderNew.getProductId())) return;
+		NewOrderSingle fixOrder = createFixNewOrder(orderNew);
         SessionID sessionId = initiator.getSessions().get(0);
         try {
             Session.sendToTarget(fixOrder, sessionId); // assumed to be threadsafe!
@@ -122,6 +119,7 @@ public class OrderConnection implements ISendOrder {
 	@Override
     public void sendOrderCancel(OrderCancel orderCancel)
     {
+        if(!isCorrectRoute(orderCancel.getProductId())) return;
         OrderCancelRequest fixOrderCancel = createFixCancelOrder(orderCancel);
 		SessionID sessionId = initiator.getSessions().get(0);
         try {
@@ -132,6 +130,15 @@ public class OrderConnection implements ISendOrder {
             sessionNotFound.printStackTrace();
             throw new RuntimeException(sessionNotFound.getMessage());
         }
+    }
+
+
+    private boolean isCorrectRoute(String productId) {
+        try {
+            Product p = productProvider.getProductForProductId(productId);
+            return p.isRoute(ROUTE);
+        } catch(Exceptions.ItemNotFoundException e) {}
+        return false;
     }
 
     private OrderCancelRequest createFixCancelOrder(OrderCancel orderCancel)
