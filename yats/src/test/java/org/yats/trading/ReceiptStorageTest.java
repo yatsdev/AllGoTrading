@@ -14,7 +14,7 @@ public class ReceiptStorageTest {
 //    @Test
 //    public void canProcessReceipts()
 //    {
-//        assert (storage.getNumberOfReceipts() == 4);
+//        assert (storage.getNumberOfReceipts() == 4);  working on this now, shouldn't be 5??You create 5 receipts below
 //        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 3);
 //        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
 //    }
