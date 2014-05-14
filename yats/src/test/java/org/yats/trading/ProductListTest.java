@@ -26,6 +26,14 @@ public class ProductListTest {
         assert (productSAP.getSymbol().compareTo("SAP")==0);
     }
 
+// appended route to all products with this:
+//    @Test
+//    public void canWriteProductList()
+//    {
+//        list.writeWithAppend("config/CFDProductListOut.csv", ",RouteAGT");
+//    }
+
+
 
     @BeforeMethod
     public void setUp() {
