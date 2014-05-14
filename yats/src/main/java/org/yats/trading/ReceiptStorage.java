@@ -7,7 +7,6 @@ import java.util.LinkedList;
 
 
 //todo: allow for multiple currencies. currently different currencies completely ignored
-//todo: all prices and sizes are in Decimals. need to be replaced by own classes, fixed decimal based, prices with currency
 //todo: to calculate profit in a currency other than the one trades happened the historic exchange rate needs to be known!
 //todo: since this is not feasible, profit has to be a list of profits in different currencies that is only converted at
 //todo: current exchange rate to target currency
