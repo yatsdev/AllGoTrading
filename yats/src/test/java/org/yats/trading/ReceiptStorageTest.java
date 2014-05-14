@@ -38,7 +38,7 @@ public class ReceiptStorageTest {
 //    @Test
 //    public void canSerializeAndParseItAgain() // CSV is only an example JSON, XML or XLS are fine too.
 //    {
-//        storage.toCSV();  //I still don't get this one too.. for me it should be storage.toCSV(),or,storage.toCSV(fileCSV.CSV) or something like that. Obviously you'll have to change the method signature in ReceiptStorage.java,too. I don't get why it should return a String, you save the whole storage to a file why should it return a string?  
+//        storage.toCSV();  //I still don't get this one too.. for me it should be storage.toCSV(),or,storage.toCSV(fileCSV.CSV) or something like that. Obviously you'll have to change the method signature in ReceiptStorage.java,too. I don't get why it should return a String, you save the whole storage to a file, why should it return a string?  
 //        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csv);
 //        newStorage.toCSV();
 //        assert(csv.compareTo(newCSV) == 0);
