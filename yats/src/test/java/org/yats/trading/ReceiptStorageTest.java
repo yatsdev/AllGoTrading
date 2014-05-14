@@ -38,7 +38,7 @@ public class ReceiptStorageTest {
 //    @Test
 //    public void canSerializeAndParseItAgain() // CSV is only an example JSON, XML or XLS are fine too.
 //    {
-//        String csv = storage.toCSV();
+//        String csv = storage.toCSV();  //I still don't get this one too.. for me it should be storage.toCSV(),or,storage.toCSV(fileCSV.CSV) or something like that.  
 //        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csv);
 //        String newCSV = newStorage.toCSV();
 //        assert(csv.compareTo(newCSV) == 0);
