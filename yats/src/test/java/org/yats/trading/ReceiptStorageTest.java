@@ -78,7 +78,7 @@ public class ReceiptStorageTest {
                   .withBookSide(BookSide.BID)
                 ;
         receipt2 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("2"))
+                .withOrderId(UniqueId.createFromString("2"))   //you will have two receipts with the same UniqueID this way..is this what you really wanted?
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
