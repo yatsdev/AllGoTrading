@@ -14,7 +14,7 @@ public class ReceiptStorageTest {
 //    @Test
 //    public void canProcessReceipts()
 //    {
-//        assert (storage.getNumberOfReceipts() == 4);
+//        assert (storage.getNumberOfReceipts() == 5);
 //        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 3);
 //        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
 //    }
@@ -75,6 +75,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
+                  .withBookSide(BookSide.BID)
                 ;
         receipt2 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
@@ -85,6 +86,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ONE)
+                  .withBookSide(BookSide.BID)
                 ;
         receipt3 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
@@ -95,6 +97,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(2))
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
+                  .withBookSide(BookSide.BID)
                 ;
         receipt4 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("4"))
@@ -105,6 +108,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(9))
                 .withPrice(Decimal.fromDouble(87))
                 .withResidualSize(Decimal.ZERO)
+                  .withBookSide(BookSide.BID)
                 ;
         receipt5 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("5"))
@@ -115,6 +119,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(-2))
                 .withPrice(Decimal.fromDouble(48))
                 .withResidualSize(Decimal.ZERO)
+                  .withBookSide(BookSide.ASK)
                 ;
 
 
