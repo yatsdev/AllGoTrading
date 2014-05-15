@@ -30,8 +30,20 @@ public class ProductAccountPosition {
         return new ProductAccountPosition(productId, internalAccount, size.add(other.size));
     }
 
-    String internalAccount;
-    String productId;
-    Decimal size;
+    private String internalAccount;
+    private String productId;
+    private Decimal size;
+
+    public void setInternalAccount(String internalAccount) {
+        this.internalAccount = internalAccount;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public void setSize(Decimal size) {
+        this.size = size;
+    }
 
 } // class
