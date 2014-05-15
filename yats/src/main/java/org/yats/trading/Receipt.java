@@ -162,6 +162,21 @@ public class Receipt {
     public void setTotalTradedSize(Decimal totalTradedSize) {
         this.totalTradedSize = totalTradedSize;
     }
+    
+      public Decimal getResidualSizeSigned() {
+
+        return  residualSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
+
+    public Decimal currentTradedSize() {
+
+        return  currentTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
+
+    public Decimal totalTradedSize() {
+
+        return  totalTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
 
 
     public Receipt withTimestamp(DateTime d) {
