@@ -23,8 +23,7 @@ public class ReceiptStorageTest {
     public void canCalculateCurrentProductPositionOverAllInternalAccounts()
     {
          int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt(); //Can't cast a decimal to int in your way 
-        assert (productPositionGlobal == +1 +1 +1 +9 -2 +10);
-    }
+        assert (productPositionGlobal == +1 +1 +1 +9 -2 +10); // productPositionGlobal is 10,but I can't pass this test
 
 //    @Test
 //    public void canCalculateProductPositionForInternalAccount()
