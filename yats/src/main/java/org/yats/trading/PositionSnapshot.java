@@ -5,7 +5,18 @@ import java.util.HashMap;
 public class PositionSnapshot {
 
     public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
-        throw new RuntimeException("not yet implemented!"+prod1+account1);
+       
+       System.out.println(positionMap.size());  // returns 1
+        String key= new String("1");             
+        System.out.println(positionMap.toString()); //returns {1,intAccount1=org.yats.trading.ProductAccountPosition@5ce65a89}
+        System.out.println(positionMap.get(key));   //returns null
+        System.out.println(positionMap.containsKey(key)); //returns false
+
+
+
+        ProductAccountPosition productAccountPosition=new ProductAccountPosition("","", Decimal.ONE);
+        return productAccountPosition;
+       
     }
 
     public void add(ProductAccountPosition p) {
