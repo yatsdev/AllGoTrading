@@ -44,13 +44,73 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public String toCSV() {
-        throw new RuntimeException("Not implemented yet.");
+       public String toCSV() {
+
+        BufferedWriter out = null;
+        try {
+            out = new BufferedWriter(new FileWriter("ReceiptStorage.csv"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        CSVWriter writer = new CSVWriter(out);
+
+        String[] toCSVfromReceipt = new String[0];
+
+        for (int i = 0; i < receiptList.size(); i++) {
+
+             toCSVfromReceipt = new String[]{receiptList.get(i).getTimestamp().toString(), receiptList.get(i).getOrderId().toString(), receiptList.get(i).getInternalAccount().toString(), receiptList.get(i).getExternalAccount().toString(), receiptList.get(i).getProductId().toString(), receiptList.get(i).getBookSide().toDirection() + "", receiptList.get(i).getResidualSize().toString(), receiptList.get(i).getCurrentTradedSize().toString(), receiptList.get(i).getTotalTradedSize().toString(), receiptList.get(i).getPrice().toString(), receiptList.get(i).getRejectReason().toString(), String.valueOf(receiptList.get(i).isEndState())}; //Attention to endstate
+            writer.writeNext(toCSVfromReceipt);
+        }
+
+        try {
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return toCSVfromReceipt[0].concat(toCSVfromReceipt[1]).concat(toCSVfromReceipt[2]).concat(toCSVfromReceipt[3]).concat(toCSVfromReceipt[4]).concat(toCSVfromReceipt[5]).concat(toCSVfromReceipt[6]).concat(toCSVfromReceipt[7]).concat(toCSVfromReceipt[8]).concat(toCSVfromReceipt[9]).concat(toCSVfromReceipt[10]).concat(toCSVfromReceipt[11]); //A string representation of the last Receipt of the Storage
     }
 
 
     public static ReceiptStorage createFromCSV(String csv) {
-        throw new RuntimeException("Not implemented yet.");
+
+
+        CSVReader reader = null;
+        try {
+            reader = new CSVReader(new FileReader(csv));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        String[] nextLine;
+        ReceiptStorage storage = new ReceiptStorage();
+        try {
+            nextLine = reader.readNext();
+
+            Receipt receiptFromCSV = new Receipt();
+            int numberOfReceipts = reader.readAll().size() + 1;
+
+            for (int i = 0; i < numberOfReceipts; i++) {
+                receiptFromCSV.setTimestamp(DateTime.parse(nextLine[0]));
+                receiptFromCSV.setOrderId(UniqueId.createFromString(nextLine[1]));
+                receiptFromCSV.setExternalAccount(nextLine[2]);
+                receiptFromCSV.setInternalAccount(nextLine[3]);
+                receiptFromCSV.setProductId(nextLine[4]);
+                receiptFromCSV.setBookSide(BookSide.fromDirection(Integer.parseInt(nextLine[5])));
+                receiptFromCSV.setResidualSize(Decimal.fromDouble(Double.parseDouble(nextLine[6]))); //Possible loss of precision?
+                receiptFromCSV.setCurrentTradedSize(Decimal.fromDouble(Double.parseDouble(nextLine[7])));
+                receiptFromCSV.setTotalTradedSize(Decimal.fromDouble(Double.parseDouble(nextLine[8])));
+                receiptFromCSV.setPrice(Decimal.fromDouble(Double.parseDouble(nextLine[9])));
+                receiptFromCSV.setRejectReason((nextLine[10]));
+                receiptFromCSV.setEndState(Boolean.valueOf(nextLine[11]));
+                storage.receiptList.add(receiptFromCSV);
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return storage;
     }
 
     public void setPositionSnapshot(PositionSnapshot positionSnapshot) {
