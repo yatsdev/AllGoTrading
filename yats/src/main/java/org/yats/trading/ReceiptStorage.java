@@ -36,17 +36,37 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         throw new RuntimeException("Not implemented yet.");
     }
 
-    public Decimal getPositionForProduct(String productId)
-    {
-        throw new RuntimeException("Not implemented yet.");
+     public Decimal getPositionForProduct(String productId) { 
+        Decimal PositionForProduct = Decimal.ZERO;
+        Receipt receipt;
+        for (int i = 0; i < receiptList.size(); i++) {
+
+            receipt = receiptList.get(i);
+            if (receipt.hasProductId(productId)) {
+                PositionForProduct = receipt.getCurrentTradedSize().add(PositionForProduct);
+            }
+        }
+        return PositionForProduct;
     }
 
     public int getNumberOfReceipts() {
-        throw new RuntimeException("Not implemented yet.");
+        int NumberOfReceipts = 0;
+        NumberOfReceipts = receiptList.size();
+        return NumberOfReceipts;
     }
-
+    
+    
     public int getNumberOfReceiptsForInternalAccount(String internalAccount) {
-        throw new RuntimeException("Not implemented yet.");
+
+        int NumberOfReceiptsForInternalAccount = 0;
+        Receipt receipt;
+        for (int i = 0; i < receiptList.size(); i++) {
+            receipt = receiptList.get(i);
+            if (receipt.getInternalAccount().compareTo(internalAccount) == 0) {
+                NumberOfReceiptsForInternalAccount = NumberOfReceiptsForInternalAccount + 1;
+            }
+        }
+        return NumberOfReceiptsForInternalAccount;
     }
 
        public String toCSV() {
