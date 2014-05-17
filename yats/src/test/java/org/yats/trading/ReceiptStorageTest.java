@@ -1,6 +1,7 @@
 package org.yats.trading;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 
@@ -22,16 +23,18 @@ public class ReceiptStorageTest {
     @Test
     public void canCalculateCurrentProductPositionOverAllInternalAccounts()
     {
-         int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt(); //Can't cast a decimal to int in your way 
-        assert (productPositionGlobal == +1 +1 +1 +9 -2 +10); // productPositionGlobal is 10,but I can't pass this test
-        assert (productPositionGlobal ==  +10) //if I change the above line to this it works, what shall I do?
-        
+        int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt();
+        assert (productPositionGlobal == (+1 +1 +1 +9 -2) );
+
+        // maybe your problems came from the minus sign in the receipt number 5 for total traded size and current traded size
+        // also, it might be better to have braces around the sum in the assert, like above now.
+
     }
 //    @Test
 //    public void canCalculateProductPositionForInternalAccount()
 //    {
 //        int productPositionAccount1 = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId());
-//        assert (productPositionAccount1 == +1 +1 +1 -2);
+//        assert (productPositionAccount1 == (+1 +1 +1 -2) );
 //        int productPositionAccount2 = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT2, product.getProductId());
 //        assert (productPositionAccount2 == 9);
 //    }
@@ -52,14 +55,14 @@ public class ReceiptStorageTest {
 //    {
 //        storage.setPositionSnapshot(positionSnapshot);
 //        int productPositionWithSnapshot = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId());
-//        assert (productPositionWithSnapshot == +1 +1 +1 -2 +10);
+//        assert (productPositionWithSnapshot == (+1 +1 +1 -2 +10) );
 //    }
 //
 //    @Test
 //    public void canCalculateProductProfitForInternalAccountWithSnapshot()
 //    {
 //        int profitWithSnapshot = (int)storage.getInternalAccountProfitForProduct(INTERNAL_ACCOUNT1, product.getProductId());
-//        assert (profitWithSnapshot == -2 -2 -2 -5);
+//        assert (profitWithSnapshot == (-2 -2 -2 -5) );
 //
 //    }
 
@@ -76,7 +79,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
-                  .withBookSide(BookSide.BID)
+                .withBookSide(BookSide.BID)
                 ;
         receipt2 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
@@ -87,7 +90,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ONE)
-                  .withBookSide(BookSide.BID)
+                .withBookSide(BookSide.BID)
                 ;
         receipt3 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
@@ -98,7 +101,7 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(2))
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
-                  .withBookSide(BookSide.BID)
+                .withBookSide(BookSide.BID)
                 ;
         receipt4 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("4"))
@@ -109,21 +112,19 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(9))
                 .withPrice(Decimal.fromDouble(87))
                 .withResidualSize(Decimal.ZERO)
-                  .withBookSide(BookSide.BID)
+                .withBookSide(BookSide.BID)
                 ;
         receipt5 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("5"))
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.fromDouble(-2))
-                .withTotalTradedSize(Decimal.fromDouble(-2))
+                .withCurrentTradedSize(Decimal.fromDouble(2))
+                .withTotalTradedSize(Decimal.fromDouble(2))
                 .withPrice(Decimal.fromDouble(48))
                 .withResidualSize(Decimal.ZERO)
-                  .withBookSide(BookSide.ASK)
+                .withBookSide(BookSide.ASK)
                 ;
-
-
 
         processReceipts();
         positionSnapshot = new PositionSnapshot();
