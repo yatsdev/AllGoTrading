@@ -7,7 +7,7 @@ import org.yats.trading.MarketData;
 public class MarketDataMsg {
 
     public String getTopic() {
-        return MarketDataMsg.class.getSimpleName()+"."+ productId;
+        return "" + productId;
     }
 
     public static MarketDataMsg createFrom(MarketData marketData) {
