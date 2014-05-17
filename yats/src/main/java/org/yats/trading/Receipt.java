@@ -224,6 +224,23 @@ public class Receipt {
         return this;
     }
 
+    public Decimal getResidualSizeSigned() {
+
+        return  residualSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
+
+    public Decimal currentTradedSize() {
+
+        return  currentTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
+
+    public Decimal totalTradedSize() {
+
+        return  totalTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
+    }
+
+
+
     public void setInternalAccount(String internalAccount) {
         this.internalAccount = internalAccount;
     }

@@ -46,6 +46,16 @@ public class OrderCancelMsg {
     public OrderCancelMsg() {
     }
 
+    public boolean isSameAs(OrderCancelMsg data) {
+
+        if(timestamp.compareTo(data.timestamp)!=0) return false;
+        if(orderId.compareTo(data.orderId)!=0) return false;
+        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
+        if(productId.compareTo(data.productId)!=0) return false;
+        if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
+        return true;
+    }
+
     public String timestamp;
     public String orderId;
     public String externalAccount;

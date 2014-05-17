@@ -1,6 +1,7 @@
 package org.yats.trading;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 
@@ -11,21 +12,22 @@ public class ReceiptStorageTest {
     private static String INTERNAL_ACCOUNT1 = "intAccount1";
     private static String INTERNAL_ACCOUNT2 = "intAccount2";
 
-//    @Test
-//    public void canProcessReceipts()
-//    {
-//        assert (storage.getNumberOfReceipts() == 4);
-//        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 3);
-//        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
-//    }
-//
-//    @Test
-//    public void canCalculateCurrentProductPositionOverAllInternalAccounts()
-//    {
-//        int productPositionGlobal = (int)storage.getPositionForProduct(product.getProductId());
-//        assert (productPositionGlobal == +1 +1 +1 +9 -2 +10);
-//    }
-//
+    @Test
+    public void canProcessReceipts()
+    {
+        assert (storage.getNumberOfReceipts() == 5);
+        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
+       assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
+    }
+
+    @Test
+    public void canCalculateCurrentProductPositionOverAllInternalAccounts()
+    {
+        int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt();
+        assert (productPositionGlobal == +1 +1 +1 +9 -2 +10); // productPositionGlobal is 10,but I can't pass this test
+        assert (productPositionGlobal ==  +10);  //if I change the above line to this it works, what shall I do?
+    }
+
 //    @Test
 //    public void canCalculateProductPositionForInternalAccount()
 //    {
@@ -75,7 +77,8 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
-                ;
+                .withBookSide(BookSide.BID)
+        ;
         receipt2 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
@@ -85,7 +88,8 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.ONE)
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ONE)
-                ;
+                .withBookSide(BookSide.BID)
+        ;
         receipt3 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("2"))
                 .withProductId(product.getProductId())
@@ -95,7 +99,8 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(2))
                 .withPrice(Decimal.fromDouble(50))
                 .withResidualSize(Decimal.ZERO)
-                ;
+                .withBookSide(BookSide.BID)
+        ;
         receipt4 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("4"))
                 .withProductId(product.getProductId())
@@ -105,7 +110,8 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(9))
                 .withPrice(Decimal.fromDouble(87))
                 .withResidualSize(Decimal.ZERO)
-                ;
+                .withBookSide(BookSide.BID)
+        ;
         receipt5 = Receipt.create()
                 .withOrderId(UniqueId.createFromString("5"))
                 .withProductId(product.getProductId())
@@ -115,7 +121,8 @@ public class ReceiptStorageTest {
                 .withTotalTradedSize(Decimal.fromDouble(-2))
                 .withPrice(Decimal.fromDouble(48))
                 .withResidualSize(Decimal.ZERO)
-                ;
+                .withBookSide(BookSide.ASK)
+        ;
 
 
 
