@@ -53,7 +53,7 @@ public class ReceiptStorageTest {
 //    }
 //
 //    @Test
-//    public void canCalculateProductPositionForInternalAccountWithSnapshot()
+//    public void canCalculateProductPositionForInternalAccountWithSnapshot()  //Can you give a little more colour to this one? What do you want to have? I guess to accomplish this one I'll have to fill the blank "public ProductAccountPosition getProductAccountPosition(String prod1, String account1)" in PositionSnapshot class, right? But in the following code we don't use it.. 
 //    {
 //        storage.setPositionSnapshot(positionSnapshot);
 //        int productPositionWithSnapshot = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId());
