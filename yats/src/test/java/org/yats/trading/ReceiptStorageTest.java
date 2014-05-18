@@ -15,30 +15,32 @@ public class ReceiptStorageTest {
     @Test
    public void canProcessReceipts()
    {
-//       assert (storage.getNumberOfReceipts() == 5);
-//       assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
-//       assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
+       assert (storage.getNumberOfReceipts() == 5);
+       assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
+       assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
     }// test passed
 
-    @Test
+@Test
     public void canCalculateCurrentProductPositionOverAllInternalAccounts()
     {
-//        int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt();
-//        assert (productPositionGlobal == (+1 +1 +1 +9 -2) );
+        int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt();
+        assert (productPositionGlobal == (+1 +1 +1 +9 -2) );
 
         // maybe your problems came from the minus sign in the receipt number 5 for total traded size and current traded size
         // also, it might be better to have braces around the sum in the assert, like above now.
+        // now works fine
 
-    }
-//    @Test
-//    public void canCalculateProductPositionForInternalAccount()
-//    {
-//        int productPositionAccount1 = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId());
-//        assert (productPositionAccount1 == (+1 +1 +1 -2) );
-//        int productPositionAccount2 = (int)storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT2, product.getProductId());
-//        assert (productPositionAccount2 == 9);
-//    }
-//
+    }//test passed
+
+    @Test
+    public void canCalculateProductPositionForInternalAccount() 
+    {
+        int productPositionAccount1 = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId()).toInt();
+        assert (productPositionAccount1 == +1 +1 +1 -2);
+        int productPositionAccount2 = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT2, product.getProductId()).toInt();
+        assert (productPositionAccount2 == 9);
+    }//test passed
+
 //    @Test
 //    public void canSerializeAndParseItAgain() // CSV is only an example JSON, XML or XLS are fine too.
 //    {
