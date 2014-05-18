@@ -26,9 +26,19 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public Decimal getInternalAccountPositionForProduct(String internalAccount, String productId)
-    {
-        throw new RuntimeException("Not implemented yet.");
+      public Decimal getInternalAccountPositionForProduct(String internalAccount, String productId) { 
+        Decimal AccountPositionForProduct = Decimal.ZERO;
+        Receipt receipt;
+        for (int i = 0; i < receiptList.size(); i++) {
+
+            receipt = receiptList.get(i);
+            if (receipt.getInternalAccount().compareTo(internalAccount) == 0 && receipt.hasProductId(productId)) {
+
+                AccountPositionForProduct = receipt.getCurrentTradedSize().add(AccountPositionForProduct);
+
+            }
+        }
+        return AccountPositionForProduct;
     }
 
     public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId)
