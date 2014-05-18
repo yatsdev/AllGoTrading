@@ -78,7 +78,7 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
 
-    public static ReceiptStorage createFromCSV(String csv) {
+     public static ReceiptStorage createFromCSV(String csv)  {
 
 
         CSVReader reader = null;
@@ -86,20 +86,18 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
             reader = new CSVReader(new FileReader(csv));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+
         }
         String[] nextLine;
         ReceiptStorage storage = new ReceiptStorage();
+
         try {
-            nextLine = reader.readNext();
-
-            Receipt receiptFromCSV = new Receipt();
-            int numberOfReceipts = reader.readAll().size() + 1;
-
-            for (int i = 0; i < numberOfReceipts; i++) {
+            while ((nextLine = reader.readNext()) != null) {
+                Receipt receiptFromCSV = new Receipt();
                 receiptFromCSV.setTimestamp(DateTime.parse(nextLine[0]));
                 receiptFromCSV.setOrderId(UniqueId.createFromString(nextLine[1]));
-                receiptFromCSV.setExternalAccount(nextLine[2]);
-                receiptFromCSV.setInternalAccount(nextLine[3]);
+                receiptFromCSV.setInternalAccount(nextLine[2]);
+                receiptFromCSV.setExternalAccount(nextLine[3]);
                 receiptFromCSV.setProductId(nextLine[4]);
                 receiptFromCSV.setBookSide(BookSide.fromDirection(Integer.parseInt(nextLine[5])));
                 receiptFromCSV.setResidualSize(Decimal.fromDouble(Double.parseDouble(nextLine[6]))); //Possible loss of precision?
@@ -114,8 +112,10 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
 
         } catch (IOException e) {
             e.printStackTrace();
+            
         }
         return storage;
+
     }
 
     public void setPositionSnapshot(PositionSnapshot positionSnapshot) {
