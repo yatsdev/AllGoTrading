@@ -144,7 +144,8 @@ public class ReceiptStorageTest {
         processReceipts();
         positionSnapshot = new PositionSnapshot();
         positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(10)));
-
+//        profitSnapshot = new ProfitSnapshot();
+//        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(-5)));
     }
 
     private void processReceipts() {
