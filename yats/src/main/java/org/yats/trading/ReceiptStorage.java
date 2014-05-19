@@ -108,7 +108,7 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
 
-     public static ReceiptStorage createFromCSV(String csv)  {
+      public static ReceiptStorage createFromCSV(String csv) {
 
 
         CSVReader reader = null;
@@ -130,10 +130,10 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
                 receiptFromCSV.setExternalAccount(nextLine[3]);
                 receiptFromCSV.setProductId(nextLine[4]);
                 receiptFromCSV.setBookSide(BookSide.fromDirection(Integer.parseInt(nextLine[5])));
-                receiptFromCSV.setResidualSize(Decimal.fromDouble(Double.parseDouble(nextLine[6]))); //Possible loss of precision?
-                receiptFromCSV.setCurrentTradedSize(Decimal.fromDouble(Double.parseDouble(nextLine[7])));
-                receiptFromCSV.setTotalTradedSize(Decimal.fromDouble(Double.parseDouble(nextLine[8])));
-                receiptFromCSV.setPrice(Decimal.fromDouble(Double.parseDouble(nextLine[9])));
+                receiptFromCSV.setResidualSize(new Decimal(nextLine[6]));//Now I read them as Strings
+                receiptFromCSV.setCurrentTradedSize(new Decimal(nextLine[7]));
+                receiptFromCSV.setTotalTradedSize(new Decimal(nextLine[8]));
+                receiptFromCSV.setPrice(new Decimal(nextLine[9]));
                 receiptFromCSV.setRejectReason((nextLine[10]));
                 receiptFromCSV.setEndState(Boolean.valueOf(nextLine[11]));
                 storage.receiptList.add(receiptFromCSV);
@@ -142,7 +142,7 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
 
         } catch (IOException e) {
             e.printStackTrace();
-            
+
         }
         return storage;
 
