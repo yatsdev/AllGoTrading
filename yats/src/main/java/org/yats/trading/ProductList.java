@@ -2,7 +2,10 @@ package org.yats.trading;
 
 import au.com.bytecode.opencsv.CSVReader;
 
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 
 public class ProductList implements IProvideProduct {
@@ -11,7 +14,6 @@ public class ProductList implements IProvideProduct {
     public Product getProductForProductId(String productId) {
         if(!list.containsKey(productId)) Exceptions.throwItemNotFoundException("productId not found: "+productId);
         return list.get(productId);
-
     }
 
     public Product findBySymbol(String symbol) {
@@ -35,14 +37,42 @@ public class ProductList implements IProvideProduct {
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
-                Product p = new Product(nextLine[0].trim(), nextLine[1].trim(), nextLine[2].trim());
+                Product p = new Product()
+                        .withProductId(checkForNull(nextLine[0].trim()))
+                        .withSymbol(checkForNull(nextLine[1].trim()))
+                        .withExchange(checkForNull(nextLine[2].trim()))
+                        .withBloombergId(checkForNull(nextLine[3].trim()))
+                        .withName(checkForNull(nextLine[4].trim()))
+                        .withRoute(checkForNull(nextLine[5].trim()))
+                        ;
                 add(p);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Exceptions.throwFileReadException(e.getMessage());
         }
     }
 
+    private String checkForNull(String text) {
+        if(text==null) Exceptions.throwFieldIsNullException("");
+        return text;
+    }
+
+    public void writeWithAppend(String path, String appendToEachLine)
+    {
+        try {
+            BufferedWriter out = new BufferedWriter(new FileWriter(path));
+            for(Product p : list.values()) {
+                out.write(p.toStringCSV());
+                out.write(appendToEachLine);
+                out.newLine();
+            }
+            out.close();
+        } catch (IOException e)
+        {
+            Exceptions.throwFileWriteException(e.getMessage());
+        }
+    }
 
     public void add(Product p) {
         list.put(p.getProductId(), p);

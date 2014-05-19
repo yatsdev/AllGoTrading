@@ -10,7 +10,7 @@ public class ReceiptMsg {
 
 
     public String getTopic() {
-        return MarketDataMsg.class.getSimpleName()+"."+orderId;
+        return ""+orderId;
     }
 
     public static ReceiptMsg createFromReceipt(Receipt r)

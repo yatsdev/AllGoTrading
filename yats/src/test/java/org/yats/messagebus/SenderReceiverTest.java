@@ -14,7 +14,7 @@ public class SenderReceiverTest {
 
     // can only be executed successfully if RabbitMQ server ip is set correctly
     private static String EXCHANGE = "exchangeSenderReceiverTest";
-    private static final String TOPIC_FOR_ALL_TEST_MarketDataMsg = MarketDataMsg.class.getSimpleName()+".#";
+    private static final String TOPIC_FOR_ALL_TEST_MarketDataMsg = "#";
     private static String SERVERIP = "127.0.0.1";
 
 

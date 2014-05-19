@@ -9,7 +9,7 @@ import org.yats.trading.OrderNew;
 public class OrderNewMsg {
 
     public String getTopic() {
-        return MarketDataMsg.class.getSimpleName()+"."+orderId;
+        return ""+orderId;
     }
 
 
