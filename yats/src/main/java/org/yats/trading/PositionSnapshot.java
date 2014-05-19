@@ -1,12 +1,21 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
+
 import java.util.HashMap;
 
 public class PositionSnapshot {
 
-     public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
+    //    LinkedList<ProductAccountPosition> positionList;
+    HashMap<String, ProductAccountPosition> positionMap;
 
-        ProductAccountPosition position = null;
+    public PositionSnapshot() {
+        positionMap = new HashMap<String, ProductAccountPosition>();
+    }
+
+    public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
+
+        ProductAccountPosition position = new ProductAccountPosition("","", Decimal.ZERO);
 
         String key = prod1 + "," + account1;
         if (positionMap.containsKey(key)) {
@@ -20,19 +29,12 @@ public class PositionSnapshot {
     public void add(ProductAccountPosition p) {
         ProductAccountPosition newPosition = p;
         String key = p.getKey();
-        if(positionMap.containsKey(key)) {
+        if (positionMap.containsKey(key)) {
             ProductAccountPosition oldPosition = positionMap.get(key);
-            newPosition=oldPosition.add(newPosition);
+            newPosition = oldPosition.add(newPosition);
         }
         positionMap.put(key, newPosition);
-   }
-
-    public PositionSnapshot() {
-        positionMap = new HashMap<String, ProductAccountPosition>();
     }
-
-    //    LinkedList<ProductAccountPosition> positionList;
-    HashMap<String, ProductAccountPosition> positionMap;
 
 
 } // class
