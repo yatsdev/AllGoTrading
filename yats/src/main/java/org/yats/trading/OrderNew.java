@@ -144,7 +144,8 @@ public class OrderNew extends OrderBase {
         limit = Decimal.ZERO;
     }
 
-   public boolean isSameAs(OrderNew data) {
+
+    public boolean isSameAs(OrderNew data) {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(externalAccount.compareTo(data.externalAccount)!=0) return false;
@@ -157,6 +158,7 @@ public class OrderNew extends OrderBase {
         return true;
     }
 
+
     private DateTime timestamp;
     private String externalAccount;
     private String internalAccount;
@@ -166,7 +168,6 @@ public class OrderNew extends OrderBase {
     private Decimal limit;
     private String productId;
 
-    
 
     private static class OrderNewNull extends OrderNew {
 

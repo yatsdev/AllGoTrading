@@ -8,7 +8,7 @@ import org.yats.trading.OrderCancel;
 public class OrderCancelMsg {
 
     public String getTopic() {
-        return ""+orderId;
+        return MarketDataMsg.class.getSimpleName()+"."+orderId;
     }
 
 
@@ -46,7 +46,7 @@ public class OrderCancelMsg {
     public OrderCancelMsg() {
     }
 
-   public boolean isSameAs(OrderCancelMsg data) {
+    public boolean isSameAs(OrderCancelMsg data) {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(orderId.compareTo(data.orderId)!=0) return false;
