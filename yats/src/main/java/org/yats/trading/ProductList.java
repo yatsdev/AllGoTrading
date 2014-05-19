@@ -1,6 +1,7 @@
 package org.yats.trading;
 
 import au.com.bytecode.opencsv.CSVReader;
+import org.yats.common.CommonExceptions;
 
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -12,7 +13,7 @@ public class ProductList implements IProvideProduct {
 
     @Override
     public Product getProductForProductId(String productId) {
-        if(!list.containsKey(productId)) Exceptions.throwItemNotFoundException("productId not found: "+productId);
+        if(!list.containsKey(productId)) TradingExceptions.throwItemNotFoundException("productId not found: " + productId);
         return list.get(productId);
     }
 
@@ -49,12 +50,12 @@ public class ProductList implements IProvideProduct {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Exceptions.throwFileReadException(e.getMessage());
+            CommonExceptions.throwFileReadException(e.getMessage());
         }
     }
 
     private String checkForNull(String text) {
-        if(text==null) Exceptions.throwFieldIsNullException("");
+        if(text==null) TradingExceptions.throwFieldIsNullException("");
         return text;
     }
 
@@ -70,7 +71,7 @@ public class ProductList implements IProvideProduct {
             out.close();
         } catch (IOException e)
         {
-            Exceptions.throwFileWriteException(e.getMessage());
+            CommonExceptions.throwFileWriteException(e.getMessage());
         }
     }
 

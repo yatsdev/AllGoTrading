@@ -1,5 +1,6 @@
 package org.yats.trading;
 
+import org.joda.time.format.ISODateTimeFormat;
 import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
@@ -59,6 +60,41 @@ public class Receipt {
                 ",rejectReason=" + rejectReason +
                 ",endState=" + endState +
                 '}';
+    }
+
+    public String toStringCSV() {
+        return ""
+                + timestamp +
+                "," + orderId +
+                "," + externalAccount +
+                "," + internalAccount +
+                "," + productId +
+                "," + bookSide.toDirection() +
+                "," + residualSize +
+                "," + currentTradedSize +
+                "," + totalTradedSize +
+                "," + price +
+                "," + rejectReason +
+                "," + endState
+                ;
+    }
+
+    public static Receipt fromStringCSV(String csv) {
+        String[] st = csv.split(",");
+        return new Receipt()
+                .withTimestamp(new DateTime(st[0],DateTimeZone.UTC))
+                .withOrderId(UniqueId.createFromString(st[1]))
+                .withExternalAccount(st[2])
+                .withInternalAccount(st[3])
+                .withProductId(st[4])
+                .withBookSide(BookSide.fromDirection(Integer.parseInt(st[5])))
+                .withResidualSize(new Decimal(st[6]))
+                .withCurrentTradedSize(new Decimal(st[7]))
+                .withTotalTradedSize(new Decimal(st[8]))
+                .withPrice(new Decimal(st[9]))
+                .withRejectReason(st[10])
+                .withEndState(Boolean.parseBoolean(st[11]))
+                ;
     }
 
     public boolean isForSameOrderAs(Receipt other) {
@@ -163,20 +199,6 @@ public class Receipt {
         this.totalTradedSize = totalTradedSize;
     }
     
-      public Decimal getResidualSizeSigned() {
-
-        return  residualSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
-
-    public Decimal currentTradedSize() {
-
-        return  currentTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
-
-    public Decimal totalTradedSize() {
-
-        return  totalTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
 
 
     public Receipt withTimestamp(DateTime d) {
@@ -255,7 +277,6 @@ public class Receipt {
     }
 
 
-
     public void setInternalAccount(String internalAccount) {
         this.internalAccount = internalAccount;
     }
@@ -295,6 +316,7 @@ public class Receipt {
     private Decimal price;
     private String rejectReason;
     private boolean endState;
+
 
     private static class ReceiptNULL extends Receipt {
         private ReceiptNULL() {

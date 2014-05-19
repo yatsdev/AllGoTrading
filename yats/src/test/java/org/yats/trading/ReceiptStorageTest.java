@@ -3,11 +3,13 @@ package org.yats.trading;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
+import org.yats.common.FileTool;
 import org.yats.common.UniqueId;
 
 
 public class ReceiptStorageTest {
 
+    public static String filename = "canSerializeToCSVFileAndParseAgain.csv";
     private static String INTERNAL_ACCOUNT1 = "intAccount1";
     private static String INTERNAL_ACCOUNT2 = "intAccount2";
     PositionSnapshot positionSnapshot;
@@ -58,15 +60,25 @@ public class ReceiptStorageTest {
     }
 
     @Test
-    public void canSerializeAndParseItAgain() // CSV is only an example JSON, XML or XLS are fine too.
+    public void canSerializeToCSVAndParseAgain()
     {
+        String csv = storage.toStringCSV();
+        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csv);
+        String newCSV = newStorage.toStringCSV();
+        assert (csv.compareTo(newCSV) == 0);
+        assert (newStorage.getNumberOfReceipts() == 5);
+        assert (newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
+    }
 
-        String csv = storage.toCSV();
-        System.out.println(csv);
-        ReceiptStorage newStorage = ReceiptStorage.createFromCSV("ReceiptStorage.csv");
-        String newCSV = newStorage.toCSV();
-        System.out.println(newCSV);
-
+    @Test
+    public void canSerializeToCSVFileAndParseAgain()
+    {
+        String csv = storage.toStringCSV();
+        FileTool.writeToTextFile(filename, csv, false);
+        String csvFromFile = FileTool.readFromTextFile(filename);
+        FileTool.deleteFile(filename);
+        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csvFromFile);
+        String newCSV = newStorage.toStringCSV();
         assert (csv.compareTo(newCSV) == 0);
         assert (newStorage.getNumberOfReceipts() == 5);
         assert (newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);

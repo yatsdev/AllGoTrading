@@ -1,13 +1,8 @@
 package org.yats.trading;
 
 
-import au.com.bytecode.opencsv.CSVReader;
-import au.com.bytecode.opencsv.CSVWriter;
-import org.joda.time.DateTime;
 import org.yats.common.Decimal;
-import org.yats.common.UniqueId;
 
-import java.io.*;
 import java.util.LinkedList;
 
 
@@ -17,6 +12,18 @@ import java.util.LinkedList;
 //todo: current exchange rate to target currency
 //todo: historic profits need to be available in their respective currencies and are converted at the current rates to target currency
 public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvideProfit {
+
+    public String toStringCSV() {
+        String lineSeparator = System.getProperty( "line.separator" );
+        StringBuffer b = new StringBuffer();
+        for (Receipt r : receiptList) {
+            String receiptString = r.toStringCSV();
+            b.append(receiptString);
+            b.append(lineSeparator);
+        }
+        return b.toString();
+    }
+
 
     LinkedList<Receipt> receiptList;
     // cumulated position changes from receipts
@@ -39,42 +46,51 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
 
     public static ReceiptStorage createFromCSV(String csv) {
 
-
-        CSVReader reader = null;
-        try {
-            reader = new CSVReader(new FileReader(csv));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-
-        }
-        String[] nextLine;
+        String lineSeparator = System.getProperty( "line.separator" );
+        String[] lines = csv.split(lineSeparator);
         ReceiptStorage storage = new ReceiptStorage();
-
-        try {
-            while ((nextLine = reader.readNext()) != null) {
-                Receipt receiptFromCSV = new Receipt();
-                receiptFromCSV.setTimestamp(DateTime.parse(nextLine[0]));
-                receiptFromCSV.setOrderId(UniqueId.createFromString(nextLine[1]));
-                receiptFromCSV.setInternalAccount(nextLine[2]);
-                receiptFromCSV.setExternalAccount(nextLine[3]);
-                receiptFromCSV.setProductId(nextLine[4]);
-                receiptFromCSV.setBookSide(BookSide.fromDirection(Integer.parseInt(nextLine[5])));
-                receiptFromCSV.setResidualSize(new Decimal(nextLine[6]));
-                receiptFromCSV.setCurrentTradedSize(new Decimal(nextLine[7]));
-                receiptFromCSV.setTotalTradedSize(new Decimal(nextLine[8]));
-                receiptFromCSV.setPrice(new Decimal(nextLine[9]));
-                receiptFromCSV.setRejectReason((nextLine[10]));
-                receiptFromCSV.setEndState(Boolean.valueOf(nextLine[11]));
-                storage.receiptList.add(receiptFromCSV);
-
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
+        for(int i = 0; i<lines.length; i++) {
+            String line = lines[i];
+            Receipt r = Receipt.fromStringCSV(line);
+            storage.onReceipt(r);
         }
         return storage;
-
+//
+//
+//        CSVReader reader = null;
+//        try {
+//            reader = new CSVReader(new FileReader(csv));
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//
+//        }
+//        String[] nextLine;
+//        ReceiptStorage storage = new ReceiptStorage();
+//
+//        try {
+//            while ((nextLine = reader.readNext()) != null) {
+//                Receipt receiptFromCSV = new Receipt();
+//                receiptFromCSV.setTimestamp(DateTime.parse(nextLine[0]));
+//                receiptFromCSV.setOrderId(UniqueId.createFromString(nextLine[1]));
+//                receiptFromCSV.setInternalAccount(nextLine[2]);
+//                receiptFromCSV.setExternalAccount(nextLine[3]);
+//                receiptFromCSV.setProductId(nextLine[4]);
+//                receiptFromCSV.setBookSide(BookSide.fromDirection(Integer.parseInt(nextLine[5])));
+//                receiptFromCSV.setResidualSize(new Decimal(nextLine[6]));
+//                receiptFromCSV.setCurrentTradedSize(new Decimal(nextLine[7]));
+//                receiptFromCSV.setTotalTradedSize(new Decimal(nextLine[8]));
+//                receiptFromCSV.setPrice(new Decimal(nextLine[9]));
+//                receiptFromCSV.setRejectReason((nextLine[10]));
+//                receiptFromCSV.setEndState(Boolean.valueOf(nextLine[11]));
+//                storage.receiptList.add(receiptFromCSV);
+//
+//            }
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//
+//        }
+//        return storage;
     }
 
     @Override
@@ -142,33 +158,6 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         return NumberOfReceiptsForInternalAccount;
     }
 
-    public String toCSV() {
-
-        BufferedWriter out = null;
-        try {
-            out = new BufferedWriter(new FileWriter("ReceiptStorage.csv"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        CSVWriter writer = new CSVWriter(out);
-
-        String[] toCSVfromReceipt = new String[0];
-
-        for (int i = 0; i < receiptList.size(); i++) {
-
-            toCSVfromReceipt = new String[]{receiptList.get(i).getTimestamp().toString(), receiptList.get(i).getOrderId().toString(), receiptList.get(i).getInternalAccount().toString(), receiptList.get(i).getExternalAccount().toString(), receiptList.get(i).getProductId().toString(), receiptList.get(i).getBookSide().toDirection() + "", receiptList.get(i).getResidualSize().toString(), receiptList.get(i).getCurrentTradedSize().toString(), receiptList.get(i).getTotalTradedSize().toString(), receiptList.get(i).getPrice().toString(), receiptList.get(i).getRejectReason().toString(), String.valueOf(receiptList.get(i).isEndState())};
-            writer.writeNext(toCSVfromReceipt);
-        }
-
-        try {
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return toCSVfromReceipt[0].concat(toCSVfromReceipt[1]).concat(toCSVfromReceipt[2]).concat(toCSVfromReceipt[3]).concat(toCSVfromReceipt[4]).concat(toCSVfromReceipt[5]).concat(toCSVfromReceipt[6]).concat(toCSVfromReceipt[7]).concat(toCSVfromReceipt[8]).concat(toCSVfromReceipt[9]).concat(toCSVfromReceipt[10]).concat(toCSVfromReceipt[11]); //A string representation of the last Receipt of the Storage
-    }
 
     public void setPositionSnapshot(PositionSnapshot positionSnapshot) {
         this.positionSnapshot = positionSnapshot;

@@ -137,7 +137,7 @@ public class OrderConnection implements ISendOrder {
         try {
             Product p = productProvider.getProductForProductId(productId);
             return p.isRoute(ROUTE);
-        } catch(Exceptions.ItemNotFoundException e) {}
+        } catch(TradingExceptions.ItemNotFoundException e) {}
         return false;
     }
 
