@@ -48,8 +48,8 @@ public class ReceiptStorageTest {
 //        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csv);
 //        String newCSV = newStorage.toCSV();
 //        assert(csv.compareTo(newCSV) == 0);
-//        assert(newStorage.getNumberOfReceipts()==4);
-//        assert(newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1)==3);
+//        assert(newStorage.getNumberOfReceipts()==5);
+//        assert(newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1)==4);
 //    }
 //
 //    @Test
