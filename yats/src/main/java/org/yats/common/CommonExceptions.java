@@ -1,13 +1,9 @@
-package org.yats.trading;
+package org.yats.common;
 
-public class Exceptions {
+public class CommonExceptions {
 
-
-    public static void throwItemNotFoundException(String msg) {
-        throw new ItemNotFoundException(msg);
-    }
-    public static void throwFieldIsNullException(String msg) {
-        throw new FieldIsNullException(msg);
+    public static void throwKeyNotFoundInConfigFile(String msg) {
+        throw new KeyNotFoundInConfigFile(msg);
     }
 
     public static void throwFileReadException(String message) {
@@ -18,13 +14,9 @@ public class Exceptions {
         throw new FileWriteException(message);
     }
 
-    public static class ItemNotFoundException extends RuntimeException {
-        public ItemNotFoundException(String msg) {
-            super(msg);
-        }
-    }
-    public static class FieldIsNullException extends RuntimeException {
-        public FieldIsNullException(String msg) {
+
+    public static class KeyNotFoundInConfigFile extends RuntimeException {
+        public KeyNotFoundInConfigFile(String msg) {
             super(msg);
         }
     }
@@ -40,4 +32,5 @@ public class Exceptions {
             super(msg);
         }
     }
+
 } // class

@@ -68,7 +68,7 @@ public class PropertiesReader implements IProvideProperties {
     @Override
     public String get(String _key)
     {
-        if(!exists(_key)) Exceptions.throwKeyNotFoundInConfigFile("Config file does not contain key: "+_key);
+        if(!exists(_key)) CommonExceptions.throwKeyNotFoundInConfigFile("Config file does not contain key: " + _key);
         return properties.getProperty(_key);
     }
 
