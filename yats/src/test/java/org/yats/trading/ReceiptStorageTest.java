@@ -78,7 +78,7 @@ public class ReceiptStorageTest {
         int productPositionWithSnapshot = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId()).toInt();
         System.out.println(productPositionWithSnapshot);
 
-//       assert (productPositionWithSnapshot ==  (+1 +1 +1 -2 +10)); //Doesn't work
+//       assert (productPositionWithSnapshot ==  (+1 +1 +1 -2 +10)); //Doesn't work.
     }
 
     @BeforeMethod
