@@ -4,8 +4,17 @@ import java.util.HashMap;
 
 public class PositionSnapshot {
 
-    public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
-        throw new RuntimeException("not yet implemented!"+prod1+account1);
+     public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
+
+        ProductAccountPosition position = null;
+
+        String key = prod1 + "," + account1;
+        if (positionMap.containsKey(key)) {
+            position = positionMap.get(key);
+
+        }
+
+        return position;
     }
 
     public void add(ProductAccountPosition p) {
