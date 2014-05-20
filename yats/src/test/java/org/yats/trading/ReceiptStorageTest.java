@@ -51,7 +51,7 @@ public class ReceiptStorageTest {
     }
 
     @Test
-    public void canCalculateProductPositionForInternalAccount() //test passed
+    public void canCalculateProductPositionForInternalAccount()
     {
         int productPositionAccount1 = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId()).toInt();
         assert (productPositionAccount1 == +1 + 1 + 1 - 2);
