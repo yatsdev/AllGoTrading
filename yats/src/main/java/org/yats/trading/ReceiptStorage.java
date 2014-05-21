@@ -115,8 +115,7 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
             }
         }
 
-//                System.out.println(positionSnapshot.getProductAccountPosition(internalAccount, productId));
-//        AccountPositionForProduct=positionSnapshot.getProductAccountPosition(internalAccount,productId).getSize().add(AccountPositionForProduct);//Adding the positionSnapshot, doesn't work. There's something i'm missing here
+        AccountPositionForProduct=positionSnapshot.getProductAccountPosition(positionRequest.getProductId(),positionRequest.getAccount()).getSize().add(AccountPositionForProduct);
 
         return AccountPositionForProduct;
     }
