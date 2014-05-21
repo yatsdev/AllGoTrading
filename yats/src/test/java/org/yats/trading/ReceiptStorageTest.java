@@ -53,9 +53,9 @@ public class ReceiptStorageTest {
     @Test
     public void canCalculateProductPositionForInternalAccount()
     {
-        int productPositionAccount1 = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId()).toInt();
+        int productPositionAccount1 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId())).toInt();
         assert (productPositionAccount1 == +1 + 1 + 1 - 2);
-        int productPositionAccount2 = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT2, product.getProductId()).toInt();
+        int productPositionAccount2 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT2, product.getProductId())).toInt();
         assert (productPositionAccount2 == 9);
     }
 
@@ -87,7 +87,7 @@ public class ReceiptStorageTest {
     @Test
     public void canCalculateProductPositionForInternalAccountWithSnapshot() {
         storage.setPositionSnapshot(positionSnapshot);
-        int productPositionWithSnapshot = storage.getInternalAccountPositionForProduct(INTERNAL_ACCOUNT1, product.getProductId()).toInt();
+        int productPositionWithSnapshot = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId())).toInt();
         System.out.println(productPositionWithSnapshot);
 
 //       assert (productPositionWithSnapshot ==  (+1 +1 +1 -2 +10)); //Doesn't work.

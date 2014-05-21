@@ -41,7 +41,8 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     Decimal getPositionForProduct(String productId)
     {
-        return positionProvider.getInternalAccountPositionForProduct(getInternalAccount(), productId);
+        PositionRequest p = new PositionRequest(getInternalAccount(), productId);
+        return positionProvider.getPosition(p);
     }
 
     Decimal getProfitForProduct(String productId)
