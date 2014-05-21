@@ -17,7 +17,6 @@ public class Position {
         this.size = size;
     }
 
-
     public Position add(Receipt receipt) {
         Decimal newSize = size.add(receipt.getCurrentTradedSizeSigned());
         return new Position(productId, newSize);
@@ -26,4 +25,7 @@ public class Position {
     String productId;
     Decimal size;
 
+    public boolean isSize(int _size) {
+        return (size.toInt() == _size);
+    }
 } // class
