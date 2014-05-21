@@ -10,17 +10,6 @@ import org.yats.common.UniqueId;
 public class ReceiptStorageTest {
 
     public static String filename = "canSerializeToCSVFileAndParseAgain.csv";
-    private static String INTERNAL_ACCOUNT1 = "intAccount1";
-    private static String INTERNAL_ACCOUNT2 = "intAccount2";
-    PositionSnapshot positionSnapshot;
-    ProfitSnapshot profitSnapshot;
-    ReceiptStorage storage;
-    Product product;
-    Receipt receipt1;
-    Receipt receipt2;
-    Receipt receipt3;
-    Receipt receipt4;
-    Receipt receipt5;
 
 
     //    @Test
@@ -31,43 +20,42 @@ public class ReceiptStorageTest {
 //
 //    }
 
-
     @Test
     public void canProcessReceipts() {
         assert (storage.getNumberOfReceipts() == 5);
-        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
-        assert (storage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT2) == 1);
     }
 
     @Test
     public void canCalculateCurrentProductPositionOverAllInternalAccounts() {
-        int productPositionGlobal = storage.getPositionForProduct(product.getProductId()).toInt();
-        assert (productPositionGlobal == (+1 + 1 + 1 + 9 - 2));
-
-        // maybe your problems came from the minus sign in the receipt number 5 for total traded size and current traded size
-        // also, it might be better to have braces around the sum in the assert, like above now.
-        // now works fine
-
+        Position p = storage.getPositionForProduct(product.getProductId());
+        assert (p.isSize(+1 + 1 + 1 + 9 - 2));
     }
 
     @Test
     public void canCalculateProductPositionForInternalAccount()
     {
-        int productPositionAccount1 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId())).getSize().toInt();
-        assert (productPositionAccount1 == +1 + 1 + 1 - 2);
-        int productPositionAccount2 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT2, product.getProductId())).getSize().toInt();
-        assert (productPositionAccount2 == 9);
+        Position positionAccount1 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId()));
+        assert (positionAccount1.isSize(+1 + 1 + 1 - 2));
+        Position positionAccount2 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT2, product.getProductId()));
+        assert (positionAccount2.isSize(9));
     }
 
     @Test
-    public void canSerializeToCSVAndParseAgain()
+    public void canCalculateProductPositionForInternalAccountWithSnapshot() {
+        storage.setPositionSnapshot(positionSnapshot);
+        Position productPositionWithSnapshot = storage.getPosition(positionRequest1);
+//        assert(productPositionWithSnapshot.isSize(+1 + 1 + 1 -2 +10));
+    }
+
+
+    @Test
+    public void canSerializeToCSVStringAndParseAgain()
     {
         String csv = storage.toStringCSV();
         ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csv);
         String newCSV = newStorage.toStringCSV();
         assert (csv.compareTo(newCSV) == 0);
         assert (newStorage.getNumberOfReceipts() == 5);
-        assert (newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
     }
 
     @Test
@@ -81,17 +69,8 @@ public class ReceiptStorageTest {
         String newCSV = newStorage.toStringCSV();
         assert (csv.compareTo(newCSV) == 0);
         assert (newStorage.getNumberOfReceipts() == 5);
-        assert (newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 4);
     }
 
-    @Test
-    public void canCalculateProductPositionForInternalAccountWithSnapshot() {
-        storage.setPositionSnapshot(positionSnapshot);
-        int productPositionWithSnapshot = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId())).getSize().toInt();
-        System.out.println(productPositionWithSnapshot);
-
-//       assert (productPositionWithSnapshot ==  (+1 +1 +1 -2 +10)); //Doesn't work.
-    }
 
     @BeforeMethod
     public void setUp() {
@@ -146,8 +125,8 @@ public class ReceiptStorageTest {
                 .withProductId(product.getProductId())
                 .withExternalAccount("1")
                 .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.fromDouble(-2))
-                .withTotalTradedSize(Decimal.fromDouble(-2))
+                .withCurrentTradedSize(Decimal.fromDouble(2))
+                .withTotalTradedSize(Decimal.fromDouble(2))
                 .withPrice(Decimal.fromDouble(48))
                 .withResidualSize(Decimal.ZERO)
                 .withBookSide(BookSide.ASK)
@@ -156,6 +135,8 @@ public class ReceiptStorageTest {
         processReceipts();
         positionSnapshot = new PositionSnapshot();
         positionSnapshot.add(new ProductAccountPosition(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(10)));
+
+        positionRequest1 = new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId());
 //        profitSnapshot = new ProfitSnapshot();
 //        profitSnapshot.add(new ProductAccountProfit(product.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(-5)));
     }
@@ -167,4 +148,18 @@ public class ReceiptStorageTest {
         storage.onReceipt(receipt4);
         storage.onReceipt(receipt5);
     }
+
+    private static String INTERNAL_ACCOUNT1 = "intAccount1";
+    private static String INTERNAL_ACCOUNT2 = "intAccount2";
+    PositionSnapshot positionSnapshot;
+    ProfitSnapshot profitSnapshot;
+    ReceiptStorage storage;
+    Product product;
+    Receipt receipt1;
+    Receipt receipt2;
+    Receipt receipt3;
+    Receipt receipt4;
+    Receipt receipt5;
+    PositionRequest positionRequest1;
+
 } // class
