@@ -6,7 +6,6 @@ import java.util.HashMap;
 
 public class PositionSnapshot {
 
-    //    LinkedList<ProductAccountPosition> positionList;
     HashMap<String, ProductAccountPosition> positionMap;
 
     public PositionSnapshot() {
