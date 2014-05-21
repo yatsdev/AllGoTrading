@@ -2,14 +2,15 @@ package org.yats.trading;
 
 import org.yats.common.Decimal;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionSnapshot {
 
-    HashMap<String, ProductAccountPosition> positionMap;
+    //    LinkedList<ProductAccountPosition> positionList;
+    ConcurrentHashMap<String, ProductAccountPosition> positionMap;
 
     public PositionSnapshot() {
-        positionMap = new HashMap<String, ProductAccountPosition>();
+        positionMap = new ConcurrentHashMap<String, ProductAccountPosition>();
     }
 
     public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {

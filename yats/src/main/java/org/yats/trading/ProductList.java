@@ -7,7 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductList implements IProvideProduct {
 
@@ -84,10 +84,10 @@ public class ProductList implements IProvideProduct {
     }
 
     public ProductList() {
-        list = new HashMap<String, Product>();
+        list = new ConcurrentHashMap<String, Product>();
     }
 
 
-    HashMap<String, Product> list;
+    ConcurrentHashMap<String, Product> list;
 
 } // class
