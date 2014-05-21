@@ -101,24 +101,14 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public Decimal getPosition(PositionRequest positionRequest) {
-        Decimal AccountPositionForProduct = Decimal.ZERO;
-        Receipt receipt;
-        for (int i = 0; i < receiptList.size(); i++) {
-
-            receipt = receiptList.get(i);
-            if (receipt.getInternalAccount().compareTo(positionRequest.getAccount()) == 0
-                    && receipt.hasProductId(positionRequest.getProductId())) {
-
-                AccountPositionForProduct = receipt.getCurrentTradedSize().add(AccountPositionForProduct);
-
+    public Position getPosition(PositionRequest positionRequest) {
+        Position position = new Position(positionRequest.getProductId(), Decimal.ZERO);
+        for (Receipt receipt : receiptList) {
+            if(positionRequest.isForReceipt(receipt)) {
+                position = position.add(receipt);
             }
         }
-
-//                System.out.println(positionSnapshot.getProductAccountPosition(internalAccount, productId));
-//        AccountPositionForProduct=positionSnapshot.getProductAccountPosition(internalAccount,productId).getSize().add(AccountPositionForProduct);//Adding the positionSnapshot, doesn't work. There's something i'm missing here
-
-        return AccountPositionForProduct;
+        return position;
     }
 
     public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
