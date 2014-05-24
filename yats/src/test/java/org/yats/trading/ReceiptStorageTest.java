@@ -28,14 +28,14 @@ public class ReceiptStorageTest {
     @Test
     public void canCalculateCurrentProductPositionOverAllInternalAccounts() {
         Position p = storage.getPositionForProduct(product.getProductId());
-        assert (p.isSize(+1 + 1 + 1 + 9 - 2));
+        assert (p.isSize(+1 +1 +1 +9 -2));
     }
 
     @Test
     public void canCalculateProductPositionForInternalAccount()
     {
         Position positionAccount1 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId()));
-        assert (positionAccount1.isSize(+1 + 1 + 1 - 2));
+        assert (positionAccount1.isSize(+1 +1 +1 -2));
         Position positionAccount2 = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT2, product.getProductId()));
         assert (positionAccount2.isSize(9));
     }
