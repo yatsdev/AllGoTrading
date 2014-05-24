@@ -103,12 +103,12 @@ public class MarketData
 
 
 
-    DateTime timestamp;
-    String productId;
-    Decimal bid;
-    Decimal ask;
-    Decimal bidSize;
-    Decimal askSize;
+    private DateTime timestamp;
+    private String productId;
+    private Decimal bid;
+    private Decimal ask;
+    private Decimal bidSize;
+    private Decimal askSize;
 
 
 
