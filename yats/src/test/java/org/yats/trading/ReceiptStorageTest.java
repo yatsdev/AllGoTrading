@@ -85,6 +85,36 @@ public class ReceiptStorageTest {
     }
 
     @Test
+    public void canSerializeToCSVFileAndParseAgainWithABigDecimalPrice()
+    {
+        Receipt receiptBidDecimal = Receipt.create()
+                .withOrderId(UniqueId.createFromString("6"))
+                .withProductId(product.getProductId())
+                .withExternalAccount("1")
+                .withInternalAccount(INTERNAL_ACCOUNT1)
+                .withCurrentTradedSize(Decimal.ONE)
+                .withTotalTradedSize(Decimal.ONE)
+                .withPrice(new Decimal("1.572690342360756259580991313234512"))
+                .withResidualSize(Decimal.ZERO)
+                .withBookSide(BookSide.BID);
+        storage.onReceipt(receiptBidDecimal);
+
+        String csv = storage.toStringCSV();
+        FileTool.writeToTextFile(filename, csv, false);
+        String csvFromFile = FileTool.readFromTextFile(filename);
+        FileTool.deleteFile(filename);
+        ReceiptStorage newStorage = ReceiptStorage.createFromCSV(csvFromFile);
+        String newCSV = newStorage.toStringCSV();
+        assert (csv.compareTo(newCSV) == 0);
+        assert (newStorage.getNumberOfReceipts() == 6);
+        assert (newStorage.getNumberOfReceiptsForInternalAccount(INTERNAL_ACCOUNT1) == 5);
+        assert (newStorage.receiptList.get(5).getPrice().isEqualTo(new Decimal("1.572690342360756259580991313234512")));
+
+    }
+
+
+
+    @Test
     public void canCalculateProductPositionForInternalAccountWithSnapshot() {
         storage.setPositionSnapshot(positionSnapshot);
         int productPositionWithSnapshot = storage.getPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId())).toInt();
