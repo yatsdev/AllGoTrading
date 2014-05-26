@@ -24,7 +24,6 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         return b.toString();
     }
 
-
     public ReceiptStorage() {
 
         receiptList = new LinkedList<Receipt>();
