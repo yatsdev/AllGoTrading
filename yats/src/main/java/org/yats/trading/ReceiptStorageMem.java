@@ -4,7 +4,12 @@ import org.yats.common.Decimal;
 
 import java.util.LinkedList;
 
-public class ReceiptStorageMem implements IConsumeReceipt, IProvidePosition, IProvideProfit {
+public class ReceiptStorageMem implements IConsumeReceipt {
+
+    @Override
+    public void onReceipt(Receipt receipt) {
+        receiptList.add(receipt);
+    }
 
     public String toStringCSV() {
         String lineSeparator = System.getProperty( "line.separator" );
@@ -30,48 +35,13 @@ public class ReceiptStorageMem implements IConsumeReceipt, IProvidePosition, IPr
         return storage;
     }
 
-    @Override
-    public void onReceipt(Receipt receipt) {
-        if (receipt.isRejection()) return;
-        receiptList.add(receipt);
-    }
-
-
-    public AccountPosition getAccountPosition(PositionRequest positionRequest) {
-        AccountPosition position = new AccountPosition(positionRequest.getProductId(), Decimal.ZERO, positionRequest.getAccount());
-        for (Receipt receipt : receiptList) {
-            if(positionRequest.isForReceipt(receipt)) {
-                position = position.add(receipt);
-            }
-        }
-        return position;
-    }
-
-    public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
-
-        throw new RuntimeException("Not implemented yet.");
-
-    }
-
-    public Position getPositionForProduct(String productId) {
-        Position p = new Position(productId, Decimal.ZERO);
-        for (Receipt receipt : receiptList) {
-            if (receipt.hasProductId(productId)) {
-                p = p.add(receipt);
-            }
-        }
-        return p;
-    }
-
     public int getNumberOfReceipts() {
         return receiptList.size();
     }
 
-
     public ReceiptStorageMem() {
         receiptList = new LinkedList<Receipt>();
     }
-
 
     private LinkedList<Receipt> receiptList;
 

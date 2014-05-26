@@ -5,7 +5,7 @@ import org.yats.common.Decimal;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PositionServer implements IConsumeReceipt, IProvidePosition {
+public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
 
     public PositionServer() {
         numberOfReceipts = 0;
@@ -20,6 +20,11 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
         AccountPosition positionChange
                 = new AccountPosition(receipt.getProductId(), receipt.getPositionChange(), receipt.getInternalAccount());
         positionSnapshot.add(positionChange);
+    }
+
+    @Override
+    public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
+        return Decimal.ZERO;
     }
 
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {

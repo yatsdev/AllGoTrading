@@ -6,8 +6,9 @@ import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
+import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
-import org.yats.trading.ReceiptStorage;
+import org.yats.trading.ReceiptStorageCSV;
 
 import java.io.IOException;
 
@@ -33,18 +34,20 @@ public class QuotingMainMonolith {
         priceFeed.setProductProvider(products);
 
         QuotingStrategy strategy = new QuotingStrategy();
-        ReceiptStorage receiptStorage = new ReceiptStorage();
+        ReceiptStorageCSV receiptStorage = new ReceiptStorageCSV();
+        PositionServer positionServer = new PositionServer();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.addReceiptConsumer(receiptStorage);
+        strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(products);
         priceFeed.logon();
 
         strategy.setPriceProvider(strategyRunner);
-        strategy.setPositionProvider(receiptStorage);
-        strategy.setProfitProvider(receiptStorage);
+        strategy.setPositionProvider(positionServer);
+        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
 

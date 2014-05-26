@@ -3,8 +3,10 @@ package org.yats.trader.examples;
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.GenericConnection;
 import org.yats.trader.StrategyRunner;
+import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 import org.yats.trading.ReceiptStorage;
+import org.yats.trading.ReceiptStorageCSV;
 
 import java.io.IOException;
 
@@ -36,17 +38,17 @@ public class QuotingMain {
         GenericConnection priceAndOrderConnection = new GenericConnection();
 
         QuotingStrategy strategy = new QuotingStrategy();
-        ReceiptStorage receiptStorage = new ReceiptStorage();
+        PositionServer positionServer = new PositionServer();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addStrategy(strategy);
-        strategyRunner.addReceiptConsumer(receiptStorage);
+        strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(products);
 
         strategy.setPriceProvider(strategyRunner);
-        strategy.setPositionProvider(receiptStorage);
-        strategy.setProfitProvider(receiptStorage);
+        strategy.setPositionProvider(positionServer);
+        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
 
