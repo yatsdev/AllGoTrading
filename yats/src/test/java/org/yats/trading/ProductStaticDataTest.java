@@ -31,7 +31,7 @@ public class ProductStaticDataTest {
         TP.setPrice(Decimal.fromDouble(83));//http://www.analystratings.net/stocks/NYSE/WMT/
         TP.setTPDateTime(DateTime.parse("2012-05-16"));//http://www.analystratings.net/stocks/NYSE/WMT/
         TPVector.add(TP);
-       productStaticData.setTP(TPVector);
+        productStaticData.setTP(TPVector);
 
         assert(!(productStaticData.getTP()==null));
         assert(productStaticData.isHasDerivatives()==true);
