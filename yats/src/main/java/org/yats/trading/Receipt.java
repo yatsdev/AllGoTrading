@@ -1,10 +1,9 @@
 package org.yats.trading;
 
-import org.joda.time.format.ISODateTimeFormat;
-import org.yats.common.Decimal;
-import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.yats.common.Decimal;
+import org.yats.common.UniqueId;
 
 
 
@@ -153,6 +152,11 @@ public class Receipt {
 
     public Decimal getCurrentTradedSize() {
         return currentTradedSize;
+    }
+
+    public Decimal getCurrentTradedSizeSigned() {
+
+        return currentTradedSize.multiply(bookSide.toDecimal());
     }
 
     public void setCurrentTradedSize(Decimal currentTradedSize) {

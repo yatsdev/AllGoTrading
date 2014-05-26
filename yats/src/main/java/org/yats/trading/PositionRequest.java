@@ -17,4 +17,16 @@ public class PositionRequest {
 
     private String account;
     private String productId;
+
+    public boolean isSameAccountAs(Receipt receipt) {
+        return account.compareTo(receipt.getInternalAccount()) == 0;
+    }
+
+    public boolean isSameProductIdAs(Receipt receipt) {
+        return productId.compareTo(receipt.getProductId()) == 0;
+    }
+
+    public boolean isForReceipt(Receipt receipt) {
+        return isSameAccountAs(receipt) && isSameProductIdAs(receipt);
+    }
 }

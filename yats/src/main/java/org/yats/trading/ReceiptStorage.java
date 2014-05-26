@@ -97,27 +97,19 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     public void onReceipt(Receipt receipt) {
         if (receipt.isRejection()) return;
         receiptList.add(receipt);
+        numberOfReceipts++;
         ProductAccountPosition positionChange = new ProductAccountPosition(receipt.getProductId(), receipt.getInternalAccount(), receipt.getPositionChange());
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public Decimal getPosition(PositionRequest positionRequest) {
-        Decimal AccountPositionForProduct = Decimal.ZERO;
-        Receipt receipt;
-        for (int i = 0; i < receiptList.size(); i++) {
-
-            receipt = receiptList.get(i);
-            if (receipt.getInternalAccount().compareTo(positionRequest.getAccount()) == 0
-                    && receipt.hasProductId(positionRequest.getProductId())) {
-
-                AccountPositionForProduct = receipt.getCurrentTradedSize().add(AccountPositionForProduct);
-
+    public Position getPosition(PositionRequest positionRequest) {
+        Position position = new Position(positionRequest.getProductId(), Decimal.ZERO);
+        for (Receipt receipt : receiptList) {
+            if(positionRequest.isForReceipt(receipt)) {
+                position = position.add(receipt);
             }
         }
-
-        AccountPositionForProduct=positionSnapshot.getProductAccountPosition(positionRequest.getProductId(),positionRequest.getAccount()).getSize().add(AccountPositionForProduct);
-
-        return AccountPositionForProduct;
+        return position;
     }
 
     public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
@@ -126,37 +118,32 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
 
     }
 
-    public Decimal getPositionForProduct(String productId) {
-        Decimal PositionForProduct = Decimal.ZERO;
-        Receipt receipt;
-        for (int i = 0; i < receiptList.size(); i++) {
-
-            receipt = receiptList.get(i);
+    public Position getPositionForProduct(String productId) {
+        Position p = new Position(productId, Decimal.ZERO);
+        for (Receipt receipt : receiptList) {
             if (receipt.hasProductId(productId)) {
-                PositionForProduct = receipt.getCurrentTradedSize().add(PositionForProduct);
+                p = p.add(receipt);
             }
         }
-        return PositionForProduct;
+        return p;
     }
 
     public int getNumberOfReceipts() {
-        int NumberOfReceipts = 0;
-        NumberOfReceipts = receiptList.size();
-        return NumberOfReceipts;
+        return numberOfReceipts;
     }
 
-    public int getNumberOfReceiptsForInternalAccount(String internalAccount) {
-
-        int NumberOfReceiptsForInternalAccount = 0;
-        Receipt receipt;
-        for (int i = 0; i < receiptList.size(); i++) {
-            receipt = receiptList.get(i);
-            if (receipt.getInternalAccount().compareTo(internalAccount) == 0) {
-                NumberOfReceiptsForInternalAccount = NumberOfReceiptsForInternalAccount + 1;
-            }
-        }
-        return NumberOfReceiptsForInternalAccount;
-    }
+//    public int getNumberOfReceiptsForInternalAccount(String internalAccount) {
+//
+//        int NumberOfReceiptsForInternalAccount = 0;
+//        Receipt receipt;
+//        for (int i = 0; i < receiptList.size(); i++) {
+//            receipt = receiptList.get(i);
+//            if (receipt.getInternalAccount().compareTo(internalAccount) == 0) {
+//                NumberOfReceiptsForInternalAccount = NumberOfReceiptsForInternalAccount + 1;
+//            }
+//        }
+//        return NumberOfReceiptsForInternalAccount;
+//    }
 
 
     public void setPositionSnapshot(PositionSnapshot positionSnapshot) {
@@ -166,6 +153,8 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     public void setProfitSnapshot(ProfitSnapshot profitSnapshot) {
         this.profitSnapshot = profitSnapshot;
     }
+
+    private int numberOfReceipts = 0;
 
 
 } // class

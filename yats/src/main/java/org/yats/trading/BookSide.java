@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
+
 public abstract class BookSide {
 
     public static BookSide NULL = new BookSideNULL();
@@ -7,6 +9,11 @@ public abstract class BookSide {
     public static Ask ASK = new Ask();
 
     public abstract int toDirection();
+
+    public Decimal toDecimal() {
+        return Decimal.fromDouble(toDirection());
+    }
+
     public static BookSide fromDirection(int direction) {
         return direction < 0 ? ASK : BID;
     }
