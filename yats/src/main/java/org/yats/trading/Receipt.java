@@ -16,6 +16,12 @@ public class Receipt {
         return rejectReason.length() > 0;
     }
 
+    boolean isTrade()
+    {
+        return !currentTradedSize.isEqualTo(Decimal.ZERO);
+    }
+
+
 //    public OrderCancel createCancelOrder()
 //    {
 //        return OrderCancel.create()

@@ -25,16 +25,6 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
 
-    LinkedList<Receipt> receiptList;
-    // cumulated position changes from receipts
-    private PositionSnapshot positionSnapshotFromReceipts;
-    // snapshot of positions so far. for example end of day positions.
-    private PositionSnapshot positionSnapshot;
-    // snapshot of profits from receipts
-    private ProfitSnapshot profitSnapshotFromReceipts;
-    // snapshot of profits from receipts not included. e.g. end of day
-    private ProfitSnapshot profitSnapshot;
-
     public ReceiptStorage() {
 
         receiptList = new LinkedList<Receipt>();
@@ -98,12 +88,13 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
         if (receipt.isRejection()) return;
         receiptList.add(receipt);
         numberOfReceipts++;
-        ProductAccountPosition positionChange = new ProductAccountPosition(receipt.getProductId(), receipt.getInternalAccount(), receipt.getPositionChange());
+        AccountPosition positionChange = new AccountPosition(receipt.getProductId(), receipt.getPositionChange(), receipt.getInternalAccount());
         positionSnapshotFromReceipts.add(positionChange);
     }
 
-    public Position getPosition(PositionRequest positionRequest) {
-        Position position = new Position(positionRequest.getProductId(), Decimal.ZERO);
+
+    public AccountPosition getAccountPosition(PositionRequest positionRequest) {
+        AccountPosition position = new AccountPosition(positionRequest.getProductId(), Decimal.ZERO, positionRequest.getAccount());
         for (Receipt receipt : receiptList) {
             if(positionRequest.isForReceipt(receipt)) {
                 position = position.add(receipt);
@@ -155,6 +146,17 @@ public class ReceiptStorage implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
     private int numberOfReceipts = 0;
+
+    private LinkedList<Receipt> receiptList;
+    // cumulated position changes from receipts
+    private PositionSnapshot positionSnapshotFromReceipts;
+    // snapshot of positions so far. for example end of day positions.
+    private PositionSnapshot positionSnapshot;
+    // snapshot of profits from receipts
+    private ProfitSnapshot profitSnapshotFromReceipts;
+    // snapshot of profits from receipts not included. e.g. end of day
+    private ProfitSnapshot profitSnapshot;
+
 
 
 } // class
