@@ -4,7 +4,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,16 +56,16 @@ public class PositionSnapshotTest {
     @BeforeMethod
     public void setUp() {
         PositionSnapshot positionSnapshotTemp = new PositionSnapshot();
-        position1 = new AccountPosition(productId1, Decimal.fromDouble(1), account1);
-        position2 = new AccountPosition(productId2, Decimal.fromDouble(2), account1);
-        position3 = new AccountPosition(productId3, Decimal.fromDouble(3), account1);
+        position1 = new AccountPosition(productId1, account1, Decimal.fromDouble(1));
+        position2 = new AccountPosition(productId2, account1, Decimal.fromDouble(2));
+        position3 = new AccountPosition(productId3, account1, Decimal.fromDouble(3));
         positionSnapshotTemp.add(position1);
         positionSnapshotTemp.add(position2);
         positionSnapshotTemp.add(position3);
         positionSnapshot = PositionSnapshot.fromStringCSV(positionSnapshotTemp.toStringCSV());
         PositionSnapshot positionSnapshot2Temp = new PositionSnapshot();
-        position4 = new AccountPosition(productId3, Decimal.fromDouble(3), account2);
-        position5 = new AccountPosition(productId3, Decimal.fromDouble(3), account2);
+        position4 = new AccountPosition(productId3, account2, Decimal.fromDouble(3));
+        position5 = new AccountPosition(productId3, account2, Decimal.fromDouble(3));
         positionSnapshot2Temp.add(position4);
         positionSnapshot2Temp.add(position5);
         positionSnapshot2 = PositionSnapshot.fromStringCSV(positionSnapshot2Temp.toStringCSV());

@@ -23,7 +23,7 @@ public class Receipt {
 
 
     public AccountPosition toAccountPosition() {
-        return new AccountPosition(getProductId(), getPositionChange(), getInternalAccount());
+        return new AccountPosition(getProductId(), getInternalAccount(), getPositionChange());
     }
 
 

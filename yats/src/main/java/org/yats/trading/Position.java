@@ -28,4 +28,14 @@ public class Position {
     public boolean isSize(int _size) {
         return (size.toInt() == _size);
     }
+
+    public boolean isSameAs(Position other) {
+        if(productId.compareTo(other.productId)!=0) return false;
+        if(!size.isEqualTo(other.size)) return false;
+        return true;
+    }
+
+    public String toStringCSV() {
+        return new StringBuilder().append(productId).append(",").append(size.toString()).toString();
+    }
 } // class

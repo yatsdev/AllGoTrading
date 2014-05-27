@@ -96,7 +96,7 @@ public class PositionServerTest {
 
         processReceipts();
         positionSnapshot = new PositionSnapshot();
-        AccountPosition p = new AccountPosition(product1.getProductId(), Decimal.fromDouble(10), INTERNAL_ACCOUNT1);
+        AccountPosition p = new AccountPosition(product1.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
         positionSnapshot.add(p);
         positionRequest1 = new PositionRequest(INTERNAL_ACCOUNT1, product1.getProductId());
     }
