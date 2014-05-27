@@ -1,6 +1,7 @@
 package org.yats.trading;
 
 import org.yats.common.Decimal;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,14 +18,13 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         if (receipt.isRejection()) return;
         if (!receipt.isTrade()) return;
         numberOfReceipts++;
-        AccountPosition positionChange
-                = new AccountPosition(receipt.getProductId(), receipt.getPositionChange(), receipt.getInternalAccount());
+        AccountPosition positionChange = receipt.toAccountPosition();
         positionSnapshot.add(positionChange);
     }
 
     @Override
     public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
-        return Decimal.ZERO;
+        throw new NotImplementedException();
     }
 
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {

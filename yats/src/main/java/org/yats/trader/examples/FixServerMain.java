@@ -88,6 +88,7 @@ public class FixServerMain {
             q.go();
         } catch (RuntimeException r)
         {
+            r.printStackTrace();
             System.exit(-1);
         }
         System.exit(0);

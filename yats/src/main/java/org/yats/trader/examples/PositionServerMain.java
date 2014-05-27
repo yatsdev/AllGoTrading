@@ -5,14 +5,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-public class ReceiptStorageMain {
+public class PositionServerMain {
+
 
     final Logger log = LoggerFactory.getLogger(ReceiptStorageMain.class);
 
     public void go() throws InterruptedException, IOException
     {
-        log.info("Starting ReceiptStorageMain...");
-        ReceiptStorageLogic storage = new ReceiptStorageLogic();
+        log.info("Starting PositionServerMain...");
+        PositionServerLogic positionServerLogic = new PositionServerLogic();
 
         Thread.sleep(2000);
 
@@ -25,15 +26,15 @@ public class ReceiptStorageMain {
 
         Thread.sleep(1000);
 
-        log.info("ReceiptStorageMain done.");
+        log.info("PositionServerMain done.");
         System.exit(0);
     }
 
-    public ReceiptStorageMain() {
+    public PositionServerMain() {
     }
 
     public static void main(String args[]) throws Exception {
-        ReceiptStorageMain q = new ReceiptStorageMain();
+        PositionServerMain q = new PositionServerMain();
 
         try {
             q.go();
@@ -46,4 +47,4 @@ public class ReceiptStorageMain {
 
     }
 
-}
+} // class

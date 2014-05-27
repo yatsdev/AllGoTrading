@@ -22,24 +22,14 @@ public class Receipt {
     }
 
 
-//    public OrderCancel createCancelOrder()
-//    {
-//        return OrderCancel.create()
-//                .withProductId(productId)
-//                .withBookSide(bookSide)
-//                .withExternalAccount(externalAccount)
-//                .withOrderId(orderId)
-//                ;
-//    }
+    public AccountPosition toAccountPosition() {
+        return new AccountPosition(getProductId(), getPositionChange(), getInternalAccount());
+    }
+
 
     public boolean isForOrder(OrderNew order) {
         return orderId.isSameAs(order.getOrderId());
     }
-
-//    public boolean isForSameProductAs(Receipt other)
-//    {
-//        return other.hasProductId(productId);
-//    }
 
     public boolean isForProduct(Product p) {
         return p.hasProductId(productId);
@@ -109,11 +99,6 @@ public class Receipt {
     public Decimal getPositionChange() {
         return Decimal.fromDouble(bookSide.toDirection()).multiply(currentTradedSize);
     }
-
-
-//    public boolean isNewOrModifiedUnfilledOrderInMarket() {
-//        return !endState && (residualSize>0) && (totalTradedSize==0);
-//    }
 
     public String getProductId()
     {

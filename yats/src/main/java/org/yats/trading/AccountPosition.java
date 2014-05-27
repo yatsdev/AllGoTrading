@@ -4,6 +4,7 @@ import org.yats.common.Decimal;
 
 public class AccountPosition extends Position {
 
+
     public String getInternalAccount() {
         return internalAccount;
     }
@@ -25,6 +26,7 @@ public class AccountPosition extends Position {
         super(productId, size);
         this.internalAccount = internalAccount;
     }
+
 
 
     private String internalAccount;

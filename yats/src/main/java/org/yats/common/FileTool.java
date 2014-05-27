@@ -4,6 +4,10 @@ import java.io.*;
 
 public class FileTool {
 
+    public static String getLineSeparator() {
+        return System.getProperty("line.separator");
+    }
+
     public static void writeToTextFile(String filename, String stringToWrite, boolean append) {
         BufferedWriter out = null;
         try {
