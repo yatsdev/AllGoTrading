@@ -4,6 +4,9 @@ import org.yats.common.Decimal;
 
 public class Position {
 
+    private String productId;
+    private Decimal size;
+
     public String getProductId() {
         return productId;
     }
@@ -22,8 +25,7 @@ public class Position {
         return new Position(productId, newSize);
     }
 
-    String productId;
-    Decimal size;
+    
 
     public boolean isSize(int _size) {
         return (size.toInt() == _size);
