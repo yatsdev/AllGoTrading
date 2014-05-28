@@ -88,30 +88,31 @@ public class FixServerLogic extends StrategyBase implements IAmCalledBack {
         super();
         shuttingDown=false;
 
-        marketDataMsgSender = new Sender<MarketDataMsg>(Config.EXCHANGE_NAME_FOR_MARKET_DATA_DEFAULT, Config.SERVER_IP_DEFAULT);
+        Config config = Config.DEFAULT;
+        marketDataMsgSender = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
         marketDataMsgSender.init();
 
-        receiptSender = new Sender<ReceiptMsg>(Config.EXCHANGE_NAME_FOR_RECEIPTS_DEFAULT, Config.SERVER_IP_DEFAULT);
+        receiptSender = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
         receiptSender.init();
 
         receiverSubscription = new BufferingReceiver<SubscriptionMsg>(SubscriptionMsg.class,
-                Config.EXCHANGE_NAME_FOR_SUBSCRIPTIONS_DEFAULT,
-                Config.TOPIC_FOR_SUBSCRIPTIONS_DEFAULT,
-                Config.SERVER_IP_DEFAULT);
+                config.getExchangeSubscription(),
+                config.getTopicSubscriptions(),
+                config.getServerIP());
         receiverSubscription.setObserver(this);
         receiverSubscription.start();
 
         receiverOrderNew = new BufferingReceiver<OrderNewMsg>(OrderNewMsg.class,
-                Config.EXCHANGE_NAME_FOR_ORDERNEW_DEFAULT,
+                config.getExchangeOrderNew(),
                 "#",
-                Config.SERVER_IP_DEFAULT);
+                config.getServerIP());
         receiverOrderNew.setObserver(this);
         receiverOrderNew.start();
 
         receiverOrderCancel = new BufferingReceiver<OrderCancelMsg>(OrderCancelMsg.class,
-                Config.EXCHANGE_NAME_FOR_ORDERCANCEL_DEFAULT,
+                config.getExchangeOrderCancel(),
                 "#",
-                Config.SERVER_IP_DEFAULT);
+                config.getServerIP());
         receiverOrderCancel.setObserver(this);
         receiverOrderCancel.start();
 

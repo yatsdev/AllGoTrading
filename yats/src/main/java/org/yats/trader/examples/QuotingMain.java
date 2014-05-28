@@ -2,11 +2,10 @@ package org.yats.trader.examples;
 
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.GenericConnection;
+import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
-import org.yats.trading.ReceiptStorage;
-import org.yats.trading.ReceiptStorageCSV;
 
 import java.io.IOException;
 
@@ -39,6 +38,9 @@ public class QuotingMain {
 
         QuotingStrategy strategy = new QuotingStrategy();
         PositionServer positionServer = new PositionServer();
+        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        positionServerLogic.setPositionServer(positionServer);
+        positionServerLogic.startSnapshotListener();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceAndOrderConnection);
@@ -74,6 +76,8 @@ public class QuotingMain {
         PropertiesReader config = PropertiesReader.createFromConfigFile("config/QuotingMain.properties");
 //        PropertiesReader config = PropertiesReader.create();
         strategy.setConfig(config);
+
+        positionServerLogic.requestPositionSnapshotFromPositionServer();
 
         Thread.sleep(2000);
 

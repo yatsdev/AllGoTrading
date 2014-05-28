@@ -21,10 +21,11 @@ public class ReceiptStorageLogic implements IAmCalledBack{
 
     public ReceiptStorageLogic() {
         storage = new ReceiptStorageCSV();
+        Config config = Config.DEFAULT;
         receiverReceipt = new BufferingReceiver<ReceiptMsg>(ReceiptMsg.class,
-                Config.EXCHANGE_NAME_FOR_RECEIPTS_DEFAULT,
+                config.getExchangeReceipts(),
                 "#",
-                Config.SERVER_IP_DEFAULT);
+                config.getServerIP());
         receiverReceipt.setObserver(this);
         receiverReceipt.start();
     }

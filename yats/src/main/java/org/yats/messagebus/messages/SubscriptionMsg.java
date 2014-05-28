@@ -9,7 +9,7 @@ public class SubscriptionMsg {
                 '}';
     }
 
-    public static SubscriptionMsg createFromProductId(String pid)
+    public static SubscriptionMsg fromProductId(String pid)
     {
         SubscriptionMsg m = new SubscriptionMsg();
         m.productId = pid;

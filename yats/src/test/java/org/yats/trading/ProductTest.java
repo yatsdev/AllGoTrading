@@ -1,11 +1,11 @@
 package org.yats.trading;
 
-/**
- * Created
- * Date: 5/26/2014
- * Time: 10:25 PM
- */
+
 public class ProductTest {
-    final static Product PRODUCT1 = new Product("product1", "sym1", "exch1");
+    public final static Product PRODUCT1 = new Product("product1", "sym1", "exch1");
+    public final static Product PRODUCT2 = new Product("product2", "sym2", "exch2");
+    public final static Product PRODUCT3 = new Product("product3", "sym3", "exch3");
+    public final static String ACCOUNT1 = new String("account1");
+    public final static String ACCOUNT2 = new String("account2");
 
 }

@@ -4,6 +4,14 @@ import org.yats.trading.PositionSnapshot;
 
 public class PositionSnapshotMsg {
 
+    @Override
+    public String toString() {
+        String out = data.replace("\n","|");
+        return "PositionSnapshotMsg{" +
+                "data='" + out + '\'' +
+                '}';
+    }
+
     public String getTopic() {
         return "positionSnapshotMsg";
     }

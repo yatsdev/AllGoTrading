@@ -9,6 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionSnapshot {
 
+
+
     public boolean isSameAs(PositionSnapshot positionSnapshot) {
         if(positionMap.size()!=positionSnapshot.positionMap.size()) return false;
         for(AccountPosition a : positionMap.values()) {
@@ -75,4 +77,7 @@ public class PositionSnapshot {
 
     private ConcurrentHashMap<String, AccountPosition> positionMap;
 
+    public int size() {
+        return positionMap.size();
+    }
 } // class

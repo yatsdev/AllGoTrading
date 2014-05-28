@@ -15,10 +15,7 @@ import org.yats.trading.PositionSnapshot;
 public class SenderReceiverTest {
 
     // can only be executed successfully if RabbitMQ server ip is set correctly
-    private static String EXCHANGE_MARKETDATA = "exchangeSenderReceiverTest_MarketData";
-    private static String EXCHANGE_POSITIONSNAPSHOT = "exchangeSenderReceiverTest_POSITIONSNAPSHOT";
-    private static final String CATCH_ALL_TOPIC = "#";
-    private static String SERVERIP = "127.0.0.1";
+//    private static final String CATCH_ALL_TOPIC = "#";
 
 
     @Test
@@ -49,18 +46,26 @@ public class SenderReceiverTest {
 
     @BeforeMethod
     public void setUp() {
-        senderMarketData = new Sender<MarketDataMsg>(EXCHANGE_MARKETDATA,SERVERIP);
+        Config config = Config.DEFAULT_FOR_TESTS;
+        senderMarketData = new Sender<MarketDataMsg>(config.getExchangeMarketData(),config.getServerIP());
         senderMarketData.init();
-        receiverMarketData = new Receiver<MarketDataMsg>(MarketDataMsg.class, EXCHANGE_MARKETDATA,
-                CATCH_ALL_TOPIC, SERVERIP);
+        receiverMarketData = new Receiver<MarketDataMsg>(
+                MarketDataMsg.class,
+                config.getExchangeMarketData(),
+                config.getTopicCatchAll(),
+                config.getServerIP());
         data = new MarketData(new DateTime(DateTimeZone.UTC), "test", Decimal.fromDouble(11),
                 Decimal.fromDouble(12), Decimal.fromDouble(20), Decimal.fromDouble(30) );
         dataMsg = MarketDataMsg.createFrom(data);
 
-        senderPositionSnapshot = new Sender<PositionSnapshotMsg>(EXCHANGE_POSITIONSNAPSHOT,SERVERIP);
+        senderPositionSnapshot = new Sender<PositionSnapshotMsg>(config.getExchangePositionSnapshot(),config.getServerIP());
         senderPositionSnapshot.init();
-        receiverPositionSnapshot = new Receiver<PositionSnapshotMsg>(PositionSnapshotMsg.class, EXCHANGE_POSITIONSNAPSHOT,
-                CATCH_ALL_TOPIC, SERVERIP);
+        receiverPositionSnapshot = new Receiver<PositionSnapshotMsg>(
+                PositionSnapshotMsg.class,
+                config.getExchangePositionSnapshot(),
+                config.getTopicCatchAll(),
+                config.getServerIP()
+        );
         positionSnapshot = new PositionSnapshot();
         positionSnapshot.add(new AccountPosition("product1", "account1", Decimal.fromDouble(11)));
         positionSnapshot.add(new AccountPosition("product2", "account1", Decimal.fromDouble(12)));

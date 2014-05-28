@@ -43,12 +43,30 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         return numberOfReceipts;
     }
 
+    public int getNumberOfPositions() {
+        return positionSnapshot.size();
+    }
 
     public void addPositionSnapshot(PositionSnapshot newPositionSnapshot) {
           positionSnapshot.add(newPositionSnapshot);
     }
 
+    public PositionSnapshot getPositionSnapshot() {
+        return positionSnapshot;
+    }
+
     private int numberOfReceipts;
     private PositionSnapshot positionSnapshot;
 
+    public boolean isEmpty() {
+        return positionSnapshot.size()==0;
+    }
+
+    public void setPositionSnapshot(PositionSnapshot positionSnapshot) {
+        this.positionSnapshot = positionSnapshot;
+    }
+
+    public void clearPositions() {
+        positionSnapshot = new PositionSnapshot();
+    }
 }
