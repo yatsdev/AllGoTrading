@@ -27,7 +27,7 @@ public class ProductAccountProfit {
         return new ProductAccountProfit(productId, internalAccount, profit.add(other.profit));
     }
 
-    String productId;
-    String internalAccount;
-    Decimal profit;
+    private String productId;
+    private String internalAccount;
+    private Decimal profit;
 } // class
