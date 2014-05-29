@@ -63,6 +63,7 @@ public class PositionSnapshot {
         //   System.out.println(positionMap.values()); holds three AccountPosition objects [org.yats.trading.AccountPosition@61dd025, org.yats.trading.AccountPosition@124c278f, org.yats.trading.AccountPosition@15b204a1]
         //   System.out.println(positionSnapshot.positionMap.values()); holds the account position that I add in the test (positionSnapshot.add(positionSnapshot2);) and is [org.yats.trading.AccountPosition@61dd025]
         // But in order to "sum" positionMap and positionSnapshot.positionMap I should retrive positionSnapshot.positionMap keys. How can I do that?
+        // can I add new attributes to this class or change other methods' signatures/bodies (apart for where I read throw new NotImplementedException(); like in this method's body)?
         
         throw new NotImplementedException();
     }
