@@ -1,10 +1,13 @@
 package org.yats.trader;
 
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
+
+
 
 
     @Override
@@ -15,6 +18,14 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     @Override
     public abstract void onReceipt(Receipt receipt);
+
+    public String getConfig(String key) {
+        return config.get(key);
+    }
+
+    public void setConfig(IProvideProperties config) {
+        this.config = config;
+    }
 
     public abstract void init();
 
@@ -103,5 +114,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     private final UniqueId consumerId;
 
+    private IProvideProperties config;
 
 }

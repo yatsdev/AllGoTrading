@@ -15,7 +15,7 @@ public class FileTool {
             out.write(stringToWrite);
             out.close();
         } catch (IOException e) {
-            CommonExceptions.throwFileWriteException(e.getMessage());
+            throw new CommonExceptions.FileWriteException(e.getMessage());
         }
     }
 
@@ -32,9 +32,8 @@ public class FileTool {
             reader.close();
             return fileData.toString();
         } catch (IOException e) {
-            CommonExceptions.throwFileReadException(e.getMessage());
+            throw new CommonExceptions.FileReadException(e.getMessage());
         }
-        return fileData.toString();
     }
 
     public static void deleteFile(String filename) {

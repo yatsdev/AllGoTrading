@@ -13,7 +13,7 @@ public class ProductList implements IProvideProduct {
 
     @Override
     public Product getProductForProductId(String productId) {
-        if(!list.containsKey(productId)) TradingExceptions.throwItemNotFoundException("productId not found: " + productId);
+        if(!list.containsKey(productId)) throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
         return list.get(productId);
     }
 
@@ -50,12 +50,12 @@ public class ProductList implements IProvideProduct {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            CommonExceptions.throwFileReadException(e.getMessage());
+            throw new CommonExceptions.FileReadException(e.getMessage());
         }
     }
 
     private String checkForNull(String text) {
-        if(text==null) TradingExceptions.throwFieldIsNullException("");
+        if(text==null) throw new TradingExceptions.FieldIsNullException("");
         return text;
     }
 
@@ -71,7 +71,7 @@ public class ProductList implements IProvideProduct {
             out.close();
         } catch (IOException e)
         {
-            CommonExceptions.throwFileWriteException(e.getMessage());
+            throw new CommonExceptions.FileWriteException(e.getMessage());
         }
     }
 

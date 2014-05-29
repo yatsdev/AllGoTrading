@@ -44,7 +44,7 @@ public class AccountPosition extends Position {
 
     public static AccountPosition fromStringCSV(String csv) {
         String[] fieldStrings = csv.split(",");
-        if(fieldStrings.length!=3) CommonExceptions.throwFieldNotFoundException("found length=" + fieldStrings.length);
+        if(fieldStrings.length!=3) throw new CommonExceptions.FieldNotFoundException("found length=" + fieldStrings.length);
         return new AccountPosition(fieldStrings[0],fieldStrings[1],new Decimal(fieldStrings[2]));
     }
 
