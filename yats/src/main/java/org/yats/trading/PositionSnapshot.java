@@ -62,7 +62,7 @@ public class PositionSnapshot {
         //I think to begin to understand...
         //   System.out.println(positionMap.values()); holds three AccountPosition objects [org.yats.trading.AccountPosition@61dd025, org.yats.trading.AccountPosition@124c278f, org.yats.trading.AccountPosition@15b204a1]
         //   System.out.println(positionSnapshot.positionMap.values()); holds the account position that I add in the test (positionSnapshot.add(positionSnapshot2);) and is [org.yats.trading.AccountPosition@61dd025]
-        
+        // But in order to "sum" positionMap and positionSnapshot.positionMap I should retrive positionSnapshot.positionMap keys. How can I do that?
         
         throw new NotImplementedException();
     }
