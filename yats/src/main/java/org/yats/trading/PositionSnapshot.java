@@ -53,8 +53,22 @@ public class PositionSnapshot {
         return new Position("pid", Decimal.ZERO);
     }
 
-    public List<AccountPosition> getAllPositionsForOneAccount(String account) {
-        return new ArrayList<AccountPosition>();
+       public List<AccountPosition> getAllPositionsForOneAccount(String account) {
+
+        Collection<AccountPosition> newPosition;
+        newPosition = positionMap.values();
+
+        ArrayList<AccountPosition> arrayList= new ArrayList<AccountPosition>();
+
+        for (int i=0;i<newPosition.size();i++) {
+            AccountPosition p = newPosition.iterator().next();
+            if(p.getInternalAccount().compareTo(account)==0) {
+                arrayList.add(p);
+            }
+        }
+
+
+        return arrayList;
     }
 
     public void add(PositionSnapshot positionSnapshot) {
