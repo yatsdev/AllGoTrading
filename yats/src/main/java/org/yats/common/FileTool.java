@@ -4,6 +4,10 @@ import java.io.*;
 
 public class FileTool {
 
+    public static String getLineSeparator() {
+        return System.getProperty("line.separator");
+    }
+
     public static void writeToTextFile(String filename, String stringToWrite, boolean append) {
         BufferedWriter out = null;
         try {
@@ -11,7 +15,7 @@ public class FileTool {
             out.write(stringToWrite);
             out.close();
         } catch (IOException e) {
-            CommonExceptions.throwFileWriteException(e.getMessage());
+            throw new CommonExceptions.FileWriteException(e.getMessage());
         }
     }
 
@@ -28,9 +32,8 @@ public class FileTool {
             reader.close();
             return fileData.toString();
         } catch (IOException e) {
-            CommonExceptions.throwFileReadException(e.getMessage());
+            throw new CommonExceptions.FileReadException(e.getMessage());
         }
-        return fileData.toString();
     }
 
     public static void deleteFile(String filename) {
@@ -38,4 +41,8 @@ public class FileTool {
         f.delete();
     }
 
+    public static boolean exists(String userSpecificFIXFilename) {
+        File f = new File(userSpecificFIXFilename);
+        return f.exists();
+    }
 }

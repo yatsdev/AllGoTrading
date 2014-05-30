@@ -2,9 +2,10 @@ package org.yats.trader.examples;
 
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.GenericConnection;
+import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
+import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
-import org.yats.trading.ReceiptStorage;
 
 import java.io.IOException;
 
@@ -36,17 +37,20 @@ public class QuotingMain {
         GenericConnection priceAndOrderConnection = new GenericConnection();
 
         QuotingStrategy strategy = new QuotingStrategy();
-        ReceiptStorage receiptStorage = new ReceiptStorage();
+        PositionServer positionServer = new PositionServer();
+        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        positionServerLogic.setPositionServer(positionServer);
+        positionServerLogic.startSnapshotListener();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addStrategy(strategy);
-        strategyRunner.addReceiptConsumer(receiptStorage);
+        strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(products);
 
         strategy.setPriceProvider(strategyRunner);
-        strategy.setPositionProvider(receiptStorage);
-        strategy.setProfitProvider(receiptStorage);
+        strategy.setPositionProvider(positionServer);
+        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
 
@@ -72,6 +76,8 @@ public class QuotingMain {
         PropertiesReader config = PropertiesReader.createFromConfigFile("config/QuotingMain.properties");
 //        PropertiesReader config = PropertiesReader.create();
         strategy.setConfig(config);
+
+        positionServerLogic.requestPositionSnapshotFromPositionServer();
 
         Thread.sleep(2000);
 

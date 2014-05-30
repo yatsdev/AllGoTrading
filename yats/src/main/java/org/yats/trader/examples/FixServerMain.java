@@ -2,6 +2,7 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
@@ -45,7 +46,11 @@ public class FixServerMain {
         strategy.setProductProvider(products);
 
 //        OrderConnection orderConnection = OrderConnection.create();
-        OrderConnection orderConnection = OrderConnection.createFromConfigFile("config/configOrder.cfg");
+        String username = System.getProperty("user.name").replace(" ","");
+        String userSpecificFIXFilename ="config/configOrder_"+username+".cfg";
+        String configFIXFilename = FileTool.exists(userSpecificFIXFilename)
+                ? userSpecificFIXFilename : "config/configOrder.cfg";
+        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXFilename);
         orderConnection.setProductProvider(products);
         orderConnection.logon();
 
@@ -88,6 +93,7 @@ public class FixServerMain {
             q.go();
         } catch (RuntimeException r)
         {
+            r.printStackTrace();
             System.exit(-1);
         }
         System.exit(0);

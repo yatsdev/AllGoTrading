@@ -3,7 +3,6 @@ package org.yats.trader.examples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
-import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
@@ -49,9 +48,9 @@ public class QuotingStrategy extends StrategyBase {
     @Override
     public void init()
     {
-        setExternalAccount(config.get("externalAccount"));
+        setExternalAccount(getConfig("externalAccount"));
         setInternalAccount("quoting1");
-        tradeProductId = config.get("tradeProductId");
+        tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
     }
 
@@ -61,12 +60,6 @@ public class QuotingStrategy extends StrategyBase {
         shuttingDown=true;
         if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
     }
-
-    public void setConfig(IProvideProperties config) {
-        this.config = config;
-    }
-
-
 
     private void handleMarketDataBidSide(MarketData marketData) {
 
@@ -134,9 +127,7 @@ public class QuotingStrategy extends StrategyBase {
 
     private Decimal position;
     private boolean shuttingDown;
-
     private String tradeProductId;
-    IProvideProperties config;
     private OrderNew lastBidOrder;
     private MarketData previousMarketData;
     private boolean receivedOrderReceiptBidSide;

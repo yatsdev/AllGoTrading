@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProfitSnapshot {
 
-    public ProductAccountPosition getProductAccountPosition(String prod1, String account1) {
+    public AccountPosition getProductAccountPosition(String prod1, String account1) {
         throw new RuntimeException("not yet implemented!");
     }
 

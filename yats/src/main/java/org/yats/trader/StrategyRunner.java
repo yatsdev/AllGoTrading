@@ -144,7 +144,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
                             = getConsumersOfProductId(newData.getProductId());
                     for(IConsumeMarketData md : marketDataConsumers.values()) { md.onMarketData(newData); }
                 }
-                 //todo: receipts should only be passed to trader that sent the corresponding order
+                 //todo: receipts should only be passed to the strategy that sent the corresponding order
                 while(receiptQueue.size()>0){
                     Receipt r = receiptQueue.take();
                     for(IConsumeReceipt c : receiptConsumers) { c.onReceipt(r); }

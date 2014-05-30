@@ -21,8 +21,9 @@ public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCall
     @Override
     public void subscribe(String productId, IConsumeMarketData consumer) {
         setMarketDataConsumer(consumer);
-        SubscriptionMsg m = SubscriptionMsg.createFromProductId(productId);
-        senderSubscription.publish(Config.TOPIC_FOR_SUBSCRIPTIONS_DEFAULT, m);
+        SubscriptionMsg m = SubscriptionMsg.fromProductId(productId);
+        Config config = Config.DEFAULT;
+        senderSubscription.publish(config.getTopicSubscriptions(), m);
         log.debug("Published "+m);
     }
 
@@ -71,22 +72,23 @@ public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCall
     public GenericConnection() {
         marketDataConsumer=new MarketDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
-        senderSubscription = new Sender<SubscriptionMsg>(Config.EXCHANGE_NAME_FOR_SUBSCRIPTIONS_DEFAULT, Config.SERVER_IP_DEFAULT);
-        senderOrderNew = new Sender<OrderNewMsg>(Config.EXCHANGE_NAME_FOR_ORDERNEW_DEFAULT, Config.SERVER_IP_DEFAULT);
-        senderOrderCancel = new Sender<OrderCancelMsg>(Config.EXCHANGE_NAME_FOR_ORDERCANCEL_DEFAULT, Config.SERVER_IP_DEFAULT);
+        Config config = Config.DEFAULT;
+        senderSubscription = new Sender<SubscriptionMsg>(config.getExchangeSubscription(), config.getServerIP());
+        senderOrderNew = new Sender<OrderNewMsg>(config.getExchangeOrderNew(), config.getServerIP());
+        senderOrderCancel = new Sender<OrderCancelMsg>(config.getExchangeOrderCancel(), config.getServerIP());
         receiverMarketdata = new BufferingReceiver<MarketDataMsg>(
                 MarketDataMsg.class,
-                Config.EXCHANGE_NAME_FOR_MARKET_DATA_DEFAULT,
+                config.getExchangeMarketData(),
                 "#",
-                Config.SERVER_IP_DEFAULT);
+                config.getServerIP());
         receiverMarketdata.setObserver(this);
         receiverMarketdata.start();
 
         receiverReceipt = new BufferingReceiver<ReceiptMsg>(
                 ReceiptMsg.class,
-                Config.EXCHANGE_NAME_FOR_RECEIPTS_DEFAULT,
+                config.getExchangeReceipts(),
                 "#",
-                Config.SERVER_IP_DEFAULT);
+                config.getServerIP());
         receiverReceipt.setObserver(this);
         receiverReceipt.start();
     }
