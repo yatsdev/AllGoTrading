@@ -5,8 +5,15 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
+
+
+    private String productIdString;
+    private String accountIdString;
+    private ConcurrentHashMap<String, ConcurrentHashMap<String,Position>> productAccountMap;
+    private ConcurrentHashMap<String, ConcurrentHashMap<String,Position>> accountProductMap;
 
     public PositionServer() {
         numberOfReceipts = 0;
@@ -24,6 +31,7 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
 
     @Override
     public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
+
         throw new NotImplementedException();
     }
 

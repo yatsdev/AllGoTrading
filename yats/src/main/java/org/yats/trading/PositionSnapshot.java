@@ -1,9 +1,9 @@
 package org.yats.trading;
 
 import org.yats.common.Decimal;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,7 +64,7 @@ public class PositionSnapshot {
 
        for (int i=0;i<newPosition.size();i++) {
             AccountPosition p = newPosition.iterator().next();
-            add(p);
+             add(p);
         }
     }
 
