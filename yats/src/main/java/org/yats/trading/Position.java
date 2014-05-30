@@ -53,8 +53,8 @@ public class Position {
     public void setProductId(String productId) {
         this.productId = productId;
     }
-    private String productId;
-    private Decimal size;
+    protected String productId;
+    protected Decimal size;
     
     
 } // class
