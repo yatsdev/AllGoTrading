@@ -59,7 +59,7 @@ public class PositionSnapshot {
 
     public Position getPositionForAllAccounts(String productId) {
 
-        Position getPositionForAllAccounts=new Position("pid", Decimal.ZERO);
+        Position getPositionForAllAccounts=new Position(productId, Decimal.ZERO);
 
         Decimal position=Decimal.ZERO;
 

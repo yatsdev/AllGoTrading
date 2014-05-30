@@ -38,10 +38,11 @@ public class PositionSnapshotTest {
     public void canCalculatePositionForAllAccountsAfterAddingOtherSnapshot()
     {
         positionSnapshot.add(positionSnapshot2);
-        Position p1 =  positionSnapshot.getPositionForAllAccounts(productId1);  //Bug: These two asserts are mutually exclusive,you can't run both.You either have to comment position p1 and its assert or position p2 and its assert.
-        assert (p1.isSize(1));
-     //   Position p2 =  positionSnapshot.getPositionForAllAccounts(productId3);
-     //   assert (p2.isSize(9));
+  //      Position p1 =  positionSnapshot.getPositionForAllAccounts(productId1);  //Bug: These two asserts are mutually exclusive,you can't run both.You either have to comment position p1 and its assert or position p2 and its assert.
+  //      assert (p1.isSize(1));
+
+        Position p2 =  positionSnapshot.getPositionForAllAccounts(productId3);
+        assert (p2.isSize(9));
     }
 
     @Test
