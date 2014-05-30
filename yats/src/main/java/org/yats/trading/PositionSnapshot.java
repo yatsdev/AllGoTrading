@@ -64,7 +64,7 @@ public class PositionSnapshot {
 
        for (int i=0;i<newPosition.size();i++) {
             AccountPosition p = newPosition.iterator().next();
-            add(p);
+             add(p);
         }
     }
 
