@@ -10,14 +10,23 @@ public class Position {
         return new Position(productId, newSize);
     }
 
+    public Position add(Position other) {
+        if(!other.isForProductId(productId)) return this;
+        return new Position(productId, size.add(other.getSize()));
+    }
+
     public boolean isSize(int _size) {
         return (size.toInt() == _size);
     }
 
     public boolean isSameAs(Position other) {
-        if(productId.compareTo(other.productId)!=0) return false;
+        if(!isForProductId(other.productId)) return false;
         if(!size.isEqualTo(other.size)) return false;
         return true;
+    }
+
+    public boolean isForProductId(String otherProductId) {
+        return (this.productId.compareTo(otherProductId)==0);
     }
 
     public String toStringCSV() {
@@ -47,6 +56,6 @@ public class Position {
 
     protected String productId;
     protected Decimal size;
-    
-    
+
+
 } // class

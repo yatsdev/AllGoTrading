@@ -50,52 +50,28 @@ public class PositionSnapshot {
     }
 
     public Position getPositionForAllAccounts(String productId) {
-
-        Position getPositionForAllAccounts=new Position(productId, Decimal.ZERO);
-
-                       Decimal position=Decimal.ZERO;
-
-                        for (AccountPosition a : positionMap.values()) {
-                        String key = a.getKey();
-                        getPositionForAllAccounts = positionMap.get(key);
-
-                                if(getPositionForAllAccounts.getProductId().compareTo(productId)==0)
-                            {
-                                        position=position.add(getPositionForAllAccounts.getSize());
-
-                                }
-
-                            }
-
-                        getPositionForAllAccounts.setSize(position);
-                return getPositionForAllAccounts;
+        Position positionForAllAccounts=new Position(productId, Decimal.ZERO);
+        for (AccountPosition a : positionMap.values()) {
+            if(!positionForAllAccounts.isForProductId(a.getProductId())) continue;
+            positionForAllAccounts = positionForAllAccounts.add(a);
+        }
+        return positionForAllAccounts;
     }
 
        public List<AccountPosition> getAllPositionsForOneAccount(String account) {
-
-        Collection<AccountPosition> newPosition;
-        newPosition = positionMap.values();
-
+        Collection<AccountPosition> newPosition = positionMap.values();
         ArrayList<AccountPosition> arrayList= new ArrayList<AccountPosition>();
-
-        for (int i=0;i<newPosition.size();i++) {
-            AccountPosition p = newPosition.iterator().next();
+        for (AccountPosition p : newPosition) {
             if(p.getInternalAccount().compareTo(account)==0) {
                 arrayList.add(p);
             }
         }
-
-
         return arrayList;
     }
 
-    public void add(PositionSnapshot positionSnapshot) {
-       
-       Collection<AccountPosition> newPosition;
-       newPosition = positionSnapshot.positionMap.values();
-
-       for (int i=0;i<newPosition.size();i++) {
-            AccountPosition p = newPosition.iterator().next();
+    public void add(PositionSnapshot other) {
+       Collection<AccountPosition> newPositionCollection = other.positionMap.values();
+       for (AccountPosition p : newPositionCollection) {
             add(p);
         }
     }

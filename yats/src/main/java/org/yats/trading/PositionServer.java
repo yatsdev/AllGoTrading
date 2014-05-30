@@ -28,11 +28,11 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {
-        return new AccountPosition("pid", "account", Decimal.ZERO);
+        return positionSnapshot.getAccountPosition(positionRequest);
     }
 
     public Position getPositionForAllAccounts(String productId) {
-        return new Position("pid", Decimal.ZERO);
+        return positionSnapshot.getPositionForAllAccounts(productId);
     }
 
     public List<AccountPosition> getAllPositionsForOneAccount(String account) {

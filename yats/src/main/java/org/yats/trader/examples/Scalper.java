@@ -31,20 +31,20 @@ public class Scalper extends StrategyBase {
     @Override
     public void onReceipt(Receipt receipt)
     {
-        if(shuttingDown) return;
-        if(receipt.getRejectReason().length()>0) {
-            log.error("Received rejection! Stopping for now!");
-            System.exit(-1);
-        }
-        if(!receipt.hasProductId(tradeProductId)){
-            log.error("Received receipt for unknown product: " + receipt);
-            return;
-        }
-        if(receipt.isForOrder(lastBidOrder)) {
-            receivedOrderReceiptBidSide =true;
-        }
-        log.debug("Received receipt: " + receipt);
-        position = receipt.getPositionChange().add(position);
+//        if(shuttingDown) return;
+//        if(receipt.getRejectReason().length()>0) {
+//            log.error("Received rejection! Stopping for now!");
+//            System.exit(-1);
+//        }
+//        if(!receipt.hasProductId(tradeProductId)){
+//            log.error("Received receipt for unknown product: " + receipt);
+//            return;
+//        }
+//        if(receipt.isForOrder(lastBidOrder)) {
+//            receivedOrderReceiptBidSide =true;
+//        }
+//        log.debug("Received receipt: " + receipt);
+//        position = receipt.getPositionChange().add(position);
     }
 
     @Override
@@ -96,15 +96,15 @@ public class Scalper extends StrategyBase {
 
     private void sendOrderBidSide(Decimal bid)
     {
-        lastBidOrder = OrderNew.create()
-                .withProductId(tradeProductId)
-                .withExternalAccount(getExternalAccount())
-                .withInternalAccount(getInternalAccount())
-                .withBookSide(BookSide.BID)
-                .withLimit(bid)
-                .withSize(Decimal.fromDouble(0.01));
-        receivedOrderReceiptBidSide = false;
-        sendNewOrder(lastBidOrder);
+//        lastBidOrder = OrderNew.create()
+//                .withProductId(tradeProductId)
+//                .withExternalAccount(getExternalAccount())
+//                .withInternalAccount(getInternalAccount())
+//                .withBookSide(BookSide.BID)
+//                .withLimit(bid)
+//                .withSize(Decimal.fromDouble(0.01));
+//        receivedOrderReceiptBidSide = false;
+//        sendNewOrder(lastBidOrder);
     }
 
     private void cancelLastOrderBidSide() {
