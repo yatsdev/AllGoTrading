@@ -27,6 +27,7 @@ public class QuotingMainMonolith {
 
 
     public void go() throws InterruptedException, IOException
+
     {
 //        PriceFeed priceFeed = PriceFeed.create();
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
