@@ -41,4 +41,8 @@ public class FileTool {
         f.delete();
     }
 
+    public static boolean exists(String userSpecificFIXFilename) {
+        File f = new File(userSpecificFIXFilename);
+        return f.exists();
+    }
 }
