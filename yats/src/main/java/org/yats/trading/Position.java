@@ -4,7 +4,13 @@ import org.yats.common.Decimal;
 
 public class Position {
 
+    public String getProductId() {
+        return productId;
+    }
 
+    public Decimal getSize() {
+        return size;
+    }
 
     public Position(String productId, Decimal size) {
         this.productId = productId;
@@ -16,7 +22,7 @@ public class Position {
         return new Position(productId, newSize);
     }
 
-
+    
 
     public boolean isSize(int _size) {
         return (size.toInt() == _size);
@@ -31,7 +37,7 @@ public class Position {
     public String toStringCSV() {
         return new StringBuilder().append(productId).append(",").append(size.toString()).toString();
     }
-
+    
     public String getProductId() {
         return productId;
     }
@@ -49,4 +55,6 @@ public class Position {
     }
     protected String productId;
     protected Decimal size;
+    
+    
 } // class
