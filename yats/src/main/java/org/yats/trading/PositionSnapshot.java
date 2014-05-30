@@ -58,7 +58,14 @@ public class PositionSnapshot {
     }
 
     public void add(PositionSnapshot positionSnapshot) {
-        throw new NotImplementedException();
+       
+       Collection<AccountPosition> newPosition;
+       newPosition = positionSnapshot.positionMap.values();
+
+       for (int i=0;i<newPosition.size();i++) {
+            AccountPosition p = newPosition.iterator().next();
+            add(p);
+        }
     }
 
     public void add(AccountPosition p) {
