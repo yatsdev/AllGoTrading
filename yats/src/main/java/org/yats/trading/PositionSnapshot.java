@@ -50,7 +50,25 @@ public class PositionSnapshot {
     }
 
     public Position getPositionForAllAccounts(String productId) {
-        return new Position("pid", Decimal.ZERO);
+
+        Position getPositionForAllAccounts=new Position("pid", Decimal.ZERO);
+
+                       Decimal position=Decimal.ZERO;
+
+                        for (AccountPosition a : positionMap.values()) {
+                        String key = a.getKey();
+                        getPositionForAllAccounts = positionMap.get(key);
+
+                                if(getPositionForAllAccounts.getProductId().compareTo(productId)==0)
+                            {
+                                        position=position.add(getPositionForAllAccounts.getSize());
+
+                                }
+
+                            }
+
+                        getPositionForAllAccounts.setSize(position);
+                return getPositionForAllAccounts;
     }
 
        public List<AccountPosition> getAllPositionsForOneAccount(String account) {
