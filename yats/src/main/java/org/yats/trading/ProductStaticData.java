@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
+
 import java.util.Vector;
 
 /**
@@ -11,6 +13,7 @@ public class ProductStaticData extends Product {
     private Product derivative;
     private boolean hasDerivatives = false;
     private Vector<TargetPrice> TP;
+    private Decimal avarageTargetPrice;
 
 
     public String getProductDescription() {
@@ -62,7 +65,22 @@ public class ProductStaticData extends Product {
         return TP;
     }
 
+    public Decimal getAvarageTargetPrice() {
+        return avarageTargetPrice;
+    }
+
+    public void setAvarageTargetPrice(Decimal avarageTargetPrice) {
+        this.avarageTargetPrice = avarageTargetPrice;
+    }
+
     public void setTP(Vector<TargetPrice> TP) {
         this.TP = TP;
+        Decimal sum=Decimal.ZERO;
+        for(int i=0;i<TP.size();i++){
+
+            sum= TP.elementAt(i).getPrice().add(sum);
+            avarageTargetPrice=sum.divide(Decimal.fromDouble(TP.size()));
+        }
+
     }
 }
