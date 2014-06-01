@@ -6,7 +6,7 @@ public class PositionStorageCSV implements IStorePositionSnapshots {
 
     @Override
     public void store(PositionSnapshot positionSnapshot) {
-        FileTool.writeToTextFile(filename, positionSnapshot.toStringCSV(), true);
+        FileTool.writeToTextFile(filename, positionSnapshot.toStringCSV()+"\n", true);
     }
 
     @Override

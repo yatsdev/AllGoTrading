@@ -93,4 +93,7 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         this.positionStorage = positionStorage;
     }
 
+    public void initFromLastStoredPositionSnapshot() {
+        positionSnapshot = positionStorage.readLast();
+    }
 }

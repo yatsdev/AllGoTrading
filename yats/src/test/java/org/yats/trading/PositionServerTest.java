@@ -10,6 +10,8 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.ReceiptMsg;
 import org.yats.trader.examples.PositionServerLogic;
 
+import java.util.ArrayList;
+
 public class PositionServerTest {
 
     @Test
@@ -39,20 +41,26 @@ public class PositionServerTest {
         assert(positionWithSnapshot.isSize(+1 + 1 + 1 -2 +10));
     }
 
-//    @Test
-//    public void canStorePositionSnapshot() {
-//        Config c = Config.DEFAULT_FOR_TESTS;
-//        c.setStorePositionsToDisk(true);
-//        c.setListeningForReceipts(true);
-//        PositionServerLogic logic = new PositionServerLogic(c);
-//        logic.setPositionStorage(positionStorage);
-//        senderReceipts = new Sender<ReceiptMsg>(c.getExchangeReceipts(),c.getServerIP());
-//        ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
-//        senderReceipts.publish(m.getTopic(), m);
-//        ThreadTool.sleepABit();
-//
-//        assert(1==positionStorage.getSnapshotCount());
-//    }
+    @Test
+    public void canStorePositionSnapshot() {
+        positionServer.onReceipt(ReceiptTest.RECEIPT1);
+        assert(1==positionStorage.getSnapshotCount());
+    }
+
+    @Test
+    public void canInitialiseFromPositionSnapshot() {
+        PositionServer originalServer = new PositionServer();
+        originalServer.setPositionStorage(positionStorage);
+        originalServer.onReceipt(ReceiptTest.RECEIPT1);
+        originalServer.onReceipt(ReceiptTest.RECEIPT2);
+        assert(2==positionStorage.getSnapshotCount());
+        PositionRequest pr = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId());
+        PositionServer newPositionServer = new PositionServer();
+        newPositionServer.setPositionStorage(positionStorage);
+        assert(newPositionServer.getAccountPosition(pr).isSize(0));
+        newPositionServer.initFromLastStoredPositionSnapshot();
+        assert(newPositionServer.getAccountPosition(pr).isSize(2));
+    }
 
 
     @BeforeMethod
@@ -64,6 +72,8 @@ public class PositionServerTest {
         p = new AccountPosition(ProductTest.PRODUCT1.getProductId(), ReceiptTest.INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
         positionSnapshot.add(p);
         positionRequest1 = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId());
+        positionStorage = new PositionSnapshotStorageMem();
+        positionServer.setPositionStorage(positionStorage);
     }
 
     private void processReceipts() {
@@ -76,10 +86,30 @@ public class PositionServerTest {
 
 
     private PositionServer positionServer;
+    private PositionSnapshotStorageMem positionStorage;
 
 //    private static String INTERNAL_ACCOUNT1 = "intAccount1";
 //    private static String INTERNAL_ACCOUNT2 = "intAccount2";
     PositionSnapshot positionSnapshot;
     PositionRequest positionRequest1;
+
+
+    private class PositionSnapshotStorageMem implements IStorePositionSnapshots  {
+        @Override
+        public void store(PositionSnapshot positionSnapshot) {
+            positionSnapshots.add(positionSnapshot);
+
+        }
+        @Override
+        public PositionSnapshot readLast() {
+            return positionSnapshots.get(positionSnapshots.size()-1);
+        }
+        public int getSnapshotCount() {return positionSnapshots.size();}
+
+        private PositionSnapshotStorageMem() {
+            positionSnapshots=new ArrayList<PositionSnapshot>();
+        }
+        ArrayList<PositionSnapshot> positionSnapshots;
+    };
 
 }

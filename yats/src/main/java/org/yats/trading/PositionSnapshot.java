@@ -23,14 +23,14 @@ public class PositionSnapshot {
         StringBuilder b = new StringBuilder();
         for(AccountPosition a : positionMap.values()) {
             b.append(a.toStringCSV());
-            b.append("\n");
+            b.append("|");
         }
         return b.toString();
     }
 
     public static PositionSnapshot fromStringCSV(String csv) {
         PositionSnapshot p = new PositionSnapshot();
-        String[] positionStrings = csv.split("\n");
+        String[] positionStrings = csv.split("|");
         for(String s : positionStrings) {
             AccountPosition a = AccountPosition.fromStringCSV(s);
             p.add(a);
