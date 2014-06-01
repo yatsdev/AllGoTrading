@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="org.glassfish.grizzly:grizzly-framework:2.1.6" type="repository">
+    <properties maven-id="org.glassfish.grizzly:grizzly-framework:2.1.6" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-framework/2.1.6/grizzly-framework-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/gmbal/gmbal/3.0.0-b023/gmbal-3.0.0-b023.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

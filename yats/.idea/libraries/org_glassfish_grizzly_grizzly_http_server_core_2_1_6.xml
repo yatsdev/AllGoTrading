@@ -1,0 +1,20 @@
+<component name="libraryTable">
+  <library name="org.glassfish.grizzly:grizzly-http-server-core:2.1.6" type="repository">
+    <properties maven-id="org.glassfish.grizzly:grizzly-http-server-core:2.1.6" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-http-server-core/2.1.6/grizzly-http-server-core-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-core/2.1.6/grizzly-core-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-framework/2.1.6/grizzly-framework-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/gmbal/gmbal-api-only/3.0.0-b023/gmbal-api-only-3.0.0-b023.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/external/management-api/3.0.0-b012/management-api-3.0.0-b012.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-portunif/2.1.6/grizzly-portunif-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-rcm/2.1.6/grizzly-rcm-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-http-server/2.1.6/grizzly-http-server-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-http/2.1.6/grizzly-http-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-http-ajp/2.1.6/grizzly-http-ajp-2.1.6.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/glassfish/grizzly/grizzly-http-server-multipart/2.1.6/grizzly-http-server-multipart-2.1.6.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

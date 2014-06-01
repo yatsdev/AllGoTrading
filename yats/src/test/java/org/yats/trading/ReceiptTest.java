@@ -56,7 +56,7 @@ public class ReceiptTest {
             .withOrderId(UniqueId.createFromString("5"))
             .withProductId(ProductTest.PRODUCT1.getProductId())
             .withExternalAccount("1")
-            .withInternalAccount(INTERNAL_ACCOUNT2)
+            .withInternalAccount(INTERNAL_ACCOUNT1)
             .withCurrentTradedSize(Decimal.fromDouble(2))
             .withTotalTradedSize(Decimal.fromDouble(2))
             .withPrice(Decimal.fromDouble(48))

@@ -19,7 +19,9 @@ import java.util.ArrayList;
 
         There need to exist files
         config/<StrategyName>.properties
-        that provide settings for each of the strategies. For example:
+        that provide settings for each of the strategies.
+
+        For example:
 
         config/QuotingMain.properties:
 

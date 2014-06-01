@@ -3,7 +3,12 @@ package org.yats.trading;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
+import org.yats.common.ThreadTool;
 import org.yats.common.UniqueId;
+import org.yats.messagebus.Config;
+import org.yats.messagebus.Sender;
+import org.yats.messagebus.messages.ReceiptMsg;
+import org.yats.trader.examples.PositionServerLogic;
 
 public class PositionServerTest {
 
@@ -14,16 +19,16 @@ public class PositionServerTest {
 
     @Test
     public void canCalculateCurrentPositionOverAllInternalAccounts() {
-        Position p = positionServer.getPositionForAllAccounts(product1.getProductId());
+        Position p = positionServer.getPositionForAllAccounts(ProductTest.PRODUCT1.getProductId());
         assert (p.isSize(+1 +1 +1 +9 -2));
     }
 
     @Test
     public void canCalculatePositionForInternalAccount()
     {
-        Position positionAccount1 = positionServer.getAccountPosition(new PositionRequest(INTERNAL_ACCOUNT1, product1.getProductId()));
+        Position positionAccount1 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId()));
         assert (positionAccount1.isSize(+1 +1 +1 -2));
-        Position positionAccount2 = positionServer.getAccountPosition(new PositionRequest(INTERNAL_ACCOUNT2, product1.getProductId()));
+        Position positionAccount2 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT2, ProductTest.PRODUCT1.getProductId()));
         assert (positionAccount2.isSize(9));
     }
 
@@ -34,93 +39,47 @@ public class PositionServerTest {
         assert(positionWithSnapshot.isSize(+1 + 1 + 1 -2 +10));
     }
 
+//    @Test
+//    public void canStorePositionSnapshot() {
+//        Config c = Config.DEFAULT_FOR_TESTS;
+//        c.setStorePositionsToDisk(true);
+//        c.setListeningForReceipts(true);
+//        PositionServerLogic logic = new PositionServerLogic(c);
+//        logic.setPositionStorage(positionStorage);
+//        senderReceipts = new Sender<ReceiptMsg>(c.getExchangeReceipts(),c.getServerIP());
+//        ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
+//        senderReceipts.publish(m.getTopic(), m);
+//        ThreadTool.sleepABit();
+//
+//        assert(1==positionStorage.getSnapshotCount());
+//    }
+
+
     @BeforeMethod
     public void setUp() {
         positionServer = new PositionServer();
-        product1 = new Product("product1", "sym1", "exch1");
-        receipt1 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("1"))
-                .withProductId(product1.getProductId())
-                .withExternalAccount("1")
-                .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.ONE)
-                .withTotalTradedSize(Decimal.ONE)
-                .withPrice(Decimal.fromDouble(50))
-                .withResidualSize(Decimal.ZERO)
-                .withBookSide(BookSide.BID)
-        ;
-        receipt2 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("2"))
-                .withProductId(product1.getProductId())
-                .withExternalAccount("1")
-                .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.ONE)
-                .withTotalTradedSize(Decimal.ONE)
-                .withPrice(Decimal.fromDouble(50))
-                .withResidualSize(Decimal.ONE)
-                .withBookSide(BookSide.BID)
-        ;
-        receipt3 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("2"))
-                .withProductId(product1.getProductId())
-                .withExternalAccount("1")
-                .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.ONE)
-                .withTotalTradedSize(Decimal.fromDouble(2))
-                .withPrice(Decimal.fromDouble(50))
-                .withResidualSize(Decimal.ZERO)
-                .withBookSide(BookSide.BID)
-        ;
-        receipt4 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("4"))
-                .withProductId(product1.getProductId())
-                .withExternalAccount("1")
-                .withInternalAccount(INTERNAL_ACCOUNT2)
-                .withCurrentTradedSize(Decimal.fromDouble(9))
-                .withTotalTradedSize(Decimal.fromDouble(9))
-                .withPrice(Decimal.fromDouble(87))
-                .withResidualSize(Decimal.ZERO)
-                .withBookSide(BookSide.BID)
-        ;
-        receipt5 = Receipt.create()
-                .withOrderId(UniqueId.createFromString("5"))
-                .withProductId(product1.getProductId())
-                .withExternalAccount("1")
-                .withInternalAccount(INTERNAL_ACCOUNT1)
-                .withCurrentTradedSize(Decimal.fromDouble(2))
-                .withTotalTradedSize(Decimal.fromDouble(2))
-                .withPrice(Decimal.fromDouble(48))
-                .withResidualSize(Decimal.ZERO)
-                .withBookSide(BookSide.ASK)
-        ;
-
         processReceipts();
         positionSnapshot = new PositionSnapshot();
-        AccountPosition p = new AccountPosition(product1.getProductId(), INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
+        AccountPosition p;
+        p = new AccountPosition(ProductTest.PRODUCT1.getProductId(), ReceiptTest.INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
         positionSnapshot.add(p);
-        positionRequest1 = new PositionRequest(INTERNAL_ACCOUNT1, product1.getProductId());
+        positionRequest1 = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId());
     }
 
     private void processReceipts() {
-        positionServer.onReceipt(receipt1);
-        positionServer.onReceipt(receipt2);
-        positionServer.onReceipt(receipt3);
-        positionServer.onReceipt(receipt4);
-        positionServer.onReceipt(receipt5);
+        positionServer.onReceipt(ReceiptTest.RECEIPT1);
+        positionServer.onReceipt(ReceiptTest.RECEIPT2);
+        positionServer.onReceipt(ReceiptTest.RECEIPT3);
+        positionServer.onReceipt(ReceiptTest.RECEIPT4);
+        positionServer.onReceipt(ReceiptTest.RECEIPT5);
     }
 
 
     private PositionServer positionServer;
 
-    private static String INTERNAL_ACCOUNT1 = "intAccount1";
-    private static String INTERNAL_ACCOUNT2 = "intAccount2";
+//    private static String INTERNAL_ACCOUNT1 = "intAccount1";
+//    private static String INTERNAL_ACCOUNT2 = "intAccount2";
     PositionSnapshot positionSnapshot;
-    Product product1;
-    Receipt receipt1;
-    Receipt receipt2;
-    Receipt receipt3;
-    Receipt receipt4;
-    Receipt receipt5;
     PositionRequest positionRequest1;
 
 }
