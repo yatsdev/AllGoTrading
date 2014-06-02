@@ -80,6 +80,13 @@ public class PropertiesReader implements IProvideProperties {
     }
 
     @Override
+    public boolean getAsBoolean(String _key, boolean _defaultValue)
+    {
+        if(!properties.containsKey(_key)) return _defaultValue;
+        return fromBooleanString(properties.getProperty(_key));
+    }
+
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         Enumeration enuKeys = properties.keys();
@@ -95,4 +102,13 @@ public class PropertiesReader implements IProvideProperties {
 
     Properties properties;
 
+    public static boolean fromBooleanString(String listening) {
+        String lowerCase = listening.toLowerCase();
+        if(lowerCase.compareTo("yes")==0) return true;
+        if(lowerCase.compareTo("no")==0) return true;
+        if(lowerCase.compareTo("y")==0) return true;
+        if(lowerCase.compareTo("1")==0) return true;
+        if(lowerCase.compareTo("true")==0) return true;
+        return false;
+    }
 }

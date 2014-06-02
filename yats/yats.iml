@@ -21,6 +21,9 @@
     <orderEntry type="library" name="flexjson-2.1" level="project" />
     <orderEntry type="library" name="rabbitmq-client" level="project" />
     <orderEntry type="library" name="quickfixj-all-1.5.3-bd" level="project" />
+    <orderEntry type="library" name="org.glassfish.jersey:jax-rs-ri:2.0-rc1" level="project" />
+    <orderEntry type="library" name="org.glassfish.grizzly:grizzly-framework:2.1.6" level="project" />
+    <orderEntry type="library" name="org.glassfish.grizzly:grizzly-http-server-core:2.1.6" level="project" />
   </component>
 </module>
 

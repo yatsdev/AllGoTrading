@@ -13,7 +13,7 @@ public class ReceiptMsg {
         return ""+orderId;
     }
 
-    public static ReceiptMsg createFromReceipt(Receipt r)
+    public static ReceiptMsg fromReceipt(Receipt r)
     {
         ReceiptMsg m = new ReceiptMsg();
         m.timestamp = r.getTimestamp().toString();

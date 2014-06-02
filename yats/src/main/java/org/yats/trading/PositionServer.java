@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -8,18 +10,21 @@ import java.util.List;
 
 public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
 
-    public PositionServer() {
-        numberOfReceipts = 0;
-        positionSnapshot = new PositionSnapshot();
+
+    final Logger log = LoggerFactory.getLogger(PositionServer.class);
+
+    public String getPositionSnapshotCSV() {
+        return positionSnapshot.toStringCSV();
     }
 
     @Override
     public void onReceipt(Receipt receipt) {
-        if (receipt.isRejection()) return;
         if (!receipt.isTrade()) return;
         numberOfReceipts++;
         AccountPosition positionChange = receipt.toAccountPosition();
         positionSnapshot.add(positionChange);
+        log.info("new position snapshot: "+positionSnapshot.toStringCSV());
+        positionStorage.store(positionSnapshot);
     }
 
     @Override
@@ -47,16 +52,10 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         return positionSnapshot.size();
     }
 
-    public void addPositionSnapshot(PositionSnapshot newPositionSnapshot) {
-          positionSnapshot.add(newPositionSnapshot);
-    }
 
     public PositionSnapshot getPositionSnapshot() {
         return positionSnapshot;
     }
-
-    private int numberOfReceipts;
-    private PositionSnapshot positionSnapshot;
 
     public boolean isEmpty() {
         return positionSnapshot.size()==0;
@@ -66,7 +65,39 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         this.positionSnapshot = positionSnapshot;
     }
 
+    public void addPositionSnapshot(PositionSnapshot newPositionSnapshot) {
+        positionSnapshot.add(newPositionSnapshot);
+    }
+
     public void clearPositions() {
         positionSnapshot = new PositionSnapshot();
+    }
+
+
+    public PositionServer() {
+        numberOfReceipts = 0;
+        positionSnapshot = new PositionSnapshot();
+        positionStorage = new IStorePositionSnapshots() {
+            @Override
+            public void store(PositionSnapshot positionSnapshot) {
+            }
+            @Override
+            public PositionSnapshot readLast() {
+                throw new NotImplementedException();
+            }
+        };
+
+    }
+
+    private int numberOfReceipts;
+    private PositionSnapshot positionSnapshot;
+    private IStorePositionSnapshots positionStorage;
+
+    public void setPositionStorage(IStorePositionSnapshots positionStorage) {
+        this.positionStorage = positionStorage;
+    }
+
+    public void initFromLastStoredPositionSnapshot() {
+        positionSnapshot = positionStorage.readLast();
     }
 }

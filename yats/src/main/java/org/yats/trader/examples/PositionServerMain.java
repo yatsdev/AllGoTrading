@@ -2,7 +2,10 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.FileTool;
+import org.yats.common.PropertiesReader;
 import org.yats.messagebus.Config;
+import org.yats.trading.PositionStorageCSV;
 
 import java.io.IOException;
 
@@ -14,8 +17,15 @@ public class PositionServerMain {
     public void go() throws InterruptedException, IOException
     {
         log.info("Starting PositionServerMain...");
-        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        String pathToConfigFile = "config/PositionServer.properties";
+        Config positionServerConfig =  FileTool.exists(pathToConfigFile)
+                ? Config.fromProperties(PropertiesReader.createFromConfigFile(pathToConfigFile))
+                : Config.DEFAULT;
+
+        PositionServerLogic positionServerLogic = new PositionServerLogic(positionServerConfig);
         positionServerLogic.startRequestListener();
+        PositionStorageCSV storage = new PositionStorageCSV(positionServerConfig.getPositionFilename());
+        positionServerLogic.setPositionStorage(storage);
 
         Thread.sleep(2000);
 

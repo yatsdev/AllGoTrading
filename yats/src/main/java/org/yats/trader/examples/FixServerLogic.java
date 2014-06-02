@@ -29,7 +29,7 @@ public class FixServerLogic extends StrategyBase implements IAmCalledBack {
     public void onReceipt(Receipt receipt)
     {
         if(shuttingDown) return;
-        ReceiptMsg m = ReceiptMsg.createFromReceipt(receipt);
+        ReceiptMsg m = ReceiptMsg.fromReceipt(receipt);
         log.info("Published: "+receipt);
         receiptSender.publish(m.getTopic(), m);
     }

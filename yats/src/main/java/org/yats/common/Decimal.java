@@ -1,6 +1,7 @@
 package org.yats.common;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Decimal  {
 
@@ -77,4 +78,7 @@ public class Decimal  {
     BigDecimal value;
 
 
+    public Decimal round() {
+        return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
+    }
 }

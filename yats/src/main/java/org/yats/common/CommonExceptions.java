@@ -32,4 +32,8 @@ public class CommonExceptions {
         }
     }
 
+    public static class DummyException extends RuntimeException {
+        public DummyException(String s) { super(s);
+        }
+    }
 } // class
