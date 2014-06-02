@@ -6,6 +6,8 @@ import org.yats.common.Decimal;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
+import java.util.HashMap;
+
 public class Scalper extends StrategyBase {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
@@ -13,38 +15,51 @@ public class Scalper extends StrategyBase {
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(QuotingStrategy.class);
 
+    final static double stepFactor = 0.0;//0031;
+    final static double ticksize = 1.0;
+
     @Override
     public void onMarketData(MarketData marketData)
     {
         if(!marketData.hasProductId(tradeProductId)) return;
-        if(!startPrice.isSameAs(MarketData.NULL)) return;
+        if(!startPrice.equals(MarketData.NULL)) return;
         if(shuttingDown) return;
         startPrice = marketData;
-        sendQuote(BookSide.BID, startPrice.getBid());
-        sendQuote(BookSide.ASK, startPrice.getAsk());
+
+        sendBidRelativeTo(startPrice.getBid());
+        sendAskRelativeTo(startPrice.getAsk());
     }
 
-    private void sendQuote(BookSide side, Decimal startPrice) {
-
-    }
 
     @Override
     public void onReceipt(Receipt receipt)
     {
-//        if(shuttingDown) return;
-//        if(receipt.getRejectReason().length()>0) {
-//            log.error("Received rejection! Stopping for now!");
-//            System.exit(-1);
-//        }
-//        if(!receipt.hasProductId(tradeProductId)){
-//            log.error("Received receipt for unknown product: " + receipt);
-//            return;
-//        }
-//        if(receipt.isForOrder(lastBidOrder)) {
-//            receivedOrderReceiptBidSide =true;
-//        }
-//        log.debug("Received receipt: " + receipt);
-//        position = receipt.getPositionChange().add(position);
+        if(shuttingDown) return;
+        if(receipt.getRejectReason().length()>0) {
+            log.error("Received rejection! Stopping for now!");
+            shutdown();
+            System.exit(-1);
+        }
+        if(!receipt.hasProductId(tradeProductId)){
+            log.error("Received receipt for unknown product: " + receipt);
+            return;
+        }
+
+        log.debug("Received receipt: " + receipt);
+
+        if(receipt.isEndState()) {
+            orders.remove(receipt.getOrderId().toString());
+            if(receipt.isTrade())    {
+                sendAskRelativeTo(receipt.getPrice());
+                sendBidRelativeTo(receipt.getPrice());
+            }
+        }
+
+
+
+
+
+        position = receipt.getPositionChange().add(position);
     }
 
     @Override
@@ -54,79 +69,68 @@ public class Scalper extends StrategyBase {
         setInternalAccount("quoting1");
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
+        position = getPositionForProduct(tradeProductId);
     }
 
     @Override
     public void shutdown()
     {
         shuttingDown=true;
-        if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
+        cancelOrders();
     }
 
-//    private void handleMarketDataBidSide(MarketData marketData) {
-//
-//        if(isInMarketBidSide()) {
-//            boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
-//            Decimal lastBid = lastBidOrder.getLimit();
-//            Decimal bid = marketData.getBid();
-//            Decimal bidChange=lastBid.subtract(getNewBid(bid)).abs();
-//            if(changedSinceLastTick && bidChange.isGreaterThan(Decimal.fromDouble(0.01))) {
-//                log.info("changed price since last order: " + marketData);
-//            }
-//
-//            boolean bidChangedEnoughForOrderUpdate = bidChange.isGreaterThan(Decimal.fromDouble(0.02));
-//            if(!bidChangedEnoughForOrderUpdate) return;
-//
-//            if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
-//        }
-//
-//        boolean positionLessThanMaximum = position.isLessThan(Decimal.ONE);
-//        if(!isInMarketBidSide() && positionLessThanMaximum) {
-//            Decimal bid = marketData.getBid();
-//            sendOrderBidSide(getNewBid(bid));
-//        }
-//        previousMarketData=marketData;
-//    }
-
-    private Decimal getNewBid(Decimal oldBid) {
-        Decimal bidRelative = oldBid.multiply(Decimal.fromDouble(0.995));
-        Decimal bidAbsolute = oldBid.subtract(Decimal.fromDouble(0.05));
-        return Decimal.min(bidRelative, bidAbsolute);
+    private void sendBidRelativeTo(Decimal price) {
+        double bidMarket=price.toDouble();
+        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)-ticksize).round();
+        if(!orderExists(BookSide.BID, bidPrice))
+            sendOrder(BookSide.BID, bidPrice);
     }
 
-    private void sendOrderBidSide(Decimal bid)
+    private void sendAskRelativeTo(Decimal price) {
+        if(!position.isGreaterThan(Decimal.ZERO)) return;
+        double askMarket=price.toDouble();
+        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ticksize).round();
+        if(!orderExists(BookSide.ASK, askPrice))
+            sendOrder(BookSide.ASK, askPrice);
+    }
+
+    private boolean orderExists(BookSide side, Decimal price) {
+        for(OrderNew order : orders.values()) {
+            boolean sameSide = order.getBookSide().equals(side);
+            boolean samePrice = order.getLimit().isEqualTo(price);
+            if(samePrice && sameSide) return true;
+        }
+        return false;
+    }
+
+    private void sendOrder(BookSide side, Decimal bid)
     {
-//        lastBidOrder = OrderNew.create()
-//                .withProductId(tradeProductId)
-//                .withExternalAccount(getExternalAccount())
-//                .withInternalAccount(getInternalAccount())
-//                .withBookSide(BookSide.BID)
-//                .withLimit(bid)
-//                .withSize(Decimal.fromDouble(0.01));
+        OrderNew order = OrderNew.create()
+                .withProductId(tradeProductId)
+                .withExternalAccount(getExternalAccount())
+                .withInternalAccount(getInternalAccount())
+                .withBookSide(side)
+                .withLimit(bid)
+                .withSize(Decimal.fromDouble(0.0001));
 //        receivedOrderReceiptBidSide = false;
-//        sendNewOrder(lastBidOrder);
+        orders.put(order.getOrderId().toString(), order);
+        sendNewOrder(order);
     }
 
-    private void cancelLastOrderBidSide() {
-        OrderCancel o = lastBidOrder.createCancelOrder();
-        sendOrderCancel(o);
-        lastBidOrder=OrderNew.NULL;
-        receivedOrderReceiptBidSide = false;
-    }
-
-    private boolean isInMarketBidSide() {
-        return lastBidOrder != OrderNew.NULL;
+    private void cancelOrders() {
+        for(OrderNew order : orders.values()) {
+            OrderCancel o = order.createCancelOrder();
+            sendOrderCancel(o);
+        }
     }
 
 
     public Scalper() {
         super();
         startPrice = MarketData.NULL;
-
-        lastBidOrder = OrderNew.NULL;
         shuttingDown=false;
-        previousMarketData = MarketData.NULL;
         position = Decimal.ZERO;
+        orders = new HashMap<String, OrderNew>();
     }
 
     private MarketData startPrice;
@@ -135,9 +139,8 @@ public class Scalper extends StrategyBase {
     private Decimal position;
     private boolean shuttingDown;
     private String tradeProductId;
-    private OrderNew lastBidOrder;
+    private HashMap<String, OrderNew> orders;
 
-    private MarketData previousMarketData;
-    private boolean receivedOrderReceiptBidSide;
+//    private boolean receivedOrderReceiptBidSide;
 
 } // class

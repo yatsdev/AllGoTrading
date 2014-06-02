@@ -19,19 +19,21 @@ public class PositionSnapshot {
         return true;
     }
 
+
     public String toStringCSV() {
         StringBuilder b = new StringBuilder();
         for(AccountPosition a : positionMap.values()) {
             b.append(a.toStringCSV());
-            b.append("|");
+            b.append('|');
         }
         return b.toString();
     }
 
     public static PositionSnapshot fromStringCSV(String csv) {
         PositionSnapshot p = new PositionSnapshot();
-        String[] positionStrings = csv.split("|");
+        String[] positionStrings = csv.split("\\|");
         for(String s : positionStrings) {
+            if(s.isEmpty()) continue;
             AccountPosition a = AccountPosition.fromStringCSV(s);
             p.add(a);
         }

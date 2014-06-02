@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
 import org.yats.messagebus.Config;
+import org.yats.trading.PositionStorageCSV;
 
 import java.io.IOException;
 
@@ -23,6 +24,8 @@ public class PositionServerMain {
 
         PositionServerLogic positionServerLogic = new PositionServerLogic(positionServerConfig);
         positionServerLogic.startRequestListener();
+        PositionStorageCSV storage = new PositionStorageCSV(positionServerConfig.getPositionFilename());
+        positionServerLogic.setPositionStorage(storage);
 
         Thread.sleep(2000);
 

@@ -1,5 +1,7 @@
 package org.yats.trading;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -9,6 +11,7 @@ import java.util.List;
 public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
 
 
+    final Logger log = LoggerFactory.getLogger(PositionServer.class);
 
     public String getPositionSnapshotCSV() {
         return positionSnapshot.toStringCSV();
@@ -20,6 +23,7 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         numberOfReceipts++;
         AccountPosition positionChange = receipt.toAccountPosition();
         positionSnapshot.add(positionChange);
+        log.info("new position snapshot: "+positionSnapshot.toStringCSV());
         positionStorage.store(positionSnapshot);
     }
 

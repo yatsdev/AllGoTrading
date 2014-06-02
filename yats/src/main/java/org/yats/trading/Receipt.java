@@ -16,7 +16,7 @@ public class Receipt {
         return rejectReason.length() > 0;
     }
 
-    boolean isTrade()
+    public boolean isTrade()
     {
         return !currentTradedSize.isEqualTo(Decimal.ZERO);
     }
@@ -311,6 +311,10 @@ public class Receipt {
     private Decimal price;
     private String rejectReason;
     private boolean endState;
+
+    public boolean isBookSide(BookSide side) {
+        return bookSide.equals(side);
+    }
 
 
     private static class ReceiptNULL extends Receipt {

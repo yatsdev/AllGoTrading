@@ -121,7 +121,8 @@ public class PriceFeed implements IProvidePriceFeed {
         application = new PriceFeedCracker();
 
         MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
-        LogFactory logFactory = new ScreenLogFactory(true, true, true, logHeartbeats);
+//        LogFactory logFactory = new ScreenLogFactory(true, true, true, logHeartbeats);
+        LogFactory logFactory = new ScreenLogFactory(false, false, false, false);
         MessageFactory messageFactory = new DefaultMessageFactory();
 
         initiator = new SocketInitiator(application, messageStoreFactory,

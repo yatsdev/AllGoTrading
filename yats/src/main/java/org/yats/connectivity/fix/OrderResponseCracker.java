@@ -107,7 +107,7 @@ public class OrderResponseCracker extends MessageCracker implements Application 
                 r.setOrderId(UniqueId.createFromString(report.getOrigClOrdID().getValue()));
             }
             if(report.getExecType().getValue()=='8') { // rejected
-                r.setRejectReason(report.getOrdRejReason().toString());
+                r.setRejectReason(report.getText().toString());
             }
 
             r.setBookSide(BookSide.ASK);

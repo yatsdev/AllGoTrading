@@ -64,7 +64,7 @@ public class FileTool {
 
                 if( readByte == 0xA ) {
                     line = line + 1;
-                    if (line == lines) {
+                    if (line >= lines) {
                         if (filePointer == fileLength) {
                             continue;
                         }
@@ -72,7 +72,7 @@ public class FileTool {
                     }
                 } else if( readByte == 0xD ) {
                     line = line + 1;
-                    if (line == lines) {
+                    if (line >= lines) {
                         if (filePointer == fileLength - 1) {
                             continue;
                         }
