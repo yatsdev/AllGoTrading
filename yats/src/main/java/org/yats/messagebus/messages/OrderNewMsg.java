@@ -19,7 +19,7 @@ public class OrderNewMsg {
         m.timestamp = r.getTimestamp().toString();
         m.orderId=r.getOrderId().toString();
         m.externalAccount=r.getExternalAccount();
-        m.internalAccount=r.getExternalAccount();
+        m.internalAccount=r.getInternalAccount();
         m.productId = r.getProductId();
         m.bookSideDirection = r.getBookSide().toDirection();
         m.size=r.getSize().toString();

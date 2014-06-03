@@ -67,6 +67,10 @@ public class Decimal  {
         return new Decimal(Double.toString(d));
     }
 
+    public static Decimal fromString(String s) {
+        return new Decimal(s);
+    }
+
     public Decimal(String valueString) {
         value = new BigDecimal(valueString);
     }
@@ -81,4 +85,10 @@ public class Decimal  {
     public Decimal round() {
         return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
     }
+
+    public Decimal roundToTickSize(Decimal tickSize) {
+        return divide(tickSize).round().multiply(tickSize);
+    }
+
+
 }

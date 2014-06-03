@@ -110,6 +110,8 @@ public class OrderConnection implements ISendOrder {
         SessionID sessionId = initiator.getSessions().get(0);
         try {
             Session.sendToTarget(fixOrder, sessionId); // assumed to be threadsafe!
+            log.debug("Sent order new: "+orderNew.toString());
+            log.debug("Sent order new as fix: "+fixOrder.toString());
         } catch (SessionNotFound sessionNotFound) {
             sessionNotFound.printStackTrace();
             throw new RuntimeException(sessionNotFound.getMessage());

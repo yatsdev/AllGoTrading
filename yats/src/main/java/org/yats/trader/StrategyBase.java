@@ -19,8 +19,16 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     @Override
     public abstract void onReceipt(Receipt receipt);
 
-    public String getConfig(String key) {
+    protected String getConfig(String key) {
         return config.get(key);
+    }
+
+    protected double getConfigAsDouble(String key) {
+        return new Decimal(config.get(key)).toDouble();
+    }
+
+    protected Decimal getConfigAsDecimal(String key) {
+        return new Decimal(config.get(key));
     }
 
     public void setConfig(IProvideProperties config) {
@@ -81,16 +89,16 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.profitProvider = profitProvider;
     }
 
-    public void setExternalAccount(String internalAccount) {
-        this.externalAccount = internalAccount;
+    public void setExternalAccount(String a) {
+        this.externalAccount = a;
     }
 
     public String getInternalAccount() {
         return internalAccount;
     }
 
-    public void setInternalAccount(String internalAccount) {
-        this.internalAccount = internalAccount;
+    public void setInternalAccount(String a) {
+        this.internalAccount = a;
     }
 
     public void setProductProvider(IProvideProduct productProvider) {

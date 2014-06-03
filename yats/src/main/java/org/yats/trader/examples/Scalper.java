@@ -15,9 +15,6 @@ public class Scalper extends StrategyBase {
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(QuotingStrategy.class);
 
-    final static double stepFactor = 0.0;//0031;
-    final static double ticksize = 1.0;
-
     @Override
     public void onMarketData(MarketData marketData)
     {
@@ -45,6 +42,8 @@ public class Scalper extends StrategyBase {
             return;
         }
 
+        position = receipt.getPositionChange().add(position);
+
         log.debug("Received receipt: " + receipt);
 
         if(receipt.isEndState()) {
@@ -55,11 +54,6 @@ public class Scalper extends StrategyBase {
             }
         }
 
-
-
-
-
-        position = receipt.getPositionChange().add(position);
     }
 
     @Override
@@ -70,6 +64,9 @@ public class Scalper extends StrategyBase {
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
         position = getPositionForProduct(tradeProductId);
+        tickSize =getConfigAsDecimal("tickSize");
+        stepFactor=getConfigAsDouble("stepFactor");
+        orderSize=getConfigAsDouble("orderSize");
     }
 
     @Override
@@ -81,7 +78,7 @@ public class Scalper extends StrategyBase {
 
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
-        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)-ticksize).round();
+        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
         if(!orderExists(BookSide.BID, bidPrice))
             sendOrder(BookSide.BID, bidPrice);
     }
@@ -89,7 +86,7 @@ public class Scalper extends StrategyBase {
     private void sendAskRelativeTo(Decimal price) {
         if(!position.isGreaterThan(Decimal.ZERO)) return;
         double askMarket=price.toDouble();
-        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ticksize).round();
+        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
         if(!orderExists(BookSide.ASK, askPrice))
             sendOrder(BookSide.ASK, askPrice);
     }
@@ -111,7 +108,7 @@ public class Scalper extends StrategyBase {
                 .withInternalAccount(getInternalAccount())
                 .withBookSide(side)
                 .withLimit(bid)
-                .withSize(Decimal.fromDouble(0.0001));
+                .withSize(Decimal.fromDouble(orderSize));
 //        receivedOrderReceiptBidSide = false;
         orders.put(order.getOrderId().toString(), order);
         sendNewOrder(order);
@@ -140,6 +137,11 @@ public class Scalper extends StrategyBase {
     private boolean shuttingDown;
     private String tradeProductId;
     private HashMap<String, OrderNew> orders;
+
+    private double stepFactor = 0.0;//0031;
+    private Decimal tickSize = Decimal.ONE;
+    private double orderSize = 0.01;
+
 
 //    private boolean receivedOrderReceiptBidSide;
 
