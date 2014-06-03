@@ -100,6 +100,10 @@ public class PositionServerLogic implements IAmCalledBack {
 
     public void setPositionStorage(IStorePositionSnapshots positionStorage) {
         positionServer.setPositionStorage(positionStorage);
+        if(config.isStorePositionsToDisk()) {
+            positionServer.initFromLastStoredPositionSnapshot();
+        }
+
     }
 
     private BufferingReceiver<ReceiptMsg> receiverReceipts;
