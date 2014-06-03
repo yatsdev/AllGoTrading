@@ -75,6 +75,7 @@ public class PositionServerLogicTest {
         }
         @Override
         public PositionSnapshot readLast() {
+            if(positionSnapshots.size()<1) return new PositionSnapshot();
             return positionSnapshots.get(positionSnapshots.size()-1);
         }
         public int getSnapshotCount() {return positionSnapshots.size();}
