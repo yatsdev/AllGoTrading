@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.yats.common.ThreadTool;
+import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.ReceiptMsg;
@@ -36,7 +36,7 @@ public class PositionServerLogicTest {
 
         logic2.startSnapshotListener();
         logic2.requestPositionSnapshotFromPositionServer();
-        ThreadTool.sleepABit();
+        Tool.sleepABit();
 
         assert(2==server2.getNumberOfPositions());
     }
@@ -51,7 +51,7 @@ public class PositionServerLogicTest {
         senderReceipts = new Sender<ReceiptMsg>(c.getExchangeReceipts(),c.getServerIP());
         ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
         senderReceipts.publish(m.getTopic(), m);
-        ThreadTool.sleepABit();
+        Tool.sleepABit();
 
         assert(1==positionStorage.getSnapshotCount());
     }

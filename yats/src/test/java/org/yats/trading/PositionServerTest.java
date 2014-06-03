@@ -3,12 +3,6 @@ package org.yats.trading;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
-import org.yats.common.ThreadTool;
-import org.yats.common.UniqueId;
-import org.yats.messagebus.Config;
-import org.yats.messagebus.Sender;
-import org.yats.messagebus.messages.ReceiptMsg;
-import org.yats.trader.examples.PositionServerLogic;
 
 import java.util.ArrayList;
 

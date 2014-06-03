@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jfx-2.1.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/jfx-2.1.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
