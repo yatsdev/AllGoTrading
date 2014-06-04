@@ -137,6 +137,8 @@ public class OrderResponseCracker extends MessageCracker implements Application 
                     .withRejectReason(report.getText().getValue())
                     ;
 
+            r.setBookSide(BookSide.BID);
+
             receiptConsumer.onReceipt(r);
 
         } catch (FieldNotFound e) {

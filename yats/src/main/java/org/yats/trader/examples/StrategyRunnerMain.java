@@ -58,8 +58,9 @@ public class StrategyRunnerMain {
 
         PropertiesReader strategyRunnerConfig = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
+        Config config = Config.fromProperties(strategyRunnerConfig);
         positionServer = new PositionServer();
-        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(config);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
