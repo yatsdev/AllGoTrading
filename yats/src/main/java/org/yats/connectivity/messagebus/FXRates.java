@@ -23,7 +23,7 @@ public class FXRates {
 
         try {
 
-            HttpUriRequest httpGet = new HttpGet("https://stream-fxpractice.oanda.com/v1/quote?accountId=neosephiroth86&instruments=EUR_USD,USD_CAD,USD_JPY");
+            HttpUriRequest httpGet = new HttpGet("https://stream-fxpractice.oanda.com/v1/prices?accountId=3173292&instruments=EUR_USD,USD_CAD,USD_JPY");
             httpGet.setHeader(new BasicHeader("Authorization", "Bearer 37e6eba904c5a0599c364647b5bb39ed-49b4e985887799ca2a4fb4724b5ebda4"));
 
             System.out.println("Executing request: " + httpGet.getRequestLine());
