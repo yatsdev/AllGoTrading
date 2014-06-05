@@ -17,13 +17,13 @@ import java.io.IOException;
     back to the to the message bus.
  */
 
-public class FixServerMain {
+public class FixClientMain {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
 
-    final Logger log = LoggerFactory.getLogger(FixServerMain.class);
+    final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
 
     public void go() throws InterruptedException, IOException
@@ -34,16 +34,16 @@ public class FixServerMain {
         PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
         priceFeed.setProductProvider(products);
 
-        FixServerLogic strategy = new FixServerLogic();
+        FixClientLogic fixServerLogic = new FixClientLogic();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
-        strategyRunner.addStrategy(strategy);
+        strategyRunner.addStrategy(fixServerLogic);
         strategyRunner.setProductProvider(products);
         priceFeed.logon();
 
-        strategy.setPriceProvider(strategyRunner);
-        strategy.setProductProvider(products);
+        fixServerLogic.setPriceProvider(strategyRunner);
+        fixServerLogic.setProductProvider(products);
 
 //        OrderConnection orderConnection = OrderConnection.create();
         String username = System.getProperty("user.name").replace(" ","");
@@ -56,7 +56,7 @@ public class FixServerMain {
 
         strategyRunner.setOrderSender(orderConnection);
         orderConnection.setReceiptConsumer(strategyRunner);
-        strategy.setOrderSender(strategyRunner);
+        fixServerLogic.setOrderSender(strategyRunner);
 
         /*
         config/FIXServer.properties needs to provide the external account number of the user in the form:
@@ -64,11 +64,11 @@ public class FixServerMain {
          */
         PropertiesReader config = PropertiesReader.createFromConfigFile("config/FIXServer.properties");
 //        PropertiesReader config = PropertiesReader.create();
-        strategy.setConfig(config);
+        fixServerLogic.setConfig(config);
 
         Thread.sleep(2000);
 
-        strategy.init();
+        fixServerLogic.init();
 
         System.out.println("\n===");
         System.out.println("Initialization done.");
@@ -77,17 +77,17 @@ public class FixServerMain {
         System.in.read();
         System.out.println("\nexiting...\n");
 
-        strategy.shutdown();
+        fixServerLogic.shutdown();
         Thread.sleep(1000);
 
         System.exit(0);
     }
 
-    public FixServerMain() {
+    public FixClientMain() {
     }
 
     public static void main(String args[]) throws Exception {
-        FixServerMain q = new FixServerMain();
+        FixClientMain q = new FixClientMain();
 
         try {
             q.go();

@@ -24,6 +24,7 @@ public class SingleOrder extends StrategyBase {
         startPrice = marketData;
 
         sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
+        sendOrder(BookSide.BID, marketData.getBid().subtract(Decimal.ONE), Decimal.fromString("0.02"));
     }
 
 

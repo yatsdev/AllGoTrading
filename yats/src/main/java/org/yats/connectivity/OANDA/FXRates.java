@@ -1,20 +1,21 @@
 package org.yats.connectivity.OANDA;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.Date;
-
-import org.apache.http.*;
-import org.apache.http.client.methods.*;
-//import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
-
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+//import org.apache.http.impl.client.BasicResponseHandler;
 
 public class FXRates {
     public static void main (String[]args) throws IOException {
@@ -23,7 +24,7 @@ public class FXRates {
 
         try {
 
-            HttpUriRequest httpGet = new HttpGet("https://stream-fxpractice.oanda.com/v1/prices?accountId=3173292&instruments=EUR_USD");
+            HttpUriRequest httpGet = new HttpGet("https://stream-fxpractice.oanda.com/v1/prices?accountId=3173292&instruments=USD_ZAR");
             httpGet.setHeader(new BasicHeader("Authorization", "Bearer 37e6eba904c5a0599c364647b5bb39ed-49b4e985887799ca2a4fb4724b5ebda4"));
 
             System.out.println("Executing request: " + httpGet.getRequestLine());
