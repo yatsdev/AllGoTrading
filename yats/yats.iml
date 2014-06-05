@@ -27,7 +27,7 @@
     <orderEntry type="library" name="jfx-2.1.4" level="project" />
     <orderEntry type="library" name="org.apache.httpcomponents:httpclient:4.2.3" level="project" />
     <orderEntry type="library" name="org.apache.httpcomponents:httpcore:4.2.3" level="project" />
-    <orderEntry type="library" name="org.netbeans.api:org-netbeans-libs-json_simple:RELEASE80" level="project" />
+    <orderEntry type="library" name="com.googlecode.json-simple:json-simple:1.1.1" level="project" />
   </component>
 </module>
 
