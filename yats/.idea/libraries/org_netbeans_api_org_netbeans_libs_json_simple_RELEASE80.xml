@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="org.netbeans.api:org-netbeans-libs-json_simple:RELEASE80" type="repository">
+    <properties maven-id="org.netbeans.api:org-netbeans-libs-json_simple:RELEASE80" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/netbeans/api/org-netbeans-libs-json_simple/RELEASE80/org-netbeans-libs-json_simple-RELEASE80.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/netbeans/external/json-simple-1.1.1/RELEASE80/json-simple-1.1.1-RELEASE80.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
