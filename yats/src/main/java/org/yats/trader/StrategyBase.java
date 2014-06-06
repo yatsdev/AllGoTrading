@@ -35,7 +35,13 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.config = config;
     }
 
-    public abstract void init();
+    public void init() {
+        initialised = true;
+    }
+
+    public boolean isInitialised() {
+        return initialised;
+    }
 
     public abstract void shutdown();
 
@@ -98,7 +104,9 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     }
 
     public StrategyBase() {
+
         consumerId = UniqueId.create();
+        initialised = false;
     }
 
 
@@ -114,5 +122,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     private final UniqueId consumerId;
 
     private IProvideProperties config;
+    private boolean initialised;
 
 }

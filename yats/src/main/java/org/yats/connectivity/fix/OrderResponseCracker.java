@@ -102,6 +102,7 @@ public class OrderResponseCracker extends MessageCracker implements Application 
             r.setPrice(new Decimal(report.getPrice().getValue()));
             r.setResidualSize(new Decimal(report.getLeavesQty().getValue()));
             r.setCurrentTradedSize(new Decimal(report.getLastShares().getValue()));
+            r.setTotalTradedSize(new Decimal(report.getCumQty().getValue()));
             r.setOrderId(UniqueId.createFromString(report.getClOrdID().getValue()));
             if(cancelTypes.indexOf(report.getExecType().getValue())>=0) { // cancel
                 r.setOrderId(UniqueId.createFromString(report.getOrigClOrdID().getValue()));

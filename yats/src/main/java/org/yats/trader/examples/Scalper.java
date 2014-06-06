@@ -18,6 +18,7 @@ public class Scalper extends StrategyBase {
     @Override
     public void onMarketData(MarketData marketData)
     {
+        if(!isInitialised()) return;
         if(!marketData.hasProductId(tradeProductId)) return;
         if(!startPrice.equals(MarketData.NULL)) return;
         if(shuttingDown) return;
@@ -31,6 +32,7 @@ public class Scalper extends StrategyBase {
     @Override
     public void onReceipt(Receipt receipt)
     {
+        if(!isInitialised()) return;
         if(shuttingDown) return;
         if(receipt.getRejectReason().length()>0) {
             log.error("Received rejection! Stopping for now!");
@@ -43,6 +45,7 @@ public class Scalper extends StrategyBase {
         }
 
         position = receipt.getPositionChange().add(position);
+        log.info("position="+position);
 
         log.debug("Received receipt: " + receipt);
 
@@ -59,10 +62,12 @@ public class Scalper extends StrategyBase {
     @Override
     public void init()
     {
-        setInternalAccount(this.getClass().getSimpleName());
+        super.init();
+        setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
         position = getPositionForProduct(tradeProductId);
+        log.info("position="+position);
         tickSize =getConfigAsDecimal("tickSize");
         stepFactor=getConfigAsDouble("stepFactor");
         orderSize=getConfigAsDouble("orderSize");
