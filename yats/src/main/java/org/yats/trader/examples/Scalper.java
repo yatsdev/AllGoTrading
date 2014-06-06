@@ -59,7 +59,7 @@ public class Scalper extends StrategyBase {
     @Override
     public void init()
     {
-        setInternalAccount("quoting1");
+        setInternalAccount(this.getClass().getSimpleName());
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
         position = getPositionForProduct(tradeProductId);
