@@ -3,8 +3,9 @@ package org.yats.trader.examples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
-import org.yats.common.IProvideProperties;
-import org.yats.messagebus.*;
+import org.yats.messagebus.BufferingReceiver;
+import org.yats.messagebus.Config;
+import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
@@ -37,7 +38,6 @@ public class FixClientLogic extends StrategyBase implements IAmCalledBack {
     @Override
     public void init()
     {
-        setExternalAccount(config.get("externalAccount"));
         setInternalAccount("quoting1");
         marketDataMsgSender.init();
     }
@@ -46,10 +46,6 @@ public class FixClientLogic extends StrategyBase implements IAmCalledBack {
     public void shutdown()
     {
         shuttingDown=true;
-    }
-
-    public void setConfig(IProvideProperties config) {
-        this.config = config;
     }
 
     public void onCallback() {
@@ -129,6 +125,5 @@ public class FixClientLogic extends StrategyBase implements IAmCalledBack {
     BufferingReceiver<OrderNewMsg> receiverOrderNew;
     BufferingReceiver<OrderCancelMsg> receiverOrderCancel;
     private boolean shuttingDown;
-    IProvideProperties config;
 
 } // class

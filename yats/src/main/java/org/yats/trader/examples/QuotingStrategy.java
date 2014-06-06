@@ -48,7 +48,6 @@ public class QuotingStrategy extends StrategyBase {
     @Override
     public void init()
     {
-        setExternalAccount(getConfig("externalAccount"));
         setInternalAccount("quoting1");
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
@@ -96,7 +95,6 @@ public class QuotingStrategy extends StrategyBase {
     {
         lastBidOrder = OrderNew.create()
                 .withProductId(tradeProductId)
-                .withExternalAccount(getExternalAccount())
                 .withInternalAccount(getInternalAccount())
                 .withBookSide(BookSide.BID)
                 .withLimit(bid)

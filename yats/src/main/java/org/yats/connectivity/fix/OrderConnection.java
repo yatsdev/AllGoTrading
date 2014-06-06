@@ -2,6 +2,7 @@ package org.yats.connectivity.fix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 import org.yats.trading.Product;
@@ -45,7 +46,7 @@ public class OrderConnection implements ISendOrder {
         String configStringDefault = "[default]\n" +
                 "FileStorePath=data\n" +
                 "ConnectionType=initiator\n" +
-                "SenderCompID=HIQ1_ORDER\n" +
+                "SenderCompID=HIQ_ORDER\n" +
                 "TargetCompID=HIQFIX\n" +
                 "SocketConnectHost=46.244.8.46\n" +
                 "StartTime=00:00:00\n" +
@@ -64,7 +65,10 @@ public class OrderConnection implements ISendOrder {
     {
         try {
             String configAsString = new Scanner(new File(pathToConfigFile)).useDelimiter("\\Z").next();
-            return createFromConfigString(configAsString);
+            OrderConnection o = createFromConfigString(configAsString);
+            PropertiesReader r = PropertiesReader.createFromConfigFile(pathToConfigFile);
+            o.setExternalAccount(r.get("externalAccount"));
+            return o;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
@@ -93,11 +97,11 @@ public class OrderConnection implements ISendOrder {
 
     public OrderConnection(SessionSettings settings) throws Exception
     {
+        externalAccount="n/a";
         boolean logHeartbeats = Boolean.valueOf(System.getProperty("logHeartbeats", "true"));
         orderResponseCracker = new OrderResponseCracker();
         MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
-        LogFactory logFactory = new ScreenLogFactory(true, true, true,
-                logHeartbeats);
+        LogFactory logFactory = new ScreenLogFactory(true, true, true, logHeartbeats);
         MessageFactory messageFactory = new DefaultMessageFactory();
         initiator = new SocketInitiator(orderResponseCracker, messageStoreFactory, settings, logFactory, messageFactory);
     }
@@ -149,7 +153,8 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new TransactTime(new Date(0)));
         fixOrder.set(new OrigClOrdID(orderCancel.getOrderId().toString()));
         fixOrder.set(new ClOrdID(UniqueId.create().toString()));
-        fixOrder.set(new Account(orderCancel.getExternalAccount()));
+//        fixOrder.set(new Account(orderCancel.getExternalAccount()));
+        fixOrder.set(new Account(externalAccount));
         Product p = productProvider.getProductForProductId(orderCancel.getProductId());
         fixOrder.set(new Symbol(p.getSymbol()));
         if (orderCancel.getSide().toDirection()>0) {
@@ -165,7 +170,8 @@ public class OrderConnection implements ISendOrder {
         quickfix.fix42.NewOrderSingle fixOrder = new quickfix.fix42.NewOrderSingle();
         fixOrder.set(new TransactTime(new Date(0)));
         fixOrder.set(new HandlInst('1'));
-        fixOrder.set(new Account(order.getExternalAccount()));
+//        fixOrder.set(new Account(order.getExternalAccount()));
+        fixOrder.set(new Account(externalAccount));
         Product p = productProvider.getProductForProductId(order.getProductId());
         BookSide side = order.getBookSide();
         fixOrder.set(new Symbol(p.getSymbol()));
@@ -192,11 +198,15 @@ public class OrderConnection implements ISendOrder {
         this.productProvider = productProvider;
     }
 
+    public void setExternalAccount(String externalAccount) {
+        this.externalAccount = externalAccount;
+    }
 
     private OrderResponseCracker orderResponseCracker;
     private boolean initiatorStarted = false;
     private Initiator initiator = null;
     private IProvideProduct productProvider;
+    private String externalAccount;
 
 
 }

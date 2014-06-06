@@ -69,10 +69,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), productId);
     }
 
-    public String getExternalAccount() {
-        return externalAccount;
-    }
-
     public void setPriceProvider(IProvidePriceFeed priceProvider) {
         this.priceProvider = priceProvider;
     }
@@ -87,10 +83,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     public void setProfitProvider(IProvideProfit profitProvider) {
         this.profitProvider = profitProvider;
-    }
-
-    public void setExternalAccount(String a) {
-        this.externalAccount = a;
     }
 
     public String getInternalAccount() {
@@ -110,7 +102,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     }
 
 
-    private String externalAccount;
     private String internalAccount;
 
     private IProvidePriceFeed priceProvider;

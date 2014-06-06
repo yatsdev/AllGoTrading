@@ -68,7 +68,7 @@ public class PriceFeed implements IProvidePriceFeed {
         String configStringDefault = "[default]\n" +
                 "FileStorePath=data\n" +
                 "ConnectionType=initiator\n" +
-                "SenderCompID=HIQ1_PRICE\n" +
+                "SenderCompID=HIQ_PRICE\n" +
                 "TargetCompID=HIQFIX\n" +
                 "SocketConnectHost=46.244.8.46\n" +
                 "StartTime=00:00:00\n" +

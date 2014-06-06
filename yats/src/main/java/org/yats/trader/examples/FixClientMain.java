@@ -2,8 +2,8 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.CommonExceptions;
 import org.yats.common.FileTool;
-import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
@@ -28,10 +28,16 @@ public class FixClientMain {
 
     public void go() throws InterruptedException, IOException
     {
-//        PriceFeed priceFeed = PriceFeed.create();
-        ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
 
-        PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
+        /*
+        config/FIXOrder_<username>.properties needs to provide the external account number of the user in the form:
+        externalAccount=1234
+         */
+        String configFIXOrderFilename = getPersonalConfigFilename("config/FIXOrder");
+        String configFIXPriceFilename = getPersonalConfigFilename("config/FIXPrice");
+
+        ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
+        PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
         FixClientLogic fixServerLogic = new FixClientLogic();
@@ -45,26 +51,13 @@ public class FixClientMain {
         fixServerLogic.setPriceProvider(strategyRunner);
         fixServerLogic.setProductProvider(products);
 
-//        OrderConnection orderConnection = OrderConnection.create();
-        String username = System.getProperty("user.name").replace(" ","");
-        String userSpecificFIXFilename ="config/configOrder_"+username+".cfg";
-        String configFIXFilename = FileTool.exists(userSpecificFIXFilename)
-                ? userSpecificFIXFilename : "config/configOrder.cfg";
-        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXFilename);
+        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
         orderConnection.setProductProvider(products);
         orderConnection.logon();
 
         strategyRunner.setOrderSender(orderConnection);
         orderConnection.setReceiptConsumer(strategyRunner);
         fixServerLogic.setOrderSender(strategyRunner);
-
-        /*
-        config/FIXServer.properties needs to provide the external account number of the user in the form:
-        externalAccount=1234
-         */
-        PropertiesReader config = PropertiesReader.createFromConfigFile("config/FIXServer.properties");
-//        PropertiesReader config = PropertiesReader.create();
-        fixServerLogic.setConfig(config);
 
         Thread.sleep(2000);
 
@@ -81,6 +74,16 @@ public class FixClientMain {
         Thread.sleep(1000);
 
         System.exit(0);
+    }
+
+    private String getPersonalConfigFilename(String prefix)
+    {
+        String username = System.getProperty("user.name").replace(" ","");
+        String userSpecificFIXFilename = prefix+"_"+username+".properties";
+        log.info("Trying to read config file: "+userSpecificFIXFilename);
+        if(!FileTool.exists(userSpecificFIXFilename))
+            throw new CommonExceptions.FileReadException(userSpecificFIXFilename+" not found!");
+        return userSpecificFIXFilename;
     }
 
     public FixClientMain() {

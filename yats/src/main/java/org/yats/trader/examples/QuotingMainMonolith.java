@@ -2,6 +2,8 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.CommonExceptions;
+import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
@@ -28,9 +30,12 @@ public class QuotingMainMonolith {
 
     public void go() throws InterruptedException, IOException
     {
+        String configFIXOrderFilename = getPersonalConfigFilename("config/FIXOrder");
+        String configFIXPriceFilename = getPersonalConfigFilename("config/FIXPrice");
+
 //        PriceFeed priceFeed = PriceFeed.create();
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        PriceFeed priceFeed = PriceFeed.createFromConfigFile("config/configPrice.cfg");
+        PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
         QuotingStrategy strategy = new QuotingStrategy();
@@ -50,9 +55,7 @@ public class QuotingMainMonolith {
         strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
-
-//        OrderConnection orderConnection = OrderConnection.create();
-        OrderConnection orderConnection = OrderConnection.createFromConfigFile("config/configOrder.cfg");
+        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
         orderConnection.setProductProvider(products);
         orderConnection.logon();
 
@@ -100,6 +103,17 @@ public class QuotingMainMonolith {
 //        shutdownLatch.await();
 
     }
+
+    private String getPersonalConfigFilename(String prefix)
+    {
+        String username = System.getProperty("user.name").replace(" ","");
+        String userSpecificFIXFilename = prefix+"_"+username+".properties";
+        log.info("Trying to read config file: "+userSpecificFIXFilename);
+        if(!FileTool.exists(userSpecificFIXFilename))
+            throw new CommonExceptions.FileReadException(userSpecificFIXFilename+" not found!");
+        return userSpecificFIXFilename;
+    }
+
 
     public QuotingMainMonolith() {
     }
