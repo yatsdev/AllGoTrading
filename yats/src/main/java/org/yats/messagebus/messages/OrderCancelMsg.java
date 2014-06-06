@@ -17,7 +17,6 @@ public class OrderCancelMsg {
         OrderCancelMsg m = new OrderCancelMsg();
         m.timestamp = r.getTimestamp().toString();
         m.orderId=r.getOrderId().toString();
-        m.externalAccount=r.getExternalAccount();
         m.productId = r.getProductId();
         m.bookSide = r.getBookSide();
         return m;
@@ -27,7 +26,6 @@ public class OrderCancelMsg {
         return OrderCancel.create()
                 .withTimestamp(DateTime.parse(timestamp))
                 .withOrderId(UniqueId.createFromString(orderId))
-                .withExternalAccount(externalAccount)
                 .withProductId(productId)
                 .withBookSide(bookSide);
     }
@@ -37,7 +35,6 @@ public class OrderCancelMsg {
         return "OrderCancelMsg{" +
                 "timestamp='" + timestamp + '\'' +
                 ", orderId='" + orderId + '\'' +
-                ", externalAccount='" + externalAccount + '\'' +
                 ", productId='" + productId + '\'' +
                 ", bookSide=" + bookSide +
                 '}';
@@ -50,7 +47,6 @@ public class OrderCancelMsg {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(orderId.compareTo(data.orderId)!=0) return false;
-        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
         return true;
@@ -58,7 +54,6 @@ public class OrderCancelMsg {
 
     public String timestamp;
     public String orderId;
-    public String externalAccount;
     public String productId;
     public BookSide bookSide;
 

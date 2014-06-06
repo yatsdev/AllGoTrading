@@ -18,7 +18,6 @@ public class OrderNewMsg {
         OrderNewMsg m = new OrderNewMsg();
         m.timestamp = r.getTimestamp().toString();
         m.orderId=r.getOrderId().toString();
-        m.externalAccount=r.getExternalAccount();
         m.internalAccount=r.getInternalAccount();
         m.productId = r.getProductId();
         m.bookSideDirection = r.getBookSide().toDirection();
@@ -31,7 +30,6 @@ public class OrderNewMsg {
         return OrderNew.create()
                 .withTimestamp(DateTime.parse(timestamp))
                 .withOrderId(UniqueId.createFromString(orderId))
-                .withExternalAccount(externalAccount)
                 .withInternalAccount(internalAccount)
                 .withProductId(productId)
                 .withBookSide(BookSide.fromDirection(bookSideDirection))
@@ -44,7 +42,6 @@ public class OrderNewMsg {
         return "OrderNewMsg{" +
                 "timestamp='" + timestamp + '\'' +
                 ", orderId='" + orderId + '\'' +
-                ", externalAccount='" + externalAccount + '\'' +
                 ", internalAccount='" + internalAccount + '\'' +
                 ", productId='" + productId + '\'' +
                 ", symbol='" + symbol + '\'' +
@@ -62,7 +59,6 @@ public class OrderNewMsg {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(orderId.compareTo(data.orderId)!=0) return false;
-        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(internalAccount.compareTo(data.internalAccount)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(symbol.compareTo(data.symbol)!=0) return false;
@@ -76,7 +72,6 @@ public class OrderNewMsg {
 
     public String timestamp;
     public String orderId;
-    public String externalAccount;
     public String internalAccount;
     public String productId;
     public String symbol;

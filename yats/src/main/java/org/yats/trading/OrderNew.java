@@ -18,7 +18,6 @@ public class OrderNew extends OrderBase {
         return OrderCancel.create()
                 .withProductId(productId)
                 .withBookSide(bookSide)
-                .withExternalAccount(externalAccount)
                 .withOrderId(orderId)
                 ;
     }
@@ -32,7 +31,6 @@ public class OrderNew extends OrderBase {
                 ",bookSide=" + bookSide +
                 ",limit=" + limit +
                 ",size=" + size +
-                ",externalAccount=" + externalAccount +
                 ",internalAccount=" + internalAccount +
                 ",timestamp=" + timestamp +
                 '}';
@@ -41,7 +39,6 @@ public class OrderNew extends OrderBase {
     public Receipt createReceiptDefault() {
         return Receipt.create()
                 .withOrderId(getOrderId())
-                .withExternalAccount(externalAccount)
                 .withProductId(productId)
                 .withBookSide(bookSide)
                 .withPrice(limit)
@@ -63,12 +60,6 @@ public class OrderNew extends OrderBase {
         return limit;
     }
 
-
-    public String getExternalAccount() {
-        return externalAccount;
-    }
-
-
     public OrderNew withTimestamp(DateTime d) {
         timestamp=d;
         return this;
@@ -76,11 +67,6 @@ public class OrderNew extends OrderBase {
 
     public OrderNew withOrderId(UniqueId i) {
         setOrderId(i);
-        return this;
-    }
-
-    public OrderNew withExternalAccount(String a) {
-        externalAccount =a;
         return this;
     }
 
@@ -136,7 +122,6 @@ public class OrderNew extends OrderBase {
 
     public OrderNew() {
         bookSide = BookSide.BID;
-        externalAccount ="";
         setOrderId(UniqueId.create());
         timestamp = DateTime.now(DateTimeZone.UTC);
         internalAccount="";
@@ -148,7 +133,6 @@ public class OrderNew extends OrderBase {
     public boolean isSameAs(OrderNew data) {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
-        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(internalAccount.compareTo(data.internalAccount)!=0) return false;
         if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
         if(!(size.isEqualTo(data.size))) return false;
@@ -160,7 +144,6 @@ public class OrderNew extends OrderBase {
 
 
     private DateTime timestamp;
-    private String externalAccount;
     private String internalAccount;
 //    private Product product;
     private BookSide bookSide;

@@ -12,7 +12,6 @@ public class OrderCancel extends OrderBase {
                 "oid="+getOrderId()+
                 ",productId="+ productId +
                 ",bookSide=" + bookSide +
-                ",externalAccount=" + externalAccount +
                 ",timestamp=" + timestamp +
                 '}';
     }
@@ -22,7 +21,6 @@ public class OrderCancel extends OrderBase {
                 .withOrderId(orderId)
                 .withProductId(productId)
                 .withBookSide(bookSide)
-                .withExternalAccount(externalAccount)
                 .withEndState(false);
     }
 
@@ -42,9 +40,6 @@ public class OrderCancel extends OrderBase {
         return bookSide;
     }
 
-    public String getExternalAccount() {
-        return externalAccount;
-    }
 
     public OrderCancel withOrderId(UniqueId id) {
         orderId=id;
@@ -66,11 +61,6 @@ public class OrderCancel extends OrderBase {
         return this;
     }
 
-    public OrderCancel withExternalAccount(String a) {
-        externalAccount =a;
-        return this;
-    }
-
     public static OrderCancel create() {
         return new OrderCancel();
     }
@@ -78,7 +68,6 @@ public class OrderCancel extends OrderBase {
     public OrderCancel() {
         productId = "";
         bookSide = BookSide.BID;
-        externalAccount ="";
         orderId = UniqueId.create();
         timestamp = DateTime.now(DateTimeZone.UTC);
     }
@@ -86,7 +75,6 @@ public class OrderCancel extends OrderBase {
      public boolean isSameAs(OrderCancel data) {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
-        if(externalAccount.compareTo(data.externalAccount)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
         return true;
@@ -96,6 +84,5 @@ public class OrderCancel extends OrderBase {
     private DateTime timestamp;
     private String productId;
     private BookSide bookSide;
-    private String externalAccount;
 
 } // class
