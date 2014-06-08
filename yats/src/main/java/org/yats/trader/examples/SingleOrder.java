@@ -23,8 +23,8 @@ public class SingleOrder extends StrategyBase {
         if(shuttingDown) return;
         startPrice = marketData;
 
-        sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
-        sendOrder(BookSide.BID, marketData.getBid().subtract(Decimal.ONE), Decimal.fromString("0.02"));
+        //sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
+        sendOrder(BookSide.BID, marketData.getBid().add(Decimal.ONE), Decimal.fromString("0.01"));
     }
 
 

@@ -1,5 +1,8 @@
 package org.yats.connectivity.OANDA;
 
+import com.jfx.MT4;
+import com.jfx.TickInfo;
+import com.jfx.strategy.Strategy;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -9,16 +12,32 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yats.common.Decimal;
+import org.yats.common.Tool;
+import org.yats.messagebus.Config;
+import org.yats.messagebus.Sender;
+import org.yats.messagebus.messages.MarketDataMsg;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 //import org.apache.http.impl.client.BasicResponseHandler;
 
 public class FXRates {
+
+    final Logger log = LoggerFactory.getLogger(FXRates.class);
+
+
     public static void main (String[]args) throws IOException {
+
+
 
         DefaultHttpClient httpClient = new DefaultHttpClient();
 
@@ -55,6 +74,23 @@ public class FXRates {
                         System.out.println(time);
                         System.out.println(bid);
                         System.out.println(ask);
+
+                        MarketDataMsg data = new MarketDataMsg();
+
+                        Sender<MarketDataMsg> sender = null;
+
+
+                        sender = new Sender<MarketDataMsg>(Config.DEFAULT.getExchangeMarketData(),
+                                Config.DEFAULT.getServerIP());
+
+                        data.productId=instrument;
+                        data.bid= Decimal.fromDouble(bid).toString();
+                        data.ask= Decimal.fromDouble(ask).toString();
+                        data.bidSize="1";
+                        data.askSize="1";
+                        data.timestamp= Tool.getUTCTimestampString();
+                        sender.publish(data.getTopic(), data);
+
                     }
                 }
             } else {
