@@ -11,6 +11,7 @@ public class PositionStorageCSV implements IStorePositionSnapshots {
 
     @Override
     public PositionSnapshot readLast() {
+        if(!FileTool.exists(filename)) return new PositionSnapshot();
         String lastLine = FileTool.getTail(filename,1);
         return PositionSnapshot.fromStringCSV(lastLine);
     }
