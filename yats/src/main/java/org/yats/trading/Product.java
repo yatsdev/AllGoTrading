@@ -14,11 +14,13 @@ public class Product {
     @Override
     public String toString() {
         return "Product{" +
-                "productId=" + productId +
-                ",symbol=" + symbol +
-                ",exchange=" + exchange +
-                ",bloombergId=" + bloombergId +
-                ",route=" + route +
+                "productId='" + productId + '\'' +
+                ",symbol='" + symbol + '\'' +
+                ",exchange='" + exchange + '\'' +
+                ",bloombergId='" + bloombergId + '\'' +
+                ",name='" + name + '\'' +
+                ",route='" + route + '\'' +
+                ",unitId='" + unitId + '\'' +
                 '}';
     }
 
@@ -56,7 +58,7 @@ public class Product {
     }
 
     public String toStringCSV() {
-        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route;
+        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route+","+unitId;
     }
 
     public Product withProductId(String p) {
@@ -89,6 +91,11 @@ public class Product {
         return this;
     }
 
+    public Product withUnitId(String s) {
+        unitId = s;
+        return this;
+    }
+
     public Product(String productId, String symbol, String exchange) {
         this.productId = productId;
         this.symbol = symbol;
@@ -105,6 +112,7 @@ public class Product {
     private String bloombergId;
     private String name;
     private String route;
+    private String unitId;
 
     public boolean isRoute(String r) {
         return (route.compareTo(r)==0);

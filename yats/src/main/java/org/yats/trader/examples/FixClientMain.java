@@ -6,6 +6,7 @@ import org.yats.common.CommonExceptions;
 import org.yats.common.FileTool;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
+import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ProductList;
 
@@ -40,16 +41,16 @@ public class FixClientMain {
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
-        FixClientLogic fixServerLogic = new FixClientLogic();
+        MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
-        strategyRunner.addStrategy(fixServerLogic);
+        strategyRunner.addStrategy(marketToBusConnection);
         strategyRunner.setProductProvider(products);
         priceFeed.logon();
 
-        fixServerLogic.setPriceProvider(strategyRunner);
-        fixServerLogic.setProductProvider(products);
+        marketToBusConnection.setPriceProvider(strategyRunner);
+        marketToBusConnection.setProductProvider(products);
 
         OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
         orderConnection.setProductProvider(products);
@@ -57,11 +58,11 @@ public class FixClientMain {
 
         strategyRunner.setOrderSender(orderConnection);
         orderConnection.setReceiptConsumer(strategyRunner);
-        fixServerLogic.setOrderSender(strategyRunner);
+        marketToBusConnection.setOrderSender(strategyRunner);
 
         Thread.sleep(2000);
 
-        fixServerLogic.init();
+        marketToBusConnection.init();
 
         System.out.println("\n===");
         System.out.println("Initialization done.");
@@ -70,7 +71,7 @@ public class FixClientMain {
         System.in.read();
         System.out.println("\nexiting...\n");
 
-        fixServerLogic.shutdown();
+        marketToBusConnection.shutdown();
         Thread.sleep(1000);
 
         System.exit(0);

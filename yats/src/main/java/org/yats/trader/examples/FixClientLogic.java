@@ -10,6 +10,7 @@ import org.yats.messagebus.messages.*;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
+@Deprecated
 public class FixClientLogic extends StrategyBase implements IAmCalledBack {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory

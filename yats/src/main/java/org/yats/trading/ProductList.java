@@ -45,6 +45,7 @@ public class ProductList implements IProvideProduct {
                         .withBloombergId(checkForNull(nextLine[3].trim()))
                         .withName(checkForNull(nextLine[4].trim()))
                         .withRoute(checkForNull(nextLine[5].trim()))
+                        .withUnitId(checkForNull(nextLine[6].trim()))
                         ;
                 add(p);
             }

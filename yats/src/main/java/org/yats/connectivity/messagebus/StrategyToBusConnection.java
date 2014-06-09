@@ -10,12 +10,12 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
 import org.yats.trading.*;
 
-public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack {
+public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(GenericConnection.class);
+    final Logger log = LoggerFactory.getLogger(StrategyToBusConnection.class);
 
 
     @Override
@@ -69,7 +69,7 @@ public class GenericConnection implements IProvidePriceFeed, ISendOrder, IAmCall
         this.receiptConsumer = receiptConsumer;
     }
 
-    public GenericConnection() {
+    public StrategyToBusConnection() {
         marketDataConsumer=new MarketDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
         Config config = Config.DEFAULT;

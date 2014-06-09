@@ -1,7 +1,7 @@
 package org.yats.trader.examples;
 
 import org.yats.common.PropertiesReader;
-import org.yats.connectivity.messagebus.GenericConnection;
+import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
@@ -34,7 +34,7 @@ public class QuotingMain {
     {
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        GenericConnection priceAndOrderConnection = new GenericConnection();
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
 
         QuotingStrategy strategy = new QuotingStrategy();
         PositionServer positionServer = new PositionServer();

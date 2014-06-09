@@ -2,7 +2,7 @@ package org.yats.trader.examples;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
-import org.yats.connectivity.messagebus.GenericConnection;
+import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
 import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
@@ -54,7 +54,7 @@ public class StrategyRunnerMain {
     public void go() throws InterruptedException, IOException
     {
         products = ProductList.createFromFile("config/CFDProductList.csv");
-        GenericConnection priceAndOrderConnection = new GenericConnection();
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
 
         PropertiesReader strategyRunnerConfig = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
