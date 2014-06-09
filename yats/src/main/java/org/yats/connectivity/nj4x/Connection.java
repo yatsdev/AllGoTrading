@@ -47,7 +47,7 @@ public class Connection {
 
         PropertiesReader oandaPropertyReader = PropertiesReader.createFromConfigFile(configDir + "/mt4oanda.txt");
 
-        strategy.connect(JFX_SERVER_ADDRESS, 7788, new Broker("OANDA-MT4"),
+        strategy.connect(JFX_SERVER_ADDRESS, 7788, new Broker("oanda-MT4"),
                 oandaPropertyReader.get("username"), oandaPropertyReader.get("password"));
 
         strategy.addTerminal(Strategy.TerminalType.ORDERS_WORKER).connect();// as many as you need parallel order processors
