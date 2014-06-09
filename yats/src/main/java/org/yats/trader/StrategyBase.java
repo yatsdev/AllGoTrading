@@ -1,5 +1,7 @@
 package org.yats.trader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
@@ -7,7 +9,7 @@ import org.yats.trading.*;
 
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
-
+    final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
 
     @Override
@@ -47,6 +49,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     public void subscribe(String productId)
     {
+        log.info("Subscription sent for "+productId+ " by "+this.getClass().getSimpleName());
         priceProvider.subscribe(productId, this);
     }
 
