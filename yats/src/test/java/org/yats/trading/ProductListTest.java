@@ -5,6 +5,8 @@ import org.testng.annotations.Test;
 
 public class ProductListTest {
 
+    public static final String PRODUCT_LIST_PATH = "config/CFDProductList.csv";
+
     @Test
     public void canReadProductList()
     {
@@ -38,7 +40,7 @@ public class ProductListTest {
     @BeforeMethod
     public void setUp() {
         list = new ProductList();
-        list.read("config/CFDProductList.csv");
+        list.read(PRODUCT_LIST_PATH);
     }
 
     ProductList list;

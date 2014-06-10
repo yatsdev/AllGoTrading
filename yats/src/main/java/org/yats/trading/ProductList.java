@@ -17,6 +17,15 @@ public class ProductList implements IProvideProduct {
         return list.get(productId);
     }
 
+    @Override
+    public IProvideProduct getProductsWithUnit(String productId) {
+        ProductList units = new ProductList();
+        for(Product p : list.values()) {
+            if(p.hasProductId(productId)) units.add(p);
+        }
+        return units;
+    }
+
     public Product findBySymbol(String symbol) {
         for(Product p:list.values()) {
             if(p.getSymbol().compareTo(symbol)==0) {

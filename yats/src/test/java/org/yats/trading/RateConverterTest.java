@@ -33,7 +33,8 @@ public class RateConverterTest {
 
     @BeforeMethod
     public void setUp() {
-        converter = new RateConverter();
+        ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
+        converter = new RateConverter(productList);
         converter.onMarketData(MarketDataTest.EURUSD);
         converter.onMarketData(MarketDataTest.USDCHF);
         p1 = new Position(MarketDataTest.SAP_PID, SAP_SIZE);

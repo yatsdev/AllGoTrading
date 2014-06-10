@@ -23,11 +23,14 @@ public class RateConverter implements IConsumeMarketData {
         return UniqueId.create();
     }
 
-    public RateConverter() {
+    public RateConverter(IProvideProduct p) {
+        products = p;
         rates = new ConcurrentHashMap<String, MarketData>();
     }
 
 
     ConcurrentHashMap<String, MarketData> rates;
+    IProvideProduct products;
+
 
 } // class

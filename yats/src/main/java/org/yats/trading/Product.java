@@ -57,6 +57,10 @@ public class Product {
         return route;
     }
 
+    public String getUnitId() {
+        return unitId;
+    }
+
     public String toStringCSV() {
         return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route+","+unitId;
     }
