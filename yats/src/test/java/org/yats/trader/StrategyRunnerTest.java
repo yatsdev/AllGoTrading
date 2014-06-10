@@ -103,8 +103,9 @@ public class StrategyRunnerTest {
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP, Decimal.fromDouble(10)
-                ,Decimal.fromDouble(11),Decimal.ONE,Decimal.ONE);
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP,
+                Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
+                Decimal.ONE,Decimal.ONE,Decimal.ONE);
     }
 
 

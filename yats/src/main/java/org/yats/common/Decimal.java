@@ -8,6 +8,9 @@ public class Decimal  {
 
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
+    public static final Decimal DIME = new Decimal("0.10");
+    public static final Decimal CENT = new Decimal("0.01");
+
 
 
     public BigDecimal toBigDecimal() {

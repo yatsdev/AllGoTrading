@@ -18,17 +18,21 @@ public class MarketData
     public boolean isPriceAndSizeSame(MarketData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
-        if(!ask.isEqualTo(other.ask)) return false;
         if(bidSize.isEqualTo(other.bidSize)) return false;
+        if(!last.isEqualTo(other.last)) return false;
+        if(lastSize.isEqualTo(other.lastSize)) return false;
+        if(!ask.isEqualTo(other.ask)) return false;
         return askSize == other.askSize;
     }
 
     public boolean isSameAs(MarketData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
-        if(!ask.isEqualTo(other.ask)) return false;
         if(!bidSize.isEqualTo(other.bidSize)) return false;
+        if(!ask.isEqualTo(other.ask)) return false;
         if(!askSize.isEqualTo(other.askSize)) return false;
+        if(!last.isEqualTo(other.last)) return false;
+        if(!lastSize.isEqualTo(other.lastSize)) return false;
         if(productId.compareTo(other.productId)!=0) return false;
         if(timestamp.toString().compareTo(other.timestamp.toString())!=0) return false;
         return true;
@@ -38,13 +42,15 @@ public class MarketData
         return true;
     }
 
-    public MarketData(DateTime timestamp, String productId, Decimal bid, Decimal ask, Decimal bidSize, Decimal askSize) {
+    public MarketData(DateTime timestamp, String productId, Decimal bid, Decimal ask, Decimal last, Decimal bidSize, Decimal askSize, Decimal lastSize) {
         this.timestamp = timestamp;
         this.productId = productId;
         this.bid = bid;
         this.ask = ask;
+        this.last = last;
         this.bidSize = bidSize;
         this.askSize = askSize;
+        this.lastSize = lastSize;
     }
 
     @Override
@@ -57,60 +63,38 @@ public class MarketData
         return timestamp;
     }
 
-//    public void setTimestamp(DateTime timestamp) {
-//        this.timestamp = timestamp;
-//    }
-
     public String getProductId() {
         return productId;
     }
-
-//    public void setProductId(String productId) {
-//        this.productId = productId;
-//    }
 
     public Decimal getBid() {
         return bid;
     }
 
-//    public void setBid(Decimal bid) {
-//        this.bid = bid;
-//    }
-
     public Decimal getAsk() {
         return ask;
     }
-
-//    public void setAsk(Decimal ask) {
-//        this.ask = ask;
-//    }
 
     public Decimal getBidSize() {
         return bidSize;
     }
 
-//    public void setBidSize(Decimal bidSize) {
-//        this.bidSize = bidSize;
-//    }
-
     public Decimal getAskSize() {
         return askSize;
     }
 
-//    public void setAskSize(Decimal askSize) {
-//        this.askSize = askSize;
-//    }
+    public Decimal getLast() { return last; }
 
-
+    public Decimal getLastSize() { return lastSize; }
 
     private DateTime timestamp;
     private String productId;
     private Decimal bid;
     private Decimal ask;
+    private Decimal last;
     private Decimal bidSize;
     private Decimal askSize;
-
-
+    private Decimal lastSize;
 
     private static class MarketDataNULL extends MarketData {
 
@@ -135,12 +119,12 @@ public class MarketData
         }
 
         @Override
-        public Decimal getAsk() {
+        public Decimal getBidSize() {
             throw new RuntimeException("This is NULL!");
         }
 
         @Override
-        public Decimal getBidSize() {
+        public Decimal getAsk() {
             throw new RuntimeException("This is NULL!");
         }
 
@@ -148,9 +132,18 @@ public class MarketData
         public Decimal getAskSize() {
             throw new RuntimeException("This is NULL!");
         }
+        @Override
+        public Decimal getLast() {
+            throw new RuntimeException("This is NULL!");
+        }
+
+        @Override
+        public Decimal getLastSize() {
+            throw new RuntimeException("This is NULL!");
+        }
 
         private MarketDataNULL() {
-            super(DateTime.now(DateTimeZone.UTC),"", Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO);
+            super(DateTime.now(DateTimeZone.UTC),"", Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO);
         }
 
     }

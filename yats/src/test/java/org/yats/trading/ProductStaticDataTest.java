@@ -6,9 +6,6 @@ import org.yats.common.Decimal;
 
 import java.util.Vector;
 
-/**
- * Created by emiliano on 25/05/2014.
- */
 public class ProductStaticDataTest {
 
     Product product=new Product().withProductId("4663743").withName("Wall Mart Stores, Inc").withSymbol("WMT").withExchange("XNAS");

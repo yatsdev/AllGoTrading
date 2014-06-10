@@ -2,8 +2,7 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.CommonExceptions;
-import org.yats.common.FileTool;
+import org.yats.common.Tool;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
@@ -34,8 +33,8 @@ public class FixClientMain {
         config/FIXOrder_<username>.properties needs to provide the external account number of the user in the form:
         externalAccount=1234
          */
-        String configFIXOrderFilename = getPersonalConfigFilename("config/FIXOrder");
-        String configFIXPriceFilename = getPersonalConfigFilename("config/FIXPrice");
+        String configFIXOrderFilename = Tool.getPersonalConfigFilename("config/FIXOrder");
+        String configFIXPriceFilename = Tool.getPersonalConfigFilename("config/FIXPrice");
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
@@ -77,15 +76,6 @@ public class FixClientMain {
         System.exit(0);
     }
 
-    private String getPersonalConfigFilename(String prefix)
-    {
-        String username = System.getProperty("user.name").replace(" ","");
-        String userSpecificFIXFilename = prefix+"_"+username+".properties";
-        log.info("Trying to read config file: "+userSpecificFIXFilename);
-        if(!FileTool.exists(userSpecificFIXFilename))
-            throw new CommonExceptions.FileReadException(userSpecificFIXFilename+" not found!");
-        return userSpecificFIXFilename;
-    }
 
     public FixClientMain() {
     }

@@ -19,6 +19,10 @@ public class Position {
         return (size.toInt() == _size);
     }
 
+    public boolean isSize(Decimal _size) {
+        return (size.isEqualTo(_size));
+    }
+
     public boolean isSameAs(Position other) {
         if(!isForProductId(other.productId)) return false;
         if(!size.isEqualTo(other.size)) return false;

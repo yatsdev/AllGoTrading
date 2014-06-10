@@ -95,7 +95,11 @@ public class PriceFeedCracker extends MessageCracker implements Application {
             Decimal ask = new Decimal(MDEntryPx.getValue());
             Decimal askSize = new Decimal(MDEntrySize.getValue());
 
-            MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId,bid,ask,bidSize,askSize);
+            Decimal last = bid.add(ask).divide(Decimal.fromString("2"));
+
+            MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId
+                    ,bid,ask,last
+                    ,bidSize,askSize, Decimal.ONE);
 //        log.debug("FIX: "+m.toString());
             marketDataConsumer.onMarketData(m);
 

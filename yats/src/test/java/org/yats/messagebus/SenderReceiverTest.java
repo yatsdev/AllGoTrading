@@ -54,8 +54,9 @@ public class SenderReceiverTest {
                 config.getExchangeMarketData(),
                 config.getTopicCatchAll(),
                 config.getServerIP());
-        data = new MarketData(new DateTime(DateTimeZone.UTC), "test", Decimal.fromDouble(11),
-                Decimal.fromDouble(12), Decimal.fromDouble(20), Decimal.fromDouble(30) );
+        data = new MarketData(new DateTime(DateTimeZone.UTC), "test",
+                Decimal.fromDouble(11), Decimal.fromDouble(12), Decimal.fromDouble(12),
+                Decimal.fromDouble(20), Decimal.fromDouble(30), Decimal.ONE );
         dataMsg = MarketDataMsg.createFrom(data);
 
         senderPositionSnapshot = new Sender<PositionSnapshotMsg>(config.getExchangePositionSnapshot(),config.getServerIP());
