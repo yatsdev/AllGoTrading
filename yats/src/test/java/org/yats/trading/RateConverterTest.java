@@ -1,18 +1,19 @@
 package org.yats.trading;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 
 public class RateConverterTest {
 
     public static final Decimal SAP_SIZE = Decimal.fromString("2");
 
-//    @Test
-//    public void canConvertPositionInEURToEUR() {
-//        Position p1InEUR = converter.convert(p1, MarketDataTest.EUR_ID);
-//        assert(p1InEUR.isSize(MarketDataTest.SAP_EUR_LAST.multiply(SAP_SIZE)));
-//    }
-//
+    @Test
+    public void canConvertPositionInEURToEUR() {
+        Position p1InEUR = converter.convert(p1, new String("EUR_USD"));
+       // assert(p1InEUR.isSize(MarketDataTest.SAP_EUR_LAST.multiply(SAP_SIZE)));
+    }
+
 //    @Test
 //    public void canConvertPositionInEURToUSD() {
 //        Position p1InUSD = converter.convert(p1, MarketDataTest.USD_ID);
