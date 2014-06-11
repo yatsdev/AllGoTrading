@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductList implements IProvideProduct {
@@ -24,6 +25,12 @@ public class ProductList implements IProvideProduct {
             if(p.hasProductId(productId)) units.add(p);
         }
         return units;
+    }
+
+    @Override
+    public Collection<Product> values()
+    {
+        return list.values();
     }
 
     public Product findBySymbol(String symbol) {
