@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-//import org.apache.http.impl.client.BasicResponseHandler;
-
 public class FXRates {
 
     final Logger log = LoggerFactory.getLogger(FXRates.class);
