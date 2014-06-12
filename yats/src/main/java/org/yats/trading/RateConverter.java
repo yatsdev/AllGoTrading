@@ -9,9 +9,70 @@ public class RateConverter implements IConsumeMarketData {
 
 
     public Position convert(Position position, String targetProductId) {
-        throw new NotImplementedException();
-//        return new Position(targetProductId, Decimal.ZERO);
+
+        Decimal positionInTargetCurrency = null;
+        Decimal priceInOriginalCurrency = rates.get(position.getProductId()).getLast();
+        Decimal positionSizedInTargetCurrency=null;
+
+        Product productToConvert=null;
+
+        if(isSameCurrency(position,targetProductId)){
+            positionSizedInTargetCurrency=getMarketDataForProduct(position.getProductId()).getLast().multiply(position.getSize());
+        }
+
+        else {
+
+            if (targetProductId.compareTo("CCY007") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY001")==0)) { //from USD to EUR
+
+                positionInTargetCurrency = priceInOriginalCurrency.divide(rates.get("OANDA0001").getLast());
+
+            }
+
+            if (targetProductId.compareTo("CCY001") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY007")==0)) { //from EUR to USD
+
+                positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get("OANDA0001").getLast());
+
+            }
+
+            if (targetProductId.compareTo("CCY004") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY007")==0)) { //from EUR to CHF) {
+
+                positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get("OANDA0003").getLast());
+
+            }
+
+            if (targetProductId.compareTo("CCY007") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY004")==0)) { //from CHF to EUR) {
+
+                positionInTargetCurrency = priceInOriginalCurrency.divide(rates.get("OANDA0003").getLast());
+
+            }
+
+            if (targetProductId.compareTo("CCY001") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY004")==0)) { //from USD to CHF) {
+
+                positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get("OANDA0004").getLast());
+
+            }
+
+            if (targetProductId.compareTo("CCY004") == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo("CCY001")==0)) { //from CHF to USD) {
+
+                positionInTargetCurrency = priceInOriginalCurrency.divide(rates.get("OANDA0004").getLast());
+
+            }
+
+
+
+
+
+
+        }
+
+
+        return new Position(targetProductId, positionInTargetCurrency);
     }
+
+    public boolean isSameCurrency(Position position,String targetProductId){
+        if(products.getProductForProductId(position.getProductId()).getUnitId().toString().compareTo(targetProductId)==0) return true;
+        else return false;
+        }
 
     @Override
     public void onMarketData(MarketData marketData) {
