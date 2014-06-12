@@ -10,7 +10,7 @@ public class RateConverter implements IConsumeMarketData {
 
     public Position convert(Position position, String targetProductId) {
       Decimal positionInTargetCurrency = null;
-        Decimal priceInOriginalCurrency = rates.get(position.getProductId()).getLast();
+        Decimal priceInOriginalCurrency = rates.get(position.getProductId()).getLast(); //This is 85
         Decimal positionSizedInTargetCurrency=null;
 
 
