@@ -28,7 +28,7 @@ public class RateConverter implements IConsumeMarketData {
         rates = new ConcurrentHashMap<String, MarketData>();
     }
 
-     MarketData getMarketDataForProduct(String pid) {
+     private MarketData getMarketDataForProduct(String pid) {
         if(!rates.containsKey(pid)) throw new TradingExceptions.ItemNotFoundException("Can not find rate for pid="+pid);
         return rates.get(pid);
     }

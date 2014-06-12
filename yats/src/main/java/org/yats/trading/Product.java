@@ -7,23 +7,21 @@ import org.yats.common.UniqueId;
 
 public class Product {
 
-
-
 //    public static ProductNULL NULL = new ProductNULL();
 
     @Override
     public String toString() {
         return "Product{" +
                 "productId='" + productId + '\'' +
-                ",symbol='" + symbol + '\'' +
-                ",exchange='" + exchange + '\'' +
-                ",bloombergId='" + bloombergId + '\'' +
-                ",name='" + name + '\'' +
-                ",route='" + route + '\'' +
-                ",unitId='" + unitId + '\'' +
+                ", symbol='" + symbol + '\'' +
+                ", exchange='" + exchange + '\'' +
+                ", bloombergId='" + bloombergId + '\'' +
+                ", name='" + name + '\'' +
+                ", route='" + route + '\'' +
+                ", underlyingId='" + underlyingId + '\'' +
+                ", unitId='" + unitId + '\'' +
                 '}';
     }
-
 
 //    public boolean isSameAs(Product other) {
 //        return other.hasProductId(productId);
@@ -31,6 +29,12 @@ public class Product {
 
     public boolean hasProductId(String pid) {
         return pid.compareTo(productId) == 0;
+    }
+    public boolean hasUnitId(String pid) {
+        return unitId.compareTo(productId) == 0;
+    }
+    public boolean hasUnderlying(String pid) {
+        return underlyingId.compareTo(productId) == 0;
     }
 
     public String getProductId() {
@@ -57,12 +61,16 @@ public class Product {
         return route;
     }
 
+    public String getUnderlyingId() {
+        return underlyingId;
+    }
+
     public String getUnitId() {
         return unitId;
     }
 
     public String toStringCSV() {
-        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route+","+unitId;
+        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route+","+ underlyingId +","+unitId;
     }
 
     public Product withProductId(String p) {
@@ -95,6 +103,11 @@ public class Product {
         return this;
     }
 
+    public Product withUnderlyingId(String s) {
+        underlyingId = s;
+        return this;
+    }
+
     public Product withUnitId(String s) {
         unitId = s;
         return this;
@@ -116,6 +129,7 @@ public class Product {
     private String bloombergId;
     private String name;
     private String route;
+    private String underlyingId;
     private String unitId;
 
     public boolean isRoute(String r) {

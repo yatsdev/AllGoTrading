@@ -20,11 +20,20 @@ public class ProductList implements IProvideProduct {
 
     @Override
     public IProvideProduct getProductsWithUnit(String productId) {
-        ProductList units = new ProductList();
-        for(Product p : list.values()) {
-            if(p.hasProductId(productId)) units.add(p);
+        ProductList newList = new ProductList();
+        for(Product p : this.list.values()) {
+            if(p.hasUnitId(productId)) newList.add(p);
         }
-        return units;
+        return newList;
+    }
+
+    @Override
+    public IProvideProduct getProductsWithUnderlying(String productId) {
+        ProductList newList = new ProductList();
+        for(Product p : this.list.values()) {
+            if(p.hasUnderlying(productId)) newList.add(p);
+        }
+        return newList;
     }
 
     @Override
@@ -61,7 +70,8 @@ public class ProductList implements IProvideProduct {
                         .withBloombergId(checkForNull(nextLine[3].trim()))
                         .withName(checkForNull(nextLine[4].trim()))
                         .withRoute(checkForNull(nextLine[5].trim()))
-                        .withUnitId(checkForNull(nextLine[6].trim()))
+                        .withUnderlyingId(checkForNull(nextLine[6].trim()))
+                        .withUnitId(checkForNull(nextLine[7].trim()))
                         ;
                 add(p);
             }
