@@ -36,4 +36,10 @@ public class CommonExceptions {
         public DummyException(String s) { super(s);
         }
     }
+
+    public static class NetworkException extends RuntimeException {
+        public NetworkException(String s) { super(s);
+        }
+    }
+
 } // class

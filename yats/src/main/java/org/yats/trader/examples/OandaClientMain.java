@@ -2,8 +2,10 @@ package org.yats.trader.examples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
+import org.yats.connectivity.oanda.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ProductList;
 
@@ -21,28 +23,30 @@ public class OandaClientMain {
         externalAccount=1234
          */
         String configFilename = Tool.getPersonalConfigFilename("config/Oanda");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
-        priceFeed.setProductProvider(products);
+        PriceFeed fxRates = PriceFeed.createFromPropertiesReader(prop);
+        fxRates.setProductProvider(products);
 
         MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
         StrategyRunner strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(priceFeed);
+        strategyRunner.setPriceFeed(fxRates);
         strategyRunner.addStrategy(marketToBusConnection);
         strategyRunner.setProductProvider(products);
-        priceFeed.logon();
+        fxRates.logon();
 
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);
 
-        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
-        orderConnection.setProductProvider(products);
-        orderConnection.logon();
+//        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
+//        orderConnection.setProductProvider(products);
+//        orderConnection.logon();
 
-        strategyRunner.setOrderSender(orderConnection);
-        orderConnection.setReceiptConsumer(strategyRunner);
+//        strategyRunner.setOrderSender(orderConnection);
+//        orderConnection.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
         Thread.sleep(2000);
@@ -62,8 +66,7 @@ public class OandaClientMain {
         System.exit(0);
     }
 
-
-    public FixClientMain() {
+    public OandaClientMain() {
     }
 
     public static void main(String args[]) throws Exception {
