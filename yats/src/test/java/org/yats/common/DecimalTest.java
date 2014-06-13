@@ -7,6 +7,13 @@ public class DecimalTest {
 
 
     @Test
+    public void canInvert()
+    {
+        assert(Decimal.fromString("0.5").isEqualTo(Decimal.fromString("2").invert()));
+        assert(Decimal.fromString("10").isEqualTo(Decimal.fromString("0.1").invert()));
+    }
+
+        @Test
     public void canRound()
     {
         Decimal r1 = Decimal.fromDouble(1.0003).roundToTickSize(tickSize0001);
@@ -40,6 +47,7 @@ public class DecimalTest {
         assert(r12.isEqualTo(Decimal.fromString("10")));
 
     }
+
 
 
     @BeforeMethod

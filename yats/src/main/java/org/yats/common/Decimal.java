@@ -94,4 +94,7 @@ public class Decimal  {
     }
 
 
+    public Decimal invert() {
+        return Decimal.ONE.divide(this);
+    }
 }
