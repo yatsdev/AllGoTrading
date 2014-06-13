@@ -21,11 +21,11 @@ public class RateConverterTest {
 //    }
 //
 //    @Test
-//    public void canConvertPositionInEURToCHF() {
+//    public void canConvertPositionInEURToCHF() { 
 //        Position p1InCHF = converter.convert(p1, MarketDataTest.CHF_PID);
 //        Decimal expectedSize = MarketDataTest.SAP_LAST
 //                .multiply(SAP_SIZE)
-//                .multiply(MarketDataTest.EUR_USD_LAST)
+//                .multiply(MarketDataTest.EUR_USD_LAST) //don't get these 2 lines
 //                .multiply(MarketDataTest.USD_CHF_LAST)
 //                ;
 //        assert(p1InCHF.isSize(expectedSize));
