@@ -87,6 +87,12 @@ public class MarketData
 
     public Decimal getLastSize() { return lastSize; }
 
+    public static MarketData createFromLast(String productId, Decimal last) {
+        return new MarketData(DateTime.now(DateTimeZone.UTC), productId,
+                last.subtract(Decimal.CENT), last.add(Decimal.CENT), last,
+                Decimal.ONE, Decimal.ONE, Decimal.ONE);
+    }
+
     private DateTime timestamp;
     private String productId;
     private Decimal bid;

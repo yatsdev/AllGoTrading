@@ -16,12 +16,12 @@ public class PriceFeedTest {
             "OANDA_EURGBP=EUR_GBP\n" +
             "OANDA_EURCHF=EUR_CHF";
 
-    @Test
-    public void canReceiveEURUSD()
-    {
-        priceFeed.receive();
-        assert (1==consumer.getReceived());
-    }
+//    @Test
+//    public void canReceiveEURUSD()
+//    {
+//        priceFeed.receive();
+//        assert (1==consumer.getReceived());
+//    }
 
 
     @BeforeMethod
