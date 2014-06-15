@@ -3,6 +3,7 @@ package org.yats.connectivity.oanda;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.MarketData;
@@ -16,12 +17,15 @@ public class PriceFeedTest {
             "OANDA_EURGBP=EUR_GBP\n" +
             "OANDA_EURCHF=EUR_CHF";
 
-//    @Test
-//    public void canReceiveEURUSD()
-//    {
-//        priceFeed.receive();
-//        assert (1==consumer.getReceived());
-//    }
+    @Test
+    public void canReceiveEURUSD()
+    {
+        Tool.sleepFor(10000);
+        assert (consumer.getReceived() > 0);
+        priceFeed.shutdown();
+        while(priceFeed.isRunning()) Tool.sleepABit();
+        System.out.println("done.");
+    }
 
 
     @BeforeMethod

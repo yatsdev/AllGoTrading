@@ -12,8 +12,8 @@ import org.yats.trading.ProductList;
 import java.io.IOException;
 
 public class OandaClientMain {
-    final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
+    final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
     public void go() throws InterruptedException, IOException
     {
@@ -70,7 +70,7 @@ public class OandaClientMain {
     }
 
     public static void main(String args[]) throws Exception {
-        FixClientMain q = new FixClientMain();
+        OandaClientMain q = new OandaClientMain();
 
         try {
             q.go();
