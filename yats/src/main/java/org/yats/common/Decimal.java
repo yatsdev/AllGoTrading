@@ -71,7 +71,10 @@ public class Decimal  {
     }
 
     public static Decimal fromString(String s) {
-        return new Decimal(s);
+        if(s.indexOf(".")>=0) {
+            return new Decimal(s.replace(",",""));
+        }
+        return new Decimal(s.replace(",","."));
     }
 
     public Decimal(String valueString) {

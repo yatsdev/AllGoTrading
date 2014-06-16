@@ -5,6 +5,13 @@ import org.testng.annotations.Test;
 
 public class DecimalTest {
 
+    @Test
+    public void canCreateFromStringInDifferentFormats() {
+        assert(!Decimal.fromString("1,265.02").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1,265.01").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1265,01").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1265,0").isEqualTo(Decimal.fromString("1265")));
+    }
 
     @Test
     public void canInvert()
