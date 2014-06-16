@@ -1,4 +1,4 @@
-package org.yats.connectivity.oanda;
+package org.yats.connectivity.oandarest;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

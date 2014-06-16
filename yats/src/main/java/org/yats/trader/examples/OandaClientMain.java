@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
-import org.yats.connectivity.oanda.PriceFeed;
+import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ProductList;
 

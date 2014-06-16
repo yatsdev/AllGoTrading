@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
+import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.MarketData;
 
@@ -20,7 +21,7 @@ public class PriceFeedTest {
     @Test
     public void canReceiveEURUSD()
     {
-        Tool.sleepFor(10000);
+        Tool.sleepFor(5000);
         assert (consumer.getReceived() > 0);
         priceFeed.shutdown();
         while(priceFeed.isRunning()) Tool.sleepABit();
