@@ -1,8 +1,5 @@
 package org.yats.trading;
 
-
-// todo: introduce class ProductStaticData that describes details of product. get data from db on subscription
-
 import org.yats.common.UniqueId;
 
 public class Product {

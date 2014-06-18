@@ -27,7 +27,7 @@ public class StrategyRunnerTest {
     public void canDoSubscriptionForMarketData()
     {
         strategy.init();
-        assert (strategyRunner.isProductSubscribed(SECURITY_ID_SAP));
+        assert (strategyRunner.isProductSubscribed(TestMarketData.SAP_SYMBOL));
     }
 
     @Test
@@ -103,7 +103,7 @@ public class StrategyRunnerTest {
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
         strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), SECURITY_ID_SAP,
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.SAP_SYMBOL,
                 Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
                 Decimal.ONE,Decimal.ONE,Decimal.ONE);
     }
@@ -115,8 +115,8 @@ public class StrategyRunnerTest {
     private StrategyMock strategy;
     private MarketData data1;
 
-    private static String SECURITY_ID_SAP ="SAP";
-    private static Product testProduct = new Product(SECURITY_ID_SAP, "", "");
+
+    private static Product testProduct = new Product(TestMarketData.SAP_SYMBOL, "", "");
 
     private class StrategyMock extends StrategyBase {
 

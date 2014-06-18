@@ -5,8 +5,22 @@ import org.testng.annotations.Test;
 
 public class DecimalTest {
 
+    @Test
+    public void canCreateFromStringInDifferentFormats() {
+        assert(!Decimal.fromString("1,265.02").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1,265.01").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1265,01").isEqualTo(Decimal.fromString("1265.01")));
+        assert(Decimal.fromString("1265,0").isEqualTo(Decimal.fromString("1265")));
+    }
 
     @Test
+    public void canInvert()
+    {
+        assert(Decimal.fromString("0.5").isEqualTo(Decimal.fromString("2").invert()));
+        assert(Decimal.fromString("10").isEqualTo(Decimal.fromString("0.1").invert()));
+    }
+
+        @Test
     public void canRound()
     {
         Decimal r1 = Decimal.fromDouble(1.0003).roundToTickSize(tickSize0001);
@@ -40,6 +54,7 @@ public class DecimalTest {
         assert(r12.isEqualTo(Decimal.fromString("10")));
 
     }
+
 
 
     @BeforeMethod
