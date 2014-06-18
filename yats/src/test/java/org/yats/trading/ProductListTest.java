@@ -28,6 +28,22 @@ public class ProductListTest {
         assert (productSAP.getSymbol().compareTo("SAP")==0);
     }
 
+    @Test
+    public void canFilterOnUnderlying()
+    {
+        IProvideProduct productsWithUnderlyingSGD = list.getProductsWithUnderlying("CCY_SGD");
+        assert (productsWithUnderlyingSGD.values().size()>0);
+        assert (productsWithUnderlyingSGD.values().size()< list.size() / 5);
+    }
+
+    @Test
+    public void canFilterOnUnit()
+    {
+        IProvideProduct productsWithUnderlyingSGD = list.getProductsWithUnit("CCY_SGD");
+        assert (productsWithUnderlyingSGD.values().size()>0);
+        assert (productsWithUnderlyingSGD.values().size()< list.size() / 5);
+    }
+
 // appended route to all products with this:
 //    @Test
 //    public void canWriteProductList()

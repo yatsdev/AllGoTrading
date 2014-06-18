@@ -25,13 +25,15 @@ public class Product {
 //    }
 
     public boolean hasProductId(String pid) {
-        return pid.compareTo(productId) == 0;
+        return productId.compareTo(pid) == 0;
     }
+
     public boolean hasUnitId(String pid) {
-        return unitId.compareTo(productId) == 0;
+        return unitId.compareTo(pid) == 0;
     }
+
     public boolean hasUnderlying(String pid) {
-        return underlyingId.compareTo(productId) == 0;
+        return underlyingId.compareTo(pid) == 0;
     }
 
     public String getProductId() {
