@@ -4,39 +4,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
+import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
+import org.yats.trading.IConsumeMarketData;
+import org.yats.trading.MarketData;
 import org.yats.trading.ProductList;
 
 import java.io.IOException;
 
-public class OandaClientMain {
+/*
+  Use template in
+  config/OandaConnection_template.properties
+  and create your personal config file.
+ */
+
+public class OandaClientMain implements IConsumeMarketData {
 
     final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
     public void go() throws InterruptedException, IOException
     {
-
-        /*
-        config/FIXOrder_<username>.properties needs to provide the external account number of the user in the form:
-        externalAccount=1234
-         */
-        String configFilename = Tool.getPersonalConfigFilename("config/Oanda");
+        String configFilename = Tool.getPersonalConfigFilename("config/OandaConnection");
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
-
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        PriceFeed fxRates = PriceFeed.createFromPropertiesReader(prop);
-        fxRates.setProductProvider(products);
+        PriceFeed oandaFeed = PriceFeed.createFromPropertiesReader(prop);
+        oandaFeed.setProductProvider(products);
 
         MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
         StrategyRunner strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(fxRates);
+        strategyRunner.setPriceFeed(oandaFeed);
         strategyRunner.addStrategy(marketToBusConnection);
         strategyRunner.setProductProvider(products);
-        fxRates.logon();
+        oandaFeed.logon();
 
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);
@@ -49,6 +52,7 @@ public class OandaClientMain {
 //        orderConnection.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
+        strategyRunner.subscribe("OANDA_EURUSD", this);
         Thread.sleep(2000);
 
         marketToBusConnection.init();
@@ -61,6 +65,7 @@ public class OandaClientMain {
         System.out.println("\nexiting...\n");
 
         marketToBusConnection.shutdown();
+        oandaFeed.shutdown();
         Thread.sleep(1000);
 
         System.exit(0);
@@ -82,4 +87,14 @@ public class OandaClientMain {
         System.exit(0);
 
     }
+
+    @Override
+    public void onMarketData(MarketData marketData) {
+    }
+
+    @Override
+    public UniqueId getConsumerId() {
+        return UniqueId.create();
+    }
+
 } // class

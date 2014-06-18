@@ -18,15 +18,16 @@ public class PriceFeedTest {
             "OANDA_EURGBP=EUR_GBP\n" +
             "OANDA_EURCHF=EUR_CHF";
 
-    @Test
-    public void canReceiveEURUSD()
-    {
-        Tool.sleepFor(5000);
-        assert (consumer.getReceived() > 0);
-        priceFeed.shutdown();
-        while(priceFeed.isRunning()) Tool.sleepABit();
-        System.out.println("done.");
-    }
+//    Not really a test since it takes too long and depends on external connection.
+//    @Test
+//    public void canReceiveEURUSD()
+//    {
+//        Tool.sleepFor(5000);
+//        assert (consumer.getReceived() > 0);
+//        priceFeed.shutdown();
+//        while(priceFeed.isRunning()) Tool.sleepABit();
+//        System.out.println("done.");
+//    }
 
 
     @BeforeMethod

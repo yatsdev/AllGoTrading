@@ -30,8 +30,14 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
 
     @Override
     public void subscribe(String productId, IConsumeMarketData consumer) {
-        subscriptionList.put(productId,consumer);
         marketDataConsumer = consumer;
+        if(subscriptionList.containsKey(productId)) return;
+        if(!properties.exists(productId)) {
+            log.debug("Subscription not available:"+productId);
+            return;
+        }
+        log.debug("New subscription:"+productId);
+        subscriptionList.put(productId,consumer);
         String symbol = properties.get(productId);
         mapPidToSymbol.put(productId, symbol);
         mapSymbolToPid.put(symbol, productId);
