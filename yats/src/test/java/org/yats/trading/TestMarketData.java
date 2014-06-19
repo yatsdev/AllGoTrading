@@ -26,7 +26,7 @@ public class TestMarketData {
     public static final Decimal GBPUSD_LAST = Decimal.fromString("1.68178");
 
     public static final String XAUUSD_PID = "OANDA_XAUUSD";
-    public static final Decimal XAUUSD_LAST = Decimal.fromString("1,265.01");
+    public static final Decimal XAUUSD_LAST = Decimal.fromString("1265.01");
 
     public static final String XAUXAG_PID = "OANDA_XAUXAG";
     public static final Decimal XAUXAG_LAST = Decimal.fromString("65.4659");
