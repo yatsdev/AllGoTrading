@@ -127,7 +127,6 @@ private int length;
 
 
 
-
     public void addProduct(Product product){
        if(isCompleted==false) {
            if (!(Chain.contains(product))) {
