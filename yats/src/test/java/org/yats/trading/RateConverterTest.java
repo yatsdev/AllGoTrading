@@ -8,42 +8,42 @@ public class RateConverterTest {
 
     public static final Decimal SAP_SIZE = Decimal.fromString("2");
 
-    @Test
-    public void canConvertPositionInEURToEUR() {
-        Position p1InEUR = converter.convert(p1, TestMarketData.EUR_PID);
-        assert(p1InEUR.isSize(TestMarketData.SAP_LAST.multiply(SAP_SIZE)));
-    }
-
-    @Test
-    public void canConvertPositionInEURToUSD() {
-        Position p1InUSD = converter.convert(p1, TestMarketData.USD_PID);
-        Decimal expectedSize = TestMarketData.SAP_LAST.multiply(SAP_SIZE).multiply(TestMarketData.EURUSD_LAST);
-        assert(p1InUSD.isSize(expectedSize));
-    }
-
-    @Test
-    public void canConvertPositionInEURToCHF() {
-        Position p1InCHF = converter.convert(p1, TestMarketData.CHF_PID);
-
-
-        Decimal expectedSize = TestMarketData.SAP_LAST
-                .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.USDCHF_LAST)
-                ;
-
-        assert(p1InCHF.isSize(expectedSize));
-    }
-
-    @Test
-    public void canConvertPositionInEURToGBPUsingInversionOfCurrencyPair() {
-        Position p1InGBP = converter.convert(p1, TestMarketData.GBP_PID);
-        Decimal expectedSize = TestMarketData.SAP_LAST
-                .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.GBPUSD_LAST.invert());
-        assert(p1InGBP.isSize(expectedSize));
-    }
+//    @Test
+//    public void canConvertPositionInEURToEUR() {
+//        Position p1InEUR = converter.convert(p1, TestMarketData.EUR_PID);
+//        assert(p1InEUR.isSize(TestMarketData.SAP_LAST.multiply(SAP_SIZE)));
+//    }
+//
+//    @Test
+//    public void canConvertPositionInEURToUSD() {
+//        Position p1InUSD = converter.convert(p1, TestMarketData.USD_PID);
+//        Decimal expectedSize = TestMarketData.SAP_LAST.multiply(SAP_SIZE).multiply(TestMarketData.EURUSD_LAST);
+//        assert(p1InUSD.isSize(expectedSize));
+//    }
+//
+//    @Test
+//    public void canConvertPositionInEURToCHF() {
+//        Position p1InCHF = converter.convert(p1, TestMarketData.CHF_PID);
+//
+//
+//        Decimal expectedSize = TestMarketData.SAP_LAST
+//                .multiply(SAP_SIZE)
+//                .multiply(TestMarketData.EURUSD_LAST)
+//                .multiply(TestMarketData.USDCHF_LAST)
+//                ;
+//
+//        assert(p1InCHF.isSize(expectedSize));
+//    }
+//
+//    @Test
+//    public void canConvertPositionInEURToGBPUsingInversionOfCurrencyPair() {
+//        Position p1InGBP = converter.convert(p1, TestMarketData.GBP_PID);
+//        Decimal expectedSize = TestMarketData.SAP_LAST
+//                .multiply(SAP_SIZE)
+//                .multiply(TestMarketData.EURUSD_LAST)
+//                .multiply(TestMarketData.GBPUSD_LAST.invert());
+//        assert(p1InGBP.isSize(expectedSize));
+//    }
 
     @Test
     public void canConvertPositionInEURToNZDUsingShortestChainOfConversions() {

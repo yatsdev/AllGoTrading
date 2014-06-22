@@ -112,6 +112,19 @@ public class Product {
         return this;
     }
 
+    public boolean isProductAsPairChainable(Product product){
+        boolean isChainable=false;
+
+        if(product.getUnderlyingId().compareTo(underlyingId)==0||product.getUnitId().compareTo(unitId)==0||product.getUnderlyingId().compareTo(unitId)==0||product.getUnitId().compareTo(underlyingId)==0){
+            if(!(product.getProductId().compareTo(productId)==0)){
+
+                isChainable=true;
+            }
+
+        }
+        return isChainable;
+    }
+
     public Product(String productId, String symbol, String exchange) {
         this.productId = productId;
         this.symbol = symbol;

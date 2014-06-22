@@ -11,11 +11,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateConverter implements IConsumeMarketData {
 
 
+    ConcurrentHashMap<String, MarketData> rates;
+    IProvideProduct products;
+
+    public RateConverter(IProvideProduct p) {
+        products = p;
+        rates = new ConcurrentHashMap<String, MarketData>();
+    }
+
     public Position convert(Position position, String targetProductId) {
 
 
         Vector<Product> currencies = new Vector<Product>();
         Vector<Product> pairs = new Vector<Product>();
+        Vector<Product> pairsBackup = new Vector<Product>();
         Vector<Product> originalProducts= new Vector<Product>();
         Vector<Product> targetProducts = new Vector<Product>();
 
@@ -44,6 +53,7 @@ public class RateConverter implements IConsumeMarketData {
                 if (product.getUnderlyingId().compareTo(currencies.elementAt(i).getProductId()) == 0 && !(product.getUnitId().compareTo(product.getUnderlyingId()) == 0))//This is a pair
                 {
                     pairs.add(product);
+                    pairsBackup.add(product);
                    // Vector<Product> ChainStart=new Vector<Product>();
                    // ChainStart.add(product);
                    // chainLinks.add(ChainStart);
@@ -84,40 +94,6 @@ for (int l=0;l<originalProducts.size();l++)
 
 
 
-
-
-
-
-
-//Building the chains
-        for(int i=0;i<chainLinks.size();i++){
-
-            for (int j=0;j<chainLinks.elementAt(i).size();j++){
-
-                 currentProduct= chainLinks.elementAt(i).elementAt(j);
-
-                for (int k=0;k<pairs.size();k++) {
-
-                    System.out.println(currentProduct);
-                    System.out.println(pairs.elementAt(k).toStringCSV());
-                    if (currentProduct.getUnderlyingId().compareTo(pairs.elementAt(k).getUnderlyingId())==0||currentProduct.getUnitId().compareTo(pairs.elementAt(k).getUnderlyingId())==0||currentProduct.getUnderlyingId().compareTo(pairs.elementAt(k).getUnitId())==0||currentProduct.getUnitId().compareTo(pairs.elementAt(k).getUnitId())==0){
-                        if(!((currentProduct.getUnderlyingId().compareTo(pairs.elementAt(k).getUnderlyingId())==0)&&(currentProduct.getUnitId().compareTo(pairs.elementAt(k).getUnitId())==0))) {
-                            if(chainLinks.elementAt(i).contains(pairs.elementAt(k))==false){
-                                // System.out.println(currentProduct);
-                                chainLinks.elementAt(i).add(pairs.elementAt(k));
-
-                            }
-                        }
-                    }
-                }
-
-            }
-
-        }
-
-
-
-
         throw new NotImplementedException();
 
     }
@@ -132,18 +108,64 @@ for (int l=0;l<originalProducts.size();l++)
         return UniqueId.create();
     }
 
-    public RateConverter(IProvideProduct p) {
-        products = p;
-        rates = new ConcurrentHashMap<String, MarketData>();
-    }
-
      private MarketData getMarketDataForProduct(String pid) {
         if(!rates.containsKey(pid)) throw new TradingExceptions.ItemNotFoundException("Can not find rate for pid="+pid);
         return rates.get(pid);
     }
 
-    ConcurrentHashMap<String, MarketData> rates;
-    IProvideProduct products;
-
 
 } // class
+
+class Chain {
+
+private Vector<Product> Chain= new Vector<Product>();
+private Product startingProduct;
+private Product targetProduct;
+private Product lastElement;
+private boolean isCompleted=false;
+private int length;
+
+
+
+
+    public void addProduct(Product product){
+       if(isCompleted==false) {
+           if (!(Chain.contains(product))) {
+               if (Chain.lastElement().isProductAsPairChainable(product)) {
+                   Chain.add(product);
+                   if (Chain.lastElement().isProductAsPairChainable(targetProduct)) {
+                       isCompleted = true;
+                   }
+               }
+           }
+
+       }
+          }
+
+    public Product getStartingProduct() {
+        return Chain.elementAt(0);
+    }
+
+    public void setStartingProduct(Product startingProduct) {
+         Chain.add(startingProduct);
+        this.startingProduct=startingProduct;
+    }
+
+    public Product getTargetProduct() {
+        return targetProduct;
+    }
+
+    public void setTargetProduct(Product targetProduct) {
+        this.targetProduct = targetProduct;
+    }
+
+    public Product getLastElement() {
+        return Chain.elementAt(Chain.size());
+    }
+
+    public int getLength() {
+        return Chain.size();
+    }
+
+
+}
