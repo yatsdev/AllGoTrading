@@ -2,8 +2,14 @@ package org.yats.common;
 
 public class CommonExceptions {
 
-    public static class KeyNotFoundInConfigFile extends RuntimeException {
-        public KeyNotFoundInConfigFile(String msg) {
+    public static class ContainerEmptyException extends RuntimeException {
+        public ContainerEmptyException(String msg) {
+            super(msg);
+        }
+    }
+
+    public static class KeyNotFoundInConfigFileException extends RuntimeException {
+        public KeyNotFoundInConfigFileException(String msg) {
             super(msg);
         }
     }

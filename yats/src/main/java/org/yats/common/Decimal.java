@@ -3,7 +3,7 @@ package org.yats.common;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class Decimal  {
+public class Decimal implements Comparable<Decimal> {
 
 
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
@@ -12,6 +12,11 @@ public class Decimal  {
     public static final Decimal CENT = new Decimal("0.01");
 
 
+    @Override
+    public int compareTo(Decimal o) {
+        if(o.isEqualTo(this)) return 0;
+        return this.isGreaterThan(o) ? 1 : -1;
+    }
 
     public BigDecimal toBigDecimal() {
         return value;
