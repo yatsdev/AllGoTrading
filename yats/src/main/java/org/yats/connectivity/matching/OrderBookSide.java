@@ -12,16 +12,24 @@ import java.util.TreeMap;
 public class OrderBookSide {
 
     public void match(OrderNew order) {
-        Decimal frontRowPrice = getFrontRowPrice();
-        if(!order.isExecutingWith(frontRowPrice)) return;
-        OrderList frontRow = book.get(frontRowPrice);
+        try {
+            doMatch(order);
+        } catch(CommonExceptions.ContainerEmptyException e) {
+        }
+    }
 
-
+    public void doMatch(OrderNew order) {
+        do {
+            Decimal frontRowPrice = getFrontRowPrice();
+            if(!order.isExecutingWith(frontRowPrice)) return;
+            PriceLevel frontRow = book.get(frontRowPrice);
+            frontRow.match(order);
+        } while(true);
     }
 
     public void add(OrderNew order) {
         Decimal limit = order.getLimit();
-        OrderList row = book.containsKey(limit) ? book.get(limit) : new OrderList();
+        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel();
         row.add(order);
         book.put(limit, row);
     }
@@ -44,7 +52,7 @@ public class OrderBookSide {
         this.side = side;
         receiptConsumer = _receiptConsumer;
 
-        book = new TreeMap<Decimal, OrderList>();
+        book = new TreeMap<Decimal, PriceLevel>();
 
     }
 
@@ -54,7 +62,7 @@ public class OrderBookSide {
     private BookSide side;
     private IConsumeReceipt receiptConsumer;
 
-    private SortedMap<Decimal,OrderList> book;
+    private SortedMap<Decimal,PriceLevel> book;
 
 
 } // class

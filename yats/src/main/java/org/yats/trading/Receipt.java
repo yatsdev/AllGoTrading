@@ -39,6 +39,17 @@ public class Receipt {
         return productId.compareTo(pid) == 0;
     }
 
+    public Receipt createWithMatching(OrderNew order) {
+        Decimal takerResidual = Decimal.max(Decimal.ZERO, takerReceipt.getResidualSize().subtract(maker.getResidualSize()));
+
+        return createCopy().withCurrentTradedSize()
+    }
+
+    public Receipt createCopy() {
+        String csv = toStringCSV();
+        return Receipt.fromStringCSV(csv);
+    }
+
     @Override
     public String toString() {
         return "Receipt{" +

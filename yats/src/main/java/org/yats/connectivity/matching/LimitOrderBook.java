@@ -26,13 +26,13 @@ public class LimitOrderBook {
     public LimitOrderBook(IConsumeReceipt _receiptConsumer)
     {
         receiptConsumer = _receiptConsumer;
-        book = new TreeMap<Decimal, OrderList>();
+        book = new TreeMap<Decimal, PriceLevel>();
         frontRowPrice = new Decimal[2];
         frontRowPrice[0] = null;
         frontRowPrice[1] = null;
     }
 
-    private SortedMap<Decimal,OrderList> book;
+    private SortedMap<Decimal,PriceLevel> book;
     private Decimal frontRowPrice[];
     IConsumeReceipt receiptConsumer;
 
