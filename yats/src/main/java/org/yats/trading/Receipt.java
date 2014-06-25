@@ -27,6 +27,11 @@ public class Receipt {
     }
 
 
+    public boolean isExecutingWith(Decimal frontRowPrice) {
+        if(bookSide.isMoreBehindThan(price, frontRowPrice)) return false;
+        return true;
+    }
+
     public boolean isForOrder(OrderNew order) {
         return orderId.isSameAs(order.getOrderId());
     }
@@ -39,10 +44,17 @@ public class Receipt {
         return productId.compareTo(pid) == 0;
     }
 
-    public Receipt createWithMatching(OrderNew order) {
-        Decimal takerResidual = Decimal.max(Decimal.ZERO, takerReceipt.getResidualSize().subtract(maker.getResidualSize()));
+    public void match(Receipt takerReceipt) {
+        currentTradedSize = Decimal.min(takerReceipt.getResidualSize(), residualSize);
+        takerReceipt.adjustByTradedSize(currentTradedSize);
+        adjustByTradedSize(currentTradedSize);
+    }
 
-        return createCopy().withCurrentTradedSize()
+    private void adjustByTradedSize(Decimal _currentTradedSize) {
+        currentTradedSize=_currentTradedSize;
+        totalTradedSize=totalTradedSize.add(_currentTradedSize);
+        residualSize=Decimal.max(Decimal.ZERO, residualSize.subtract(currentTradedSize));
+        if(residualSize.isEqualTo(Decimal.ZERO)) endState=true;
     }
 
     public Receipt createCopy() {
@@ -325,6 +337,15 @@ public class Receipt {
 
     public boolean isBookSide(BookSide side) {
         return bookSide.equals(side);
+    }
+
+    public boolean isSamePriceOrBehind(Receipt takerReceipt) {
+        if(price.isEqualTo(takerReceipt.getPrice())) return true;
+        return bookSide.isMoreBehindThan(takerReceipt.getPrice(),price);
+    }
+
+    public boolean isOpposite(BookSide side) {
+        return bookSide.isOpposite(side);
     }
 
 

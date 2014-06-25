@@ -5,31 +5,39 @@ import org.yats.common.Decimal;
 import org.yats.trading.BookSide;
 import org.yats.trading.IConsumeReceipt;
 import org.yats.trading.OrderNew;
+import org.yats.trading.Receipt;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class OrderBookSide {
+public class OrderBookSide implements IConsumeReceipt {
 
-    public void match(OrderNew order) {
+    public void match(OrderNew takerOrder) {
         try {
-            doMatch(order);
+            Receipt takerReceipt = takerOrder.createReceiptDefault();
+            doMatch(takerReceipt);
         } catch(CommonExceptions.ContainerEmptyException e) {
         }
     }
 
-    public void doMatch(OrderNew order) {
+    public void doMatch(Receipt takerReceipt) {
         do {
             Decimal frontRowPrice = getFrontRowPrice();
-            if(!order.isExecutingWith(frontRowPrice)) return;
+            if(!takerReceipt.isExecutingWith(frontRowPrice)) throw new CommonExceptions.ContainerEmptyException("");
             PriceLevel frontRow = book.get(frontRowPrice);
-            frontRow.match(order);
+            frontRow.match(takerReceipt);
         } while(true);
+    }
+
+    @Override
+    public void onReceipt(Receipt receipt) {
+        if(receipt.isOpposite(side)) lastTakerReceipt = receipt;
+        receiptConsumer.onReceipt(receipt);
     }
 
     public void add(OrderNew order) {
         Decimal limit = order.getLimit();
-        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel();
+        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
         row.add(order);
         book.put(limit, row);
     }
@@ -58,7 +66,7 @@ public class OrderBookSide {
 
 
 
-
+    private Receipt lastTakerReceipt;
     private BookSide side;
     private IConsumeReceipt receiptConsumer;
 

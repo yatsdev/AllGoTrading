@@ -1,6 +1,5 @@
 package org.yats.connectivity.matching;
 
-import org.yats.common.Decimal;
 import org.yats.trading.IConsumeReceipt;
 import org.yats.trading.OrderNew;
 import org.yats.trading.Receipt;
@@ -9,13 +8,18 @@ import java.util.ArrayList;
 
 public class PriceLevel {
 
+    public void match(OrderNew takerOrder) {
+        Receipt takerReceipt = takerOrder.createReceiptDefault();
+        match(takerReceipt);
+    }
 
-    public void match(OrderNew taker) {
-        for(Receipt maker : list) {
-            Receipt takerReceipt = taker.createReceiptDefault();
-            Decimal takerResidual = Decimal.max(Decimal.ZERO, takerReceipt.getResidualSize().subtract(maker.getResidualSize()));
-            Decimal makerResidual = Decimal.max(Decimal.ZERO, maker.getResidualSize().subtract(taker.getSize()));
-
+    public void match(Receipt takerReceipt) {
+        for(Receipt makerReceipt : list) {
+            if(!makerReceipt.isSamePriceOrBehind(takerReceipt)) return;
+            makerReceipt.match(takerReceipt);
+            receiptConsumer.onReceipt(takerReceipt.createCopy());
+            receiptConsumer.onReceipt(makerReceipt.createCopy());
+            if(takerReceipt.isEndState()) return;
         }
     }
 

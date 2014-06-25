@@ -22,7 +22,9 @@ public abstract class BookSide {
 
     public abstract boolean isMoreBehindThan(Decimal limit, Decimal frontRowPrice);
 
-
+    public boolean isOpposite(BookSide side){
+        return side.toDirection() != toDirection();
+    }
 
 
     public static class Ask extends BookSide {
