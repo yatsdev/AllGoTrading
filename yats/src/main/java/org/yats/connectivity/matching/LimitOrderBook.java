@@ -1,5 +1,6 @@
 package org.yats.connectivity.matching;
 
+import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
 import org.yats.common.Tool;
 import org.yats.trading.*;
@@ -24,14 +25,19 @@ public class LimitOrderBook implements IConsumeReceipt {
 
     //todo: only send if changed
     private void sendMarketData() {
-        Decimal bid = book[0].getFrontRowPrice();
-        Decimal bidSize = book[0].getFrontRowSize();
-        Decimal ask = book[1].getFrontRowPrice();
-        Decimal askSize = book[1].getFrontRowSize();
-        Decimal last = lastReceipt!=null ? lastReceipt.getPrice() : Decimal.ZERO;
-        Decimal lastSize = lastReceipt!=null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
-        MarketData m = new MarketData(Tool.getUTCTimestamp(),"pid",bid,ask,last,bidSize,askSize,lastSize);
-        consumer.onMarketData(m);
+        try {
+            Decimal bid = book[0].getFrontRowPrice();
+            Decimal bidSize = book[0].getFrontRowSize();
+            Decimal ask = book[1].getFrontRowPrice();
+            Decimal askSize = book[1].getFrontRowSize();
+
+            Decimal last = lastReceipt != null ? lastReceipt.getPrice() : Decimal.ZERO;
+            Decimal lastSize = lastReceipt != null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
+            MarketData m = new MarketData(Tool.getUTCTimestamp(), "pid", bid, ask, last, bidSize, askSize, lastSize);
+            consumer.onMarketData(m);
+        } catch(CommonExceptions.ContainerEmptyException e) {
+            // todo: enable sending even if only half the book is filled?
+        }
     }
 
     public int getSize(BookSide _side) {
