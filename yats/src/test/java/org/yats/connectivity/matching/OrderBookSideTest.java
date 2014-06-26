@@ -11,69 +11,77 @@ public class OrderBookSideTest implements IConsumeReceipt {
     @Test
     public void canAddOrder()
     {
-        bookBid.add(orderBid1);
-        bookBid.add(orderBid2);
+        bookBid.add(bid100At10);
+        bookBid.add(bid200At9);
         assert (2 == bookBid.getSize());
     }
 
     @Test
     public void canFindFirstBidRow()
     {
-        bookBid.add(orderBid1);
-        bookBid.add(orderBid2);
-        assert(orderBid1.getLimit() == bookBid.getFrontRowPrice());
+        bookBid.add(bid100At10);
+        bookBid.add(bid200At9);
+        assert(bid100At10.getLimit() == bookBid.getFrontRowPrice());
     }
 
     @Test
     public void canFindFirstAskRow()
     {
-        bookAsk.add(orderAsk1);
-        bookAsk.add(orderAsk2);
-        assert(orderAsk1.getLimit() == bookAsk.getFrontRowPrice());
+        bookAsk.add(ask100At11);
+        bookAsk.add(ask300At12);
+        assert(ask100At11.getLimit() == bookAsk.getFrontRowPrice());
     }
 
     @Test
     public void canMatchBidOrderIntoAskSide()
     {
-        bookAsk.add(orderAsk1);
-        bookAsk.add(orderAsk2);
-        bookAsk.match(orderBid3);
+        bookAsk.add(ask100At11);
+        bookAsk.add(ask300At12);
+        bookAsk.match(bid200At12);
         assert(tradedAccount1==-200);
         assert(tradedAccount2==200);
     }
 
-
+    @Test
+    public void canMatchAndHaveResidual()
+    {
+        bookAsk.add(ask100At11);
+        bookAsk.match(bid200At12);
+        assert(tradedAccount1==-100);
+        assert(tradedAccount2==100);
+        assert(lastBidReceipt.getResidualSize().isEqualTo(Decimal.fromDouble(100)));
+    }
 
     @BeforeMethod
     public void setUp() {
         bookBid = new OrderBookSide(BookSide.BID, this);
         bookAsk = new OrderBookSide(BookSide.ASK, this);
-        orderBid1 = new OrderNew()
+        bid100At10 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(10))
                 .withSize(Decimal.fromDouble(100));
-        orderBid2 = new OrderNew()
+        bid200At9 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(9))
                 .withSize(Decimal.fromDouble(200));
-        orderBid3 = new OrderNew()
+        bid200At12 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT2)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(200));
 
-        orderAsk1 = new OrderNew()
+        ask100At11 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(100));
-        orderAsk2 = new OrderNew()
+        ask300At12 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
@@ -85,6 +93,8 @@ public class OrderBookSideTest implements IConsumeReceipt {
 
     @Override
     public void onReceipt(Receipt receipt) {
+        if(receipt.isBookSide(BookSide.BID)) lastBidReceipt = receipt;
+        if(receipt.isBookSide(BookSide.ASK)) lastAskReceipt = receipt;
         if(receipt.getInternalAccount().compareTo(ProductTest.ACCOUNT1)==0) {
             tradedAccount1+=receipt.getCurrentTradedSizeSigned().toInt();
         } else
@@ -93,13 +103,15 @@ public class OrderBookSideTest implements IConsumeReceipt {
         }
     }
 
+    Receipt lastBidReceipt;
+    Receipt lastAskReceipt;
     OrderBookSide bookBid;
     OrderBookSide bookAsk;
-    OrderNew orderBid1;
-    OrderNew orderBid2;
-    OrderNew orderBid3;
-    OrderNew orderAsk1;
-    OrderNew orderAsk2;
+    OrderNew bid100At10;
+    OrderNew bid200At9;
+    OrderNew bid200At12;
+    OrderNew ask100At11;
+    OrderNew ask300At12;
     int tradedAccount1;
     int tradedAccount2;
 

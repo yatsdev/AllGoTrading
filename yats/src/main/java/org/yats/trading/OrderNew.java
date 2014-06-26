@@ -43,6 +43,7 @@ public class OrderNew extends OrderBase {
 
     public Receipt createReceiptDefault() {
         return Receipt.create()
+                .withInternalAccount(internalAccount)
                 .withOrderId(getOrderId())
                 .withProductId(productId)
                 .withBookSide(bookSide)

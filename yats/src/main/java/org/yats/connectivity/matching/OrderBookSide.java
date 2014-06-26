@@ -13,24 +13,32 @@ import java.util.TreeMap;
 public class OrderBookSide implements IConsumeReceipt {
 
     public void match(OrderNew takerOrder) {
+        Receipt takerReceipt = takerOrder.createReceiptDefault();
+        match(takerReceipt);
+    }
+
+    public void match(Receipt takerReceipt) {
+        takerReceiptSent=false;
         try {
-            Receipt takerReceipt = takerOrder.createReceiptDefault();
             doMatch(takerReceipt);
         } catch(CommonExceptions.ContainerEmptyException e) {
+            if(!takerReceiptSent) onReceipt(takerReceipt);
         }
     }
 
     public void doMatch(Receipt takerReceipt) {
-        do {
+        while(!takerReceipt.isEndState()) {
             Decimal frontRowPrice = getFrontRowPrice();
-            if(!takerReceipt.isExecutingWith(frontRowPrice)) throw new CommonExceptions.ContainerEmptyException("");
+            if(!takerReceipt.isExecutingWith(frontRowPrice)) throw new CommonExceptions.ContainerEmptyException("cant execute");
             PriceLevel frontRow = book.get(frontRowPrice);
             frontRow.match(takerReceipt);
-        } while(true);
+            if(frontRow.isEmpty()) book.remove(frontRowPrice);
+        }
     }
 
     @Override
     public void onReceipt(Receipt receipt) {
+        takerReceiptSent=true;
         if(receipt.isOpposite(side)) lastTakerReceipt = receipt;
         receiptConsumer.onReceipt(receipt);
     }
@@ -39,6 +47,13 @@ public class OrderBookSide implements IConsumeReceipt {
         Decimal limit = order.getLimit();
         PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
         row.add(order);
+        book.put(limit, row);
+    }
+
+    public void add(Receipt receiptNew) {
+        Decimal limit = receiptNew.getPrice();
+        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
+        row.add(receiptNew);
         book.put(limit, row);
     }
 
@@ -71,6 +86,7 @@ public class OrderBookSide implements IConsumeReceipt {
     private IConsumeReceipt receiptConsumer;
 
     private SortedMap<Decimal,PriceLevel> book;
+    private boolean takerReceiptSent;
 
 
 } // class

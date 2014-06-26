@@ -1,5 +1,7 @@
 package org.yats.connectivity.matching;
 
+import org.yats.common.CommonExceptions;
+import org.yats.common.Decimal;
 import org.yats.trading.IConsumeReceipt;
 import org.yats.trading.OrderNew;
 import org.yats.trading.Receipt;
@@ -8,6 +10,13 @@ import java.util.ArrayList;
 
 public class PriceLevel {
 
+    public boolean isEmpty() {
+        for(Receipt makerReceipt : list) {
+            if(makerReceipt.getResidualSize().isGreaterThan(Decimal.ZERO)) return false;
+        }
+        return true;
+    }
+
     public void match(OrderNew takerOrder) {
         Receipt takerReceipt = takerOrder.createReceiptDefault();
         match(takerReceipt);
@@ -15,7 +24,7 @@ public class PriceLevel {
 
     public void match(Receipt takerReceipt) {
         for(Receipt makerReceipt : list) {
-            if(!makerReceipt.isSamePriceOrBehind(takerReceipt)) return;
+            if(!takerReceipt.isSamePriceOrInfront(makerReceipt)) throw new CommonExceptions.ContainerEmptyException("taker infront of maker receipt");;
             makerReceipt.match(takerReceipt);
             receiptConsumer.onReceipt(takerReceipt.createCopy());
             receiptConsumer.onReceipt(makerReceipt.createCopy());
@@ -24,7 +33,11 @@ public class PriceLevel {
     }
 
     public void add(OrderNew order) {
-        list.add(order.createReceiptDefault());
+        add(order.createReceiptDefault());
+    }
+
+    public void add(Receipt receipt) {
+        list.add(receipt);
     }
 
     public int size() {

@@ -2,18 +2,18 @@ package org.yats.connectivity.matching;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
 import org.yats.trading.*;
 
 public class PricelevelTest implements IConsumeReceipt {
 
 
-    @Test
+    @Test(expectedExceptions = CommonExceptions.ContainerEmptyException.class)
     public void doesNotMatchNotCrossingOrders()
     {
         level.add(orderAsk1);
         level.match(orderBid1);
-        assert(0==receipts);
     }
 
     @Test

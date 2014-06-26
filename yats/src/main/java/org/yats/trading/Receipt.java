@@ -339,9 +339,9 @@ public class Receipt {
         return bookSide.equals(side);
     }
 
-    public boolean isSamePriceOrBehind(Receipt takerReceipt) {
-        if(price.isEqualTo(takerReceipt.getPrice())) return true;
-        return bookSide.isMoreBehindThan(takerReceipt.getPrice(),price);
+    public boolean isSamePriceOrInfront(Receipt other) {
+        if(price.isEqualTo(other.getPrice())) return true;
+        return bookSide.isMoreInfrontThan(price, other.getPrice());
     }
 
     public boolean isOpposite(BookSide side) {
