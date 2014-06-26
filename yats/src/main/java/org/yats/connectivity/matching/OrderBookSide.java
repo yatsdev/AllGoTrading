@@ -63,6 +63,11 @@ public class OrderBookSide implements IConsumeReceipt {
         return frontRowPrice;
     }
 
+    public Decimal getFrontRowSize() {
+        if(isEmpty()) return Decimal.ZERO;
+        return book.get(getFrontRowPrice()).getCumulativeSize();
+    }
+
     public boolean isEmpty() {
         return book.isEmpty();
     }

@@ -3,9 +3,10 @@ package org.yats.connectivity.matching;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
+import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public class LimitOrderBookTest implements IConsumeReceipt {
+public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
 
     @Test
     public void canMatchIntoEmptyBookCreatingMakerReceipts()
@@ -53,6 +54,16 @@ public class LimitOrderBookTest implements IConsumeReceipt {
     @Override
     public void onReceipt(Receipt receipt) {
 
+    }
+
+    @Override
+    public void onMarketData(MarketData marketData) {
+
+    }
+
+    @Override
+    public UniqueId getConsumerId() {
+        return UniqueId.create();
     }
 
     LimitOrderBook book;

@@ -1,10 +1,8 @@
 package org.yats.connectivity.matching;
 
 import org.yats.common.Decimal;
-import org.yats.trading.BookSide;
-import org.yats.trading.IConsumeReceipt;
-import org.yats.trading.OrderNew;
-import org.yats.trading.Receipt;
+import org.yats.common.Tool;
+import org.yats.trading.*;
 
 public class LimitOrderBook implements IConsumeReceipt {
 
@@ -14,20 +12,27 @@ public class LimitOrderBook implements IConsumeReceipt {
         book[oppositeIndex].match(takerReceipt);
         int index = takerReceipt.getBookSide().toIndex();
         if(!takerReceipt.isEndState()) book[index].add(takerReceipt);
+        sendMarketData();
     }
+
 
     @Override
     public void onReceipt(Receipt receipt) {
-
-        receiptConsumer.onReceipt(receipt);
+        lastReceipt=receipt;
+        consumer.onReceipt(receipt);
     }
 
-    //    public void add(OrderNew orderNew) {
-//        BookSide side = orderNew.getBookSide();
-//        if(frontRowPrice[side.toIndex()]==null){
-//
-//        }
-//    }
+    //todo: only send if changed
+    private void sendMarketData() {
+        Decimal bid = book[0].getFrontRowPrice();
+        Decimal bidSize = book[0].getFrontRowSize();
+        Decimal ask = book[1].getFrontRowPrice();
+        Decimal askSize = book[1].getFrontRowSize();
+        Decimal last = lastReceipt!=null ? lastReceipt.getPrice() : Decimal.ZERO;
+        Decimal lastSize = lastReceipt!=null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
+        MarketData m = new MarketData(Tool.getUTCTimestamp(),"pid",bid,ask,last,bidSize,askSize,lastSize);
+        consumer.onMarketData(m);
+    }
 
     public int getSize(BookSide _side) {
         return book[_side.toIndex()].getSize();
@@ -38,9 +43,9 @@ public class LimitOrderBook implements IConsumeReceipt {
     }
 
 
-    public LimitOrderBook(IConsumeReceipt _receiptConsumer)
+    public LimitOrderBook(IConsumeMarketDataAndReceipt _receiptConsumer)
     {
-        receiptConsumer = _receiptConsumer;
+        consumer = _receiptConsumer;
         book = new OrderBookSide[2];
         book[0] = new OrderBookSide(BookSide.BID, this);
         book[1] = new OrderBookSide(BookSide.ASK, this);
@@ -51,9 +56,10 @@ public class LimitOrderBook implements IConsumeReceipt {
 
     Receipt lastBidReceipt;
     Receipt lastAskReceipt;
+    Receipt lastReceipt;
     OrderBookSide book[];
     private Decimal frontRowPrice[];
-    IConsumeReceipt receiptConsumer;
+    IConsumeMarketDataAndReceipt consumer;
 
 
 

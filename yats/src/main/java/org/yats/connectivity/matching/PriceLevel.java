@@ -43,6 +43,13 @@ public class PriceLevel {
     public int size() {
         return list.size();
     }
+    public Decimal getCumulativeSize() {
+        Decimal sum = Decimal.ZERO;
+        for(Receipt makerReceipt : list) {
+            sum=sum.add(makerReceipt.getResidualSize());
+        }
+        return sum;
+    }
 
     public PriceLevel(IConsumeReceipt _receiptConsumer) {
         list = new ArrayList<Receipt>();
