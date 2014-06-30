@@ -348,6 +348,10 @@ public class Receipt {
         return bookSide.isOpposite(side);
     }
 
+    public boolean hasOrderId(String _orderId) {
+        return _orderId.compareTo(orderId.toString()) == 0;
+    }
+
 
     private static class ReceiptNULL extends Receipt {
         private ReceiptNULL() {

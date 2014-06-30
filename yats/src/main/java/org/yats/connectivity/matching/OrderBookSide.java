@@ -2,13 +2,11 @@ package org.yats.connectivity.matching;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
-import org.yats.trading.BookSide;
-import org.yats.trading.IConsumeReceipt;
-import org.yats.trading.OrderNew;
-import org.yats.trading.Receipt;
+import org.yats.trading.*;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class OrderBookSide implements IConsumeReceipt {
 
@@ -36,11 +34,27 @@ public class OrderBookSide implements IConsumeReceipt {
         }
     }
 
+    public void cancel(OrderCancel order) {
+        String orderId = order.getOrderId().toString();
+        if(bookByOrderId.containsKey(orderId)) {
+            bookByOrderId.get(orderId).remove(orderId);
+            bookByOrderId.remove(orderId);
+            PriceLevel frontRow = book.get(getFrontRowPrice());
+            if(frontRow.isEmpty()) book.remove(getFrontRowPrice());
+        }
+    }
+
+
     @Override
     public void onReceipt(Receipt receipt) {
         takerReceiptSent=true;
         if(receipt.isOpposite(side)) lastTakerReceipt = receipt;
+        if(receipt.isEndState()) removeOrderFromBook(receipt.getOrderId().toString());
         receiptConsumer.onReceipt(receipt);
+    }
+
+    private void removeOrderFromBook(String orderId) {
+        if(bookByOrderId.containsKey(orderId)) bookByOrderId.remove(orderId);
     }
 
     public void add(OrderNew order) {
@@ -81,6 +95,7 @@ public class OrderBookSide implements IConsumeReceipt {
         receiptConsumer = _receiptConsumer;
 
         book = new TreeMap<Decimal, PriceLevel>();
+        bookByOrderId = new ConcurrentHashMap<String, PriceLevel>();
 
     }
 
@@ -91,6 +106,7 @@ public class OrderBookSide implements IConsumeReceipt {
     private IConsumeReceipt receiptConsumer;
 
     private SortedMap<Decimal,PriceLevel> book;
+    private ConcurrentHashMap<String, PriceLevel> bookByOrderId;
     private boolean takerReceiptSent;
 
 

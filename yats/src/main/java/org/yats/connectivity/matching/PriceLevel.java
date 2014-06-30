@@ -32,6 +32,15 @@ public class PriceLevel {
         }
     }
 
+    public void remove(String orderId){
+        for(Receipt makerReceipt : list) {
+            if(makerReceipt.hasOrderId(orderId)) {
+                makerReceipt.setEndState(true);
+                receiptConsumer.onReceipt(makerReceipt.createCopy());
+            }
+        }
+    }
+
     public void add(OrderNew order) {
         add(order.createReceiptDefault());
     }

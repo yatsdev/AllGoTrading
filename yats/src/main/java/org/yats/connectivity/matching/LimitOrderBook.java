@@ -16,6 +16,12 @@ public class LimitOrderBook implements IConsumeReceipt {
         sendMarketData();
     }
 
+    public void cancel(OrderCancel order) {
+        book[0].cancel(order);
+        book[1].cancel(order);
+        sendMarketData();
+    }
+
 
     @Override
     public void onReceipt(Receipt receipt) {
@@ -66,7 +72,6 @@ public class LimitOrderBook implements IConsumeReceipt {
     OrderBookSide book[];
     private Decimal frontRowPrice[];
     IConsumeMarketDataAndReceipt consumer;
-
 
 
 } // class

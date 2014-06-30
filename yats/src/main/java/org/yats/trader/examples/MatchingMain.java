@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
+import org.yats.connectivity.matching.InternalMarket;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
@@ -30,26 +31,25 @@ public class MatchingMain implements IConsumeMarketData {
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        PriceFeed oandaFeed = PriceFeed.createFromPropertiesReader(prop);
-        oandaFeed.setProductProvider(products);
+//        PriceFeed oandaFeed = PriceFeed.createFromPropertiesReader(prop);
+//        oandaFeed.setProductProvider(products);
 
         MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
+        InternalMarket orderConnection = InternalMarket.createFromConfigFile(configFilename);
+        orderConnection.setProductProvider(products);
+
         StrategyRunner strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(oandaFeed);
+        strategyRunner.setPriceFeed(orderConnection);
         strategyRunner.addStrategy(marketToBusConnection);
         strategyRunner.setProductProvider(products);
-        oandaFeed.logon();
 
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);
 
-//        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
-//        orderConnection.setProductProvider(products);
-//        orderConnection.logon();
 
 //        strategyRunner.setOrderSender(orderConnection);
-//        orderConnection.setReceiptConsumer(strategyRunner);
+        orderConnection.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
         strategyRunner.subscribe("OANDA_EURUSD", this);
@@ -65,7 +65,7 @@ public class MatchingMain implements IConsumeMarketData {
         System.out.println("\nexiting...\n");
 
         marketToBusConnection.shutdown();
-        oandaFeed.shutdown();
+//        oandaFeed.shutdown();
         Thread.sleep(1000);
 
         System.exit(0);
@@ -75,7 +75,7 @@ public class MatchingMain implements IConsumeMarketData {
     }
 
     public static void main(String args[]) throws Exception {
-        OandaClientMain q = new OandaClientMain();
+        MatchingMain q = new MatchingMain();
 
         try {
             q.go();
