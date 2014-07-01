@@ -13,8 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProductList implements IProvideProduct {
 
     @Override
+    public boolean isProductIdExisting(String productId){
+        return list.containsKey(productId);
+    }
+
+    @Override
     public Product getProductForProductId(String productId) {
-        if(!list.containsKey(productId)) throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
+        if(!isProductIdExisting(productId)) throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
         return list.get(productId);
     }
 

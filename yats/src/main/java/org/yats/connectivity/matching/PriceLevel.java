@@ -12,6 +12,7 @@ public class PriceLevel {
 
     public boolean isEmpty() {
         for(Receipt makerReceipt : list) {
+            if(makerReceipt.isEndState()) continue;
             if(makerReceipt.getResidualSize().isGreaterThan(Decimal.ZERO)) return false;
         }
         return true;
@@ -28,17 +29,26 @@ public class PriceLevel {
             makerReceipt.match(takerReceipt);
             receiptConsumer.onReceipt(takerReceipt.createCopy());
             receiptConsumer.onReceipt(makerReceipt.createCopy());
+            takerReceipt.setCurrentTradedSize(Decimal.ZERO);
+            makerReceipt.setCurrentTradedSize(Decimal.ZERO);
             if(takerReceipt.isEndState()) return;
         }
     }
 
     public void remove(String orderId){
-        for(Receipt makerReceipt : list) {
-            if(makerReceipt.hasOrderId(orderId)) {
-                makerReceipt.setEndState(true);
-                receiptConsumer.onReceipt(makerReceipt.createCopy());
-            }
+        Receipt receipt = findReceiptWithOrderId(orderId);
+        if(receipt==null) return;
+        receipt.setEndState(true);
+        receipt.setCurrentTradedSize(Decimal.ZERO);
+        list.remove(receipt);
+        receiptConsumer.onReceipt(receipt.createCopy());
+    }
+
+    public Receipt findReceiptWithOrderId(String orderId){
+        for(Receipt receipt : list) {
+            if (receipt.hasOrderId(orderId)) return receipt;
         }
+        return null;
     }
 
     public void add(OrderNew order) {

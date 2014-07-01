@@ -3,6 +3,7 @@ package org.yats.connectivity.matching;
 import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
 import org.yats.common.Tool;
+import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 public class LimitOrderBook implements IConsumeReceipt {
@@ -16,9 +17,9 @@ public class LimitOrderBook implements IConsumeReceipt {
         sendMarketData();
     }
 
-    public void cancel(OrderCancel order) {
-        book[0].cancel(order);
-        book[1].cancel(order);
+    public void cancel(UniqueId orderId) {
+        book[0].cancel(orderId);
+        book[1].cancel(orderId);
         sendMarketData();
     }
 

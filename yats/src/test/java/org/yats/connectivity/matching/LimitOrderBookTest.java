@@ -25,6 +25,33 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
         assert (1 == book.getSize(BookSide.BID));
     }
 
+    @Test
+    public void canCancelAskOrder()
+    {
+        book.match(ask100At11);
+        assert (1 == book.getSize());
+        book.cancel(ask100At11.getOrderId());
+        assert (0 == book.getSize());
+    }
+
+    @Test
+    public void cancelNotExistingOrderDoesNothing()
+    {
+        book.match(bid100At10);
+        assert (1 == book.getSize());
+        book.cancel(ask100At11.getOrderId());
+        assert (1 == book.getSize());
+    }
+
+    @Test
+    public void cancelBidOrderLeavingAsk()
+    {
+        book.match(bid100At10);
+        book.match(ask100At11);
+        assert (2 == book.getSize());
+        book.cancel(bid100At10.getOrderId());
+        assert (1 == book.getSize(BookSide.ASK));
+    }
 
 
     @BeforeMethod

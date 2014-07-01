@@ -1,5 +1,8 @@
 package org.yats.connectivity.matching;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
@@ -7,29 +10,33 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMarketDataAndReceipt {
 
-
-    private ProductList productProvider;
+    final Logger log = LoggerFactory.getLogger(InternalMarket.class);
 
     @Override
     public void subscribe(String productId, IConsumeMarketData _consumer) {
         priceConsumer = _consumer;
+        if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
+        log.debug("Subscription for "+productId+". OrderBook created.");
     }
 
     @Override
     public void sendOrderNew(OrderNew order) {
         String productId = order.getProductId();
+        if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
+        log.debug("Matching new order "+order.toString());
         orderBooks.get(productId).match(order);
     }
 
     @Override
     public void sendOrderCancel(OrderCancel order) {
         String productId = order.getProductId();
+        if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        orderBooks.get(productId).cancel(order);
+        log.debug("Canceling new order "+order.toString());
+        orderBooks.get(productId).cancel(order.getOrderId());
     }
-
 
     @Override
     public void onMarketData(MarketData marketData) {
@@ -50,6 +57,24 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         this.receiptConsumer = receiptConsumer;
     }
 
+    public void setProductProvider(IProvideProduct productProvider) {
+        this.productProvider = productProvider;
+    }
+
+    public InternalMarket(IProvideProperties prop) {
+        properties = prop;
+        orderBooks = new ConcurrentHashMap<String, LimitOrderBook>();
+        priceConsumer=null;
+        receiptConsumer=null;
+        productProvider=null;
+    }
+
+    private boolean isProductValid(String productId) {
+        if(!productProvider.isProductIdExisting(productId)) return false;
+        Product p = productProvider.getProductForProductId(productId);
+        if(p.getExchange().compareTo(properties.get("marketName"))!=0) return false;
+        return true;
+    }
 
     private void createOrderBookForProductId(String productId) {
         if(!orderBooks.containsKey(productId)) {
@@ -60,13 +85,11 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     private ConcurrentHashMap<String, LimitOrderBook> orderBooks;
     private IConsumeMarketData priceConsumer;
     private IConsumeReceipt receiptConsumer;
+    private IProvideProduct productProvider;
+    private IProvideProperties properties;
 
 
-    public static InternalMarket createFromConfigFile(String configFilename) {
-        return null;
-    }
 
-    public void setProductProvider(ProductList productProvider) {
-        this.productProvider = productProvider;
-    }
+
+
 }

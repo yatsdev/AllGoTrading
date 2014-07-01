@@ -7,7 +7,6 @@ import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.matching.InternalMarket;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
-import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.MarketData;
@@ -23,7 +22,7 @@ import java.io.IOException;
 
 public class MatchingMain implements IConsumeMarketData {
 
-    final Logger log = LoggerFactory.getLogger(FixClientMain.class);
+    final Logger log = LoggerFactory.getLogger(MatchingMain.class);
 
     public void go() throws InterruptedException, IOException
     {
@@ -31,16 +30,14 @@ public class MatchingMain implements IConsumeMarketData {
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-//        PriceFeed oandaFeed = PriceFeed.createFromPropertiesReader(prop);
-//        oandaFeed.setProductProvider(products);
 
         MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
-        InternalMarket orderConnection = InternalMarket.createFromConfigFile(configFilename);
-        orderConnection.setProductProvider(products);
+        InternalMarket internalMarket = new InternalMarket(prop);
+        internalMarket.setProductProvider(products);
 
         StrategyRunner strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(orderConnection);
+        strategyRunner.setPriceFeed(internalMarket);
         strategyRunner.addStrategy(marketToBusConnection);
         strategyRunner.setProductProvider(products);
 
@@ -48,11 +45,10 @@ public class MatchingMain implements IConsumeMarketData {
         marketToBusConnection.setProductProvider(products);
 
 
-//        strategyRunner.setOrderSender(orderConnection);
-        orderConnection.setReceiptConsumer(strategyRunner);
+        strategyRunner.setOrderSender(internalMarket);
+        internalMarket.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
-        strategyRunner.subscribe("OANDA_EURUSD", this);
         Thread.sleep(2000);
 
         marketToBusConnection.init();

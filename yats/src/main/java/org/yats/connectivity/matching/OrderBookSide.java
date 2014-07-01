@@ -2,6 +2,7 @@ package org.yats.connectivity.matching;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
+import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 import java.util.SortedMap;
@@ -31,16 +32,16 @@ public class OrderBookSide implements IConsumeReceipt {
             PriceLevel frontRow = book.get(frontRowPrice);
             frontRow.match(takerReceipt);
             if(frontRow.isEmpty()) book.remove(frontRowPrice);
+            removeEmptyFrontRows();
         }
     }
 
-    public void cancel(OrderCancel order) {
-        String orderId = order.getOrderId().toString();
-        if(bookByOrderId.containsKey(orderId)) {
-            bookByOrderId.get(orderId).remove(orderId);
-            bookByOrderId.remove(orderId);
-            PriceLevel frontRow = book.get(getFrontRowPrice());
-            if(frontRow.isEmpty()) book.remove(getFrontRowPrice());
+    public void cancel(UniqueId orderId) {
+        String idString = orderId.toString();
+        if(bookByOrderId.containsKey(idString)) {
+            bookByOrderId.get(idString).remove(idString);
+            bookByOrderId.remove(idString);
+            removeEmptyFrontRows();
         }
     }
 
@@ -58,10 +59,7 @@ public class OrderBookSide implements IConsumeReceipt {
     }
 
     public void add(OrderNew order) {
-        Decimal limit = order.getLimit();
-        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
-        row.add(order);
-        book.put(limit, row);
+        add(order.createReceiptDefault());
     }
 
     public void add(Receipt receiptNew) {
@@ -69,6 +67,8 @@ public class OrderBookSide implements IConsumeReceipt {
         PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
         row.add(receiptNew);
         book.put(limit, row);
+        bookByOrderId.put(receiptNew.getOrderId().toString(), row);
+        receiptConsumer.onReceipt(receiptNew.createCopy());
     }
 
     public Decimal getFrontRowPrice() {
@@ -93,12 +93,18 @@ public class OrderBookSide implements IConsumeReceipt {
     public OrderBookSide(BookSide side, IConsumeReceipt _receiptConsumer) {
         this.side = side;
         receiptConsumer = _receiptConsumer;
-
         book = new TreeMap<Decimal, PriceLevel>();
         bookByOrderId = new ConcurrentHashMap<String, PriceLevel>();
-
     }
 
+    private void removeEmptyFrontRows() {
+        PriceLevel frontRow;
+        do {
+            Decimal frontRowPrice = getFrontRowPrice();
+            frontRow = book.get(frontRowPrice);
+            if (frontRow.isEmpty()) book.remove(frontRowPrice);
+        } while(frontRow.isEmpty() && book.size()>0);
+    }
 
 
     private Receipt lastTakerReceipt;

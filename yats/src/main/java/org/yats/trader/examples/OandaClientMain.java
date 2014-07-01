@@ -44,7 +44,7 @@ public class OandaClientMain implements IConsumeMarketData {
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);
 
-//        OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);
+//        OrderConnection orderConnection = OrderConnection.createFromProperties(configFIXOrderFilename);
 //        orderConnection.setProductProvider(products);
 //        orderConnection.logon();
 
