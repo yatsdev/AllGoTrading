@@ -6,6 +6,25 @@ public class Product {
 
 //    public static ProductNULL NULL = new ProductNULL();
 
+    public boolean isRoute(String r) {
+        return (route.compareTo(r)==0);
+    }
+
+    public boolean isProductAsPairChainable(Product product)
+    {
+
+        if(   product.hasUnderlying(underlyingId)
+           || product.hasUnderlying(unitId)
+           || product.hasUnitId(underlyingId)
+           || product.hasUnitId(unitId)
+           )
+        {
+            return (!product.hasProductId(productId));
+        }
+        return false;
+    }
+
+
     @Override
     public String toString() {
         return "Product{" +
@@ -131,22 +150,6 @@ public class Product {
     private String underlyingId;
     private String unitId;
 
-    public boolean isRoute(String r) {
-        return (route.compareTo(r)==0);
-    }
-    
-        public boolean isProductAsPairChainable(Product product){
-        boolean isChainable=false;
-
-        if(product.getUnderlyingId().compareTo(underlyingId)==0||product.getUnitId().compareTo(unitId)==0||product.getUnderlyingId().compareTo(unitId)==0||product.getUnitId().compareTo(underlyingId)==0){
-            if(!(product.getProductId().compareTo(productId)==0)){
-
-                isChainable=true;
-            }
-
-        }
-        return isChainable;
-    }
 
 
 //    private static class ProductNULL extends Product {
