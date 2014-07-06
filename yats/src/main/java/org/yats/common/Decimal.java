@@ -10,6 +10,7 @@ public class Decimal implements Comparable<Decimal> {
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal DIME = new Decimal("0.10");
     public static final Decimal CENT = new Decimal("0.01");
+    private static final int DEFAULT_SCALE = 10;
 
 
     @Override
@@ -56,7 +57,7 @@ public class Decimal implements Comparable<Decimal> {
     }
 
     public Decimal divide(Decimal other) {
-        return new Decimal(value.divide(other.value));
+        return new Decimal(value.divide(other.value, DEFAULT_SCALE, RoundingMode.HALF_UP));
     }
 
     public Decimal abs() {
@@ -84,6 +85,7 @@ public class Decimal implements Comparable<Decimal> {
 
     public Decimal(String valueString) {
         value = new BigDecimal(valueString);
+
     }
 
     public Decimal(BigDecimal b) {

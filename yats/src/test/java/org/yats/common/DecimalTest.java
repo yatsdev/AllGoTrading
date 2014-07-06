@@ -28,6 +28,13 @@ public class DecimalTest {
         assert(Decimal.fromString("10").isEqualTo(Decimal.fromString("0.1").invert()));
     }
 
+    @Test
+    public void canInvertAndRoundsInfiniteLongDecimalExpressions()
+    {
+        Decimal result = Decimal.fromString("3").invert();
+        assert(Decimal.fromString("0.3333333333").isEqualTo(result));
+    }
+
         @Test
     public void canRound()
     {
