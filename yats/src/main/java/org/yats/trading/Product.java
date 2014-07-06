@@ -134,6 +134,20 @@ public class Product {
     public boolean isRoute(String r) {
         return (route.compareTo(r)==0);
     }
+    
+        public boolean isProductAsPairChainable(Product product){
+        boolean isChainable=false;
+
+        if(product.getUnderlyingId().compareTo(underlyingId)==0||product.getUnitId().compareTo(unitId)==0||product.getUnderlyingId().compareTo(unitId)==0||product.getUnitId().compareTo(underlyingId)==0){
+            if(!(product.getProductId().compareTo(productId)==0)){
+
+                isChainable=true;
+            }
+
+        }
+        return isChainable;
+    }
+
 
 //    private static class ProductNULL extends Product {
 //        public String getProductId() { throw new RuntimeException("This is null object!");}
