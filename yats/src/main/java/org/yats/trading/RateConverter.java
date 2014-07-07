@@ -11,8 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateConverter implements IConsumeMarketData {
 
 
-    ConcurrentHashMap<String, MarketData> rates;
-    IProvideProduct products;
 
 
     public RateConverter(IProvideProduct p) {
@@ -215,6 +213,10 @@ public class RateConverter implements IConsumeMarketData {
 
         return positionInTargetCurrency;
     }
+
+    private ConcurrentHashMap<String, MarketData> rates;
+    private IProvideProduct products;
+
 
 }
 
