@@ -68,6 +68,7 @@ public class ProductList implements IProvideProduct {
             String[] nextLine;
             reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
+                if(nextLine.length<8) throw new CommonExceptions.FieldNotFoundException("too few fields!");
                 Product p = new Product()
                         .withProductId(checkForNull(nextLine[0].trim()))
                         .withSymbol(checkForNull(nextLine[1].trim()))
@@ -86,9 +87,20 @@ public class ProductList implements IProvideProduct {
         }
     }
 
-    private String checkForNull(String text) {
-        if(text==null) throw new TradingExceptions.FieldIsNullException("");
-        return text;
+    public boolean isEveryUnitAvailableAsProduct() {
+        for(Product p : list.values()) {
+            if(!isProductIdExisting(p.getUnitId())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isEveryUnderlyingAvailableAsProduct() {
+        for(Product p : list.values()) {
+            if(!isProductIdExisting(p.getUnderlyingId())) return false;
+        }
+        return true;
     }
 
     public void writeWithAppend(String path, String appendToEachLine)
@@ -119,6 +131,11 @@ public class ProductList implements IProvideProduct {
         list = new ConcurrentHashMap<String, Product>();
     }
 
+
+    private String checkForNull(String text) {
+        if(text==null) throw new TradingExceptions.FieldIsNullException("");
+        return text;
+    }
 
     ConcurrentHashMap<String, Product> list;
 

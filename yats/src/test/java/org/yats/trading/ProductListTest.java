@@ -11,6 +11,8 @@ public class ProductListTest {
     public void canReadProductList()
     {
         assert (list.size()>0);
+        assert (list.isEveryUnderlyingAvailableAsProduct());
+        assert (list.isEveryUnitAvailableAsProduct());
     }
 
 
