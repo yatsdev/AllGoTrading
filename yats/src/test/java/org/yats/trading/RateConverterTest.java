@@ -7,6 +7,7 @@ import org.yats.common.Decimal;
 public class RateConverterTest {
 
     public static final Decimal SAP_SIZE = Decimal.fromString("2");
+    public static final Decimal HKD_SIZE = Decimal.fromString("1000");
 
     @Test
     public void canConvertPositionInEURToEUR() {
@@ -78,6 +79,33 @@ public class RateConverterTest {
         assert(p1InNZD.isSize(expectedSize));
     }
 
+    @Test
+    public void canConvertPositionInHKDToSAPUsingShortestChainOfConversions() {
+        converter.onMarketData(TestMarketData.XAUUSD);
+        converter.onMarketData(TestMarketData.XAUXAG);
+        converter.onMarketData(TestMarketData.XAGNZD);
+        converter.onMarketData(TestMarketData.AUDHKD);
+        converter.onMarketData(TestMarketData.CADHKD);
+        converter.onMarketData(TestMarketData.CADSGD);
+        converter.onMarketData(TestMarketData.NZDCAD);
+        converter.onMarketData(TestMarketData.SGDHKD);
+
+        Position p2InSAP = converter.convert(p2, TestMarketData.SAP_PID);
+
+        Decimal expectedSize = HKD_SIZE
+                .multiply(TestMarketData.SGDHKD_LAST.invert())
+                .multiply(TestMarketData.CADSGD_LAST.invert())
+                .multiply(TestMarketData.NZDCAD_LAST.invert())
+                .multiply(TestMarketData.XAGNZD_LAST.invert())
+                .multiply(TestMarketData.XAUXAG_LAST.invert())
+                .multiply(TestMarketData.XAUUSD_LAST)
+                .multiply(TestMarketData.EURUSD_LAST.invert())
+                .multiply(TestMarketData.SAP_LAST.invert())
+                ;
+
+        assert(p2InSAP.isSize(expectedSize));
+    }
+
 
     @BeforeMethod
     public void setUp() {
@@ -88,10 +116,12 @@ public class RateConverterTest {
         converter.onMarketData(TestMarketData.GBPUSD);
         converter.onMarketData(TestMarketData.SAP);
         p1 = new Position(TestMarketData.SAP_PID, SAP_SIZE);
+        p2 = new Position(TestMarketData.HKD_PID, HKD_SIZE);
     }
 
 
     Position p1;
+    Position p2;
     RateConverter converter;
 
 } // class
