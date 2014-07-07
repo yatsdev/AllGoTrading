@@ -71,7 +71,7 @@ public class RateConverterTest {
 //                .multiply(SAP_SIZE)
 //                .multiply(TestMarketData.EURUSD_LAST)
 //                .multiply(TestMarketData.XAUUSD_LAST.invert())
-//                .multiply(TestMarketData.XAUXAG_LAST.invert())
+//                .multiply(TestMarketData.XAUXAG_LAST.invert())  //It's not inverted I think
 //                .multiply(TestMarketData.XAGNZD_LAST)
 //                ;
 //        assert(p1InNZD.isSize(expectedSize));
