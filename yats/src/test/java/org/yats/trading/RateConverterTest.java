@@ -93,8 +93,7 @@ public class RateConverterTest {
         Position p2InSAP = converter.convert(p2, TestMarketData.SAP_PID);
 
         Decimal expectedSize = HKD_SIZE
-                .multiply(TestMarketData.SGDHKD_LAST.invert())
-                .multiply(TestMarketData.CADSGD_LAST.invert())
+                .multiply(TestMarketData.CADHKD_LAST.invert())
                 .multiply(TestMarketData.NZDCAD_LAST.invert())
                 .multiply(TestMarketData.XAGNZD_LAST.invert())
                 .multiply(TestMarketData.XAUXAG_LAST.invert())
