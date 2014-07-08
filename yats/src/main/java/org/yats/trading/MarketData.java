@@ -38,6 +38,13 @@ public class MarketData
         return true;
     }
 
+    public boolean isSameFrontRowPricesAs(MarketData other) {
+        if(other==NULL) return false;
+        if(!bid.isEqualTo(other.bid)) return false;
+        if(!ask.isEqualTo(other.ask)) return false;
+        return true;
+    }
+
     public boolean isInitialized() {
         return true;
     }
