@@ -105,7 +105,6 @@ public class RateConverterTest {
         assert(p2InSAP.isSize(expectedSize));
     }
 
-
     @BeforeMethod
     public void setUp() {
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
