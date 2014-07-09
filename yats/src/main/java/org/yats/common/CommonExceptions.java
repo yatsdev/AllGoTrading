@@ -8,8 +8,8 @@ public class CommonExceptions {
         }
     }
 
-    public static class KeyNotFoundInConfigFileException extends RuntimeException {
-        public KeyNotFoundInConfigFileException(String msg) {
+    public static class KeyNotFoundException extends RuntimeException {
+        public KeyNotFoundException(String msg) {
             super(msg);
         }
     }
