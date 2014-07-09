@@ -20,16 +20,20 @@ public class RateConverter implements IConsumeMarketData {
 
 
     public Position convert(Position position, String targetProductId) {
-        Decimal positionInTargetCurrency = null;
-        Decimal priceInOriginalCurrency = rates.getLastPrice(position.getProductId());
-        Decimal positionSizedInTargetCurrency = null;
+
+        Decimal positionSizedInTargetProduct = null;
+        Decimal positionInTargetProduct=null;
+
+
+        positionInTargetProduct = getLastForProductId(position.getProductId());
+
+
 
 
         if (isSameCurrency(position, targetProductId)) {
-            positionInTargetCurrency = getLastForProductId(position.getProductId());
+            positionInTargetProduct= getLastForProductId(position.getProductId());
         } else {
 
-            Vector<Product> currencies = new Vector<Product>();
             Vector<Product> onlinePairs = new Vector<Product>();
             Collection collection = null;
             collection = products.values();
@@ -39,29 +43,13 @@ public class RateConverter implements IConsumeMarketData {
             ConcurrentHashMap nextPair = new ConcurrentHashMap();
 
 
-            //In this segment I'll collect in my currencies Vector all the currencies available in the .csv file
-            Iterator itr = collection.iterator();
-            while (itr.hasNext()) {
-                Product product = (Product) itr.next();
-                if (product.getUnitId().compareTo(product.getUnderlyingId()) == 0) {
-                    currencies.add(product);
-                }
-            }
-
-
-
 
 //In this segment I'll collect the pairs available in rates
             Iterator itr2 = collection.iterator();
             while (itr2.hasNext()) {
                 Product product = (Product) itr2.next();
-                for (int i = 0; i < currencies.size(); i++) {
-                    if (product.getUnderlyingId().compareTo(currencies.elementAt(i).getProductId()) == 0 && !(product.getUnitId().compareTo(product.getUnderlyingId()) == 0))//This is a pair
-                    {
-                        if (rates.containsKey(product.getProductId())) {
-                            onlinePairs.add(product);
-                        }
-                    }
+                if (rates.containsKey(product.getProductId())) {
+                    onlinePairs.add(product);
                 }
             }
 
@@ -133,52 +121,55 @@ public class RateConverter implements IConsumeMarketData {
 
 ///////////////////////////Here I do the actual conversion using the chain just found, I have to use ifs to evaluate whether to invert pairs or not.
 
-            positionInTargetCurrency=priceInOriginalCurrency;
+  String currentlyworkingIn=new String();
+
             if(products.getProductForProductId(position.getProductId()).getUnitId().compareTo(bestNode.getChainSoFar().firstElement().getUnitId())==0){
 
 
-                positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().firstElement().getProductId()).getLast().invert());
+                positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().firstElement().getProductId()).getLast().invert());
+                currentlyworkingIn=bestNode.getChainSoFar().firstElement().getUnderlyingId();
             }else {
 
 
-                positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().firstElement().getProductId()).getLast());
-
+                positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().firstElement().getProductId()).getLast());
+                currentlyworkingIn=bestNode.getChainSoFar().firstElement().getUnitId();
 
             }
             for(int i=1;i<bestNode.getChainSoFar().size();i++){
 
-
-                if(bestNode.getChainSoFar().elementAt(i-1).getUnitId().compareTo(bestNode.getChainSoFar().elementAt(i).getUnitId())==0){
+                if(currentlyworkingIn.compareTo(bestNode.getChainSoFar().elementAt(i).getUnitId())==0){
 
 
                     if(bestNode.getChainSoFar().elementAt(i).getUnderlyingId().compareTo(targetProductId)==0){
-                        positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast().invert());
+                        positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast().invert());
                         break;
                     }
 
-                      positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast().invert());
+                    currentlyworkingIn=bestNode.getChainSoFar().elementAt(i).getUnderlyingId();
+                    positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast().invert());
                 }else {
 
                     if(bestNode.getChainSoFar().elementAt(i).getUnitId().compareTo(targetProductId)==0){
 
-                        positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast());
+                        positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast());
                         break;
                     }
 
-                    positionInTargetCurrency =  positionInTargetCurrency.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast());
+                    currentlyworkingIn=bestNode.getChainSoFar().elementAt(i).getUnitId();
+                    positionInTargetProduct =  positionInTargetProduct.multiply(rates.get(bestNode.getChainSoFar().elementAt(i).getProductId()).getLast());
 
 
                 }
 
 
             }
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         }
 
-        positionSizedInTargetCurrency = positionInTargetCurrency.multiply(position.getSize());
-        return new Position(targetProductId, positionSizedInTargetCurrency);
+
+        positionSizedInTargetProduct = positionInTargetProduct.multiply(position.getSize());
+        return new Position(targetProductId, positionSizedInTargetProduct);
 
     }
 
