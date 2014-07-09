@@ -38,12 +38,16 @@ public class LimitOrderBook implements IConsumeReceipt {
             Decimal ask = book[1].getFrontRowPrice();
             Decimal askSize = book[1].getFrontRowSize();
 
+            if(bidSize.isZero() || askSize.isZero()) {
+                return;
+            }
+
             Decimal last = lastReceipt != null ? lastReceipt.getPrice() : Decimal.ZERO;
             Decimal lastSize = lastReceipt != null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
-            MarketData m = new MarketData(Tool.getUTCTimestamp(), "pid", bid, ask, last, bidSize, askSize, lastSize);
+            MarketData m = new MarketData(Tool.getUTCTimestamp(), productId, bid, ask, last, bidSize, askSize, lastSize);
             consumer.onMarketData(m);
         } catch(CommonExceptions.ContainerEmptyException e) {
-            // todo: enable sending even if only half the book is filled?
+            // todo: enable sending even if only half the book is filled or totally empty?
         }
     }
 
@@ -56,9 +60,10 @@ public class LimitOrderBook implements IConsumeReceipt {
     }
 
 
-    public LimitOrderBook(IConsumeMarketDataAndReceipt _receiptConsumer)
+    public LimitOrderBook(String _productId, IConsumeMarketDataAndReceipt _consumer)
     {
-        consumer = _receiptConsumer;
+        productId=_productId;
+        consumer = _consumer;
         book = new OrderBookSide[2];
         book[0] = new OrderBookSide(BookSide.BID, this);
         book[1] = new OrderBookSide(BookSide.ASK, this);
@@ -73,6 +78,7 @@ public class LimitOrderBook implements IConsumeReceipt {
     OrderBookSide book[];
     private Decimal frontRowPrice[];
     IConsumeMarketDataAndReceipt consumer;
+    String productId;
 
 
 } // class

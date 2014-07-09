@@ -45,6 +45,18 @@ public class MarketData
         return true;
     }
 
+    public boolean isSameFrontRowBidAs(MarketData other) {
+        if(other==NULL) return false;
+        if(bid.isEqualTo(other.bid)) return true;
+        return false;
+    }
+
+    public boolean isSameFrontRowAskAs(MarketData other) {
+        if(other==NULL) return false;
+        if(ask.isEqualTo(other.ask)) return true;
+        return false;
+    }
+
     public boolean isInitialized() {
         return true;
     }

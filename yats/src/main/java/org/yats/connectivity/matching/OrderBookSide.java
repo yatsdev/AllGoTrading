@@ -68,7 +68,7 @@ public class OrderBookSide implements IConsumeReceipt {
         row.add(receiptNew);
         book.put(limit, row);
         bookByOrderId.put(receiptNew.getOrderId().toString(), row);
-        receiptConsumer.onReceipt(receiptNew.createCopy());
+        //receiptConsumer.onReceipt(receiptNew.createCopy());
     }
 
     public Decimal getFrontRowPrice() {

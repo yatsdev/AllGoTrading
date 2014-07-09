@@ -25,19 +25,22 @@ public class Quoter extends StrategyBase {
     }
 
     public void onTPMarketData(MarketData marketData) {
-
+        log.info("TradeProduct: "+marketData);
     }
 
     public void onRPMarketData(MarketData marketData) {
-        if(!lastRPMarketData.equals(MarketData.NULL)) {
-            lastRPMarketData = marketData;
-        } else if(marketData.isSameFrontRowPricesAs(lastRPMarketData)) return;
+        log.info("RefProduct: "+marketData);
 
-        cancelOrders();
-        sendBidRelativeTo(marketData.getBid());
-        sendAskRelativeTo(marketData.getAsk());
+        if(!marketData.isSameFrontRowBidAs(prevRefMarketData)) {
+            cancelOrders(BookSide.BID);
+            sendBidRelativeTo(marketData.getBid());
+        }
+        if(!marketData.isSameFrontRowAskAs(prevRefMarketData)) {
+            cancelOrders(BookSide.ASK);
+            sendAskRelativeTo(marketData.getAsk());
+        }
 
-        lastRPMarketData = marketData;
+        prevRefMarketData = marketData;
     }
 
 
@@ -56,7 +59,7 @@ public class Quoter extends StrategyBase {
             return;
         }
 
-        position = receipt.getPositionChange().add(position);
+        position = position.add(receipt.getPositionChange());
         log.info("position="+position);
 
         log.debug("Received receipt: " + receipt);
@@ -93,12 +96,13 @@ public class Quoter extends StrategyBase {
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
         Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
-        if(!orderExists(BookSide.BID, bidPrice))
+        if(!orderExists(BookSide.BID, bidPrice)) {
             sendOrder(BookSide.BID, bidPrice);
+        }
     }
 
     private void sendAskRelativeTo(Decimal price) {
-        if(!position.isGreaterThan(Decimal.ZERO)) return;
+//        if(!position.isGreaterThan(Decimal.ZERO)) return;
         double askMarket=price.toDouble();
         Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
         if(!orderExists(BookSide.ASK, askPrice))
@@ -107,7 +111,7 @@ public class Quoter extends StrategyBase {
 
     private boolean orderExists(BookSide side, Decimal price) {
         for(OrderNew order : orders.values()) {
-            boolean sameSide = order.getBookSide().equals(side);
+            boolean sameSide = order.isForBookSide(side);
             boolean samePrice = order.getLimit().isEqualTo(price);
             if(samePrice && sameSide) return true;
         }
@@ -134,13 +138,22 @@ public class Quoter extends StrategyBase {
         }
     }
 
+    private void cancelOrders(BookSide side) {
+        for(OrderNew order : orders.values()) {
+            if(order.isForBookSide(side)) {
+                OrderCancel o = order.createCancelOrder();
+                sendOrderCancel(o);
+            }
+        }
+    }
+
 
     public Quoter() {
         super();
         shuttingDown=false;
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
-        lastRPMarketData = MarketData.NULL;
+        prevRefMarketData = MarketData.NULL;
     }
 
     private Decimal position;
@@ -148,7 +161,7 @@ public class Quoter extends StrategyBase {
     private String tradeProductId;
     private String refProductId;
     private HashMap<String, OrderNew> orders;
-    private MarketData lastRPMarketData;
+    private MarketData prevRefMarketData;
 
     private double stepFactor = 0.0;//0031;
     private Decimal tickSize = Decimal.ONE;

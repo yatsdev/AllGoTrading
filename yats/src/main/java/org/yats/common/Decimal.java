@@ -32,6 +32,23 @@ public class Decimal implements Comparable<Decimal> {
         return value.toString();
     }
 
+    public Decimal round() {
+        return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
+    }
+
+    public Decimal roundToTickSize(Decimal tickSize) {
+        return divide(tickSize).round().multiply(tickSize);
+    }
+
+
+    public Decimal invert() {
+        return Decimal.ONE.divide(this);
+    }
+
+    public boolean isZero() {
+        return equals(Decimal.ZERO);
+    }
+
     public boolean isLessThan(Decimal d) {
         return value.compareTo(d.toBigDecimal()) < 0;
     }
@@ -95,16 +112,5 @@ public class Decimal implements Comparable<Decimal> {
     BigDecimal value;
 
 
-    public Decimal round() {
-        return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
-    }
 
-    public Decimal roundToTickSize(Decimal tickSize) {
-        return divide(tickSize).round().multiply(tickSize);
-    }
-
-
-    public Decimal invert() {
-        return Decimal.ONE.divide(this);
-    }
 }

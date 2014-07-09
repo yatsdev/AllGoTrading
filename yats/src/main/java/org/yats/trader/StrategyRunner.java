@@ -140,9 +140,10 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
                 String updatedProductId = updatedProductQueue.take();
                 MarketData newData = marketDataMap.remove(updatedProductId);
                 if(newData!=null) {
-                    ConcurrentHashMap<String, IConsumeMarketData> marketDataConsumers
-                            = getConsumersOfProductId(newData.getProductId());
-                    for(IConsumeMarketData md : marketDataConsumers.values()) { md.onMarketData(newData); }
+                    ConcurrentHashMap<String, IConsumeMarketData> marketDataConsumers = getConsumersOfProductId(newData.getProductId());
+                    for(IConsumeMarketData md : marketDataConsumers.values()) {
+                        md.onMarketData(newData);
+                    }
                 }
                  //todo: receipts should only be passed to the strategy that sent the corresponding order
                 while(receiptQueue.size()>0){

@@ -56,7 +56,7 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
 
     @BeforeMethod
     public void setUp() {
-        book = new LimitOrderBook(this);
+        book = new LimitOrderBook(ProductTest.PRODUCT1.getProductId(), this);
         bid100At10 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)

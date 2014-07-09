@@ -45,6 +45,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     @Override
     public void onReceipt(Receipt receipt) {
+        receipt.setExternalAccount(externalAccount);
         receiptConsumer.onReceipt(receipt);
     }
 
@@ -63,6 +64,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     public InternalMarket(IProvideProperties prop) {
         properties = prop;
+        externalAccount = prop.get("externalAccount");
         orderBooks = new ConcurrentHashMap<String, LimitOrderBook>();
         priceConsumer=null;
         receiptConsumer=null;
@@ -78,7 +80,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     private void createOrderBookForProductId(String productId) {
         if(!orderBooks.containsKey(productId)) {
-            orderBooks.put(productId, new LimitOrderBook(this));
+            orderBooks.put(productId, new LimitOrderBook(productId, this));
         }
     }
 
@@ -87,6 +89,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     private IConsumeReceipt receiptConsumer;
     private IProvideProduct productProvider;
     private IProvideProperties properties;
+    private String externalAccount;
 
 
 

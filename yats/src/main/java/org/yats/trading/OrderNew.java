@@ -54,6 +54,10 @@ public class OrderNew extends OrderBase {
                 .withRejectReason("");
     }
 
+    public boolean isForBookSide(BookSide _side) {
+        return bookSide.toIndex() == _side.toIndex();
+    }
+
     public BookSide getBookSide() {
         return bookSide;
     }
