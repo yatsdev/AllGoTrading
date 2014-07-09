@@ -3,15 +3,21 @@ package org.yats.common;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class Decimal  {
+public class Decimal implements Comparable<Decimal> {
 
 
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal DIME = new Decimal("0.10");
     public static final Decimal CENT = new Decimal("0.01");
+    private static final int DEFAULT_SCALE = 10;
 
 
+    @Override
+    public int compareTo(Decimal o) {
+        if(o.isEqualTo(this)) return 0;
+        return this.isGreaterThan(o) ? 1 : -1;
+    }
 
     public BigDecimal toBigDecimal() {
         return value;
@@ -24,6 +30,23 @@ public class Decimal  {
     @Override
     public String toString() {
         return value.toString();
+    }
+
+    public Decimal round() {
+        return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
+    }
+
+    public Decimal roundToTickSize(Decimal tickSize) {
+        return divide(tickSize).round().multiply(tickSize);
+    }
+
+
+    public Decimal invert() {
+        return Decimal.ONE.divide(this);
+    }
+
+    public boolean isZero() {
+        return equals(Decimal.ZERO);
     }
 
     public boolean isLessThan(Decimal d) {
@@ -51,7 +74,7 @@ public class Decimal  {
     }
 
     public Decimal divide(Decimal other) {
-        return new Decimal(value.divide(other.value));
+        return new Decimal(value.divide(other.value, DEFAULT_SCALE, RoundingMode.HALF_UP));
     }
 
     public Decimal abs() {
@@ -79,6 +102,7 @@ public class Decimal  {
 
     public Decimal(String valueString) {
         value = new BigDecimal(valueString);
+
     }
 
     public Decimal(BigDecimal b) {
@@ -88,16 +112,5 @@ public class Decimal  {
     BigDecimal value;
 
 
-    public Decimal round() {
-        return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
-    }
 
-    public Decimal roundToTickSize(Decimal tickSize) {
-        return divide(tickSize).round().multiply(tickSize);
-    }
-
-
-    public Decimal invert() {
-        return Decimal.ONE.divide(this);
-    }
 }

@@ -12,6 +12,11 @@ public class OrderNew extends OrderBase {
     public static OrderNew NULL = new OrderNewNull();
 
 
+    public boolean isExecutingWith(Decimal frontRowPrice) {
+        if(bookSide.isMoreBehindThan(limit, frontRowPrice)) return false;
+        return true;
+    }
+
 
     public OrderCancel createCancelOrder()
     {
@@ -38,6 +43,7 @@ public class OrderNew extends OrderBase {
 
     public Receipt createReceiptDefault() {
         return Receipt.create()
+                .withInternalAccount(internalAccount)
                 .withOrderId(getOrderId())
                 .withProductId(productId)
                 .withBookSide(bookSide)
@@ -46,6 +52,10 @@ public class OrderNew extends OrderBase {
                 .withTotalTradedSize(Decimal.ZERO)
                 .withCurrentTradedSize(Decimal.ZERO)
                 .withRejectReason("");
+    }
+
+    public boolean isForBookSide(BookSide _side) {
+        return bookSide.toIndex() == _side.toIndex();
     }
 
     public BookSide getBookSide() {
@@ -150,6 +160,7 @@ public class OrderNew extends OrderBase {
     private Decimal size;
     private Decimal limit;
     private String productId;
+
 
 
     private static class OrderNewNull extends OrderNew {

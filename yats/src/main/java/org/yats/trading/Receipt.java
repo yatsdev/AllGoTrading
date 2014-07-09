@@ -27,6 +27,11 @@ public class Receipt {
     }
 
 
+    public boolean isExecutingWith(Decimal frontRowPrice) {
+        if(bookSide.isMoreBehindThan(price, frontRowPrice)) return false;
+        return true;
+    }
+
     public boolean isForOrder(OrderNew order) {
         return orderId.isSameAs(order.getOrderId());
     }
@@ -37,6 +42,24 @@ public class Receipt {
 
     public boolean hasProductId(String pid) {
         return productId.compareTo(pid) == 0;
+    }
+
+    public void match(Receipt takerReceipt) {
+        currentTradedSize = Decimal.min(takerReceipt.getResidualSize(), residualSize);
+        takerReceipt.adjustByTradedSize(currentTradedSize);
+        adjustByTradedSize(currentTradedSize);
+    }
+
+    private void adjustByTradedSize(Decimal _currentTradedSize) {
+        currentTradedSize=_currentTradedSize;
+        totalTradedSize=totalTradedSize.add(_currentTradedSize);
+        residualSize=Decimal.max(Decimal.ZERO, residualSize.subtract(currentTradedSize));
+        if(residualSize.isEqualTo(Decimal.ZERO)) endState=true;
+    }
+
+    public Receipt createCopy() {
+        String csv = toStringCSV();
+        return Receipt.fromStringCSV(csv);
     }
 
     @Override
@@ -314,6 +337,19 @@ public class Receipt {
 
     public boolean isBookSide(BookSide side) {
         return bookSide.equals(side);
+    }
+
+    public boolean isSamePriceOrInfront(Receipt other) {
+        if(price.isEqualTo(other.getPrice())) return true;
+        return bookSide.isMoreInfrontThan(price, other.getPrice());
+    }
+
+    public boolean isOpposite(BookSide side) {
+        return bookSide.isOpposite(side);
+    }
+
+    public boolean hasOrderId(String _orderId) {
+        return _orderId.compareTo(orderId.toString()) == 0;
     }
 
 

@@ -6,6 +6,25 @@ public class Product {
 
 //    public static ProductNULL NULL = new ProductNULL();
 
+    public boolean isRoute(String r) {
+        return (route.compareTo(r)==0);
+    }
+
+    public boolean isProductAsPairChainable(Product product)
+    {
+
+        if(   product.hasUnderlying(underlyingId)
+           || product.hasUnderlying(unitId)
+           || product.hasUnitId(underlyingId)
+           || product.hasUnitId(unitId)
+           )
+        {
+            return (!product.hasProductId(productId));
+        }
+        return false;
+    }
+
+
     @Override
     public String toString() {
         return "Product{" +
@@ -131,9 +150,10 @@ public class Product {
     private String underlyingId;
     private String unitId;
 
-    public boolean isRoute(String r) {
-        return (route.compareTo(r)==0);
+    public boolean isNoRateProduct() {
+        return unitId.compareTo(underlyingId)==0;
     }
+
 
 //    private static class ProductNULL extends Product {
 //        public String getProductId() { throw new RuntimeException("This is null object!");}
