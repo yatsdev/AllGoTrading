@@ -15,18 +15,18 @@ public class RateConverter implements IConsumeMarketData {
 
     public RateConverter(IProvideProduct p) {
         products = p;
-        rates = new ConcurrentHashMap<String, MarketData>();
+        rates = new MarketDataMap();
     }
 
 
     public Position convert(Position position, String targetProductId) {
         Decimal positionInTargetCurrency = null;
-        Decimal priceInOriginalCurrency = rates.get(position.getProductId()).getLast();
+        Decimal priceInOriginalCurrency = rates.getLastPrice(position.getProductId());
         Decimal positionSizedInTargetCurrency = null;
 
 
         if (isSameCurrency(position, targetProductId)) {
-            positionInTargetCurrency = getMarketDataForProduct(position.getProductId()).getLast();
+            positionInTargetCurrency = getLastForProductId(position.getProductId());
         } else {
 
             Vector<Product> currencies = new Vector<Product>();
@@ -58,7 +58,7 @@ public class RateConverter implements IConsumeMarketData {
                 for (int i = 0; i < currencies.size(); i++) {
                     if (product.getUnderlyingId().compareTo(currencies.elementAt(i).getProductId()) == 0 && !(product.getUnitId().compareTo(product.getUnderlyingId()) == 0))//This is a pair
                     {
-                        if (!(rates.get(product.getProductId()) == null)) {
+                        if (rates.containsKey(product.getProductId())) {
                             onlinePairs.add(product);
                         }
                     }
@@ -192,10 +192,16 @@ public class RateConverter implements IConsumeMarketData {
         return UniqueId.create();
     }
 
-    private MarketData getMarketDataForProduct(String pid) {
+    private Decimal getLastForProductId(String pid) {
+
+        if (!products.isProductIdExisting(pid))
+            throw new TradingExceptions.ItemNotFoundException("Can not find product for pid=" + pid);
+        Product p = products.getProductForProductId(pid);
+        if(p.isNoRateProduct())
+            return Decimal.ONE;
         if (!rates.containsKey(pid))
             throw new TradingExceptions.ItemNotFoundException("Can not find rate for pid=" + pid);
-        return rates.get(pid);
+        return rates.getLastPrice(pid);
     }
 
     public boolean isSameCurrency(Position position, String targetProductId) {
@@ -214,7 +220,7 @@ public class RateConverter implements IConsumeMarketData {
         return positionInTargetCurrency;
     }
 
-    private ConcurrentHashMap<String, MarketData> rates;
+    private MarketDataMap rates;
     private IProvideProduct products;
 
 

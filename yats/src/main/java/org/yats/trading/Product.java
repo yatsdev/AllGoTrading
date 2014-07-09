@@ -150,6 +150,9 @@ public class Product {
     private String underlyingId;
     private String unitId;
 
+    public boolean isNoRateProduct() {
+        return unitId.compareTo(underlyingId)==0;
+    }
 
 
 //    private static class ProductNULL extends Product {
