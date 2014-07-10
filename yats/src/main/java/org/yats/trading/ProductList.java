@@ -36,7 +36,7 @@ public class ProductList implements IProvideProduct {
     public IProvideProduct getProductsWithUnderlying(String productId) {
         ProductList newList = new ProductList();
         for(Product p : this.list.values()) {
-            if(p.hasUnderlying(productId)) newList.add(p);
+            if(p.hasUnderlyingId(productId)) newList.add(p);
         }
         return newList;
     }

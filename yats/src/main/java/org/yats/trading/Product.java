@@ -13,8 +13,8 @@ public class Product {
     public boolean isProductAsPairChainable(Product product)
     {
 
-        if(   product.hasUnderlying(underlyingId)
-           || product.hasUnderlying(unitId)
+        if(   product.hasUnderlyingId(underlyingId)
+           || product.hasUnderlyingId(unitId)
            || product.hasUnitId(underlyingId)
            || product.hasUnitId(unitId)
            )
@@ -51,7 +51,7 @@ public class Product {
         return unitId.compareTo(pid) == 0;
     }
 
-    public boolean hasUnderlying(String pid) {
+    public boolean hasUnderlyingId(String pid) {
         return underlyingId.compareTo(pid) == 0;
     }
 

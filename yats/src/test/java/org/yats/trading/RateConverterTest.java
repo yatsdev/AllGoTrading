@@ -34,6 +34,23 @@ public class RateConverterTest {
     }
 
     @Test
+    public void canCache() {
+        Position p1InCHF = converter.convert(p1, TestMarketData.CHF_PID);
+        assert(converter.getCacheHits()==0);
+        assert(converter.getCacheSize()==1);
+        Position p2InCHF = converter.convert(p1, TestMarketData.CHF_PID);
+        assert(converter.getCacheHits()==1);
+        assert(converter.getCacheSize()==1);
+
+        Decimal expectedSize = TestMarketData.SAP_LAST
+                .multiply(SAP_SIZE)
+                .multiply(TestMarketData.EURUSD_LAST)
+                .multiply(TestMarketData.USDCHF_LAST)
+                ;
+        assert(p2InCHF.isSize(expectedSize));
+    }
+
+    @Test
     public void canConvertPositionInEURToGBPUsingInversionOfCurrencyPair() {
         Position p1InGBP = converter.convert(p1, TestMarketData.GBP_PID);
         Decimal expectedSize = TestMarketData.SAP_LAST
@@ -103,6 +120,8 @@ public class RateConverterTest {
                 ;
 
         assert(p2InSAP.isSize(expectedSize));
+        assert(converter.getCacheSize()==1);
+        assert(converter.isChainInCache(p2.getProductId(), TestMarketData.SAP_PID));
     }
 
     @BeforeMethod
