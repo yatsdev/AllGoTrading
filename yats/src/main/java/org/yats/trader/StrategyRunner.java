@@ -117,6 +117,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
     }
 
     public StrategyRunner() {
+
         consumerId = UniqueId.create();
         priceFeed = new PriceFeedDummy();
         orderSender = new OrderSenderDummy();

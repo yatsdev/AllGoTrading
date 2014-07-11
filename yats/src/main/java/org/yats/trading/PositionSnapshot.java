@@ -9,6 +9,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionSnapshot {
 
+    public int size() {
+        return positionMap.size();
+    }
+
+    public Position calculateValue(RateConverter converter, String targetProductId) {
+        Position result = new Position(targetProductId, Decimal.ZERO);
+        for(Position p : positionMap.values()) {
+            Position additional = converter.convert(p, targetProductId);
+            result = result.add(additional);
+        }
+        return result;
+    }
+
     public boolean isSameAs(PositionSnapshot positionSnapshot) {
         if(positionMap.size()!=positionSnapshot.positionMap.size()) return false;
         for(AccountPosition a : positionMap.values()) {
@@ -92,7 +105,5 @@ public class PositionSnapshot {
 
     private ConcurrentHashMap<String, AccountPosition> positionMap;
 
-    public int size() {
-        return positionMap.size();
-    }
+
 } // class

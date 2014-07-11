@@ -75,4 +75,8 @@ public class TestMarketData {
     public final static MarketData NZDCAD = MarketData.createFromLast(NZDCAD_PID, NZDCAD_LAST);
     public final static MarketData SGDHKD = MarketData.createFromLast(SGDHKD_PID, SGDHKD_LAST);
 
+    public final static MarketData PRODUCT1_DATA = MarketData.createFromLast(ProductTest.PRODUCT1.getProductId(), Decimal.ONE);
+    public final static MarketData PRODUCT2_DATA = MarketData.createFromLast(ProductTest.PRODUCT2.getProductId(), Decimal.ONE);
+    public final static MarketData PRODUCT3_DATA = MarketData.createFromLast(ProductTest.PRODUCT3.getProductId(), Decimal.ONE);
+
 } // class

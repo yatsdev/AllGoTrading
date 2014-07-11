@@ -137,6 +137,14 @@ public class Product {
         this.exchange = exchange;
     }
 
+    public Product(String productId, String symbol, String exchange, String _underlying, String _unitId) {
+        this.productId = productId;
+        this.symbol = symbol;
+        this.exchange = exchange;
+        underlyingId = _underlying;
+        unitId = _unitId;
+    }
+
     public Product() {
         productId = new UniqueId().toString();
     }

@@ -53,6 +53,14 @@ public class PositionSnapshotTest {
         assert(sum.isEqualTo(Decimal.fromDouble(6)));
     }
 
+    @Test
+    public void canCalculateValuation()
+    {
+        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+
+        assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
+    }
+
 
     @BeforeMethod
     public void setUp() {
@@ -70,11 +78,22 @@ public class PositionSnapshotTest {
         positionSnapshot2Temp.add(position4);
         positionSnapshot2Temp.add(position5);
         positionSnapshot2 = PositionSnapshot.fromStringCSV(positionSnapshot2Temp.toStringCSV());
+        productList = new ProductList();
+        productList.read(ProductListTest.PRODUCT_LIST_PATH);
+        converter = new RateConverter(productList);
+        productList.add(ProductTest.PRODUCT1);
+        productList.add(ProductTest.PRODUCT2);
+        productList.add(ProductTest.PRODUCT3);
+        converter.onMarketData(TestMarketData.EURUSD);
+        converter.onMarketData(TestMarketData.GBPUSD);
+        converter.onMarketData(TestMarketData.PRODUCT1_DATA);
+        converter.onMarketData(TestMarketData.PRODUCT2_DATA);
+        converter.onMarketData(TestMarketData.PRODUCT3_DATA);
     }
 
-    String productId1 = "prod1";
-    String productId2 = "prod2";
-    String productId3 = "prod3";
+    String productId1 = ProductTest.PRODUCT1.getProductId();
+    String productId2 = ProductTest.PRODUCT2.getProductId();
+    String productId3 = ProductTest.PRODUCT3.getProductId();
     String account1 = "account1";
     String account2 = "account2";
     PositionSnapshot positionSnapshot;
@@ -84,5 +103,7 @@ public class PositionSnapshotTest {
     AccountPosition position3;
     AccountPosition position4;
     AccountPosition position5;
+    RateConverter converter;
+    ProductList productList;
 
 } // class
