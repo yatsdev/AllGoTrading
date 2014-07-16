@@ -221,6 +221,13 @@ public class RateConverter implements IConsumeMarketData {
     private IProvideProduct products;
     private ConcurrentHashMap<String, RatesChain> cache;
     private int cacheHits;
+
+    public Position calculateProfit(Position oldPosition, Position newPosition, String targetPid) {
+        Position oldPositionInTarget = convert(oldPosition, targetPid);
+        Position newPositionInTarget = convert(newPosition, targetPid);
+        Position profit = newPositionInTarget.subtract(oldPositionInTarget);
+        return profit;
+    }
 }
 
 

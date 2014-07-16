@@ -23,6 +23,10 @@ public class Position {
         return (size.isEqualTo(_size));
     }
 
+    public boolean isSize(Decimal _size, int digits) {
+        return size.roundToDigits(digits).isEqualTo(_size.roundToDigits(digits));
+    }
+
     public boolean isSameAs(Position other) {
         if(!isForProductId(other.productId)) return false;
         if(!size.isEqualTo(other.size)) return false;
@@ -62,4 +66,8 @@ public class Position {
     protected Decimal size;
 
 
+    public Position subtract(Position oldPosition) {
+        if(!oldPosition.isForProductId(productId)) throw new TradingExceptions.UnknownIdException(""+productId+"!="+oldPosition.getProductId());
+        return new Position(productId, size.subtract(oldPosition.getSize()));
+    }
 } // class

@@ -61,6 +61,24 @@ public class PositionSnapshotTest {
         assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
     }
 
+    @Test
+    public void canCalculateProfitFromDifferentPositions()
+    {
+        Position positionInUSD = positionSnapshot.calculateValue(converter, TestMarketData.USD_PID);
+        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        assert(profitInEUR.isSize(Decimal.ZERO,5));
+    }
+
+    @Test
+    public void canCalculateProfitFromSamePositions()
+    {
+        Position positionInUSD = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        assert(profitInEUR.isSize(Decimal.ZERO,5));
+    }
+
 
     @BeforeMethod
     public void setUp() {

@@ -13,4 +13,8 @@ public class TradingExceptions {
         }
     }
 
+    public static class UnknownIdException extends RuntimeException {
+        public UnknownIdException(String s) { super(s);
+        }
+    }
 } // class

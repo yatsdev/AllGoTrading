@@ -39,6 +39,9 @@ public class Decimal implements Comparable<Decimal> {
     public Decimal roundToTickSize(Decimal tickSize) {
         return divide(tickSize).round().multiply(tickSize);
     }
+    public Decimal roundToDigits(int digits) {
+        return multiply(Decimal.fromDouble(digits)).round().divide(Decimal.fromDouble(digits));
+    }
 
 
     public Decimal invert() {
