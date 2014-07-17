@@ -2,12 +2,38 @@ package org.yats.trading;
 
 import org.yats.common.Decimal;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PositionSnapshot {
+public class PositionSnapshot implements IProvidePosition {
+
+    @Override
+    public AccountPosition getAccountPosition(PositionRequest positionRequest) {
+        AccountPosition position = new AccountPosition("", "", Decimal.ZERO);
+        String key = positionRequest.getProductId() + "," + positionRequest.getAccount();
+        if (positionMap.containsKey(key)) {
+            position = positionMap.get(key);
+        }
+        return position;
+    }
+
+    @Override
+    public IProvidePosition getAllPositionsForOneAccount(String accountId) {
+        PositionSnapshot snapshot = new PositionSnapshot();
+        Collection<AccountPosition> newPosition = positionMap.values();
+        for (AccountPosition p : newPosition) {
+            if(p.isForAccount(accountId)) {
+                snapshot.add(p);
+            }
+        }
+        return snapshot;
+    }
+
+    @Override
+    public Collection<AccountPosition> values()
+    {
+        return positionMap.values();
+    }
 
     public int size() {
         return positionMap.size();
@@ -53,15 +79,6 @@ public class PositionSnapshot {
         return p;
     }
 
-    public AccountPosition getAccountPosition(PositionRequest r) {
-        AccountPosition position = new AccountPosition("", "", Decimal.ZERO);
-        String key = r.getProductId() + "," + r.getAccount();
-        if (positionMap.containsKey(key)) {
-            position = positionMap.get(key);
-        }
-        return position;
-    }
-
     public Position getPositionForAllAccounts(String productId) {
         Position positionForAllAccounts=new Position(productId, Decimal.ZERO);
         for (AccountPosition a : positionMap.values()) {
@@ -71,16 +88,17 @@ public class PositionSnapshot {
         return positionForAllAccounts;
     }
 
-       public List<AccountPosition> getAllPositionsForOneAccount(String account) {
-        Collection<AccountPosition> newPosition = positionMap.values();
-        ArrayList<AccountPosition> arrayList= new ArrayList<AccountPosition>();
-        for (AccountPosition p : newPosition) {
-            if(p.getInternalAccount().compareTo(account)==0) {
-                arrayList.add(p);
-            }
-        }
-        return arrayList;
-    }
+
+//    public List<AccountPosition> getAllPositionsForOneAccount(String account) {
+//        Collection<AccountPosition> newPosition = positionMap.values();
+//        ArrayList<AccountPosition> arrayList= new ArrayList<AccountPosition>();
+//        for (AccountPosition p : newPosition) {
+//            if(p.getInternalAccount().compareTo(account)==0) {
+//                arrayList.add(p);
+//            }
+//        }
+//        return arrayList;
+//    }
 
     public void add(PositionSnapshot other) {
        Collection<AccountPosition> newPositionCollection = other.positionMap.values();

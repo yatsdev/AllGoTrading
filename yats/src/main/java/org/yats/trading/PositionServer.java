@@ -5,8 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
 
@@ -32,16 +31,22 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         throw new NotImplementedException();
     }
 
+    @Override
+    public IProvidePosition getAllPositionsForOneAccount(String accountId) {
+        return positionSnapshot.getAllPositionsForOneAccount(accountId);
+    }
+
+    @Override
+    public Collection<AccountPosition> values() {
+        return positionSnapshot.values();
+    }
+
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {
         return positionSnapshot.getAccountPosition(positionRequest);
     }
 
     public Position getPositionForAllAccounts(String productId) {
         return positionSnapshot.getPositionForAllAccounts(productId);
-    }
-
-    public List<AccountPosition> getAllPositionsForOneAccount(String account) {
-        return new ArrayList<AccountPosition>();
     }
 
     public int getNumberOfReceipts() {

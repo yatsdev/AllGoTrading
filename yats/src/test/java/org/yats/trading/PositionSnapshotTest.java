@@ -4,8 +4,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 
-import java.util.List;
-
 
 public class PositionSnapshotTest {
 
@@ -44,10 +42,10 @@ public class PositionSnapshotTest {
     @Test
     public void canCalculateAllPositionsForOneAccount()
     {
-        List<AccountPosition> positions = positionSnapshot.getAllPositionsForOneAccount(account1);
-        assert (positions.size()==3);
+        IProvidePosition positions = positionSnapshot.getAllPositionsForOneAccount(account1);
+        assert (positions.values().size()==3);
         Decimal sum=Decimal.ZERO;
-        for(AccountPosition p : positions) {
+        for(AccountPosition p : positions.values()) {
             sum=sum.add(p.getSize());
         }
         assert(sum.isEqualTo(Decimal.fromDouble(6)));

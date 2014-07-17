@@ -40,6 +40,10 @@ public class AccountPosition extends Position {
         return super.isSameAs(other);
     }
 
+    public boolean isForAccount(String _account) {
+        return (internalAccount.compareTo(_account)==0);
+    }
+
     private String internalAccount;
 
     public static AccountPosition fromStringCSV(String csv) {
