@@ -52,7 +52,7 @@ public class QuotingMainMonolith {
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
-        strategy.setProfitProvider(positionServer);
+//        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
         OrderConnection orderConnection = OrderConnection.createFromConfigFile(configFIXOrderFilename);

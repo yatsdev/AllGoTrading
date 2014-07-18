@@ -8,7 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class RateConverter implements IConsumeMarketData {
 
-    public Position convert(Position position, String targetProductId) {
+    public Position convert(Position position, String targetProductId)
+    {
         String key = createKey(position.getProductId(), targetProductId);
         RatesChain bestRatesChain = cache.containsKey(key)
                 ? getFromCache(key)

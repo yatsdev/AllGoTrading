@@ -2,12 +2,11 @@ package org.yats.trading;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Collection;
 
-public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvideProfit{
+public class PositionServer implements IConsumeReceipt, IProvidePosition {
 
 
     final Logger log = LoggerFactory.getLogger(PositionServer.class);
@@ -27,8 +26,20 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
     @Override
-    public Decimal getInternalAccountProfitForProduct(String internalAccount, String productId) {
-        throw new NotImplementedException();
+    public Position getValueForAccountProduct(RateConverter converter, PositionRequest request, String targetProductId) {
+        Position p = positionSnapshot.getAccountPosition(request);
+        Position targetPosition = converter.convert(p, targetProductId);
+        return targetPosition;
+    }
+
+    @Override
+    public Position getValueForAccount(RateConverter converter, String accountId, String targetProductId) {
+        return positionSnapshot.getValueForAccount(converter, accountId, targetProductId);
+    }
+
+    @Override
+    public Position getValueForAllPositions(RateConverter converter, String targetProductId) {
+        return positionSnapshot.getValueForAllPositions(converter, targetProductId);
     }
 
     @Override
@@ -37,9 +48,10 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
     }
 
     @Override
-    public Collection<AccountPosition> values() {
-        return positionSnapshot.values();
+    public Collection<AccountPosition> getAllPositions() {
+        return positionSnapshot.getAllPositions();
     }
+
 
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {
         return positionSnapshot.getAccountPosition(positionRequest);
@@ -78,9 +90,13 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
         positionSnapshot = new PositionSnapshot();
     }
 
+    public void setRateConverter(RateConverter rateConverter) {
+        this.rateConverter = rateConverter;
+    }
 
     public PositionServer() {
         numberOfReceipts = 0;
+        rateConverter = new RateConverter(new ProductList());
         positionSnapshot = new PositionSnapshot();
         positionStorage = new IStorePositionSnapshots() {
             @Override
@@ -97,6 +113,7 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition, IProvi
     private int numberOfReceipts;
     private PositionSnapshot positionSnapshot;
     private IStorePositionSnapshots positionStorage;
+    private RateConverter rateConverter;
 
     public void setPositionStorage(IStorePositionSnapshots positionStorage) {
         this.positionStorage = positionStorage;

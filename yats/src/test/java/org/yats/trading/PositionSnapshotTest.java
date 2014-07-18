@@ -43,9 +43,9 @@ public class PositionSnapshotTest {
     public void canCalculateAllPositionsForOneAccount()
     {
         IProvidePosition positions = positionSnapshot.getAllPositionsForOneAccount(account1);
-        assert (positions.values().size()==3);
+        assert (positions.getAllPositions().size()==3);
         Decimal sum=Decimal.ZERO;
-        for(AccountPosition p : positions.values()) {
+        for(AccountPosition p : positions.getAllPositions()) {
             sum=sum.add(p.getSize());
         }
         assert(sum.isEqualTo(Decimal.fromDouble(6)));
@@ -54,7 +54,7 @@ public class PositionSnapshotTest {
     @Test
     public void canCalculateValuation()
     {
-        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(converter, TestMarketData.EUR_PID);
 
         assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
     }
@@ -62,8 +62,8 @@ public class PositionSnapshotTest {
     @Test
     public void canCalculateProfitFromDifferentPositions()
     {
-        Position positionInUSD = positionSnapshot.calculateValue(converter, TestMarketData.USD_PID);
-        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(converter, TestMarketData.USD_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(converter, TestMarketData.EUR_PID);
         Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
         assert(profitInEUR.isSize(Decimal.ZERO,5));
     }
@@ -71,8 +71,8 @@ public class PositionSnapshotTest {
     @Test
     public void canCalculateProfitFromSamePositions()
     {
-        Position positionInUSD = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
-        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(converter, TestMarketData.EUR_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(converter, TestMarketData.EUR_PID);
         Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
         assert(profitInEUR.isSize(Decimal.ZERO,5));
     }

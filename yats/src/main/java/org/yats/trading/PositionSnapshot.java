@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PositionSnapshot implements IProvidePosition {
 
+
     @Override
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {
         AccountPosition position = new AccountPosition("", "", Decimal.ZERO);
@@ -30,22 +31,38 @@ public class PositionSnapshot implements IProvidePosition {
     }
 
     @Override
-    public Collection<AccountPosition> values()
+    public Collection<AccountPosition> getAllPositions()
     {
         return positionMap.values();
     }
 
-    public int size() {
-        return positionMap.size();
+    @Override
+    public Position getValueForAccountProduct(RateConverter converter, PositionRequest request, String targetProductId) {
+        Position p = getAccountPosition(request);
+        Position targetPosition = converter.convert(p, targetProductId);
+        return targetPosition;
     }
 
-    public Position calculateValue(RateConverter converter, String targetProductId) {
+    @Override
+    public Position getValueForAllPositions(RateConverter converter, String targetProductId) {
         Position result = new Position(targetProductId, Decimal.ZERO);
         for(Position p : positionMap.values()) {
             Position additional = converter.convert(p, targetProductId);
             result = result.add(additional);
         }
         return result;
+    }
+
+    @Override
+    public Position getValueForAccount(RateConverter rateConverter, String accountId, String targetProductId) {
+        IProvidePosition positionsOfAccount = getAllPositionsForOneAccount(accountId);
+        Position targetPosition = positionsOfAccount.getValueForAllPositions(rateConverter, targetProductId);
+        return targetPosition;
+    }
+
+
+    public int size() {
+        return positionMap.size();
     }
 
     public boolean isSameAs(PositionSnapshot positionSnapshot) {
@@ -90,7 +107,7 @@ public class PositionSnapshot implements IProvidePosition {
 
 
 //    public List<AccountPosition> getAllPositionsForOneAccount(String account) {
-//        Collection<AccountPosition> newPosition = positionMap.values();
+//        Collection<AccountPosition> newPosition = positionMap.getAllPositions();
 //        ArrayList<AccountPosition> arrayList= new ArrayList<AccountPosition>();
 //        for (AccountPosition p : newPosition) {
 //            if(p.getInternalAccount().compareTo(account)==0) {

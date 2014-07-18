@@ -50,7 +50,7 @@ public class QuotingMain {
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
-        strategy.setProfitProvider(positionServer);
+//        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
 

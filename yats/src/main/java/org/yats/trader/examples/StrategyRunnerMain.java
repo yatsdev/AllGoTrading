@@ -8,6 +8,7 @@ import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
+import org.yats.trading.RateConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 
 public class StrategyRunnerMain {
 
+
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
@@ -53,13 +55,17 @@ public class StrategyRunnerMain {
 
     public void go() throws InterruptedException, IOException
     {
-        products = ProductList.createFromFile("config/CFDProductList.csv");
+        productList = ProductList.createFromFile("config/CFDProductList.csv");
         StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
 
         PropertiesReader strategyRunnerConfig = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
+        converter = new RateConverter(productList);
+
+        //todo: get rid of Config
         Config config = Config.fromProperties(strategyRunnerConfig);
         positionServer = new PositionServer();
+        positionServer.setRateConverter(converter);
         PositionServerLogic positionServerLogic = new PositionServerLogic(config);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
@@ -67,7 +73,7 @@ public class StrategyRunnerMain {
         strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(products);
+        strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(priceAndOrderConnection);
         priceAndOrderConnection.setReceiptConsumer(strategyRunner);
 
@@ -108,8 +114,8 @@ public class StrategyRunnerMain {
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
-        strategy.setProfitProvider(positionServer);
-        strategy.setProductProvider(products);
+//        strategy.setProfitProvider(positionServer);
+        strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
         strategy.setConfig(strategyConfig);
         return strategy;
@@ -147,6 +153,7 @@ public class StrategyRunnerMain {
 
     private PositionServer positionServer;
     private StrategyRunner strategyRunner;
-    private ProductList products;
+    private ProductList productList;
+    private RateConverter converter;
 
 } // class
