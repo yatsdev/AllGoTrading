@@ -6,7 +6,7 @@ public interface IProvidePosition {
     public AccountPosition getAccountPosition(PositionRequest positionRequest);
     public IProvidePosition getAllPositionsForOneAccount(String account);
     public Collection<AccountPosition> getAllPositions();
-    public Position getValueForAllPositions(RateConverter converter, String targetProductId);
-    public Position getValueForAccount(RateConverter converter, String accountId, String targetProductId);
-    public Position getValueForAccountProduct(RateConverter converter, PositionRequest request, String targetProductId);
+    public Position getValueForAccount(String targetProductId, String accountId);
+    public Position getValueForAllPositions(String targetProductId);
+    public Position getValueForAccountProduct(String targetProductId, PositionRequest request);
 }

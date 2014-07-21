@@ -26,20 +26,18 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
     }
 
     @Override
-    public Position getValueForAccountProduct(RateConverter converter, PositionRequest request, String targetProductId) {
-        Position p = positionSnapshot.getAccountPosition(request);
-        Position targetPosition = converter.convert(p, targetProductId);
-        return targetPosition;
+    public Position getValueForAccountProduct(String targetProductId, PositionRequest request) {
+        return positionSnapshot.getValueForAccountProduct(targetProductId, request);
     }
 
     @Override
-    public Position getValueForAccount(RateConverter converter, String accountId, String targetProductId) {
-        return positionSnapshot.getValueForAccount(converter, accountId, targetProductId);
+    public Position getValueForAccount(String targetProductId, String accountId) {
+        return positionSnapshot.getValueForAccount(targetProductId, accountId);
     }
 
     @Override
-    public Position getValueForAllPositions(RateConverter converter, String targetProductId) {
-        return positionSnapshot.getValueForAllPositions(converter, targetProductId);
+    public Position getValueForAllPositions(String targetProductId) {
+        return positionSnapshot.getValueForAllPositions(targetProductId);
     }
 
     @Override
@@ -90,13 +88,12 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
         positionSnapshot = new PositionSnapshot();
     }
 
-    public void setRateConverter(RateConverter rateConverter) {
-        this.rateConverter = rateConverter;
+    public void setRateConverter(IConvertRate rateConverter) {
+        positionSnapshot.setRateConverter(rateConverter);
     }
 
     public PositionServer() {
         numberOfReceipts = 0;
-        rateConverter = new RateConverter(new ProductList());
         positionSnapshot = new PositionSnapshot();
         positionStorage = new IStorePositionSnapshots() {
             @Override
@@ -113,7 +110,6 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
     private int numberOfReceipts;
     private PositionSnapshot positionSnapshot;
     private IStorePositionSnapshots positionStorage;
-    private RateConverter rateConverter;
 
     public void setPositionStorage(IStorePositionSnapshots positionStorage) {
         this.positionStorage = positionStorage;

@@ -37,28 +37,29 @@ public class PositionSnapshot implements IProvidePosition {
     }
 
     @Override
-    public Position getValueForAccountProduct(RateConverter converter, PositionRequest request, String targetProductId) {
+    public Position getValueForAccountProduct(String targetProductId, PositionRequest request) {
         Position p = getAccountPosition(request);
-        Position targetPosition = converter.convert(p, targetProductId);
+        Position targetPosition = rateConverter.convert(p, targetProductId);
         return targetPosition;
     }
 
     @Override
-    public Position getValueForAllPositions(RateConverter converter, String targetProductId) {
+    public Position getValueForAccount(String targetProductId, String accountId) {
+        IProvidePosition positionsOfAccount = getAllPositionsForOneAccount(accountId);
+        Position targetPosition = positionsOfAccount.getValueForAllPositions(targetProductId);
+        return targetPosition;
+    }
+
+    @Override
+    public Position getValueForAllPositions(String targetProductId) {
         Position result = new Position(targetProductId, Decimal.ZERO);
         for(Position p : positionMap.values()) {
-            Position additional = converter.convert(p, targetProductId);
+            Position additional = rateConverter.convert(p, targetProductId);
             result = result.add(additional);
         }
         return result;
     }
 
-    @Override
-    public Position getValueForAccount(RateConverter rateConverter, String accountId, String targetProductId) {
-        IProvidePosition positionsOfAccount = getAllPositionsForOneAccount(accountId);
-        Position targetPosition = positionsOfAccount.getValueForAllPositions(rateConverter, targetProductId);
-        return targetPosition;
-    }
 
 
     public int size() {
@@ -134,11 +135,16 @@ public class PositionSnapshot implements IProvidePosition {
         positionMap.put(key, newPosition);
     }
 
+    public void setRateConverter(IConvertRate rateConverter) {
+        this.rateConverter = rateConverter;
+    }
+
     public PositionSnapshot() {
         positionMap = new ConcurrentHashMap<String, AccountPosition>();
+        rateConverter = new RateConverter(new ProductList());
     }
 
     private ConcurrentHashMap<String, AccountPosition> positionMap;
-
+    private IConvertRate rateConverter;
 
 } // class

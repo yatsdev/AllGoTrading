@@ -6,7 +6,13 @@ import org.yats.common.UniqueId;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RateConverter implements IConsumeMarketData {
+public class RateConverter implements IConsumeMarketData, IConvertRate {
+
+    public Position calculateProfit(Position oldPosition, Position newPosition, String targetPid) {
+        Position oldPositionInTarget = convert(oldPosition, targetPid);
+        Position newPositionInTarget = convert(newPosition, targetPid);
+        return newPositionInTarget.subtract(oldPositionInTarget);
+    }
 
     public Position convert(Position position, String targetProductId)
     {
@@ -100,7 +106,7 @@ public class RateConverter implements IConsumeMarketData {
         Vector<Product> onlinePairs = new Vector<Product>();
 
         Vector<Product> originalProducts = new Vector<Product>();
-        ConcurrentHashMap nextPair = new ConcurrentHashMap();
+        ConcurrentHashMap<Product, Vector<Product>> nextPair = new ConcurrentHashMap<Product, Vector<Product>>();
 
 
 //In this segment I'll collect the pairs available in rates
@@ -157,7 +163,7 @@ public class RateConverter implements IConsumeMarketData {
 
                 } else {
 
-                    Vector<Product> possibleSons = (Vector<Product>) nextPair.get(currentRatesChain.getNode());
+                    Vector<Product> possibleSons = nextPair.get(currentRatesChain.getNode());
 
                     for (int j = 0; j < possibleSons.size(); j++) {
 
@@ -180,14 +186,14 @@ public class RateConverter implements IConsumeMarketData {
         return bestRatesChain;
     } // findBestNode
 
-    public Decimal returnPositionInTargetCurrency(String targetProductId, Position position, String fromCurrency, String toCurrency, Decimal priceInOriginalCurrency, Decimal positionInTargetCurrency, String OANDAFXPAIR) {
-
-        if (targetProductId.compareTo(toCurrency) == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo(fromCurrency) == 0)) {
-            positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get(OANDAFXPAIR).getLast());
-        }
-
-        return positionInTargetCurrency;
-    }
+//    public Decimal returnPositionInTargetCurrency(String targetProductId, Position position, String fromCurrency, String toCurrency, Decimal priceInOriginalCurrency, Decimal positionInTargetCurrency, String OANDAFXPAIR) {
+//
+//        if (targetProductId.compareTo(toCurrency) == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo(fromCurrency) == 0)) {
+//            positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get(OANDAFXPAIR).getLast());
+//        }
+//
+//        return positionInTargetCurrency;
+//    }
 
     public RateConverter(IProvideProduct p) {
         products = p;
@@ -197,9 +203,7 @@ public class RateConverter implements IConsumeMarketData {
     }
 
     private boolean isPositionHasUnitId(Position position, String unitId) {
-        if (products.getProductForProductId(position.getProductId()).hasUnitId(unitId))
-            return true;
-        else return false;
+        return products.getProductForProductId(position.getProductId()).hasUnitId(unitId);
     }
 
     private Decimal getLastForProductId(String pid) {
@@ -223,12 +227,6 @@ public class RateConverter implements IConsumeMarketData {
     private ConcurrentHashMap<String, RatesChain> cache;
     private int cacheHits;
 
-    public Position calculateProfit(Position oldPosition, Position newPosition, String targetPid) {
-        Position oldPositionInTarget = convert(oldPosition, targetPid);
-        Position newPositionInTarget = convert(newPosition, targetPid);
-        Position profit = newPositionInTarget.subtract(oldPositionInTarget);
-        return profit;
-    }
 }
 
 
