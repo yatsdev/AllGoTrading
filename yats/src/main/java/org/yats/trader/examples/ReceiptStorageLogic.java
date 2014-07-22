@@ -25,7 +25,7 @@ public class ReceiptStorageLogic implements IAmCalledBack{
 
     public ReceiptStorageLogic() {
         storage = new ReceiptStorageCSV();
-        Config config = Config.DEFAULT;
+        Config config = Config.fromProperties(Config.createRealProperties());
         receiverReceipt = new BufferingReceiver<ReceiptMsg>(ReceiptMsg.class,
                 config.getExchangeReceipts(),
                 "#",

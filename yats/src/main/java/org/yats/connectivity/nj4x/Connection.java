@@ -1,9 +1,11 @@
 package org.yats.connectivity.nj4x;
 
-import com.jfx.*;
+import com.jfx.Broker;
+import com.jfx.ErrUnknownSymbol;
+import com.jfx.MT4;
+import com.jfx.TickInfo;
 import com.jfx.strategy.Strategy;
 import com.jfx.strategy.StrategyRunner;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
@@ -12,10 +14,11 @@ import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.MarketDataMsg;
-import org.yats.trading.MarketData;
 
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Connection {
 
@@ -87,8 +90,8 @@ public class Connection {
             this.symbol = _symbol;
             orderJob = null;
             orderCloseJob = null;
-            sender = new Sender<MarketDataMsg>(Config.DEFAULT.getExchangeMarketData(),
-                    Config.DEFAULT.getServerIP());
+            Config c = Config.fromProperties(Config.createRealProperties());
+            sender = new Sender<MarketDataMsg>(c.getExchangeMarketData(), c.getServerIP());
         }
 
         @Override

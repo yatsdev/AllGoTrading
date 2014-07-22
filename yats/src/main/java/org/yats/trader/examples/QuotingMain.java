@@ -34,11 +34,11 @@ public class QuotingMain {
     {
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
         QuotingStrategy strategy = new QuotingStrategy();
         PositionServer positionServer = new PositionServer();
-        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.createRealProperties());
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 

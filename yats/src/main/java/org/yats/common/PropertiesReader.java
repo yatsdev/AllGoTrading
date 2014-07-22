@@ -100,6 +100,11 @@ public class PropertiesReader implements IProvideProperties {
             return "PropertiesReader: "+b.toString();
     }
 
+    @Override
+    public void setAsBoolean(String key, boolean value) {
+        properties.setProperty(key, value ? "true" : "false");
+    }
+
     Properties properties;
 
     public static boolean fromBooleanString(String listening) {

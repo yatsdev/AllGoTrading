@@ -72,8 +72,8 @@ public class FXRates {
                         Sender<MarketDataMsg> sender = null;
 
 
-                        sender = new Sender<MarketDataMsg>(Config.DEFAULT.getExchangeMarketData(),
-                                Config.DEFAULT.getServerIP());
+                        Config config = Config.fromProperties(Config.createRealProperties());
+                        sender = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
 
                         data.productId=instrument;
                         data.bid= Decimal.fromDouble(bid).toString();

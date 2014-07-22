@@ -7,4 +7,5 @@ public interface IProvideProperties {
     String get(String _key, String _defaultValue);
     boolean getAsBoolean(String _key, boolean _defaultValue);
 
+    void setAsBoolean(String key, boolean value);
 }

@@ -86,7 +86,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
             shuttingDown=false;
 
 //        Config config = _config; // Config.DEFAULT;
-            Config config =  Config.DEFAULT;
+            Config config =  Config.fromProperties(Config.createRealProperties());
             marketDataMsgSender = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
             marketDataMsgSender.init();
 

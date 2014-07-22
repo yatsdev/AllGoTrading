@@ -1,65 +1,67 @@
 package org.yats.messagebus;
 
+import org.yats.common.FileTool;
+import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 
 public class Config {
 
 
-    public static final Config DEFAULT = createRealConfig();
+//    public static final Config DEFAULT = createRealConfig();
     public static final Config DEFAULT_FOR_TESTS = createTestConfig();
 
 
 
     public String getServerIP() {
-        return serverIP;
+        return properties.get("serverIP");
     }
 
     public String getExchangeMarketData() {
-        return exchangeMarketData;
+        return properties.get("exchangeMarketData");
     }
 
     public String getExchangeReceipts() {
-        return exchangeReceipts;
+        return properties.get("exchangeReceipts");
     }
 
     public String getExchangeSubscription() {
-        return exchangeSubscription;
+        return properties.get("xchangeSubscription");
     }
 
     public String getExchangePositionRequest() {
-        return exchangePositionRequest;
+        return properties.get("exchangePositionRequest");
     }
 
     public String getExchangePositionSnapshot() {
-        return exchangePositionSnapshot;
+        return properties.get("exchangePositionSnapshot");
     }
 
     public String getExchangeOrderNew() {
-        return exchangeOrderNew;
+        return properties.get("exchangeOrderNew");
     }
 
     public String getExchangeOrderCancel() {
-        return exchangeOrderCancel;
+        return properties.get("exchangeOrderCancel");
     }
 
     public String getTopicSubscriptions() {
-        return topicSubscriptions;
+        return properties.get("topicSubscriptions");
     }
 
     public String getTopicPositionSnapshot() {
-        return topicPositionSnapshot;
+        return properties.get("topicPositionSnapshot");
     }
 
     public boolean isListeningForReceipts() {
-        return listeningForReceipts;
+        return properties.getAsBoolean("listeningForReceipts",false);
     }
 
     public boolean isStorePositionsToDisk() {
-        return storePositionsToDisk;
+        return properties.getAsBoolean("storePositionsToDisk",false);
     }
 
     public String getPositionFilename() {
-        return positionFilename;
+        return properties.get("positionFilename");
     }
 
     public String getTopicCatchAll() {
@@ -67,92 +69,115 @@ public class Config {
     }
 
     public void setStorePositionsToDisk(boolean storePositions) {
-        this.storePositionsToDisk = storePositions;
+        properties.setAsBoolean("storePositionsToDisk", storePositions);
     }
 
     public void setListeningForReceipts(boolean listeningToReceipts) {
-        this.listeningForReceipts = listeningToReceipts;
+        properties.setAsBoolean("listeningForReceipts", listeningToReceipts);
     }
 
-    public static Config fromProperties(PropertiesReader p) {
+    public static Config fromProperties(IProvideProperties p) {
+
         Config c = new Config();
-        c.serverIP = p.get("serverIP","127.0.0.1");
-        c.exchangeMarketData = p.get("exchangeMarketData","marketdata");
-        c.exchangeReceipts = p.get("exchangeReceipts","receipts");
-        c.exchangeSubscription = p.get("exchangeSubscription","subscriptions");
-        c.exchangePositionRequest = p.get("exchangePositionRequest","positionrequests");
-        c.exchangePositionSnapshot = p.get("exchangePositionSnapshot","positionsnapshots");
-        c.exchangeOrderNew = p.get("exchangeOrderNew","orderNew");
-        c.exchangeOrderCancel = p.get("exchangeOrderCancel","orderCancel");
-        c.topicSubscriptions = p.get("topicSubscriptions","subscriptions");
-        c.topicPositionSnapshot = p.get("topicPositionSnapshot","topicPositionSnapshot");
-        c.listeningForReceipts = p.getAsBoolean("listeningForReceipts", false);
-        c.storePositionsToDisk = p.getAsBoolean("storePositionsToDisk", false);
-        c.positionFilename = p.get("positionFilename", "PositionDefault.csv");
+        c.setProperties(p);
+//        c.serverIP = p.get("serverIP","127.0.0.1");
+//        c.exchangeMarketData = p.get("exchangeMarketData","marketdata");
+//        c.exchangeReceipts = p.get("exchangeReceipts","receipts");
+//        c.exchangeSubscription = p.get("exchangeSubscription","subscriptions");
+//        c.exchangePositionRequest = p.get("exchangePositionRequest","positionrequests");
+//        c.exchangePositionSnapshot = p.get("exchangePositionSnapshot","positionsnapshots");
+//        c.exchangeOrderNew = p.get("exchangeOrderNew","orderNew");
+//        c.exchangeOrderCancel = p.get("exchangeOrderCancel","orderCancel");
+//        c.topicSubscriptions = p.get("topicSubscriptions","subscriptions");
+//        c.topicPositionSnapshot = p.get("topicPositionSnapshot","topicPositionSnapshot");
+//        c.listeningForReceipts = p.getAsBoolean("listeningForReceipts", false);
+//        c.storePositionsToDisk = p.getAsBoolean("storePositionsToDisk", false);
+//        c.positionFilename = p.get("positionFilename", "PositionDefault.csv");
         return c;
     }
 
     private static Config createRealConfig() {
-        Config config = new Config();
-        config.initRealDefault();
+        String configString = getInitRealDefaultString();
+        Config config = Config.fromProperties(PropertiesReader.createFromConfigString(configString));
         return config;
     }
 
+    public static IProvideProperties createRealProperties() {
+        String configString = getInitRealDefaultString();
+        return PropertiesReader.createFromConfigString(configString);
+    }
 
-    private void initRealDefault() {
-        serverIP = "127.0.0.1";
-        exchangeMarketData = "marketdata";
-        exchangeReceipts = "receipts";
-        exchangeSubscription = "subscriptions";
-        exchangePositionRequest = "positionrequests";
-        exchangePositionSnapshot = "positionsnapshots";
-        exchangeOrderNew = "orderNew";
-        exchangeOrderCancel = "orderCancel";
-        topicSubscriptions = "subscriptions";
-        topicPositionSnapshot = "topicPositionSnapshot";
-        listeningForReceipts = false;
-        storePositionsToDisk = false;
-        positionFilename = "Position.csv";
+    private static String getInitRealDefaultString() {
+        String CR = FileTool.getLineSeparator();
+        String configString =
+        "serverIP = 127.0.0.1" + CR +
+        "exchangeMarketData = marketdata" + CR +
+        "exchangeReceipts = receipts" + CR +
+        "exchangeSubscription = subscriptions" + CR +
+        "exchangePositionRequest = positionrequests" + CR +
+        "exchangePositionSnapshot = positionsnapshots" + CR +
+        "exchangeOrderNew = orderNew" + CR +
+        "exchangeOrderCancel = orderCancel" + CR +
+        "topicSubscriptions = subscriptions" + CR +
+        "topicPositionSnapshot = topicPositionSnapshot" + CR +
+        "listeningForReceipts = false" + CR +
+        "storePositionsToDisk = false" + CR +
+        "positionFilename = Position.csv" + CR;
+        return configString;
     }
 
     private static Config createTestConfig() {
-        Config config = new Config();
-        config.initTestDefault();
+        String configString = getInitTestDefaultString();
+        Config config = Config.fromProperties(PropertiesReader.createFromConfigString(configString));
         return config;
     }
 
-    private void initTestDefault() {
-        serverIP = "127.0.0.1";
-        exchangeMarketData = "marketdataTest";
-        exchangeReceipts = "receiptsTest";
-        exchangeSubscription = "subscriptionsTest";
-        exchangePositionRequest = "positionrequestsTest";
-        exchangePositionSnapshot = "positionsnapshotsTest";
-        exchangeOrderNew = "orderNewTest";
-        exchangeOrderCancel = "orderCancelTest";
-        topicSubscriptions = "subscriptionsTest";
-        topicPositionSnapshot = "topicPositionSnapshotTest";
-        listeningForReceipts = false;
-        storePositionsToDisk = false;
-        positionFilename = "PositionTest.csv";
+    public static IProvideProperties createTestProperties() {
+        String configString = getInitTestDefaultString();
+        return PropertiesReader.createFromConfigString(configString);
+    }
+
+
+    private static String getInitTestDefaultString() {
+        String CR = FileTool.getLineSeparator();
+        String configString =
+        "serverIP = 127.0.0.1" + CR +
+        "exchangeMarketData = marketdataTest"+ CR +
+        "exchangeReceipts = receiptsTest"+ CR +
+        "exchangeSubscription = subscriptionsTest"+ CR +
+        "exchangePositionRequest = positionrequestsTest"+ CR +
+        "exchangePositionSnapshot = positionsnapshotsTest"+ CR +
+        "exchangeOrderNew = orderNewTest"+ CR +
+        "exchangeOrderCancel = orderCancelTest"+ CR +
+        "topicSubscriptions = subscriptionsTest"+ CR +
+        "topicPositionSnapshot = topicPositionSnapshotTest"+ CR +
+        "listeningForReceipts = false"+ CR +
+        "storePositionsToDisk = false"+ CR +
+        "positionFilename = PositionTest.csv";
+        return configString;
+    }
+
+    public void setProperties(IProvideProperties properties) {
+        this.properties = properties;
     }
 
     public Config() {
     }
 
-    private String serverIP;
-    private String exchangeMarketData;
-    private String exchangeReceipts;
-    private String exchangeSubscription;
-    private String exchangePositionRequest;
-    private String exchangePositionSnapshot;
-    private String exchangeOrderNew;
-    private String exchangeOrderCancel;
-    private String topicSubscriptions;
-    private String topicPositionSnapshot;
-    private boolean listeningForReceipts;
-    private boolean storePositionsToDisk;
-    private String positionFilename;
+    private IProvideProperties properties;
+//    private String serverIP;
+//    private String exchangeMarketData;
+//    private String exchangeReceipts;
+//    private String exchangeSubscription;
+//    private String exchangePositionRequest;
+//    private String exchangePositionSnapshot;
+//    private String exchangeOrderNew;
+//    private String exchangeOrderCancel;
+//    private String topicSubscriptions;
+//    private String topicPositionSnapshot;
+//    private boolean listeningForReceipts;
+//    private boolean storePositionsToDisk;
+//    private String positionFilename;
 
 
 }

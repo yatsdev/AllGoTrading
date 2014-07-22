@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.yats.common.IProvideProperties;
 import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
@@ -23,14 +24,15 @@ public class PositionServerLogicTest {
     @Test
     public void canInitializeOnePositionServerFromAnother()
     {
-        PositionServerLogic logic1 = new PositionServerLogic(Config.DEFAULT_FOR_TESTS);
+        IProvideProperties p = Config.createTestProperties();
+        PositionServerLogic logic1 = new PositionServerLogic(p);
         PositionServer server1 = new PositionServer();
         logic1.setPositionServer(server1);
         server1.onReceipt(ReceiptTest.RECEIPT1);
         server1.onReceipt(ReceiptTest.RECEIPT4);
         logic1.startRequestListener();
 
-        PositionServerLogic logic2 = new PositionServerLogic(Config.DEFAULT_FOR_TESTS);
+        PositionServerLogic logic2 = new PositionServerLogic(p);
         PositionServer server2 = new PositionServer();
         logic2.setPositionServer(server2);
 
@@ -43,10 +45,12 @@ public class PositionServerLogicTest {
 
     @Test
     public void canStorePositionSnapshot() {
-        Config c = Config.DEFAULT_FOR_TESTS;
+        IProvideProperties p = Config.createTestProperties();
+        Config c = Config.fromProperties(p);
+
         c.setStorePositionsToDisk(true);
         c.setListeningForReceipts(true);
-        PositionServerLogic logic = new PositionServerLogic(c);
+        PositionServerLogic logic = new PositionServerLogic(p);
         logic.setPositionStorage(positionStorage);
         senderReceipts = new Sender<ReceiptMsg>(c.getExchangeReceipts(),c.getServerIP());
         ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);

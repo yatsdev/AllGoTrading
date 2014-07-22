@@ -56,17 +56,16 @@ public class StrategyRunnerMain {
     public void go() throws InterruptedException, IOException
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
-        PropertiesReader strategyRunnerConfig = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
+        PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
         converter = new RateConverter(productList);
 
         //todo: get rid of Config
-        Config config = Config.fromProperties(strategyRunnerConfig);
         positionServer = new PositionServer();
         positionServer.setRateConverter(converter);
-        PositionServerLogic positionServerLogic = new PositionServerLogic(config);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
@@ -77,7 +76,7 @@ public class StrategyRunnerMain {
         strategyRunner.setOrderSender(priceAndOrderConnection);
         priceAndOrderConnection.setReceiptConsumer(strategyRunner);
 
-        String strategyNamesString = strategyRunnerConfig.get("strategyNames");
+        String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
 
         ArrayList<StrategyBase> strategies = new ArrayList<StrategyBase>();
