@@ -19,6 +19,8 @@ public class Scalper extends StrategyBase {
     public void onMarketData(MarketData marketData)
     {
         if(!isInitialised()) return;
+        if(isConversionAvailable(ProductList.USD_PID, tradeProductId))
+            log.info("Conversion to USD available!");
         if(!marketData.hasProductId(tradeProductId)) return;
         if(!startPrice.equals(MarketData.NULL)) return;
         if(shuttingDown) return;
@@ -45,7 +47,11 @@ public class Scalper extends StrategyBase {
         }
 
         position = receipt.getPositionChange().add(position);
-        log.info("position="+position);
+        log.info("position(strategy)="+position);
+        log.info("position(server)="+getPositionForProduct(tradeProductId));
+        if(isConversionAvailable(ProductList.USD_PID, tradeProductId))
+            log.info("positionValueUSD(server)="+getValueForProduct(ProductList.USD_PID, tradeProductId));
+        log.info("positionValueEUR(server)="+getValueForProduct(ProductList.EUR_PID, tradeProductId));
 
         log.debug("Received receipt: " + receipt);
 
@@ -66,6 +72,7 @@ public class Scalper extends StrategyBase {
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
+        subscribe("OANDA_EURUSD");
         position = getPositionForProduct(tradeProductId);
         log.info("position="+position);
         tickSize =getConfigAsDecimal("tickSize");
@@ -88,7 +95,10 @@ public class Scalper extends StrategyBase {
     }
 
     private void sendAskRelativeTo(Decimal price) {
-        if(!position.isGreaterThan(Decimal.ZERO)) return;
+        if(position.isLessThan(Decimal.fromDouble(orderSize))) {
+            log.info("Can not sell. Position less than orderSize. positionSize="+position);
+            return;
+        }
         double askMarket=price.toDouble();
         Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
         if(!orderExists(BookSide.ASK, askPrice))

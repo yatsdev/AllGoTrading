@@ -11,7 +11,7 @@ public class PositionSnapshot implements IProvidePosition {
     @Override
     public AccountPosition getAccountPosition(PositionRequest positionRequest) {
         AccountPosition position = new AccountPosition("", "", Decimal.ZERO);
-        String key = positionRequest.getProductId() + "," + positionRequest.getAccount();
+        String key = positionRequest.getAsKey();
         if (positionMap.containsKey(key)) {
             position = positionMap.get(key);
         }

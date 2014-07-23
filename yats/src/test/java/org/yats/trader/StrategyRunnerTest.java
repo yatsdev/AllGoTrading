@@ -22,12 +22,13 @@ public class StrategyRunnerTest {
 //    final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
 
+    private static String ACCOUNT = "testAccount";
 
     @Test
     public void canDoSubscriptionForMarketData()
     {
         strategy.init();
-        assert (strategyRunner.isProductSubscribed(TestMarketData.SAP_SYMBOL));
+        assert (strategyRunner.isProductSubscribed(TestMarketData.SAP_PID));
     }
 
     @Test
@@ -88,24 +89,53 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 5);
     }
 
+    @Test
+    public void canCalculatePositionSizeAndValue()
+    {
+        orderConnection.init();
+        strategy.sendBuyOrder();
+        strategyRunner.waitForProcessingQueues();
+        orderConnection.partialFillOrder(2);
+        strategyRunner.waitForProcessingQueues();
+        Decimal positionSize = strategy.getPositionForProduct(TestMarketData.SAP_PID);
+        assert (positionSize.isEqualTo(Decimal.fromString("2")));
+        Position positionValueUSD = strategy.getValueForProduct(TestMarketData.USD_PID, TestMarketData.SAP_PID);
+        Decimal expected = Decimal.fromString("2")
+                .multiply(data1.getLast())
+                .multiply(TestMarketData.EURUSD_LAST);
+        assert (positionValueUSD.isSize(expected));
+    }
+
+
 
     @BeforeMethod
     public void setUp() {
-        ProductList products = new ProductList();
-        products.add(testProduct);
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.SAP_PID,
+                Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
+                Decimal.ONE,Decimal.ONE,Decimal.ONE);
+
+        ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
+        rateConverter = new RateConverter(productList);
+        rateConverter.onMarketData(TestMarketData.EURUSD);
+        rateConverter.onMarketData(data1);
+        positionServer = new PositionServer();
+        positionServer.setRateConverter(rateConverter);
         feed = new PriceFeedMock();
         strategy = new StrategyMock();
+        strategy.setInternalAccount(ACCOUNT);
         strategyRunner = new StrategyRunner();
+        strategyRunner.setRateConverter(rateConverter);
+        strategyRunner.addReceiptConsumer(positionServer);
         orderConnection = new OrderConnectionMock(strategyRunner);
         strategy.setPriceProvider(strategyRunner);
         strategy.setOrderSender(strategyRunner);
         strategyRunner.setOrderSender(orderConnection);
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
-        strategyRunner.setProductProvider(products);
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.SAP_SYMBOL,
-                Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
-                Decimal.ONE,Decimal.ONE,Decimal.ONE);
+        strategyRunner.setProductProvider(productList);
+
+        strategy.setPositionProvider(positionServer);
+
     }
 
 
@@ -114,9 +144,12 @@ public class StrategyRunnerTest {
     private OrderConnectionMock orderConnection;
     private StrategyMock strategy;
     private MarketData data1;
+    private PositionServer positionServer;
+    private RateConverter rateConverter;
+    private ProductList productList;
 
 
-    private static Product testProduct = new Product(TestMarketData.SAP_SYMBOL, "", "");
+    private static Product testProduct = new Product(TestMarketData.SAP_PID, TestMarketData.SAP_SYMBOL, "exchange");
 
     private class StrategyMock extends StrategyBase {
 
@@ -129,7 +162,10 @@ public class StrategyRunnerTest {
                     .withProductId(testProduct.getProductId())
                     .withBookSide(BookSide.BID)
                     .withLimit(Decimal.fromDouble((50)))
-                    .withSize(Decimal.fromDouble(5));
+                    .withSize(Decimal.fromDouble(5))
+                    .withInternalAccount(ACCOUNT)
+                    ;
+
             sendNewOrder(order);
         }
 

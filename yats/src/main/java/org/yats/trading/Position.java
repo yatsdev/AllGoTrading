@@ -4,6 +4,13 @@ import org.yats.common.Decimal;
 
 public class Position {
 
+    @Override
+    public String toString() {
+        return "Position{" +
+                "productId='" + productId + '\'' +
+                ", size=" + size +
+                '}';
+    }
 
     public Position add(Receipt receipt) {
         Decimal newSize = size.add(receipt.getCurrentTradedSizeSigned());

@@ -60,11 +60,10 @@ public class StrategyRunnerMain {
 
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
-        converter = new RateConverter(productList);
+        rateConverter = new RateConverter(productList);
 
-        //todo: get rid of Config
         positionServer = new PositionServer();
-        positionServer.setRateConverter(converter);
+        positionServer.setRateConverter(rateConverter);
         PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
@@ -74,6 +73,8 @@ public class StrategyRunnerMain {
         strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(priceAndOrderConnection);
+        strategyRunner.setRateConverter(rateConverter);
+        strategyRunner.addReceiptConsumer(positionServer);
         priceAndOrderConnection.setReceiptConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
@@ -153,6 +154,6 @@ public class StrategyRunnerMain {
     private PositionServer positionServer;
     private StrategyRunner strategyRunner;
     private ProductList productList;
-    private RateConverter converter;
+    private RateConverter rateConverter;
 
 } // class

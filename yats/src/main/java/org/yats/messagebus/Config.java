@@ -25,7 +25,7 @@ public class Config {
     }
 
     public String getExchangeSubscription() {
-        return properties.get("xchangeSubscription");
+        return properties.get("exchangeSubscription");
     }
 
     public String getExchangePositionRequest() {

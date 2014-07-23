@@ -7,6 +7,8 @@ import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
+import java.util.NoSuchElementException;
+
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
@@ -71,6 +73,22 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     {
         PositionRequest p = new PositionRequest(getInternalAccount(), productId);
         return positionProvider.getAccountPosition(p).getSize();
+    }
+
+    public boolean isConversionAvailable(String targetProductId, String productId) {
+        try {
+            PositionRequest r = new PositionRequest(getInternalAccount(), productId);
+            positionProvider.getValueForAccountProduct(targetProductId, r);
+            return true;
+        } catch(NoSuchElementException e) {
+            return false;
+        }
+    }
+
+    public Position getValueForProduct(String targetProductId, String productId)
+    {
+        PositionRequest r = new PositionRequest(getInternalAccount(), productId);
+        return positionProvider.getValueForAccountProduct(targetProductId, r);
     }
 
 //    public Decimal getProfitForProduct(String productId)
