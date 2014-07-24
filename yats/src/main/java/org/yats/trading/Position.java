@@ -8,7 +8,7 @@ public class Position {
     public String toString() {
         return "Position{" +
                 "productId='" + productId + '\'' +
-                ", size=" + size +
+                ", size=" + size.roundToDigits(5) +
                 '}';
     }
 

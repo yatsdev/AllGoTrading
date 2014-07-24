@@ -19,8 +19,6 @@ public class Scalper extends StrategyBase {
     public void onMarketData(MarketData marketData)
     {
         if(!isInitialised()) return;
-        if(isConversionAvailable(ProductList.USD_PID, tradeProductId))
-            log.info("Conversion to USD available!");
         if(!marketData.hasProductId(tradeProductId)) return;
         if(!startPrice.equals(MarketData.NULL)) return;
         if(shuttingDown) return;

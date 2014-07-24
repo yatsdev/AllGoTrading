@@ -7,8 +7,6 @@ import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-import java.util.NoSuchElementException;
-
 public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
@@ -80,7 +78,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
             PositionRequest r = new PositionRequest(getInternalAccount(), productId);
             positionProvider.getValueForAccountProduct(targetProductId, r);
             return true;
-        } catch(NoSuchElementException e) {
+        } catch(TradingExceptions.RateConverterException e) {
             return false;
         }
     }

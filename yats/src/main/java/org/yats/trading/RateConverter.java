@@ -20,6 +20,9 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
         RatesChain bestRatesChain = cache.containsKey(key)
                 ? getFromCache(key)
                 : findBestNode(position.getProductId(), targetProductId);
+        if(bestRatesChain.isEmpty()) {
+            throw new TradingExceptions.RateConverterException("empty chain found");
+        }
         cache.put(key, bestRatesChain);
         return convert(position, targetProductId, bestRatesChain);
     }

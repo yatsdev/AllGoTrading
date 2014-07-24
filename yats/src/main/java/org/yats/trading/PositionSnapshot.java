@@ -60,8 +60,6 @@ public class PositionSnapshot implements IProvidePosition {
         return result;
     }
 
-
-
     public int size() {
         return positionMap.size();
     }
@@ -79,6 +77,7 @@ public class PositionSnapshot implements IProvidePosition {
 
     public String toStringCSV() {
         StringBuilder b = new StringBuilder();
+
         for(AccountPosition a : positionMap.values()) {
             b.append(a.toStringCSV());
             b.append('|');
@@ -144,6 +143,13 @@ public class PositionSnapshot implements IProvidePosition {
         rateConverter = new RateConverter(new ProductList());
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//    private void updateLastChange() {
+//        lastChange = Tool.getUTCTimestamp();
+//    }
+
+//    private DateTime lastChange;
     private ConcurrentHashMap<String, AccountPosition> positionMap;
     private IConvertRate rateConverter;
 

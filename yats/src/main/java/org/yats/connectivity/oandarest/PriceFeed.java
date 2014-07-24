@@ -107,14 +107,16 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
                 Object obj = JSONValue.parse(line);
                 JSONObject tick = (JSONObject) obj;
 
+                if(line.contains("instrument")) {
                 //ignore heartbeats
-                if (tick.containsKey("instrument")) {
+//                if (tick.containsKey("instrument")) {
                     System.out.println("-------");
 
-                    String instrument = tick.get("instrument").toString();
-                    String time = tick.get("time").toString();
-                    double bid = Double.parseDouble(tick.get("bid").toString());
-                    double ask = Double.parseDouble(tick.get("ask").toString());
+                    JSONObject values = (JSONObject)tick.get("tick");
+                    String instrument = values.get("instrument").toString();
+                    String time = values.get("time").toString();
+                    double bid = Double.parseDouble(values.get("bid").toString());
+                    double ask = Double.parseDouble(values.get("ask").toString());
                     Decimal last = Decimal.fromDouble((bid+ask)/2);
 
                     System.out.println(instrument);
