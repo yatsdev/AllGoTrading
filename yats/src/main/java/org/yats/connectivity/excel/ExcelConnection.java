@@ -4,21 +4,25 @@ import com.pretty_tools.dde.DDEException;
 import com.pretty_tools.dde.DDEMLException;
 import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
+import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
+import org.yats.trading.IConsumeMarketData;
+import org.yats.trading.IProvidePriceFeed;
+import org.yats.trading.MarketData;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class ExcelConnection implements Runnable {
+public class ExcelConnection implements Runnable,IConsumeMarketData {
 
     private Vector<String> productIDs=new Vector<String>();
 
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection= new StrategyToBusConnection(Config.createRealProperties()); //.createRealProperties() does not work
-
-
+    private IConsumeMarketData marketDataConsumer;
+    private IProvidePriceFeed priceProvider;
 
     public boolean isExcelRunning() {
         return false;
@@ -58,6 +62,10 @@ public class ExcelConnection implements Runnable {
                         for (int i = 1; i < currentProductIDs.size(); i++) {
                             int j=i+1;
                             try {
+                                strategyToBusConnection.subscribe("4663789",ExcelConnection.this);
+                                strategyToBusConnection.setMarketDataConsumer(ExcelConnection.this);
+                                priceProvider.subscribe("4663789", ExcelConnection.this);
+                                //connection.subscribe(productId, consumer);
                                 conversation.poke("R" + j + "C2", "miao");//Substitute with Bid Price Data Stream
                                 conversation.poke("R" + j + "C3", "ciao");//Substitute with Ask Price Data Stream
                             } catch (DDEException e) {
@@ -124,4 +132,17 @@ public class ExcelConnection implements Runnable {
 
     private String excelFileName;
     private Thread thread;
+
+    @Override
+    public void onMarketData(MarketData marketData) {
+
+System.out.println("Here"); //Nothing happens
+System.out.println(marketData.getAsk() + "");//Nothing happens
+
+    }
+
+    @Override
+    public UniqueId getConsumerId() {
+        return null;
+    }
 } // class
