@@ -1,6 +1,8 @@
 package org.yats.trading;
 
+import org.joda.time.DateTime;
 import org.yats.common.Decimal;
+import org.yats.common.Tool;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +80,8 @@ public class PositionSnapshot implements IProvidePosition {
     public String toStringCSV() {
         StringBuilder b = new StringBuilder();
 
+        b.append(lastChange.toString());
+        b.append(";");
         for(AccountPosition a : positionMap.values()) {
             b.append(a.toStringCSV());
             b.append('|');
@@ -87,7 +91,16 @@ public class PositionSnapshot implements IProvidePosition {
 
     public static PositionSnapshot fromStringCSV(String csv) {
         PositionSnapshot p = new PositionSnapshot();
-        String[] positionStrings = csv.split("\\|");
+        String[] snapshotParts = csv.split(";");
+        String positionPartString="";
+        if(snapshotParts.length>1) {
+            p.lastChange = DateTime.parse(snapshotParts[0]);
+            positionPartString = snapshotParts[1];
+        } else {
+            positionPartString = csv;
+        }
+
+        String[] positionStrings = positionPartString.split("\\|");
         for(String s : positionStrings) {
             if(s.isEmpty()) continue;
             AccountPosition a = AccountPosition.fromStringCSV(s);
@@ -122,6 +135,7 @@ public class PositionSnapshot implements IProvidePosition {
        for (AccountPosition p : newPositionCollection) {
             add(p);
         }
+        updateLastChange();
     }
 
     public void add(AccountPosition p) {
@@ -132,6 +146,7 @@ public class PositionSnapshot implements IProvidePosition {
             newPosition = oldPosition.add(newPosition);
         }
         positionMap.put(key, newPosition);
+        updateLastChange();
     }
 
     public void setRateConverter(IConvertRate rateConverter) {
@@ -141,15 +156,16 @@ public class PositionSnapshot implements IProvidePosition {
     public PositionSnapshot() {
         positionMap = new ConcurrentHashMap<String, AccountPosition>();
         rateConverter = new RateConverter(new ProductList());
+        updateLastChange();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-//    private void updateLastChange() {
-//        lastChange = Tool.getUTCTimestamp();
-//    }
+    private void updateLastChange() {
+        lastChange = Tool.getUTCTimestamp();
+    }
 
-//    private DateTime lastChange;
+    private DateTime lastChange;
     private ConcurrentHashMap<String, AccountPosition> positionMap;
     private IConvertRate rateConverter;
 

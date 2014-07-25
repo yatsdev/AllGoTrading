@@ -118,6 +118,10 @@ public class OrderResponseCracker extends MessageCracker implements Application 
 
             r.setEndState(isInEndState(report.getOrdStatus().getValue()));
 
+//            if(isInEndState(report.getOrdStatus().getValue())) {
+//                log.debug("found endstate");
+//            }
+
             receiptConsumer.onReceipt(r);
 
 		} catch (FieldNotFound e) {
