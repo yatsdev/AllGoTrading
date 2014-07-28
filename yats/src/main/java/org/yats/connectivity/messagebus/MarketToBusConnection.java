@@ -58,8 +58,12 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         private void sendAllReceivedSubscription() {
             while(receiverSubscription.hasMoreMessages()) {
                 SubscriptionMsg m = receiverSubscription.get();
-                Product p = getProductForProductId(m.productId);
-                subscribe(p.getProductId());
+                try {
+                    Product p = getProductForProductId(m.productId);
+                    subscribe(p.getProductId());
+                } catch(TradingExceptions.ItemNotFoundException e) {
+                    log.debug("Attempt to subscribe for unknown product: "+m.productId);
+                }
             }
         }
 

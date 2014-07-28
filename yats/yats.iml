@@ -28,6 +28,7 @@
     <orderEntry type="library" name="org.apache.httpcomponents:httpcore:4.2.3" level="project" />
     <orderEntry type="library" name="com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="pretty-tools-JDDE-2.0.3" level="project" />
+    <orderEntry type="library" name="oanda_fxtrade" level="project" />
   </component>
 </module>
 
