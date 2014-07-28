@@ -8,7 +8,10 @@ import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
-import org.yats.trading.*;
+import org.yats.trading.IConsumeMarketData;
+import org.yats.trading.IConsumeReceipt;
+import org.yats.trading.MarketData;
+import org.yats.trading.Receipt;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -26,32 +29,34 @@ public class ExcelConnection implements Runnable, IConsumeMarketData, IConsumeRe
     @Override
     public void onItemChanged(String s, String s2, String s3)
     {
-        String[] parts = s.split("\r\n");
+
+        String[] parts = s3.split("\r\n");
         currentProductIDs = new Vector<String>(Arrays.asList(parts));
 
-        if (productIDs.isEmpty()) {
-            for (int i = 1; i < currentProductIDs.size(); i++) {
-                int j=i+1;
-                try {
-                    strategyToBusConnection.subscribe("4663789", this);
-                    //connection.subscribe(productId, consumer);
-                    conversation.poke("R" + j + "C2", "miao");//Substitute with Bid Price Data Stream
-                    conversation.poke("R" + j + "C3", "ciao");//Substitute with Ask Price Data Stream
-                } catch (DDEException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
+        for(int i=1;i<currentProductIDs.size();i++){
+        subscribe(currentProductIDs.elementAt(i));
         }
+
     }
 
     @Override
-    public void onMarketData(MarketData marketData)
-    {
-        System.out.println("Here! Something happens! ;)");
-        System.out.println("But you have to start the FIXclient or OandaClient to receive data first!");
-        System.out.println(marketData.getAsk() + "");
+    public void onMarketData(MarketData marketData) {
+
+
+            for (int i = 1; i < currentProductIDs.size(); i++) {
+                int j = i + 1;
+                if (marketData.hasProductId(currentProductIDs.elementAt(i))){
+                    try {
+                        conversation.poke("R" + j + "C2", marketData.getBid().toString());
+                        conversation.poke("R" + j + "C3", marketData.getAsk().toString());
+                    } catch (DDEException e) {
+                        e.printStackTrace();
+                    }
+            }
+            }
+
+
+
     }
 
     @Override
@@ -145,7 +150,7 @@ public class ExcelConnection implements Runnable, IConsumeMarketData, IConsumeRe
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
-
+    private int j;
 
 
 } // class
