@@ -74,7 +74,6 @@ public class StrategyRunnerMain {
         strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(priceAndOrderConnection);
         strategyRunner.setRateConverter(rateConverter);
-        strategyRunner.addReceiptConsumer(positionServer);
         priceAndOrderConnection.setReceiptConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
