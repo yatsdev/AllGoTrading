@@ -70,6 +70,7 @@ public class MarketData
         this.bidSize = bidSize;
         this.askSize = askSize;
         this.lastSize = lastSize;
+        book = new OrderBook();
     }
 
     @Override
@@ -120,6 +121,7 @@ public class MarketData
     private Decimal bidSize;
     private Decimal askSize;
     private Decimal lastSize;
+    private OrderBook book;
 
     private static class MarketDataNULL extends MarketData {
 
