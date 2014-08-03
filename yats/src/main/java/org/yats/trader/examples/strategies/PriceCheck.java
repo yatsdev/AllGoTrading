@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.strategies;
 
 
 import org.slf4j.Logger;

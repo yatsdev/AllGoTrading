@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.trading.*;
 
-public class OrderBookSideTest implements IConsumeReceipt {
+public class LimitOrderBookSideTest implements IConsumeReceipt {
 
 
     @Test
@@ -21,7 +21,8 @@ public class OrderBookSideTest implements IConsumeReceipt {
     {
         bookBid.add(bid100At10);
         bookBid.add(bid200At9);
-        assert(bid100At10.getLimit() == bookBid.getFrontRowPrice());
+        Decimal bidFront = bookBid.getFrontRowPrice();
+        assert(bid100At10.getLimit() == bidFront);
     }
 
     @Test
@@ -52,10 +53,41 @@ public class OrderBookSideTest implements IConsumeReceipt {
         assert(lastBidReceipt.getResidualSize().isEqualTo(Decimal.fromDouble(100)));
     }
 
+    @Test
+    public void canCreateOfferBookSideForBidSide()
+    {
+        assert(bookBid.toOfferBookSide(10).toStringCSV().length()==0);
+        bookBid.add(bid100At10);
+        bookBid.add(bid200At9);
+        bookBid.add(bid200At12);
+        bookBid.add(bid50At8);
+        OfferBookSide bidSide = bookBid.toOfferBookSide(3);
+        String bidSideString = bidSide.toStringCSV();
+        String expected = bid200At12.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR
+                        + bid100At10.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR
+                        + bid200At9.toBookRowCSV();
+        assert(bidSideString.compareTo(expected)==0);
+    }
+
+    @Test
+    public void canCreateOfferBookSideForAskSide()
+    {
+        bookAsk.add(ask100At11);
+        bookAsk.add(ask10At9_80);
+        bookAsk.add(ask15At10_10);
+        bookAsk.add(ask300At12);
+        OfferBookSide askSide = bookAsk.toOfferBookSide(3);
+        String askSideString = askSide.toStringCSV();
+        String expected = ask10At9_80.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR
+                        + ask15At10_10.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR
+                        + ask100At11.toBookRowCSV();
+        assert(askSideString.compareTo(expected)==0);
+    }
+
     @BeforeMethod
     public void setUp() {
-        bookBid = new OrderBookSide(BookSide.BID, this);
-        bookAsk = new OrderBookSide(BookSide.ASK, this);
+        bookBid = new LimitOrderBookSide(BookSide.BID, this);
+        bookAsk = new LimitOrderBookSide(BookSide.ASK, this);
         bid100At10 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
@@ -74,6 +106,12 @@ public class OrderBookSideTest implements IConsumeReceipt {
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(200));
+        bid50At8 = new OrderNew()
+                .withBookSide(BookSide.BID)
+                .withInternalAccount(ProductTest.ACCOUNT2)
+                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withLimit(Decimal.fromDouble(8))
+                .withSize(Decimal.fromDouble(50));
 
         ask100At11 = new OrderNew()
                 .withBookSide(BookSide.ASK)
@@ -87,6 +125,18 @@ public class OrderBookSideTest implements IConsumeReceipt {
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(300));
+        ask10At9_80 = new OrderNew()
+                .withBookSide(BookSide.ASK)
+                .withInternalAccount(ProductTest.ACCOUNT1)
+                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withLimit(Decimal.fromDouble(9.8))
+                .withSize(Decimal.fromDouble(10));
+        ask15At10_10 = new OrderNew()
+                .withBookSide(BookSide.ASK)
+                .withInternalAccount(ProductTest.ACCOUNT1)
+                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withLimit(Decimal.fromDouble(10.1))
+                .withSize(Decimal.fromDouble(15));
         tradedAccount1=0;
         tradedAccount2=0;
     }
@@ -105,13 +155,16 @@ public class OrderBookSideTest implements IConsumeReceipt {
 
     Receipt lastBidReceipt;
     Receipt lastAskReceipt;
-    OrderBookSide bookBid;
-    OrderBookSide bookAsk;
+    LimitOrderBookSide bookBid;
+    LimitOrderBookSide bookAsk;
     OrderNew bid100At10;
     OrderNew bid200At9;
     OrderNew bid200At12;
+    OrderNew bid50At8;
     OrderNew ask100At11;
     OrderNew ask300At12;
+    OrderNew ask15At10_10;
+    OrderNew ask10At9_80;
     int tradedAccount1;
     int tradedAccount2;
 

@@ -62,6 +62,7 @@ public class PriceLevel {
     public int size() {
         return list.size();
     }
+
     public Decimal getCumulativeSize() {
         Decimal sum = Decimal.ZERO;
         for(Receipt makerReceipt : list) {
@@ -70,11 +71,17 @@ public class PriceLevel {
         return sum;
     }
 
-    public PriceLevel(IConsumeReceipt _receiptConsumer) {
+    public Decimal getPrice() {
+        return price;
+    }
+
+    public PriceLevel(Decimal _price, IConsumeReceipt _receiptConsumer) {
+        price = _price;
         list = new ArrayList<Receipt>();
         receiptConsumer = _receiptConsumer;
     }
 
+    Decimal price;
     ArrayList<Receipt> list;
     IConsumeReceipt receiptConsumer;
 

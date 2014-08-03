@@ -1,9 +1,10 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
+import org.yats.trader.examples.strategies.QuotingStrategy;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 

@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
         # Comments have a leading hash
 
         # qualified name of the strategy class:
-        strategyClass=org.yats.trader.examples.QuotingStrategy
+        strategyClass=org.yats.trader.examples.strategies.QuotingStrategy
 
         # your AllGoTrading account number
         externalAccount=1234

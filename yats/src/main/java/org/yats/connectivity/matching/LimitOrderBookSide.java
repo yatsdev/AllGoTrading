@@ -5,11 +5,13 @@ import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class OrderBookSide implements IConsumeReceipt {
+public class LimitOrderBookSide implements IConsumeReceipt {
 
     public void match(OrderNew takerOrder) {
         Receipt takerReceipt = takerOrder.createReceiptDefault();
@@ -54,6 +56,19 @@ public class OrderBookSide implements IConsumeReceipt {
         receiptConsumer.onReceipt(receipt);
     }
 
+    public OfferBookSide toOfferBookSide(int depth) {
+        OfferBookSide bookSide = new OfferBookSide(side);
+        int depthCount=0;
+        for(PriceLevel level : book.values()) {
+            if(level.isEmpty()) continue;
+            Decimal size = level.getCumulativeSize();
+            bookSide.add(new BookRow(size, level.getPrice()));
+            depthCount++;
+            if(depthCount>=depth) break;
+        }
+        return bookSide;
+    }
+
     private void removeOrderFromBook(String orderId) {
         if(bookByOrderId.containsKey(orderId)) bookByOrderId.remove(orderId);
     }
@@ -64,7 +79,7 @@ public class OrderBookSide implements IConsumeReceipt {
 
     public void add(Receipt receiptNew) {
         Decimal limit = receiptNew.getPrice();
-        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(this);
+        PriceLevel row = book.containsKey(limit) ? book.get(limit) : new PriceLevel(limit, this);
         row.add(receiptNew);
         book.put(limit, row);
         bookByOrderId.put(receiptNew.getOrderId().toString(), row);
@@ -73,8 +88,7 @@ public class OrderBookSide implements IConsumeReceipt {
 
     public Decimal getFrontRowPrice() {
         if(isEmpty()) throw new CommonExceptions.ContainerEmptyException("book is empty!");
-        Decimal frontRowPrice = side==BookSide.BID ? book.lastKey() : book.firstKey();
-        return frontRowPrice;
+        return book.firstKey();
     }
 
     public Decimal getFrontRowSize() {
@@ -90,12 +104,16 @@ public class OrderBookSide implements IConsumeReceipt {
         return book.size();
     }
 
-    public OrderBookSide(BookSide side, IConsumeReceipt _receiptConsumer) {
-        this.side = side;
+    public LimitOrderBookSide(BookSide _side, IConsumeReceipt _receiptConsumer) {
+        this.side = _side;
         receiptConsumer = _receiptConsumer;
-        book = new TreeMap<Decimal, PriceLevel>();
+        book = _side==BookSide.BID
+                ? new TreeMap<Decimal, PriceLevel>(Collections.reverseOrder())
+                : new TreeMap<Decimal, PriceLevel>();
         bookByOrderId = new ConcurrentHashMap<String, PriceLevel>();
     }
+
+    //////////////////////////////////////////////////////////////////////////////////////
 
     private void removeEmptyFrontRows() {
         PriceLevel frontRow;

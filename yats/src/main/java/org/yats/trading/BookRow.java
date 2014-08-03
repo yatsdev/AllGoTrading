@@ -14,12 +14,14 @@ public class BookRow {
     }
 
     public String toStringCSV() {
+        if(size.isEqualTo(Decimal.ZERO)) return "";
         return size + "," + price;
     }
 
     public static BookRow fromStringCSV(String csv) {
         String[] parts = csv.split(",");
-        if(parts.length<2) throw new CommonExceptions.FieldNotFoundException("too few fields!");
+        if(parts.length<2) //throw new CommonExceptions.FieldNotFoundException("too few fields!");
+            return new BookRow(new Decimal("0"), new Decimal("-1"));
         return new BookRow(new Decimal(parts[0]), new Decimal(parts[1]));
     }
 

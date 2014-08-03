@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.yats.common.Tool;
 import org.yats.connectivity.excel.ExcelConnection;

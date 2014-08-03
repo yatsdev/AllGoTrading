@@ -3,23 +3,23 @@ package org.yats.trading;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class OrderBookTest {
+public class OfferBookTest {
 
     @Test
     public void canConvertToAndFromCSV() {
         String csv = book.toStringCSV();
-        OrderBook csvBook = OrderBook.fromStringCSV(csv);
+        OfferBook csvBook = OfferBook.fromStringCSV(csv);
         String csv2 = csvBook.toStringCSV();
         assert(csv.compareTo(csv2)==0);
     }
 
     @BeforeMethod
     public void setUp() {
-        book = new OrderBook();
+        book = new OfferBook();
         book.addBid("10", "22");
-        book.addAsk("11", "23");
+        book.addBid("11", "23");
     }
 
-    private OrderBook book;
+    private OfferBook book;
 
 } // class

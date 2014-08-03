@@ -61,6 +61,10 @@ public class MarketData
         return true;
     }
 
+    public String getOfferBookAsCSV() {
+        return book.toStringCSV();
+    }
+
     public MarketData(DateTime timestamp, String productId, Decimal bid, Decimal ask, Decimal last, Decimal bidSize, Decimal askSize, Decimal lastSize) {
         this.timestamp = timestamp;
         this.productId = productId;
@@ -70,7 +74,9 @@ public class MarketData
         this.bidSize = bidSize;
         this.askSize = askSize;
         this.lastSize = lastSize;
-        book = new OrderBook();
+        book = new OfferBook();
+        book.addBid(new BookRow(bidSize, bid));
+        book.addAsk(new BookRow(askSize, ask));
     }
 
     @Override
@@ -107,6 +113,14 @@ public class MarketData
 
     public Decimal getLastSize() { return lastSize; }
 
+    public OfferBook getBook() {
+        return book;
+    }
+
+    public void setBook(OfferBook book) {
+        this.book = book;
+    }
+
     public static MarketData createFromLast(String productId, Decimal last) {
         return new MarketData(DateTime.now(DateTimeZone.UTC), productId,
                 last.subtract(Decimal.CENT), last.add(Decimal.CENT), last,
@@ -121,7 +135,7 @@ public class MarketData
     private Decimal bidSize;
     private Decimal askSize;
     private Decimal lastSize;
-    private OrderBook book;
+    private OfferBook book;
 
     private static class MarketDataNULL extends MarketData {
 

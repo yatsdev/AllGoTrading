@@ -27,13 +27,13 @@ public class Receiver<T> {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 //            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
-            log.debug("Receiver: "+jsonMessage);
+//            log.debug("Receiver: "+jsonMessage);
             T msg = deserializer.convertFromString(jsonMessage);
-            log.debug("Receiver parsed: "+msg.toString());
+//            log.debug("Receiver parsed: "+msg.toString());
             return msg;
         } catch (InterruptedException e) {
 //            e.printStackTrace();
-            throw new RuntimeException("Receiver: problem with receiving message!");
+            throw new RuntimeException("Receiver: problem with receiving message! " + e.getMessage());
         }
     }
 

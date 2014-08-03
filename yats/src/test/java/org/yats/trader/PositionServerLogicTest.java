@@ -9,7 +9,7 @@ import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.ReceiptMsg;
-import org.yats.trader.examples.PositionServerLogic;
+import org.yats.trader.examples.server.PositionServerLogic;
 import org.yats.trading.IStorePositionSnapshots;
 import org.yats.trading.PositionServer;
 import org.yats.trading.PositionSnapshot;

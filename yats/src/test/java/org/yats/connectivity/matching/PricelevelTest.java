@@ -39,12 +39,13 @@ public class PricelevelTest implements IConsumeReceipt {
 
     @BeforeMethod
     public void setUp() {
-        level = new PriceLevel(this);
+        Decimal levelPrice = Decimal.fromString("10");
+        level = new PriceLevel(levelPrice, this);
         orderBid1 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
                 .withProductId(ProductTest.PRODUCT1.getProductId())
-                .withLimit(Decimal.fromDouble(10))
+                .withLimit(levelPrice)
                 .withSize(Decimal.fromDouble(100));
         orderAsk1 = new OrderNew()
                 .withBookSide(BookSide.ASK)

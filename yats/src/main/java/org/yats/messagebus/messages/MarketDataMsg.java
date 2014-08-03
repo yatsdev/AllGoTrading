@@ -3,6 +3,7 @@ package org.yats.messagebus.messages;
 import org.joda.time.DateTime;
 import org.yats.common.Decimal;
 import org.yats.trading.MarketData;
+import org.yats.trading.OfferBook;
 
 public class MarketDataMsg {
 
@@ -20,12 +21,13 @@ public class MarketDataMsg {
         m.lastSize=marketData.getLastSize().toString();
         m.productId =marketData.getProductId();
         m.timestamp=marketData.getTimestamp().toString();
+        m.offerBook=marketData.getOfferBookAsCSV();
         return m;
     }
 
     public MarketData toMarketData()
     {
-        return new MarketData(
+        MarketData d = new MarketData(
                 DateTime.parse(timestamp),
                 productId,
                 new Decimal(bid),
@@ -34,6 +36,8 @@ public class MarketDataMsg {
                 new Decimal(bidSize),
                 new Decimal(askSize),
                 new Decimal(lastSize));
+        d.setBook(OfferBook.fromStringCSV(offerBook));
+        return d;
     }
 
     public boolean isSameAs(MarketDataMsg data) {
@@ -45,6 +49,7 @@ public class MarketDataMsg {
         if(lastSize.compareTo(data.lastSize)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(timestamp.compareTo(data.timestamp)!=0) return false;
+        if(offerBook.compareTo(data.offerBook)!=0) return false;
         return true;
     }
 
@@ -59,12 +64,12 @@ public class MarketDataMsg {
                 ", bidSize='" + bidSize + '\'' +
                 ", askSize='" + askSize + '\'' +
                 ", lastSize='" + lastSize + '\'' +
+                ", offerBook='" + offerBook + '\'' +
                 '}';
     }
 
     public MarketDataMsg() {
     }
-
 
     public String timestamp;
     public String productId;
@@ -74,5 +79,6 @@ public class MarketDataMsg {
     public String bidSize;
     public String askSize;
     public String lastSize;
+    public String offerBook;
 
 } // class

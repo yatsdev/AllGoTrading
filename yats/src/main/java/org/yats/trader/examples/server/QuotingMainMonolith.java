@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,7 @@ import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
+import org.yats.trader.examples.strategies.QuotingStrategy;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 import org.yats.trading.ReceiptStorageCSV;
