@@ -13,7 +13,7 @@ public class Quoter extends StrategyBase {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(MarketFollow.class);
+    final Logger log = LoggerFactory.getLogger(Quoter.class);
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -49,20 +49,24 @@ public class Quoter extends StrategyBase {
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
-        if(receipt.getRejectReason().length()>0) {
-            log.error("Received rejection! Stopping for now!");
-            shutdown();
-            System.exit(-1);
-        }
+
         if(!receipt.hasProductId(tradeProductId)){
             log.error("Received receipt for unknown product: " + receipt);
             return;
         }
 
+        if(receipt.getRejectReason().length()>0) {
+            log.error("Received rejection "+receipt);
+            orders.remove(receipt.getOrderId().toString());
+            return;
+//            shutdown();
+//            System.exit(-1);
+        }
+
         position = position.add(receipt.getPositionChange());
         log.info("position="+position);
 
-        log.debug("Received receipt: " + receipt);
+        log.info("Received receipt: " + receipt);
 
         if(receipt.isEndState()) {
             orders.remove(receipt.getOrderId().toString());

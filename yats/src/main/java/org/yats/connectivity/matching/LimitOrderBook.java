@@ -24,6 +24,14 @@ public class LimitOrderBook implements IConsumeReceipt {
     }
 
 
+    public boolean isOrderInBooks(UniqueId orderId){
+        boolean inBookBid =book[0].isOrderIdInBook(orderId.toString());
+        boolean inBookAsk =book[1].isOrderIdInBook(orderId.toString());
+        return inBookBid || inBookAsk;
+    }
+
+
+
     @Override
     public void onReceipt(Receipt receipt) {
         lastReceipt=receipt;

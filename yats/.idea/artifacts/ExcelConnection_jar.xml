@@ -2,6 +2,9 @@
   <artifact type="jar" name="ExcelConnection:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/ExcelConnection_jar</output-path>
     <root id="archive" name="ExcelConnection.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
       <element id="module-output" name="yats" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/mina/mina-core/1.1.7/mina-core-1.1.7.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/rabbitmq-client.jar" path-in-jar="/" />

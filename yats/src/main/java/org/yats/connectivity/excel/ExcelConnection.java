@@ -79,11 +79,17 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     public void startDDE() {
         try
         {
+            System.out.print("conversation.connect...");
             conversation.connect("Excel", "MarketData");
+            System.out.println("done.");
+            System.out.print("conversation.request...");
             String s = conversation.request("C1");
+            System.out.println("done.");
             parseProductIds(s);
             subscribeAllProductIds();
+            System.out.print("conversation.startAdvice...");
             conversation.startAdvice("C1");
+            System.out.println("done.");
         }
         catch (DDEMLException e)
         {

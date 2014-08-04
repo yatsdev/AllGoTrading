@@ -6,7 +6,6 @@ import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,13 +39,16 @@ public class LimitOrderBookSide implements IConsumeReceipt {
 
     public void cancel(UniqueId orderId) {
         String idString = orderId.toString();
-        if(bookByOrderId.containsKey(idString)) {
+        if(isOrderIdInBook(idString)) {
             bookByOrderId.get(idString).remove(idString);
             bookByOrderId.remove(idString);
             removeEmptyFrontRows();
         }
     }
 
+    public boolean isOrderIdInBook(String orderIdString) {
+        return bookByOrderId.containsKey(orderIdString);
+    }
 
     @Override
     public void onReceipt(Receipt receipt) {

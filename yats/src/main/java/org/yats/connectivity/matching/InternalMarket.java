@@ -34,9 +34,19 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         String productId = order.getProductId();
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        log.debug("Canceling new order "+order.toString());
-        orderBooks.get(productId).cancel(order.getOrderId());
+        log.debug("Canceling order "+order.toString());
+        LimitOrderBook book = orderBooks.get(productId);
+        if(book.isOrderInBooks(order.getOrderId()))
+            book.cancel(order.getOrderId());
+        else
+            rejectUnknownCancelOrder(order);
     }
+
+    private void rejectUnknownCancelOrder(OrderCancel order) {
+        Receipt r = order.createReceiptDefault().withEndState(true).withRejectReason("Unknown order.");
+        onReceipt(r);
+    }
+
 
     @Override
     public void onMarketData(MarketData marketData) {
