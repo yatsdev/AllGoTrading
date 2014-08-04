@@ -26,6 +26,7 @@ public class Quoter extends StrategyBase {
 
     public void onTPMarketData(MarketData marketData) {
         log.info("TradeProduct: "+marketData);
+        log.info("TradeProduct: "+marketData.getOfferBookAsCSV());
     }
 
     public void onRPMarketData(MarketData marketData) {
