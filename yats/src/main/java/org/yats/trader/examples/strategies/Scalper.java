@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.strategies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ public class Scalper extends StrategyBase {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(QuotingStrategy.class);
+    final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -45,7 +45,11 @@ public class Scalper extends StrategyBase {
         }
 
         position = receipt.getPositionChange().add(position);
-        log.info("position="+position);
+        log.info("position(strategy)="+position);
+        log.info("position(server)="+getPositionForProduct(tradeProductId));
+        if(isConversionAvailable(ProductList.USD_PID, tradeProductId))
+            log.info("positionValueUSD(server)="+getValueForProduct(ProductList.USD_PID, tradeProductId));
+        log.info("positionValueEUR(server)="+getValueForProduct(ProductList.EUR_PID, tradeProductId));
 
         log.debug("Received receipt: " + receipt);
 
@@ -66,6 +70,7 @@ public class Scalper extends StrategyBase {
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
+        subscribe("OANDA_EURUSD");
         position = getPositionForProduct(tradeProductId);
         log.info("position="+position);
         tickSize =getConfigAsDecimal("tickSize");
@@ -88,7 +93,10 @@ public class Scalper extends StrategyBase {
     }
 
     private void sendAskRelativeTo(Decimal price) {
-        if(!position.isGreaterThan(Decimal.ZERO)) return;
+        if(position.isLessThan(Decimal.fromDouble(orderSize))) {
+            log.info("Can not sell. Position less than orderSize. positionSize="+position);
+            return;
+        }
         double askMarket=price.toDouble();
         Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
         if(!orderExists(BookSide.ASK, askPrice))

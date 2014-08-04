@@ -12,6 +12,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductList implements IProvideProduct {
 
+    public static final String EUR_PID = "CCY_EUR";
+    public static final String USD_PID = "CCY_USD";
+    public static final String CHF_PID = "CCY_CHF";
+    public static final String GBP_PID = "CCY_GBP";
+    public static final String SGD_PID = "CCY_SGD";
+    public static final String HKD_PID = "CCY_HKD";
+    public static final String XAG_PID = "CCY_XAG";
+    public static final String NZD_PID = "CCY_NZD";
+    public static final String CAD_PID = "CCY_CAD";
+    public static final String XAU_PID = "CCY_XAU";
+    public static final String AUD_PID = "CCY_AUD";
+
     @Override
     public boolean isProductIdExisting(String productId){
         return list.containsKey(productId);
@@ -19,7 +31,9 @@ public class ProductList implements IProvideProduct {
 
     @Override
     public Product getProductForProductId(String productId) {
-        if(!isProductIdExisting(productId)) throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
+        if(!isProductIdExisting(productId)) {
+            throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
+        }
         return list.get(productId);
     }
 

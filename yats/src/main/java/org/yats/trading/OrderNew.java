@@ -11,12 +11,10 @@ public class OrderNew extends OrderBase {
 
     public static OrderNew NULL = new OrderNewNull();
 
-
     public boolean isExecutingWith(Decimal frontRowPrice) {
         if(bookSide.isMoreBehindThan(limit, frontRowPrice)) return false;
         return true;
     }
-
 
     public OrderCancel createCancelOrder()
     {
@@ -40,6 +38,7 @@ public class OrderNew extends OrderBase {
                 ",timestamp=" + timestamp +
                 '}';
     }
+
 
     public Receipt createReceiptDefault() {
         return Receipt.create()
@@ -109,14 +108,11 @@ public class OrderNew extends OrderBase {
         return new OrderNew();
     }
 
-
     public DateTime getTimestamp() {
         return timestamp;
     }
 
-//    public void setTimestamp(DateTime timestamp) {
-//        this.timestamp = timestamp;
-//    }
+
 
     public String getInternalAccount() {
         return internalAccount;
@@ -128,6 +124,14 @@ public class OrderNew extends OrderBase {
 
     public void setProductId(String productId) {
         this.productId = productId;
+    }
+
+    public BookRow toBookRow() {
+        return new BookRow(size, limit);
+    }
+
+    public String toBookRowCSV() {
+        return toBookRow().toStringCSV();
     }
 
     public OrderNew() {
@@ -155,7 +159,6 @@ public class OrderNew extends OrderBase {
 
     private DateTime timestamp;
     private String internalAccount;
-//    private Product product;
     private BookSide bookSide;
     private Decimal size;
     private Decimal limit;

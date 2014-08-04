@@ -4,7 +4,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.FileTool;
-import org.yats.common.UniqueId;
 
 
 public class ReceiptStorageTest {
@@ -14,7 +13,7 @@ public class ReceiptStorageTest {
 //    @Test
 //    public void canCalculateProductProfitForInternalAccountWithSnapshot()
 //    {
-//        int profitWithSnapshot = (int)storage.getInternalAccountProfitForProduct(INTERNAL_ACCOUNT1, product.getProductId());
+//        int valueWithSnapshot = (int)storage.getValueForAccountProduct(INTERNAL_ACCOUNT1, product.getProductId());
 //        assert (profitWithSnapshot == -2 -2 -2 -5);
 //
 //    }

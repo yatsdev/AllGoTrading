@@ -100,12 +100,16 @@ public class PropertiesReader implements IProvideProperties {
             return "PropertiesReader: "+b.toString();
     }
 
+    @Override
+    public void setAsBoolean(String key, boolean value) {
+        properties.setProperty(key, value ? "true" : "false");
+    }
+
     Properties properties;
 
-    public static boolean fromBooleanString(String listening) {
-        String lowerCase = listening.toLowerCase();
+    public static boolean fromBooleanString(String value) {
+        String lowerCase = value.toLowerCase();
         if(lowerCase.compareTo("yes")==0) return true;
-        if(lowerCase.compareTo("no")==0) return true;
         if(lowerCase.compareTo("y")==0) return true;
         if(lowerCase.compareTo("1")==0) return true;
         if(lowerCase.compareTo("true")==0) return true;

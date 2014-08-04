@@ -73,10 +73,26 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         return positionProvider.getAccountPosition(p).getSize();
     }
 
-    public Decimal getProfitForProduct(String productId)
-    {
-        return profitProvider.getInternalAccountProfitForProduct(getInternalAccount(), productId);
+    public boolean isConversionAvailable(String targetProductId, String productId) {
+        try {
+            PositionRequest r = new PositionRequest(getInternalAccount(), productId);
+            positionProvider.getValueForAccountProduct(targetProductId, r);
+            return true;
+        } catch(TradingExceptions.RateConverterException e) {
+            return false;
+        }
     }
+
+    public Position getValueForProduct(String targetProductId, String productId)
+    {
+        PositionRequest r = new PositionRequest(getInternalAccount(), productId);
+        return positionProvider.getValueForAccountProduct(targetProductId, r);
+    }
+
+//    public Decimal getProfitForProduct(String productId)
+//    {
+//        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
+//    }
 
     public void setPriceProvider(IProvidePriceFeed priceProvider) {
         this.priceProvider = priceProvider;
@@ -110,6 +126,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
         consumerId = UniqueId.create();
         initialised = false;
+        converter = new RateConverter(new ProductList());
     }
 
 
@@ -126,5 +143,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     private IProvideProperties config;
     private boolean initialised;
+    private RateConverter converter;
 
 }

@@ -4,6 +4,13 @@ import org.yats.common.Decimal;
 
 public class Position {
 
+    @Override
+    public String toString() {
+        return "Position{" +
+                "productId='" + productId + '\'' +
+                ", size=" + size.roundToDigits(5) +
+                '}';
+    }
 
     public Position add(Receipt receipt) {
         Decimal newSize = size.add(receipt.getCurrentTradedSizeSigned());
@@ -21,6 +28,10 @@ public class Position {
 
     public boolean isSize(Decimal _size) {
         return (size.isEqualTo(_size));
+    }
+
+    public boolean isSize(Decimal _size, int digits) {
+        return size.roundToDigits(digits).isEqualTo(_size.roundToDigits(digits));
     }
 
     public boolean isSameAs(Position other) {
@@ -62,4 +73,8 @@ public class Position {
     protected Decimal size;
 
 
+    public Position subtract(Position oldPosition) {
+        if(!oldPosition.isForProductId(productId)) throw new TradingExceptions.UnknownIdException(""+productId+"!="+oldPosition.getProductId());
+        return new Position(productId, size.subtract(oldPosition.getSize()));
+    }
 } // class

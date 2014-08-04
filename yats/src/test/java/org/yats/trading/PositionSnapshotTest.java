@@ -4,8 +4,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 
-import java.util.List;
-
 
 public class PositionSnapshotTest {
 
@@ -44,26 +42,67 @@ public class PositionSnapshotTest {
     @Test
     public void canCalculateAllPositionsForOneAccount()
     {
-        List<AccountPosition> positions = positionSnapshot.getAllPositionsForOneAccount(account1);
-        assert (positions.size()==3);
+        IProvidePosition positions = positionSnapshot.getAllPositionsForOneAccount(account1);
+        assert (positions.getAllPositions().size()==3);
         Decimal sum=Decimal.ZERO;
-        for(AccountPosition p : positions) {
+        for(AccountPosition p : positions.getAllPositions()) {
             sum=sum.add(p.getSize());
         }
         assert(sum.isEqualTo(Decimal.fromDouble(6)));
     }
 
     @Test
-    public void canCalculateValuation()
+    public void canCalculateValuationForAccountProduct()
     {
-        Position positionInEUR = positionSnapshot.calculateValue(converter, TestMarketData.EUR_PID);
+        PositionRequest r = new PositionRequest(account1, productId1);
+        Position positionInUSD = positionSnapshot.getValueForAccountProduct(TestMarketData.USD_PID, r);
+        Decimal expected =
+                Decimal.ONE
+                .multiply(TestMarketData.PRODUCT1_DATA.getLast())
+                .multiply(TestMarketData.EURUSD.getLast());
+        assert(positionInUSD.getSize().isEqualTo(expected));
+    }
 
+    @Test
+    public void canCalculateValuationForAllPositions()
+    {
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
         assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
+    }
+
+    @Test
+    public void canCalculateProfitFromDifferentSnapshots()
+    {
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.USD_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        assert(profitInEUR.isSize(Decimal.ZERO,5));
+    }
+
+    @Test
+    public void verifyThatProfitFromSameSnapshotIsZero()
+    {
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        assert(profitInEUR.isSize(Decimal.ZERO,5));
     }
 
 
     @BeforeMethod
     public void setUp() {
+        productList = new ProductList();
+        productList.read(ProductListTest.PRODUCT_LIST_PATH);
+        productList.add(ProductTest.PRODUCT1);
+        productList.add(ProductTest.PRODUCT2);
+        productList.add(ProductTest.PRODUCT3);
+        converter = new RateConverter(productList);
+        converter.onMarketData(TestMarketData.EURUSD);
+        converter.onMarketData(TestMarketData.GBPUSD);
+        converter.onMarketData(TestMarketData.PRODUCT1_DATA);
+        converter.onMarketData(TestMarketData.PRODUCT2_DATA);
+        converter.onMarketData(TestMarketData.PRODUCT3_DATA);
+
         PositionSnapshot positionSnapshotTemp = new PositionSnapshot();
         position1 = new AccountPosition(productId1, account1, Decimal.fromDouble(1));
         position2 = new AccountPosition(productId2, account1, Decimal.fromDouble(2));
@@ -72,23 +111,14 @@ public class PositionSnapshotTest {
         positionSnapshotTemp.add(position2);
         positionSnapshotTemp.add(position3);
         positionSnapshot = PositionSnapshot.fromStringCSV(positionSnapshotTemp.toStringCSV());
+        positionSnapshot.setRateConverter(converter);
         PositionSnapshot positionSnapshot2Temp = new PositionSnapshot();
         position4 = new AccountPosition(productId3, account2, Decimal.fromDouble(3));
         position5 = new AccountPosition(productId3, account2, Decimal.fromDouble(3));
         positionSnapshot2Temp.add(position4);
         positionSnapshot2Temp.add(position5);
         positionSnapshot2 = PositionSnapshot.fromStringCSV(positionSnapshot2Temp.toStringCSV());
-        productList = new ProductList();
-        productList.read(ProductListTest.PRODUCT_LIST_PATH);
-        converter = new RateConverter(productList);
-        productList.add(ProductTest.PRODUCT1);
-        productList.add(ProductTest.PRODUCT2);
-        productList.add(ProductTest.PRODUCT3);
-        converter.onMarketData(TestMarketData.EURUSD);
-        converter.onMarketData(TestMarketData.GBPUSD);
-        converter.onMarketData(TestMarketData.PRODUCT1_DATA);
-        converter.onMarketData(TestMarketData.PRODUCT2_DATA);
-        converter.onMarketData(TestMarketData.PRODUCT3_DATA);
+        positionSnapshot2.setRateConverter(converter);
     }
 
     String productId1 = ProductTest.PRODUCT1.getProductId();

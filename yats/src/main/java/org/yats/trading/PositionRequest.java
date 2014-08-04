@@ -2,6 +2,10 @@ package org.yats.trading;
 
 public class PositionRequest {
 
+    public String getAsKey() {
+        return productId+","+account;
+    }
+
     public String getAccount() {
         return account;
     }

@@ -1,9 +1,10 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
+import org.yats.trader.examples.strategies.MarketFollow;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 
@@ -34,11 +35,11 @@ public class QuotingMain {
     {
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
-        QuotingStrategy strategy = new QuotingStrategy();
+        MarketFollow strategy = new MarketFollow();
         PositionServer positionServer = new PositionServer();
-        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.DEFAULT);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.createRealProperties());
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
@@ -50,7 +51,7 @@ public class QuotingMain {
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
-        strategy.setProfitProvider(positionServer);
+//        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(products);
 
 
@@ -59,7 +60,7 @@ public class QuotingMain {
         strategy.setOrderSender(strategyRunner);
 
         /*
-        config/QuotingMain.properties needs to provide settings for the strategy.
+        config/MarketFollow.properties needs to provide settings for the strategy.
 
         # Comments have a leading hash
         # your AllGoTrading account number
@@ -73,7 +74,7 @@ public class QuotingMain {
 
         */
 
-        PropertiesReader config = PropertiesReader.createFromConfigFile("config/QuotingMain.properties");
+        PropertiesReader config = PropertiesReader.createFromConfigFile("config/MarketFollow.properties");
 //        PropertiesReader config = PropertiesReader.create();
         strategy.setConfig(config);
 

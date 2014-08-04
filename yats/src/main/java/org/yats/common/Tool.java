@@ -10,6 +10,17 @@ public class Tool {
     final static Logger log = LoggerFactory.getLogger(Tool.class);
 
 
+    public static String getOsName()
+    {
+        if(OS == null) { OS = System.getProperty("os.name"); }
+        return OS;
+    }
+
+    public static boolean isWindows()
+    {
+        return getOsName().startsWith("Windows");
+    }
+
     public static String getPersonalConfigFilename(String prefix)
     {
         String username = System.getProperty("user.name").replace(" ","");
@@ -40,5 +51,11 @@ public class Tool {
     public static DateTime getUTCTimestamp() {
         return DateTime.now(DateTimeZone.UTC);
     }
+
+
+
+    ///////////////////////////
+
+    private static String OS = null;
 
 }

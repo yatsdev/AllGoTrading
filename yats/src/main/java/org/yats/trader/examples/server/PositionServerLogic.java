@@ -1,9 +1,10 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
 import org.yats.common.IAmCalledBack;
+import org.yats.common.IProvideProperties;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
@@ -19,7 +20,6 @@ public class PositionServerLogic implements IAmCalledBack {
     @Override
     public void onCallback() {
         while(receiverPositionRequests.hasMoreMessages()) {
-            if(positionServer.isEmpty()) continue;
             answerPositionRequest();
         }
         while(receiverPositionSnapshots.hasMoreMessages()) {
@@ -28,10 +28,13 @@ public class PositionServerLogic implements IAmCalledBack {
         while(receiverReceipts.hasMoreMessages()) {
             positionServer.onReceipt(receiverReceipts.get().toReceipt());
         }
+        Thread.yield();
     }
 
     private void receiveNewPositionSnapshot() {
         PositionSnapshotMsg m = receiverPositionSnapshots.get();
+        if(gotSnapshotOnce) return;
+        gotSnapshotOnce=true;
         PositionSnapshot s = m.toPositionSnapshot();
         log.debug("receiveNewPositionSnapshot received:" + m.toString());
         positionServer.setPositionSnapshot(s);
@@ -51,8 +54,8 @@ public class PositionServerLogic implements IAmCalledBack {
                 PositionRequestMsg.fromPositionRequest(pr));
     }
 
-    public PositionServerLogic(Config config) {
-        this.config=config;
+    public PositionServerLogic(IProvideProperties p) {
+        this.config=Config.fromProperties(p);
         positionServer = new PositionServer();
         receiverPositionRequests = new BufferingReceiver<PositionRequestMsg>(PositionRequestMsg.class,
                 config.getExchangePositionRequest(),
@@ -70,6 +73,8 @@ public class PositionServerLogic implements IAmCalledBack {
                 config.getExchangeReceipts(),
                 "#",
                 config.getServerIP());
+
+        gotSnapshotOnce=false;
         if(config.isListeningForReceipts()) {
             receiverReceipts.setObserver(this);
             receiverReceipts.start();
@@ -113,7 +118,7 @@ public class PositionServerLogic implements IAmCalledBack {
     private Sender<PositionRequestMsg> senderPositionRequest;
     private PositionServer positionServer;
     private Config config;
-
+    private boolean gotSnapshotOnce;
 
 
     private class PositionStorageDummy implements IStorePositionSnapshots {

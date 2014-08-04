@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.strategies;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ public class Quoter extends StrategyBase {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(QuotingStrategy.class);
+    final Logger log = LoggerFactory.getLogger(Quoter.class);
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -26,6 +26,7 @@ public class Quoter extends StrategyBase {
 
     public void onTPMarketData(MarketData marketData) {
         log.info("TradeProduct: "+marketData);
+        log.info("TradeProduct: "+marketData.getOfferBookAsCSV());
     }
 
     public void onRPMarketData(MarketData marketData) {
@@ -49,20 +50,24 @@ public class Quoter extends StrategyBase {
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
-        if(receipt.getRejectReason().length()>0) {
-            log.error("Received rejection! Stopping for now!");
-            shutdown();
-            System.exit(-1);
-        }
+
         if(!receipt.hasProductId(tradeProductId)){
             log.error("Received receipt for unknown product: " + receipt);
             return;
         }
 
+        if(receipt.getRejectReason().length()>0) {
+            log.error("Received rejection "+receipt);
+            orders.remove(receipt.getOrderId().toString());
+            return;
+//            shutdown();
+//            System.exit(-1);
+        }
+
         position = position.add(receipt.getPositionChange());
         log.info("position="+position);
 
-        log.debug("Received receipt: " + receipt);
+        log.info("Received receipt: " + receipt);
 
         if(receipt.isEndState()) {
             orders.remove(receipt.getOrderId().toString());
@@ -95,18 +100,24 @@ public class Quoter extends StrategyBase {
 
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
-        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
-        if(!orderExists(BookSide.BID, bidPrice)) {
-            sendOrder(BookSide.BID, bidPrice);
-        }
+        Decimal bidPrice1 = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal bidPrice2 = Decimal.fromDouble(bidMarket*(1.0-(2.0*stepFactor))- tickSize.toDouble()).roundToTickSize(tickSize);
+        sendOrderIfNotExisting(BookSide.BID, bidPrice1);
+        sendOrderIfNotExisting(BookSide.BID, bidPrice2);
     }
 
     private void sendAskRelativeTo(Decimal price) {
-//        if(!position.isGreaterThan(Decimal.ZERO)) return;
         double askMarket=price.toDouble();
-        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
-        if(!orderExists(BookSide.ASK, askPrice))
-            sendOrder(BookSide.ASK, askPrice);
+        Decimal askPrice1 = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal askPrice2 = Decimal.fromDouble(askMarket*(1.0+(2.0*stepFactor))+ tickSize.toDouble()).roundToTickSize(tickSize);
+        sendOrderIfNotExisting(BookSide.ASK, askPrice1);
+        sendOrderIfNotExisting(BookSide.ASK, askPrice2);
+    }
+
+    private void sendOrderIfNotExisting(BookSide _side, Decimal _price) {
+        if(!orderExists(_side, _price)) {
+            sendOrder(_side, _price);
+        }
     }
 
     private boolean orderExists(BookSide side, Decimal price) {

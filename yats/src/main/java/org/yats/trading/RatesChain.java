@@ -4,6 +4,10 @@ import java.util.Vector;
 
 class RatesChain {
 
+    public boolean isEmpty() {
+        return chain.size()<1;
+    }
+
     public boolean hasElementUnitId(int index, String searchedUnitId) {
         return chain.elementAt(index).hasUnitId(searchedUnitId);
     }

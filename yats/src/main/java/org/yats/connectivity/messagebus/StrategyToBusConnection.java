@@ -3,6 +3,7 @@ package org.yats.connectivity.messagebus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
+import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
@@ -22,7 +23,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     public void subscribe(String productId, IConsumeMarketData consumer) {
         setMarketDataConsumer(consumer);
         SubscriptionMsg m = SubscriptionMsg.fromProductId(productId);
-        Config config = Config.DEFAULT;
+//        Config config = Config.DEFAULT;
         senderSubscription.publish(config.getTopicSubscriptions(), m);
         log.debug("Published "+m);
     }
@@ -69,10 +70,10 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         this.receiptConsumer = receiptConsumer;
     }
 
-    public StrategyToBusConnection() {
+    public StrategyToBusConnection(IProvideProperties p) {
         marketDataConsumer=new MarketDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
-        Config config = Config.DEFAULT;
+        config = Config.fromProperties(p);
         senderSubscription = new Sender<SubscriptionMsg>(config.getExchangeSubscription(), config.getServerIP());
         senderOrderNew = new Sender<OrderNewMsg>(config.getExchangeOrderNew(), config.getServerIP());
         senderOrderCancel = new Sender<OrderCancelMsg>(config.getExchangeOrderCancel(), config.getServerIP());
@@ -100,6 +101,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     IConsumeReceipt receiptConsumer;
     BufferingReceiver<MarketDataMsg> receiverMarketdata;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
+    Config config;
 
     private static class MarketDataConsumerDummy implements IConsumeMarketData {
         private MarketDataConsumerDummy() {

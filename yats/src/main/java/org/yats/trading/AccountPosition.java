@@ -30,14 +30,18 @@ public class AccountPosition extends Position {
         return new AccountPosition(productId, internalAccount, newSize);
     }
 
-    public AccountPosition(String productId, String internalAccount, Decimal size) {
-        super(productId, size);
-        this.internalAccount = internalAccount;
+    public AccountPosition(String _productId, String _internalAccount, Decimal _size) {
+        super(_productId, _size);
+        this.internalAccount = _internalAccount;
     }
 
     public boolean isSameAs(AccountPosition other) {
         if(internalAccount.compareTo(other.internalAccount)!=0) return false;
         return super.isSameAs(other);
+    }
+
+    public boolean isForAccount(String _account) {
+        return (internalAccount.compareTo(_account)==0);
     }
 
     private String internalAccount;

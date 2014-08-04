@@ -1,4 +1,4 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
@@ -8,6 +8,7 @@ import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
+import org.yats.trading.RateConverter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,12 +24,12 @@ import java.util.ArrayList;
 
         For example:
 
-        config/QuotingMain.properties:
+        config/MarketFollow.properties:
 
         # Comments have a leading hash
 
         # qualified name of the strategy class:
-        strategyClass=org.yats.trader.examples.QuotingStrategy
+        strategyClass=org.yats.trader.examples.strategies.QuotingStrategy
 
         # your AllGoTrading account number
         externalAccount=1234
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 
 public class StrategyRunnerMain {
 
+
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
@@ -53,25 +55,28 @@ public class StrategyRunnerMain {
 
     public void go() throws InterruptedException, IOException
     {
-        products = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection();
+        productList = ProductList.createFromFile("config/CFDProductList.csv");
+        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
-        PropertiesReader strategyRunnerConfig = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
+        PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
 
-        Config config = Config.fromProperties(strategyRunnerConfig);
+        rateConverter = new RateConverter(productList);
+
         positionServer = new PositionServer();
-        PositionServerLogic positionServerLogic = new PositionServerLogic(config);
+        positionServer.setRateConverter(rateConverter);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
         strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(products);
+        strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(priceAndOrderConnection);
+        strategyRunner.setRateConverter(rateConverter);
         priceAndOrderConnection.setReceiptConsumer(strategyRunner);
 
-        String strategyNamesString = strategyRunnerConfig.get("strategyNames");
+        String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
 
         ArrayList<StrategyBase> strategies = new ArrayList<StrategyBase>();
@@ -108,8 +113,8 @@ public class StrategyRunnerMain {
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
-        strategy.setProfitProvider(positionServer);
-        strategy.setProductProvider(products);
+//        strategy.setProfitProvider(positionServer);
+        strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
         strategy.setConfig(strategyConfig);
         return strategy;
@@ -147,6 +152,7 @@ public class StrategyRunnerMain {
 
     private PositionServer positionServer;
     private StrategyRunner strategyRunner;
-    private ProductList products;
+    private ProductList productList;
+    private RateConverter rateConverter;
 
 } // class

@@ -1,8 +1,9 @@
-package org.yats.trader.examples;
+package org.yats.trader.examples.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.FileTool;
+import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.messagebus.Config;
 import org.yats.trading.PositionStorageCSV;
@@ -18,13 +19,16 @@ public class PositionServerMain {
     {
         log.info("Starting PositionServerMain...");
         String pathToConfigFile = "config/PositionServer.properties";
-        Config positionServerConfig =  FileTool.exists(pathToConfigFile)
-                ? Config.fromProperties(PropertiesReader.createFromConfigFile(pathToConfigFile))
-                : Config.DEFAULT;
+//        Config positionServerConfig =  FileTool.exists(pathToConfigFile)
+//                ? Config.fromProperties(PropertiesReader.createFromConfigFile(pathToConfigFile))
+//                : Config.fromProperties(Config.createRealProperties());
 
-        PositionServerLogic positionServerLogic = new PositionServerLogic(positionServerConfig);
+        IProvideProperties p =FileTool.exists(pathToConfigFile)
+                ? PropertiesReader.createFromConfigFile(pathToConfigFile)
+                : Config.createRealProperties();
+        PositionServerLogic positionServerLogic = new PositionServerLogic(p);
         positionServerLogic.startRequestListener();
-        PositionStorageCSV storage = new PositionStorageCSV(positionServerConfig.getPositionFilename());
+        PositionStorageCSV storage = new PositionStorageCSV(p.get("positionFilename"));
         positionServerLogic.setPositionStorage(storage);
 
         Thread.sleep(2000);
