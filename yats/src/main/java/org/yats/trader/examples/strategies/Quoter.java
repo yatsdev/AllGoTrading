@@ -95,18 +95,24 @@ public class Quoter extends StrategyBase {
 
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
-        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
-        if(!orderExists(BookSide.BID, bidPrice)) {
-            sendOrder(BookSide.BID, bidPrice);
-        }
+        Decimal bidPrice1 = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal bidPrice2 = Decimal.fromDouble(bidMarket*(1.0-(2.0*stepFactor))- tickSize.toDouble()).roundToTickSize(tickSize);
+        sendOrderIfNotExisting(BookSide.BID, bidPrice1);
+        sendOrderIfNotExisting(BookSide.BID, bidPrice2);
     }
 
     private void sendAskRelativeTo(Decimal price) {
-//        if(!position.isGreaterThan(Decimal.ZERO)) return;
         double askMarket=price.toDouble();
-        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
-        if(!orderExists(BookSide.ASK, askPrice))
-            sendOrder(BookSide.ASK, askPrice);
+        Decimal askPrice1 = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal askPrice2 = Decimal.fromDouble(askMarket*(1.0+(2.0*stepFactor))+ tickSize.toDouble()).roundToTickSize(tickSize);
+        sendOrderIfNotExisting(BookSide.ASK, askPrice1);
+        sendOrderIfNotExisting(BookSide.ASK, askPrice2);
+    }
+
+    private void sendOrderIfNotExisting(BookSide _side, Decimal _price) {
+        if(!orderExists(_side, _price)) {
+            sendOrder(_side, _price);
+        }
     }
 
     private boolean orderExists(BookSide side, Decimal price) {
