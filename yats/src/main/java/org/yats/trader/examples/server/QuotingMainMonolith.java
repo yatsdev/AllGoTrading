@@ -8,7 +8,7 @@ import org.yats.common.PropertiesReader;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
-import org.yats.trader.examples.strategies.QuotingStrategy;
+import org.yats.trader.examples.strategies.MarketFollow;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 import org.yats.trading.ReceiptStorageCSV;
@@ -39,7 +39,7 @@ public class QuotingMainMonolith {
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
-        QuotingStrategy strategy = new QuotingStrategy();
+        MarketFollow strategy = new MarketFollow();
         ReceiptStorageCSV receiptStorage = new ReceiptStorageCSV();
         PositionServer positionServer = new PositionServer();
 
@@ -66,7 +66,7 @@ public class QuotingMainMonolith {
 
 
         /*
-        QuotingMain.properties needs to provide settings for the strategy.
+        MarketFollow.properties needs to provide settings for the strategy.
 
         # Comments have a leading hash
         # your AllGoTrading account number
@@ -80,7 +80,7 @@ public class QuotingMainMonolith {
 
         */
 
-        PropertiesReader config = PropertiesReader.createFromConfigFile("config/QuotingMain.properties");
+        PropertiesReader config = PropertiesReader.createFromConfigFile("config/MarketFollow.properties");
 //        PropertiesReader config = PropertiesReader.create();
         strategy.setConfig(config);
 

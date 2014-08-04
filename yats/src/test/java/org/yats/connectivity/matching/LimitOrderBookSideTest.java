@@ -57,6 +57,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
     public void canCreateOfferBookSideForBidSide()
     {
         assert(bookBid.toOfferBookSide(10).toStringCSV().length()==0);
+        assert(bookBid.toOfferBookSide(10).size()==0);
         bookBid.add(bid100At10);
         bookBid.add(bid200At9);
         bookBid.add(bid200At12);
@@ -77,6 +78,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         bookAsk.add(ask15At10_10);
         bookAsk.add(ask300At12);
         OfferBookSide askSide = bookAsk.toOfferBookSide(3);
+        assert(askSide.size()==3);
         String askSideString = askSide.toStringCSV();
         String expected = ask10At9_80.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR
                         + ask15At10_10.toBookRowCSV() + OfferBookSide.CSV_SEPARATOR

@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
         For example:
 
-        config/QuotingMain.properties:
+        config/MarketFollow.properties:
 
         # Comments have a leading hash
 

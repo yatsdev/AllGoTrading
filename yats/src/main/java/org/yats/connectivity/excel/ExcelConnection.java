@@ -6,10 +6,10 @@ import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.IProvideProperties;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
-import org.yats.messagebus.Config;
 import org.yats.trading.IConsumeMarketData;
 import org.yats.trading.IConsumeReceipt;
 import org.yats.trading.MarketData;
@@ -127,10 +127,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         System.exit(0);
     }
 
-    public ExcelConnection(String excelFileName)
+    public ExcelConnection(IProvideProperties _prop)
     {
-        this.excelFileName = excelFileName;
-        strategyToBusConnection = new StrategyToBusConnection(Config.createRealProperties());
+        strategyToBusConnection = new StrategyToBusConnection(_prop);
         strategyToBusConnection.setMarketDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
         if(Tool.isWindows()) {
@@ -158,7 +157,6 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     }
 
 
-    private String excelFileName;
     private Vector<String> productIDs=new Vector<String>();
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;

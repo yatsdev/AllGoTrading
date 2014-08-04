@@ -6,6 +6,14 @@ public class OfferBookSide { // implements List<BookRow> {
 
     public static final String CSV_SEPARATOR = ";";
 
+    public int size() {
+        return bookHalf.size();
+    }
+
+    public BookRow getRow(int index) {
+        return bookHalf.elementAt(index);
+    }
+
     public String toStringCSV() {
         StringBuilder b = new StringBuilder();
         boolean firstRow = true;
@@ -44,4 +52,5 @@ public class OfferBookSide { // implements List<BookRow> {
 
     private BookSide side;
     private Vector<BookRow> bookHalf;
+
 }

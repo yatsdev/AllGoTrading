@@ -1,14 +1,19 @@
 package org.yats.trader.examples.server;
 
+import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.connectivity.excel.ExcelConnection;
-import org.yats.messagebus.Config;
 
 import java.io.IOException;
 
-public class ExcelDemo {
+public class ExcelConnectionMain {
+
 
     public static void main(String args[])  {
-        ExcelConnection c = new ExcelConnection(Config.createRealProperties());
+
+        String configFilename = Tool.getPersonalConfigFilename("config/ExcelConnection");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+        ExcelConnection c = new ExcelConnection(prop);
         try {
             c.go();
         } catch (RuntimeException r)

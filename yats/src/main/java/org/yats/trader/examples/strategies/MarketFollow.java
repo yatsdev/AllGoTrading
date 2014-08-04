@@ -11,12 +11,12 @@ import org.yats.trading.*;
     a new order sent whenever the best bid of the market moved 2 cents or more.
 */
 
-public class QuotingStrategy extends StrategyBase {
+public class MarketFollow extends StrategyBase {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(QuotingStrategy.class);
+    final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -115,7 +115,7 @@ public class QuotingStrategy extends StrategyBase {
     }
 
 
-    public QuotingStrategy() {
+    public MarketFollow() {
         super();
         lastBidOrder = OrderNew.NULL;
         shuttingDown=false;

@@ -12,6 +12,15 @@ public class OfferBook {
                 '}';
     }
 
+
+    public int getDepth(BookSide _side) {
+        return bookSides[_side.toIndex()].size();
+    }
+
+    public BookRow getBookRow(BookSide _side, int index) {
+        return bookSides[_side.toIndex()].getRow(index);
+    }
+
     public String toStringCSV() {
         StringBuilder b = new StringBuilder();
         b.append(bookSides[0].toStringCSV());
