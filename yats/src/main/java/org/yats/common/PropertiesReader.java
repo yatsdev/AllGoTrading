@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 // the properties file needs to contain key-value pairs in form "key=value"
@@ -59,6 +61,19 @@ public class PropertiesReader implements IProvideProperties {
         }
     }
 
+    public static PropertiesReader createFromMap(ConcurrentHashMap<String, String> map) {
+        PropertiesReader r = new PropertiesReader();
+        for(String key : map.keySet()) {
+            r.set(key, map.get(key));
+        }
+        return r;
+    }
+
+    @Override
+    public Set<String> getKeySet() {
+        return properties.stringPropertyNames();
+    }
+
     @Override
     public boolean exists(String _key)
     {
@@ -87,6 +102,12 @@ public class PropertiesReader implements IProvideProperties {
     }
 
     @Override
+    public Decimal getAsDecimal(String _key) {
+        if(!exists(_key)) throw new CommonExceptions.FieldNotFoundException("No such key: " + _key);
+        return Decimal.fromString(get(_key));
+    }
+
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         Enumeration enuKeys = properties.keys();
@@ -101,11 +122,21 @@ public class PropertiesReader implements IProvideProperties {
     }
 
     @Override
-    public void setAsBoolean(String key, boolean value) {
+    public void set(String key, boolean value) {
         properties.setProperty(key, value ? "true" : "false");
     }
 
-    Properties properties;
+    @Override
+    public void set(String key, Decimal value) {
+        properties.setProperty(key, value.toString());
+    }
+
+    @Override
+    public void set(String key, String value) {
+        properties.setProperty(key, value);
+    }
+
+
 
     public static boolean fromBooleanString(String value) {
         String lowerCase = value.toLowerCase();
@@ -115,4 +146,9 @@ public class PropertiesReader implements IProvideProperties {
         if(lowerCase.compareTo("true")==0) return true;
         return false;
     }
+
+
+    /////////////////////////////////////////////////////////////////////////////
+
+    Properties properties;
 }

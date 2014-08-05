@@ -11,7 +11,7 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
 import org.yats.trading.*;
 
-public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack {
+public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
@@ -43,9 +43,25 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     @Override
+    public void sendSettings(IProvideProperties p) {
+        KeyValueMsg m = KeyValueMsg.fromProperties(p);
+        senderSettings.publish(m.getTopic(), m);
+        log.debug("Published setting properties: "+p.getKeySet().size());
+    }
+
+    @Override
+    public void sendReports(IProvideProperties p) {
+        KeyValueMsg m = KeyValueMsg.fromProperties(p);
+        senderReports.publish(m.getTopic(), m);
+        log.debug("Published report properties: "+p.getKeySet().size());
+    }
+
+    @Override
     public void onCallback() {
         sendAllReceivedMarketData();
         sendAllReceivedReceipts();
+        sendAllReceivedSettings();
+        sendAllReceivedReports();
     }
 
     private void sendAllReceivedMarketData() {
@@ -62,8 +78,30 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         }
     }
 
+    private void sendAllReceivedSettings() {
+        while(receiverSettings.hasMoreMessages()) {
+            IProvideProperties p = receiverSettings.get().toProperties();
+            settingsConsumer.onSettings(p);
+        }
+    }
+
+    private void sendAllReceivedReports() {
+        while(receiverReports.hasMoreMessages()) {
+            IProvideProperties p = receiverReports.get().toProperties();
+            reportsConsumer.onReport(p);
+        }
+    }
+
     public void setMarketDataConsumer(IConsumeMarketData marketDataConsumer) {
         this.marketDataConsumer = marketDataConsumer;
+    }
+
+    public void setSettingsConsumer(IConsumeSettings settingsConsumer) {
+        this.settingsConsumer = settingsConsumer;
+    }
+
+    public void setReportsConsumer(IConsumeReports reportsConsumer) {
+        this.reportsConsumer = reportsConsumer;
     }
 
     public void setReceiptConsumer(IConsumeReceipt receiptConsumer) {
@@ -73,10 +111,31 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     public StrategyToBusConnection(IProvideProperties p) {
         marketDataConsumer=new MarketDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
+        settingsConsumer =new SettingsConsumerDummy();
+        reportsConsumer=new ReportsConsumerDummy();
         config = Config.fromProperties(p);
         senderSubscription = new Sender<SubscriptionMsg>(config.getExchangeSubscription(), config.getServerIP());
         senderOrderNew = new Sender<OrderNewMsg>(config.getExchangeOrderNew(), config.getServerIP());
         senderOrderCancel = new Sender<OrderCancelMsg>(config.getExchangeOrderCancel(), config.getServerIP());
+        senderSettings = new Sender<KeyValueMsg>(config.getExchangeKeyValueToStrategy(), config.getServerIP());
+        senderReports = new Sender<KeyValueMsg>(config.getExchangeKeyValueFromStrategy(), config.getServerIP());
+
+        receiverSettings = new BufferingReceiver<KeyValueMsg>(
+                KeyValueMsg.class,
+                config.getExchangeKeyValueToStrategy(),
+                "#",
+                config.getServerIP());
+        receiverSettings.setObserver(this);
+        receiverSettings.start();
+
+        receiverReports = new BufferingReceiver<KeyValueMsg>(
+                KeyValueMsg.class,
+                config.getExchangeKeyValueFromStrategy(),
+                "#",
+                config.getServerIP());
+        receiverReports.setObserver(this);
+        receiverReports.start();
+
         receiverMarketdata = new BufferingReceiver<MarketDataMsg>(
                 MarketDataMsg.class,
                 config.getExchangeMarketData(),
@@ -97,10 +156,17 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     Sender<SubscriptionMsg> senderSubscription;
     Sender<OrderNewMsg> senderOrderNew;
     Sender<OrderCancelMsg> senderOrderCancel;
+    Sender<KeyValueMsg> senderSettings;
+    Sender<KeyValueMsg> senderReports;
+
     IConsumeMarketData marketDataConsumer;
     IConsumeReceipt receiptConsumer;
+    IConsumeSettings settingsConsumer;
+    IConsumeReports reportsConsumer;
     BufferingReceiver<MarketDataMsg> receiverMarketdata;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
+    BufferingReceiver<KeyValueMsg> receiverSettings;
+    BufferingReceiver<KeyValueMsg> receiverReports;
     Config config;
 
     private static class MarketDataConsumerDummy implements IConsumeMarketData {
@@ -124,5 +190,18 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         public void onReceipt(Receipt receipt) {
         }
     }
+
+    private static class SettingsConsumerDummy implements IConsumeSettings {
+        @Override
+        public void onSettings(IProvideProperties p) {
+        }
+    }
+
+    private static class ReportsConsumerDummy implements IConsumeReports {
+        @Override
+        public void onReport(IProvideProperties p) {
+        }
+    }
+
 
 } // class

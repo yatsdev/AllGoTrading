@@ -24,7 +24,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
             if(shuttingDown) return;
             MarketDataMsg data = MarketDataMsg.createFrom(marketData);
             log.info("Published: "+marketData);
-            marketDataMsgSender.publish(data.getTopic(), data);
+            senderMarketDataMsg.publish(data.getTopic(), data);
         }
 
         @Override
@@ -33,14 +33,14 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
             if(shuttingDown) return;
             ReceiptMsg m = ReceiptMsg.fromReceipt(receipt);
             log.info("Published: "+receipt);
-            receiptSender.publish(m.getTopic(), m);
+            senderReceipt.publish(m.getTopic(), m);
         }
 
         @Override
         public void init()
         {
             setInternalAccount("quoting1");
-            marketDataMsgSender.init();
+            senderMarketDataMsg.init();
         }
 
         @Override
@@ -89,13 +89,9 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
             super();
             shuttingDown=false;
 
-//        Config config = _config; // Config.DEFAULT;
             Config config =  Config.fromProperties(Config.createRealProperties());
-            marketDataMsgSender = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
-            marketDataMsgSender.init();
-
-            receiptSender = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
-            receiptSender.init();
+            senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
+            senderReceipt = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
 
             receiverSubscription = new BufferingReceiver<SubscriptionMsg>(SubscriptionMsg.class,
                     config.getExchangeSubscription(),
@@ -117,15 +113,10 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
                     config.getServerIP());
             receiverOrderCancel.setObserver(this);
             receiverOrderCancel.start();
-
-//        tradeProduct = new Product("4663789", "SAP", "XETR");
-//        tradeProduct = new Product("4663745", "GE", "XNAS");
         }
 
-//    private Product tradeProduct;
-
-        Sender<MarketDataMsg> marketDataMsgSender;
-        Sender<ReceiptMsg> receiptSender;
+        Sender<MarketDataMsg> senderMarketDataMsg;
+        Sender<ReceiptMsg> senderReceipt;
         BufferingReceiver<SubscriptionMsg> receiverSubscription;
         BufferingReceiver<OrderNewMsg> receiverOrderNew;
         BufferingReceiver<OrderCancelMsg> receiverOrderCancel;

@@ -37,6 +37,14 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.config = config;
     }
 
+    public void setConfigItem(String key, String value) {
+        config.set(key, value);
+    }
+
+    public void sendConfig() {
+
+    }
+
     public void init() {
         initialised = true;
     }

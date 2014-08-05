@@ -36,6 +36,13 @@ public class Config {
         return properties.get("exchangePositionSnapshot");
     }
 
+    public String getExchangeKeyValueFromStrategy() {
+        return properties.get("exchangeKeyValueFromStrategy");
+    }
+    public String getExchangeKeyValueToStrategy() {
+        return properties.get("exchangeKeyValueToStrategy");
+    }
+
     public String getExchangeOrderNew() {
         return properties.get("exchangeOrderNew");
     }
@@ -69,11 +76,11 @@ public class Config {
     }
 
     public void setStorePositionsToDisk(boolean storePositions) {
-        properties.setAsBoolean("storePositionsToDisk", storePositions);
+        properties.set("storePositionsToDisk", storePositions);
     }
 
     public void setListeningForReceipts(boolean listeningToReceipts) {
-        properties.setAsBoolean("listeningForReceipts", listeningToReceipts);
+        properties.set("listeningForReceipts", listeningToReceipts);
     }
 
     public static Config fromProperties(IProvideProperties p) {
@@ -165,6 +172,7 @@ public class Config {
     }
 
     private IProvideProperties properties;
+
 //    private String serverIP;
 //    private String exchangeMarketData;
 //    private String exchangeReceipts;
