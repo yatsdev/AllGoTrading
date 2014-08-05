@@ -93,7 +93,9 @@ public class PositionSnapshot implements IProvidePosition {
         PositionSnapshot p = new PositionSnapshot();
         String[] snapshotParts = csv.split(";");
         String positionPartString="";
-        if(snapshotParts.length>1) {
+        if(snapshotParts.length==1 && csv.contains(";")) {
+            p.lastChange = DateTime.parse(snapshotParts[0]);
+        } else if(snapshotParts.length>1) {
             p.lastChange = DateTime.parse(snapshotParts[0]);
             positionPartString = snapshotParts[1];
         } else {

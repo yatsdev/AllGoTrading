@@ -20,7 +20,6 @@ public class PositionServerLogic implements IAmCalledBack {
     @Override
     public void onCallback() {
         while(receiverPositionRequests.hasMoreMessages()) {
-            if(positionServer.isEmpty()) continue;
             answerPositionRequest();
         }
         while(receiverPositionSnapshots.hasMoreMessages()) {
@@ -29,10 +28,13 @@ public class PositionServerLogic implements IAmCalledBack {
         while(receiverReceipts.hasMoreMessages()) {
             positionServer.onReceipt(receiverReceipts.get().toReceipt());
         }
+        Thread.yield();
     }
 
     private void receiveNewPositionSnapshot() {
         PositionSnapshotMsg m = receiverPositionSnapshots.get();
+        if(gotSnapshotOnce) return;
+        gotSnapshotOnce=true;
         PositionSnapshot s = m.toPositionSnapshot();
         log.debug("receiveNewPositionSnapshot received:" + m.toString());
         positionServer.setPositionSnapshot(s);
@@ -71,6 +73,8 @@ public class PositionServerLogic implements IAmCalledBack {
                 config.getExchangeReceipts(),
                 "#",
                 config.getServerIP());
+
+        gotSnapshotOnce=false;
         if(config.isListeningForReceipts()) {
             receiverReceipts.setObserver(this);
             receiverReceipts.start();
@@ -114,7 +118,7 @@ public class PositionServerLogic implements IAmCalledBack {
     private Sender<PositionRequestMsg> senderPositionRequest;
     private PositionServer positionServer;
     private Config config;
-
+    private boolean gotSnapshotOnce;
 
 
     private class PositionStorageDummy implements IStorePositionSnapshots {
