@@ -7,7 +7,7 @@ import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
+public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
@@ -20,6 +20,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     @Override
     public abstract void onReceipt(Receipt receipt);
+
+    @Override
+    public abstract void onSettings(IProvideProperties p);
+
 
     protected String getConfig(String key) {
         return config.get(key);
@@ -71,6 +75,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         orderSender.sendOrderCancel(order);
     }
 
+    public void sendReports(IProvideProperties p) {
+        reportSender.sendReports(p);
+    }
+
     public Product getProductForProductId(String productId) {
         return productProvider.getProductForProductId(productId);
     }
@@ -110,6 +118,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.orderSender = orderSender;
     }
 
+    public void setReportSender(ISendReports reportSender) {
+        this.reportSender = reportSender;
+    }
+
     public void setPositionProvider(IProvidePosition positionProvider) {
         this.positionProvider = positionProvider;
     }
@@ -131,7 +143,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     }
 
     public StrategyBase() {
-
         consumerId = UniqueId.create();
         initialised = false;
         converter = new RateConverter(new ProductList());
@@ -142,6 +153,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     private IProvidePriceFeed priceProvider;
     private ISendOrder orderSender;
+    private ISendReports reportSender;
 
     private IProvidePosition positionProvider;
     private IProvideProfit profitProvider;

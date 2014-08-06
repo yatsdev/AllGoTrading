@@ -3,6 +3,8 @@ package org.yats.trader.examples.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
@@ -39,6 +41,7 @@ public class Quoter extends StrategyBase {
         if(!marketData.isSameFrontRowAskAs(prevRefMarketData)) {
             cancelOrders(BookSide.ASK);
             sendAskRelativeTo(marketData.getAsk());
+            sendReports(prop);
         }
 
         prevRefMarketData = marketData;
@@ -76,6 +79,11 @@ public class Quoter extends StrategyBase {
     }
 
     @Override
+    public void onSettings(IProvideProperties p) {
+        System.out.println("Strategy settings: "+PropertiesReader.toString(p));
+    }
+
+    @Override
     public void init()
     {
         super.init();
@@ -104,6 +112,8 @@ public class Quoter extends StrategyBase {
         Decimal bidPrice2 = Decimal.fromDouble(bidMarket*(1.0-(2.0*stepFactor))- tickSize.toDouble()).roundToTickSize(tickSize);
         sendOrderIfNotExisting(BookSide.BID, bidPrice1);
         sendOrderIfNotExisting(BookSide.BID, bidPrice2);
+        prop.set("bidPrice1", bidPrice1);
+        prop.set("bidPrice2", bidPrice2);
     }
 
     private void sendAskRelativeTo(Decimal price) {
@@ -112,6 +122,9 @@ public class Quoter extends StrategyBase {
         Decimal askPrice2 = Decimal.fromDouble(askMarket*(1.0+(2.0*stepFactor))+ tickSize.toDouble()).roundToTickSize(tickSize);
         sendOrderIfNotExisting(BookSide.ASK, askPrice1);
         sendOrderIfNotExisting(BookSide.ASK, askPrice2);
+        prop.set("askPrice1", askPrice1);
+        prop.set("askPrice2", askPrice2);
+
     }
 
     private void sendOrderIfNotExisting(BookSide _side, Decimal _price) {
@@ -165,6 +178,7 @@ public class Quoter extends StrategyBase {
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
         prevRefMarketData = MarketData.NULL;
+        prop = new PropertiesReader();
     }
 
     private Decimal position;
@@ -177,6 +191,8 @@ public class Quoter extends StrategyBase {
     private double stepFactor = 0.0;//0031;
     private Decimal tickSize = Decimal.ONE;
     private double orderSize = 0.01;
+
+    PropertiesReader prop;
 
 
 //    private boolean receivedOrderReceiptBidSide;

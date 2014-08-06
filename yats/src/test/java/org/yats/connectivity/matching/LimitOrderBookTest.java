@@ -53,6 +53,18 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
         assert (1 == book.getSize(BookSide.ASK));
     }
 
+    @Test
+    public void cancelBidOrderResultsInReceiptWithEndstateTrue()
+    {
+        book.match(bid100At10);
+        assert (1 == receiptCounter);
+
+        book.cancel(bid100At10.getOrderId());
+        assert (2 == receiptCounter);
+        assert(lastReceipt.isEndState());
+        assert(!lastReceipt.isRejection());
+    }
+
 
     @BeforeMethod
     public void setUp() {
@@ -75,12 +87,15 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
                 .withProductId(ProductTest.PRODUCT1.getProductId())
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(100));
+        receiptCounter=0;
+        lastReceipt=null;
     }
 
 
     @Override
     public void onReceipt(Receipt receipt) {
-
+        receiptCounter++;
+        lastReceipt=receipt;
     }
 
     @Override
@@ -97,4 +112,6 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
     OrderNew bid100At10;
     OrderNew bid200At12;
     OrderNew ask100At11;
+    Receipt lastReceipt;
+    int receiptCounter;
 } // class

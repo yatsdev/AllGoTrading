@@ -79,6 +79,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     private void sendAllReceivedSettings() {
+        if(receiverSettings==null) return;
         while(receiverSettings.hasMoreMessages()) {
             IProvideProperties p = receiverSettings.get().toProperties();
             settingsConsumer.onSettings(p);
@@ -86,6 +87,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     private void sendAllReceivedReports() {
+        if(receiverReports==null) return;
         while(receiverReports.hasMoreMessages()) {
             IProvideProperties p = receiverReports.get().toProperties();
             reportsConsumer.onReport(p);
@@ -120,21 +122,27 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         senderSettings = new Sender<KeyValueMsg>(config.getExchangeKeyValueToStrategy(), config.getServerIP());
         senderReports = new Sender<KeyValueMsg>(config.getExchangeKeyValueFromStrategy(), config.getServerIP());
 
-        receiverSettings = new BufferingReceiver<KeyValueMsg>(
-                KeyValueMsg.class,
-                config.getExchangeKeyValueToStrategy(),
-                "#",
-                config.getServerIP());
-        receiverSettings.setObserver(this);
-        receiverSettings.start();
+        receiverSettings=null;
+        if(config.isReceiverForSettings()) {
+            receiverSettings = new BufferingReceiver<KeyValueMsg>(
+                    KeyValueMsg.class,
+                    config.getExchangeKeyValueToStrategy(),
+                    "#",
+                    config.getServerIP());
+            receiverSettings.setObserver(this);
+            receiverSettings.start();
+        }
 
-        receiverReports = new BufferingReceiver<KeyValueMsg>(
-                KeyValueMsg.class,
-                config.getExchangeKeyValueFromStrategy(),
-                "#",
-                config.getServerIP());
-        receiverReports.setObserver(this);
-        receiverReports.start();
+        receiverReports=null;
+        if(config.isReceiverForReports()) {
+            receiverReports = new BufferingReceiver<KeyValueMsg>(
+                    KeyValueMsg.class,
+                    config.getExchangeKeyValueFromStrategy(),
+                    "#",
+                    config.getServerIP());
+            receiverReports.setObserver(this);
+            receiverReports.start();
+        }
 
         receiverMarketdata = new BufferingReceiver<MarketDataMsg>(
                 MarketDataMsg.class,

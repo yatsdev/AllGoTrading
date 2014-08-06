@@ -137,6 +137,11 @@ public class PropertiesReader implements IProvideProperties {
     }
 
 
+    public static String toString(IProvideProperties p) {
+        StringBuilder b = new StringBuilder();
+        for(String key : p.getKeySet()) b.append(key+"="+p.get(key)+";");
+        return b.toString();
+    }
 
     public static boolean fromBooleanString(String value) {
         String lowerCase = value.toLowerCase();

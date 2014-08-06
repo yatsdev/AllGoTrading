@@ -67,6 +67,9 @@ public class Config {
         return properties.getAsBoolean("storePositionsToDisk",false);
     }
 
+    public boolean isReceiverForSettings() { return properties.getAsBoolean("receiveSettings", false); }
+    public boolean isReceiverForReports() { return properties.getAsBoolean("receiveReports", false); }
+
     public String getPositionFilename() {
         return properties.get("positionFilename");
     }

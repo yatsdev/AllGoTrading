@@ -3,7 +3,6 @@ package org.yats.trader.examples.server;
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
-import org.yats.messagebus.Config;
 import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
@@ -56,9 +55,10 @@ public class StrategyRunnerMain {
     public void go() throws InterruptedException, IOException
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(Config.createRealProperties());
 
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
+
+        StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
 
         rateConverter = new RateConverter(productList);
 
@@ -73,8 +73,10 @@ public class StrategyRunnerMain {
         strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(strategyToBusConnection);
+        strategyRunner.setReportSender(strategyToBusConnection);
         strategyRunner.setRateConverter(rateConverter);
         strategyToBusConnection.setReceiptConsumer(strategyRunner);
+        strategyToBusConnection.setSettingsConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
@@ -116,6 +118,7 @@ public class StrategyRunnerMain {
 //        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
+        strategy.setReportSender(strategyRunner);
         strategy.setConfig(strategyConfig);
         return strategy;
     }

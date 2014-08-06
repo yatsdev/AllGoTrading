@@ -5,6 +5,7 @@ import org.joda.time.DateTimeZone;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.trading.*;
 
 
@@ -196,6 +197,11 @@ public class StrategyRunnerTest {
 
             position += receipt.getPositionChange().toInt();
             lastReceipt=receipt;
+        }
+
+        @Override
+        public void onSettings(IProvideProperties p) {
+
         }
 
         @Override

@@ -11,7 +11,7 @@ public class Receipt {
 
     public static ReceiptNULL NULL = new ReceiptNULL();
 
-    boolean isRejection()
+    public boolean isRejection()
     {
         return rejectReason.length() > 0;
     }

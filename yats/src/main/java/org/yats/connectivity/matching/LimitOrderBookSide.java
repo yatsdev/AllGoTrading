@@ -40,7 +40,8 @@ public class LimitOrderBookSide implements IConsumeReceipt {
     public void cancel(UniqueId orderId) {
         String idString = orderId.toString();
         if(isOrderIdInBook(idString)) {
-            bookByOrderId.get(idString).remove(idString);
+            PriceLevel priceLevel = bookByOrderId.get(idString);
+            priceLevel.remove(idString);
             bookByOrderId.remove(idString);
             removeEmptyFrontRows();
         }

@@ -7,19 +7,17 @@ import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.IConsumeReceipt;
-import org.yats.trading.MarketData;
-import org.yats.trading.Receipt;
+import org.yats.trading.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener {
+public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener, IConsumeReports {
 
     final Logger log = LoggerFactory.getLogger(ExcelConnection.class);
 
@@ -48,11 +46,26 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                 }
             }
         }
+
+        // use strategyToBusConnection.sendSettings(...) to send settings to the strategies like in onReport(..) below
+
     }
 
     @Override
     public void onReceipt(Receipt receipt) {
 
+    }
+
+    @Override
+    public void onReport(IProvideProperties p) {
+
+        // reports from strategies are coming in here. send them to Excel
+
+        // for now writing to console:
+        System.out.println("Strategy reports: "+PropertiesReader.toString(p));
+
+        //lets send the report back as settings to test the way back to the strategy
+        strategyToBusConnection.sendSettings(p);
     }
 
     @Override
@@ -118,7 +131,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 //        thread = new Thread(this);
 //        thread.start();
 
-        startDDE();
+        if(Tool.isWindows()) startDDE();
         System.out.println("\n===");
         System.out.println("Initialization done.");
         System.out.println("Press enter to exit.");
@@ -126,8 +139,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         System.in.read();
         System.out.println("\nexiting...\n");
 
-        stopDDE();
-        Thread.sleep(1000);
+        if(Tool.isWindows()) stopDDE();
+        if(Tool.isWindows()) Thread.sleep(1000);
+        if(!Tool.isWindows())Thread.sleep(60000);
 
         log.info("ExcelConnection done.");
         System.exit(0);
@@ -138,12 +152,13 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         strategyToBusConnection = new StrategyToBusConnection(_prop);
         strategyToBusConnection.setMarketDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
+        strategyToBusConnection.setReportsConsumer(this);
         if(Tool.isWindows()) {
             conversation = new DDEClientConversation();  // cant use this on Linux
             conversation.setEventListener(this);
         } else {
             System.out.println("This is not Windows! DDEClient will not work!");
-            System.exit(0);
+//            System.exit(0);
         }
     }
 
@@ -163,11 +178,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     }
 
 
-    private Vector<String> productIDs=new Vector<String>();
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
-    private int j;
 
 
 } // class

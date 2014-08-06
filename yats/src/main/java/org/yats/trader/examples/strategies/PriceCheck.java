@@ -4,6 +4,7 @@ package org.yats.trader.examples.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.MarketData;
 import org.yats.trading.Receipt;
@@ -56,6 +57,11 @@ public class PriceCheck extends StrategyBase {
     @Override
     public void onReceipt(Receipt receipt)
     {
+    }
+
+    @Override
+    public void onSettings(IProvideProperties p) {
+
     }
 
     @Override
