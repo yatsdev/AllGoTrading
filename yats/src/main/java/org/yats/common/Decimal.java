@@ -6,6 +6,7 @@ import java.math.RoundingMode;
 public class Decimal implements Comparable<Decimal> {
 
 
+    public static final Decimal MINUSONE = new Decimal("-1");
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal DIME = new Decimal("0.10");

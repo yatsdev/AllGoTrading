@@ -2,7 +2,6 @@ package org.yats.connectivity.matching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
@@ -42,12 +41,6 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
             rejectUnknownCancelOrder(order);
     }
 
-    private void rejectUnknownCancelOrder(OrderCancel order) {
-        Receipt r = order.createReceiptDefault().withEndState(true).withRejectReason("Unknown order.");
-        onReceipt(r);
-    }
-
-
     @Override
     public void onMarketData(MarketData marketData) {
         priceConsumer.onMarketData(marketData);
@@ -72,20 +65,27 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         this.productProvider = productProvider;
     }
 
-    public InternalMarket(IProvideProperties prop) {
-        properties = prop;
-        externalAccount = prop.get("externalAccount");
+    public InternalMarket(String _externalAccount, String _marketName) {
+        externalAccount = _externalAccount;
+        marketName = _marketName;
         orderBooks = new ConcurrentHashMap<String, LimitOrderBook>();
         priceConsumer=null;
         receiptConsumer=null;
         productProvider=null;
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////
+
     private boolean isProductValid(String productId) {
         if(!productProvider.isProductIdExisting(productId)) return false;
         Product p = productProvider.getProductForProductId(productId);
-        if(p.getExchange().compareTo(properties.get("marketName"))!=0) return false;
+        if(!p.hasExchange(marketName)) return false;
         return true;
+    }
+
+    private void rejectUnknownCancelOrder(OrderCancel order) {
+        Receipt r = order.createReceiptDefault().withEndState(true).withRejectReason("Unknown order.");
+        onReceipt(r);
     }
 
     private void createOrderBookForProductId(String productId) {
@@ -98,8 +98,8 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     private IConsumeMarketData priceConsumer;
     private IConsumeReceipt receiptConsumer;
     private IProvideProduct productProvider;
-    private IProvideProperties properties;
     private String externalAccount;
+    private String marketName;
 
 
 

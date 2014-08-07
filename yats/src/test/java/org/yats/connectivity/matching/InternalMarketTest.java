@@ -1,0 +1,137 @@
+package org.yats.connectivity.matching;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import org.yats.common.Decimal;
+import org.yats.common.UniqueId;
+import org.yats.messagebus.messages.OrderNewMsg;
+import org.yats.trading.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
+
+    @Test
+    public void canInsertAndCancel() {
+        market.sendOrderNew(bid133);
+        market.sendOrderNew(ask135);
+        assert(mdCounter==2);
+        assert(lastMarketData.hasFrontRow(BookSide.BID, bid133.getAsRow()));
+    }
+
+    @Test
+    public void canHandleMultipleNonCrossingOrders() {
+        OrderNew newBid = bid133;
+        sendMultipleOrders(newBid, 99);
+        assert(mdCounter==99);
+        OrderNew newAsk = ask135;
+        sendMultipleOrders(newAsk, 99);
+        assert(mdCounter==198);
+        assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.99"))));
+        assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.01"))));
+    }
+
+
+    @Test
+    public void canHandleMultipleCrossingOrders() {
+        OrderNew newBid = createCopy(bid133);
+        sendMultipleOrders(newBid, 99);
+        assert(mdCounter==99);
+        OrderNew newAsk = createCopy(ask135).withLimit(bid133.getLimit().add(Decimal.ONE));
+        sendMultipleOrders(newAsk, 99);
+        assert(mdCounter==198);
+        assert(lastMarketData.isBookSideEmpty(BookSide.BID)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
+        assert(lastMarketData.isBookSideEmpty(BookSide.ASK)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
+//        assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.00"))));
+    }
+
+    @Test
+    public void canHandleOneOrderFillingMultipleOrders() {
+        OrderNew newBid = createCopy(bid133);
+        sendMultipleOrders(newBid, 99);
+        assert(mdCounter==99);
+        assert(receiptCounter==99);
+        OrderNew newAsk = createCopy(ask135)
+                .withLimit(bid133.getLimit())
+                .withSize(Decimal.fromString("98.5"));
+        market.sendOrderNew(newAsk);
+        assert(mdCounter==100);
+        assert(receiptCounter==297);
+        assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
+        assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
+    }
+
+    private OrderNew createCopy(OrderNew order) {
+        return OrderNewMsg.createFromOrderNew(order).toOrderNew();
+    }
+
+    private void sendMultipleOrders(OrderNew order, int amount) {
+        for(int i = 0; i<amount; i++) {
+            order.withOrderId(UniqueId.create());
+            double step = order.getBookSide().toDirection();
+            order.withLimit(order.getLimit().add(Decimal.fromDouble(step/100.0)));
+            market.sendOrderNew(order);
+        }
+    }
+
+    @BeforeMethod
+    public void setUp() {
+        ProductList products = ProductList.createFromFile(ProductList.PATH);
+        market = new InternalMarket(ProductTest.TEST_EXTACCOUNT, ProductTest.TEST_MARKET);
+        market.setReceiptConsumer(this);
+        market.setProductProvider(products);
+        market.subscribe(ProductTest.PRODUCT_TEST.getProductId(), this);
+
+        bid133 = OrderNew.create()
+                .withProductId(ProductTest.PRODUCT_TEST.getProductId())
+                .withInternalAccount(ProductTest.TEST_ACCOUNT)
+                .withBookSide(BookSide.BID)
+                .withLimit(Decimal.fromString("133"))
+                .withSize(Decimal.fromString("1"))
+        ;
+        ask135 = OrderNew.create()
+                .withProductId(ProductTest.PRODUCT_TEST.getProductId())
+                .withInternalAccount(ProductTest.TEST_ACCOUNT)
+                .withBookSide(BookSide.ASK)
+                .withLimit(Decimal.fromString("135"))
+                .withSize(Decimal.fromString("1"))
+        ;
+
+        mdCounter=0;
+        receiptCounter=0;
+        receiptList=new ArrayList<Receipt>();
+        mdList=new ArrayList<MarketData>();
+    }
+
+    @Override
+    public void onReceipt(Receipt receipt) {
+        receiptCounter++;
+        lastReceipt=receipt;
+        receiptList.add(receipt);
+//        System.out.println(receipt);
+    }
+
+    @Override
+    public void onMarketData(MarketData marketData) {
+        mdCounter++;
+        lastMarketData=marketData;
+    }
+
+    @Override
+    public UniqueId getConsumerId() {
+        return UniqueId.create();
+    }
+
+    OrderNew bid133;
+    OrderNew ask135;
+    InternalMarket market;
+    int mdCounter;
+    int receiptCounter;
+    MarketData lastMarketData;
+    Receipt lastReceipt;
+    List<Receipt> receiptList;
+    List<MarketData> mdList;
+
+
+} // class

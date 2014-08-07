@@ -54,6 +54,9 @@ public class Product {
     public boolean hasUnderlyingId(String pid) {
         return underlyingId.compareTo(pid) == 0;
     }
+    public boolean hasExchange(String _exchange) {
+        return exchange.compareTo(_exchange) == 0;
+    }
 
     public String getProductId() {
         return productId;

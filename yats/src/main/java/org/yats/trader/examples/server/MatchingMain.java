@@ -33,7 +33,7 @@ public class MatchingMain implements IConsumeMarketData {
 
         MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
 
-        InternalMarket internalMarket = new InternalMarket(prop);
+        InternalMarket internalMarket = new InternalMarket(prop.get("externalAccount"), prop.get("marketName"));
         internalMarket.setProductProvider(products);
 
         StrategyRunner strategyRunner = new StrategyRunner();

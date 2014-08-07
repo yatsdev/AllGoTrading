@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductList implements IProvideProduct {
 
+    public static final String PATH = "config/CFDProductList.csv";
+
     public static final String EUR_PID = "CCY_EUR";
     public static final String USD_PID = "CCY_USD";
     public static final String CHF_PID = "CCY_CHF";

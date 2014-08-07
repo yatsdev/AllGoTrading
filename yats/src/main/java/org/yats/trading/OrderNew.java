@@ -1,10 +1,9 @@
 package org.yats.trading;
 
-import org.yats.common.Decimal;
-import org.yats.common.UniqueId;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-
+import org.yats.common.Decimal;
+import org.yats.common.UniqueId;
 
 
 public class OrderNew extends OrderBase {
@@ -15,6 +14,11 @@ public class OrderNew extends OrderBase {
         if(bookSide.isMoreBehindThan(limit, frontRowPrice)) return false;
         return true;
     }
+
+    public BookRow getAsRow() {
+        return new BookRow(size, limit);
+    }
+
 
     public OrderCancel createCancelOrder()
     {
@@ -156,6 +160,7 @@ public class OrderNew extends OrderBase {
         return true;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     private DateTime timestamp;
     private String internalAccount;
@@ -163,8 +168,6 @@ public class OrderNew extends OrderBase {
     private Decimal size;
     private Decimal limit;
     private String productId;
-
-
 
     private static class OrderNewNull extends OrderNew {
 

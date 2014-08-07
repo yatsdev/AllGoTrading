@@ -19,5 +19,4 @@ public abstract class OrderBase {
 
     protected UniqueId orderId;
 
-
 } // class

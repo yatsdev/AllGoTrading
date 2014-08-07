@@ -28,6 +28,7 @@ public class Receipt {
 
 
     public boolean isExecutingWith(Decimal frontRowPrice) {
+        if(!frontRowPrice.isGreaterThan(Decimal.ZERO)) return false;
         if(bookSide.isMoreBehindThan(price, frontRowPrice)) return false;
         return true;
     }
