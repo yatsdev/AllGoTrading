@@ -65,7 +65,75 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                         conversation.poke("R" + j + "C13", marketData.getBook().getBookRow(BookSide.ASK, 2).getPrice().toString());
                     }
 
-                    
+                    //Lv3
+                    if(marketData.getBook().getDepth(BookSide.BID)==4) {
+                        conversation.poke("R" + j + "C14", marketData.getBook().getBookRow(BookSide.BID, 3).getSize().toString());
+                        conversation.poke("R" + j + "C15", marketData.getBook().getBookRow(BookSide.BID, 3).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==4) {
+                        conversation.poke("R" + j + "C16", marketData.getBook().getBookRow(BookSide.ASK, 3).getSize().toString());
+                        conversation.poke("R" + j + "C17", marketData.getBook().getBookRow(BookSide.ASK, 3).getPrice().toString());
+                    }
+
+                    //Lv4
+                    if(marketData.getBook().getDepth(BookSide.BID)==5) {
+                        conversation.poke("R" + j + "C18", marketData.getBook().getBookRow(BookSide.BID, 4).getSize().toString());
+                        conversation.poke("R" + j + "C19", marketData.getBook().getBookRow(BookSide.BID, 4).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==5) {
+                        conversation.poke("R" + j + "C20", marketData.getBook().getBookRow(BookSide.ASK, 4).getSize().toString());
+                        conversation.poke("R" + j + "C21", marketData.getBook().getBookRow(BookSide.ASK, 4).getPrice().toString());
+                    }
+
+                    //Lv5
+                    if(marketData.getBook().getDepth(BookSide.BID)==6) {
+                        conversation.poke("R" + j + "C22", marketData.getBook().getBookRow(BookSide.BID, 5).getSize().toString());
+                        conversation.poke("R" + j + "C23", marketData.getBook().getBookRow(BookSide.BID, 5).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==6) {
+                        conversation.poke("R" + j + "C24", marketData.getBook().getBookRow(BookSide.ASK, 5).getSize().toString());
+                        conversation.poke("R" + j + "C25", marketData.getBook().getBookRow(BookSide.ASK, 5).getPrice().toString());
+                    }
+
+                    //Lv6
+                    if(marketData.getBook().getDepth(BookSide.BID)==7) {
+                        conversation.poke("R" + j + "C26", marketData.getBook().getBookRow(BookSide.BID, 6).getSize().toString());
+                        conversation.poke("R" + j + "C27", marketData.getBook().getBookRow(BookSide.BID, 6).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==7) {
+                        conversation.poke("R" + j + "C28", marketData.getBook().getBookRow(BookSide.ASK, 6).getSize().toString());
+                        conversation.poke("R" + j + "C29", marketData.getBook().getBookRow(BookSide.ASK, 6).getPrice().toString());
+                    }
+
+                    //Lv7
+                    if(marketData.getBook().getDepth(BookSide.BID)==8) {
+                        conversation.poke("R" + j + "C30", marketData.getBook().getBookRow(BookSide.BID, 7).getSize().toString());
+                        conversation.poke("R" + j + "C31", marketData.getBook().getBookRow(BookSide.BID, 7).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==8) {
+                        conversation.poke("R" + j + "C32", marketData.getBook().getBookRow(BookSide.ASK, 7).getSize().toString());
+                        conversation.poke("R" + j + "C33", marketData.getBook().getBookRow(BookSide.ASK, 7).getPrice().toString());
+                    }
+
+                    //Lv8
+                    if(marketData.getBook().getDepth(BookSide.BID)==9) {
+                        conversation.poke("R" + j + "C34", marketData.getBook().getBookRow(BookSide.BID, 8).getSize().toString());
+                        conversation.poke("R" + j + "C35", marketData.getBook().getBookRow(BookSide.BID, 8).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==9) {
+                        conversation.poke("R" + j + "C36", marketData.getBook().getBookRow(BookSide.ASK, 8).getSize().toString());
+                        conversation.poke("R" + j + "C37", marketData.getBook().getBookRow(BookSide.ASK, 8).getPrice().toString());
+                    }
+
+                    //Lv9
+                    if(marketData.getBook().getDepth(BookSide.BID)==10) {
+                        conversation.poke("R" + j + "C38", marketData.getBook().getBookRow(BookSide.BID, 9).getSize().toString());
+                        conversation.poke("R" + j + "C39", marketData.getBook().getBookRow(BookSide.BID, 9).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==10) {
+                        conversation.poke("R" + j + "C40", marketData.getBook().getBookRow(BookSide.ASK, 9).getSize().toString());
+                        conversation.poke("R" + j + "C41", marketData.getBook().getBookRow(BookSide.ASK, 9).getPrice().toString());
+                    }
 
                 } catch (DDEException e) {
                     e.printStackTrace();
