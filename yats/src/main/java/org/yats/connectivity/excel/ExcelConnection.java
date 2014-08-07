@@ -39,8 +39,34 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             int j = i + 1;
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
-                    conversation.poke("R" + j + "C2", marketData.getBid().toString());
-                    conversation.poke("R" + j + "C3", marketData.getAsk().toString());
+                    //Lv0
+                    conversation.poke("R" + j + "C2", marketData.getBidSize().toString());
+                    conversation.poke("R" + j + "C3", marketData.getBid().toString());
+                    conversation.poke("R" + j + "C4", marketData.getAskSize().toString());
+                    conversation.poke("R" + j + "C5", marketData.getAsk().toString());
+
+                    //Lv1
+                    if(marketData.getBook().getDepth(BookSide.BID)==2) {
+                        conversation.poke("R" + j + "C6", marketData.getBook().getBookRow(BookSide.BID, 1).getSize().toString());
+                        conversation.poke("R" + j + "C7", marketData.getBook().getBookRow(BookSide.BID, 1).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==2) {
+                        conversation.poke("R" + j + "C8", marketData.getBook().getBookRow(BookSide.ASK, 1).getSize().toString());
+                        conversation.poke("R" + j + "C9", marketData.getBook().getBookRow(BookSide.ASK, 1).getPrice().toString());
+                    }
+
+                    //Lv2
+                    if(marketData.getBook().getDepth(BookSide.BID)==3) {
+                        conversation.poke("R" + j + "C10", marketData.getBook().getBookRow(BookSide.BID, 2).getSize().toString());
+                        conversation.poke("R" + j + "C11", marketData.getBook().getBookRow(BookSide.BID, 2).getPrice().toString());
+                    }
+                    if(marketData.getBook().getDepth(BookSide.ASK)==3) {
+                        conversation.poke("R" + j + "C12", marketData.getBook().getBookRow(BookSide.ASK, 2).getSize().toString());
+                        conversation.poke("R" + j + "C13", marketData.getBook().getBookRow(BookSide.ASK, 2).getPrice().toString());
+                    }
+
+                    
+
                 } catch (DDEException e) {
                     e.printStackTrace();
                 }
