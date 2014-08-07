@@ -74,6 +74,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private void sendAllReceivedReceipts() {
         while(receiverReceipt.hasMoreMessages()) {
             Receipt r = receiverReceipt.get().toReceipt();
+            log.info("Received receipt (StrategyToBusConnection): "+r);
             receiptConsumer.onReceipt(r);
         }
     }

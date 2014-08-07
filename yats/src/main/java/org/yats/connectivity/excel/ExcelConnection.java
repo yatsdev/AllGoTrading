@@ -32,11 +32,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     @Override
     public void onMarketData(MarketData marketData) {
+        System.out.println(marketData.getProductId()+" : "+marketData.getOfferBookAsCSV());
         for (int i = 1; i < currentProductIDs.size(); i++) {
             int j = i + 1;
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
-                if(marketData.getBidSize().isEqualTo(Decimal.ZERO)) continue;
-                if(marketData.getAskSize().isEqualTo(Decimal.ZERO)) continue;
+//                if(marketData.getBidSize().isEqualTo(Decimal.ZERO)) continue;
+//                if(marketData.getAskSize().isEqualTo(Decimal.ZERO)) continue;
                 try {
                     //Lv0
                     conversation.poke("R" + j + "C2", marketData.getBidSize().toString());
@@ -156,7 +157,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         // reports from strategies are coming in here. send them to Excel
 
         // for now writing to console:
-        System.out.println("Strategy reports: "+PropertiesReader.toString(p));
+//        System.out.println("Strategy reports: "+PropertiesReader.toString(p));
 
         //lets send the report back as settings to test the way back to the strategy
         strategyToBusConnection.sendSettings(p);
