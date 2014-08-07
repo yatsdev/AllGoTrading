@@ -16,7 +16,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         priceConsumer = _consumer;
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        log.debug("Subscription for "+productId+". OrderBook created.");
+        log.debug("Subscription for " + productId + ". OrderBook created.");
     }
 
     @Override
@@ -43,6 +43,9 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     @Override
     public void onMarketData(MarketData marketData) {
+        if(priceConsumer==null) {
+            System.out.println("why null?");
+        }
         priceConsumer.onMarketData(marketData);
     }
 
@@ -59,6 +62,10 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     public void setReceiptConsumer(IConsumeReceipt receiptConsumer) {
         this.receiptConsumer = receiptConsumer;
+    }
+
+    public void setPriceConsumer(IConsumeMarketData priceConsumer) {
+        this.priceConsumer = priceConsumer;
     }
 
     public void setProductProvider(IProvideProduct productProvider) {

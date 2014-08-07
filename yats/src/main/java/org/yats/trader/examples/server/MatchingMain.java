@@ -47,6 +47,7 @@ public class MatchingMain implements IConsumeMarketData {
 
         strategyRunner.setOrderSender(internalMarket);
         internalMarket.setReceiptConsumer(strategyRunner);
+        internalMarket.setPriceConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
         Thread.sleep(2000);

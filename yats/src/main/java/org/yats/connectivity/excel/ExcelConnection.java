@@ -6,10 +6,7 @@ import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.IProvideProperties;
-import org.yats.common.PropertiesReader;
-import org.yats.common.Tool;
-import org.yats.common.UniqueId;
+import org.yats.common.*;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.trading.*;
 
@@ -38,6 +35,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         for (int i = 1; i < currentProductIDs.size(); i++) {
             int j = i + 1;
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
+                if(marketData.getBidSize().isEqualTo(Decimal.ZERO)) continue;
+                if(marketData.getAskSize().isEqualTo(Decimal.ZERO)) continue;
                 try {
                     //Lv0
                     conversation.poke("R" + j + "C2", marketData.getBidSize().toString());
@@ -46,6 +45,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     conversation.poke("R" + j + "C5", marketData.getAsk().toString());
 
                     //Lv1
+
                     if(marketData.getBook().getDepth(BookSide.BID)==2) {
                         conversation.poke("R" + j + "C6", marketData.getBook().getBookRow(BookSide.BID, 1).getSize().toString());
                         conversation.poke("R" + j + "C7", marketData.getBook().getBookRow(BookSide.BID, 1).getPrice().toString());

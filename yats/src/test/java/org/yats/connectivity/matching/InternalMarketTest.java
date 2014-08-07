@@ -8,6 +8,7 @@ import org.yats.messagebus.messages.OrderNewMsg;
 import org.yats.trading.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
@@ -61,6 +62,53 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
         assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
     }
+
+    @Test
+    public void canCancelMultipleOrdersTowardsFrontRow() {
+        OrderNew newBid = createCopy(bid133);
+        sendMultipleOrders(newBid, 99);
+        assert(receiptCounter==99);
+        assert(mdCounter==99);
+        List<Receipt> snapshot = new ArrayList<Receipt>();
+        snapshot.addAll(receiptList);
+
+        int counter=1;
+        for(Receipt r : snapshot) {
+            OrderCancel c = r.createOrderCancel(r);
+            market.sendOrderCancel(c);
+            Decimal expected = bid133.getLimit().add(Decimal.fromString("0.99"));
+            if(counter<99) assert(lastMarketData.getBid().isEqualTo(expected));
+            if(counter==99) assert(lastMarketData.isBookSideEmpty(BookSide.BID));
+            counter++;
+        }
+        assert(receiptCounter==2*99);
+        assert(mdCounter==99+99);
+    }
+
+    @Test
+    public void canCancelMultipleOrdersStartingFrontRow() {
+        OrderNew newAsk = createCopy(ask135);
+        sendMultipleOrders(newAsk, 99);
+        assert(receiptCounter==99);
+        assert(mdCounter==99);
+        List<Receipt> snapshot = new ArrayList<Receipt>();
+        snapshot.addAll(receiptList);
+        Collections.reverse(snapshot);
+
+        Decimal expected = ask135.getLimit().subtract(Decimal.fromString("0.98"));
+        int counter=1;
+        for(Receipt r : snapshot) {
+            OrderCancel c = r.createOrderCancel(r);
+            market.sendOrderCancel(c);
+            if(counter<99) assert(lastMarketData.getAsk().isEqualTo(expected));
+            if(counter==99) assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
+            counter++;
+            expected=expected.add(Decimal.CENT);
+        }
+        assert(receiptCounter==2*99);
+        assert(mdCounter==99+99);
+    }
+
 
     private OrderNew createCopy(OrderNew order) {
         return OrderNewMsg.createFromOrderNew(order).toOrderNew();

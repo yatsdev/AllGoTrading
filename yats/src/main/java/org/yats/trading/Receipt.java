@@ -353,6 +353,15 @@ public class Receipt {
         return _orderId.compareTo(orderId.toString()) == 0;
     }
 
+    public OrderCancel createOrderCancel(Receipt r) {
+        OrderCancel c = new OrderCancel()
+                .withBookSide(r.getBookSide())
+                .withOrderId(r.getOrderId())
+                .withProductId(r.getProductId())
+                ;
+        return c;
+    }
+
 
     private static class ReceiptNULL extends Receipt {
         private ReceiptNULL() {
