@@ -91,11 +91,11 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         }
     }
 
-    public MarketToBusConnection() {
+    public MarketToBusConnection(IProvideProperties prop) {
         super();
         shuttingDown=false;
 
-        Config config =  Config.fromProperties(Config.createRealProperties());
+        Config config =  Config.fromProperties(prop);
         senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
         senderReceipt = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
 

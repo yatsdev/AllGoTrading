@@ -33,7 +33,7 @@ public class OandaClientMain implements IConsumeMarketData {
         PriceFeed oandaFeed = PriceFeed.createFromPropertiesReader(prop);
         oandaFeed.setProductProvider(products);
 
-        MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
+        MarketToBusConnection marketToBusConnection = new MarketToBusConnection(prop);
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(oandaFeed);

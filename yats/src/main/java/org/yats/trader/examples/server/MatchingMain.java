@@ -31,7 +31,7 @@ public class MatchingMain implements IConsumeMarketData {
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
 
-        MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
+        MarketToBusConnection marketToBusConnection = new MarketToBusConnection(prop);
 
         InternalMarket internalMarket = new InternalMarket(prop.get("externalAccount"), prop.get("marketName"));
         internalMarket.setProductProvider(products);
