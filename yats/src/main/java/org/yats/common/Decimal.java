@@ -12,6 +12,7 @@ public class Decimal implements Comparable<Decimal> {
     public static final Decimal DIME = new Decimal("0.10");
     public static final Decimal CENT = new Decimal("0.01");
     private static final int DEFAULT_SCALE = 10;
+    public static final Decimal HUNDRED = new Decimal("100");;
 
 
     @Override

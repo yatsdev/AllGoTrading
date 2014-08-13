@@ -46,7 +46,8 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     public void init()
     {
         setInternalAccount("quoting1");
-        senderMarketDataMsg.init();
+        //TODO: why again init?
+//        senderMarketDataMsg.init();
     }
 
     @Override

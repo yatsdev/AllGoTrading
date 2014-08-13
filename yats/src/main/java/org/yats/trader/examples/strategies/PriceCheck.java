@@ -14,9 +14,9 @@ public class PriceCheck extends StrategyBase {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(MarketFollow.class);
+    final Logger log = LoggerFactory.getLogger(PriceCheck.class);
 
-    private static int dots = 0;
+
 
     @Override
     public void onMarketData(MarketData marketData)
@@ -90,5 +90,6 @@ public class PriceCheck extends StrategyBase {
 
     private boolean shuttingDown;
     private String tradeProductId;
+    private static int dots = 0;
 
 } // class
