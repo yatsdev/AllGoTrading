@@ -23,7 +23,7 @@ public class PriceGeneratorLogic implements Runnable {
                     ? Decimal.CENT.multiply(Decimal.MINUSONE)
                     : Decimal.CENT;
 
-            lastData = MarketData.createFromLast("TEST_EURUSD", Decimal.ONE.add(change));
+            lastData = MarketData.createFromLast(pid, Decimal.ONE.add(change));
             MarketDataMsg m = MarketDataMsg.createFrom(lastData);
 
             senderMarketDataMsg.publish(m.getTopic(), m);
@@ -45,8 +45,10 @@ public class PriceGeneratorLogic implements Runnable {
     public PriceGeneratorLogic(IProvideProperties prop)
     {
         interval = prop.getAsDecimal("interval").toInt();
+        pid=prop.get("productId");
+
         Config config =  Config.fromProperties(prop);
-        lastData = MarketData.createFromLast("TEST_EURUSD", Decimal.ONE);
+        lastData = MarketData.createFromLast(pid, Decimal.ONE);
         productList = ProductList.createFromFile("config/CFDProductList.csv");
         senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
         senderMarketDataMsg.init();
@@ -62,6 +64,7 @@ public class PriceGeneratorLogic implements Runnable {
     private boolean shutdownThread;
     private Thread thread;
     private ProductList productList;
+    private String pid;
     private MarketData lastData;
     private int counter;
     private int interval;
