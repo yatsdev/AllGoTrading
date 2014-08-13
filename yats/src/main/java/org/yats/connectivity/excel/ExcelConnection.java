@@ -188,6 +188,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         try
         {
             System.out.print("conversation.connect...");
+            conversation.setTimeout(30000);// Maybe just this line will solve our "stability" problems
             conversation.connect("Excel", "MarketData");
             System.out.println("done.");
             System.out.print("conversation.request...");
