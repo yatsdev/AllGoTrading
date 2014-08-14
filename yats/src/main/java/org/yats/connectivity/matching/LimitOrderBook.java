@@ -1,5 +1,7 @@
 package org.yats.connectivity.matching;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
 import org.yats.common.Tool;
@@ -7,6 +9,8 @@ import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 public class LimitOrderBook implements IConsumeReceipt {
+
+    final Logger log = LoggerFactory.getLogger(LimitOrderBook.class);
 
     public void match(OrderNew orderNew) {
         Receipt takerReceipt = orderNew.createReceiptDefault();
@@ -38,8 +42,11 @@ public class LimitOrderBook implements IConsumeReceipt {
         consumer.onReceipt(receipt);
     }
 
+    int counter = 0;
+
     //todo: only send if changed
     private void sendMarketData() {
+        log.info("sendMarketData counter start="+counter);
         try {
             Decimal bid = book[0].getFrontRowPrice();
             Decimal bidSize = book[0].getFrontRowSize();
@@ -55,7 +62,11 @@ public class LimitOrderBook implements IConsumeReceipt {
             m.setBook(offerBook);
             consumer.onMarketData(m);
         } catch(CommonExceptions.ContainerEmptyException e) {
+            log.error(e.getMessage());
+        } catch(Throwable t) {
+            log.error(t.getMessage());
         }
+        log.info("sendMarketData counter end="+counter++);
     }
 
     public int getSize(BookSide _side) {

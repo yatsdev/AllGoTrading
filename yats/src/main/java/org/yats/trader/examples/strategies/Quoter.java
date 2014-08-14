@@ -27,8 +27,8 @@ public class Quoter extends StrategyBase {
     }
 
     public void onTPMarketData(MarketData marketData) {
-        log.info("TradeProduct: "+marketData);
-        log.info("TradeProduct: "+marketData.getOfferBookAsCSV());
+        log.info("TradeProduct ticker: "+marketData);
+        log.info("TradeProduct depth: "+marketData.getOfferBookAsCSV());
     }
 
     public void onRPMarketData(MarketData marketData) {
@@ -137,7 +137,9 @@ public class Quoter extends StrategyBase {
         for(OrderNew order : orders.values()) {
             boolean sameSide = order.isForBookSide(side);
             boolean samePrice = order.getLimit().isEqualTo(price);
-            if(samePrice && sameSide) return true;
+            if(samePrice && sameSide) {
+                return true;
+            }
         }
         return false;
     }

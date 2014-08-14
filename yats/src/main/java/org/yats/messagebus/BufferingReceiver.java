@@ -1,10 +1,14 @@
 package org.yats.messagebus;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
+
+    final Logger log = LoggerFactory.getLogger(BufferingReceiver.class);
 
     public boolean hasMoreMessages()
     {
@@ -25,7 +29,11 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
         while(!shutdown) {
             T m = receive();
             buffer.add(m);
-            observer.onCallback();
+            try {
+                observer.onCallback();
+            } catch(Throwable t) {
+                log.error(t.getMessage());
+            }
         }
     }
 

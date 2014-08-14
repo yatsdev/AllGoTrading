@@ -140,6 +140,19 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
         try {
             while (!shutdown) {
                 String updatedProductId = updatedProductQueue.take();
+
+                //todo: receipts and settings should only be passed to the strategy that sent the corresponding order
+
+                while(settingsQueue.size()>0) {
+                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(settingsQueue.take()); }
+                }
+
+                while(receiptQueue.size()>0){
+                    Receipt r = receiptQueue.take();
+                    for(IConsumeReceipt c : receiptConsumers) {
+                        c.onReceipt(r); }
+                }
+
                 MarketData newData = marketDataMap.remove(updatedProductId);
                 if(newData!=null) {
                     rateConverter.onMarketData(newData);
@@ -148,17 +161,9 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
                         md.onMarketData(newData);
                     }
                 }
-                 //todo: receipts should only be passed to the strategy that sent the corresponding order
-                while(receiptQueue.size()>0){
-                    Receipt r = receiptQueue.take();
-                    for(IConsumeReceipt c : receiptConsumers) {
-                        c.onReceipt(r); }
-                }
-                while(settingsQueue.size()>0) {
-                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(settingsQueue.take()); }
-                }
             }
         }catch(InterruptedException e) {
+            log.error(e.getMessage());
             e.printStackTrace();
         }
     }

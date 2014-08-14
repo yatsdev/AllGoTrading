@@ -11,7 +11,9 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
 import org.yats.trading.*;
 
-public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
+import java.util.concurrent.LinkedBlockingQueue;
+
+public class StrategyToBusConnection implements Runnable, IProvidePriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
@@ -64,9 +66,37 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         sendAllReceivedReports();
     }
 
+    @Override
+    public void run() {
+//        try {
+//            while (!shuttingDown) {
+//                updatedProductQueue.take();
+//                while(subscriptionQueue.size()>0) {
+//                    SubscriptionMsg m = subscriptionQueue.take();
+//                    log.info("processing Subscription: "+m);
+//                    market.subscribe(m.productId, this);
+//                }
+//                while(orderCancelQueue.size()>0){
+//                    OrderCancel c = orderCancelQueue.take();
+//                    log.info("processing OrderCancel: "+c);
+//                    market.sendOrderCancel(c);
+//                }
+//                while(orderNewQueue.size()>0){
+//                    OrderNew o = orderNewQueue.take();
+//                    log.info("processing OrderNew: "+o);
+//                    market.sendOrderNew(o);
+//                }
+//            }
+//        }catch(InterruptedException e) {
+//            log.error(e.getMessage());
+//            e.printStackTrace();
+//        }
+    }
+
     private void sendAllReceivedMarketData() {
         while(receiverMarketdata.hasMoreMessages()) {
             MarketData m = receiverMarketdata.get().toMarketData();
+            log.info("STB: "+m);
             marketDataConsumer.onMarketData(m);
         }
     }
@@ -112,6 +142,16 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     public StrategyToBusConnection(IProvideProperties p) {
+        shuttingDown=false;
+
+        orderNewQueue = new LinkedBlockingQueue<OrderNew>();
+        orderCancelQueue = new LinkedBlockingQueue<OrderCancel>();
+        subscriptionQueue = new LinkedBlockingQueue<SubscriptionMsg>();
+        updatedProductQueue = new LinkedBlockingQueue<String>();
+        thread = new Thread(this);
+        thread.start();
+
+
         marketDataConsumer=new MarketDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
         settingsConsumer =new SettingsConsumerDummy();
@@ -177,6 +217,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     BufferingReceiver<KeyValueMsg> receiverSettings;
     BufferingReceiver<KeyValueMsg> receiverReports;
     Config config;
+    boolean shuttingDown;
+
+    private LinkedBlockingQueue<SubscriptionMsg> subscriptionQueue;
+    private LinkedBlockingQueue<OrderNew> orderNewQueue;
+    private LinkedBlockingQueue<OrderCancel> orderCancelQueue;
+    private LinkedBlockingQueue<String> updatedProductQueue;
+    private Thread thread;
+
 
     private static class MarketDataConsumerDummy implements IConsumeMarketData {
         private MarketDataConsumerDummy() {
