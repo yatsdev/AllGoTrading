@@ -72,6 +72,14 @@ public class LimitOrderBookSide implements IConsumeReceipt {
         return bookSide;
     }
 
+    public int getOrderCount() {
+        int sum =0;
+        for(PriceLevel l : book.values()) {
+            sum += l.getOrderCount();
+        }
+        return sum;
+    }
+
     private void removeOrderFromBook(String orderId) {
         if(bookByOrderId.containsKey(orderId)) bookByOrderId.remove(orderId);
     }

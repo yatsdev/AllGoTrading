@@ -10,6 +10,17 @@ import java.util.ArrayList;
 
 public class PriceLevel {
 
+
+    public int getOrderCount() {
+        int sum=0;
+        for(Receipt makerReceipt : list) {
+            if(makerReceipt.isEndState()) continue;
+            if(!makerReceipt.getResidualSize().isGreaterThan(Decimal.ZERO)) continue;
+            sum++;
+        }
+        return sum;
+    }
+
     public boolean isEmpty() {
         for(Receipt makerReceipt : list) {
             if(makerReceipt.isEndState()) continue;

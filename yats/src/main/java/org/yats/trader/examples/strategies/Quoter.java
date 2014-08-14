@@ -54,6 +54,12 @@ public class Quoter extends StrategyBase {
         if(!isInitialised()) return;
         if(shuttingDown) return;
 
+        log.info("Received receipt: " + receipt);
+
+        if(receipt.isEndState()) {
+            orders.remove(receipt.getOrderId().toString());
+        }
+
         if(!receipt.hasProductId(tradeProductId)){
             log.error("Received receipt for unknown product: " + receipt);
             return;
@@ -70,11 +76,9 @@ public class Quoter extends StrategyBase {
         position = position.add(receipt.getPositionChange());
         log.info("position="+position);
 
-        log.info("Received receipt: " + receipt);
 
-        if(receipt.isEndState()) {
-            orders.remove(receipt.getOrderId().toString());
-        }
+
+
 
     }
 

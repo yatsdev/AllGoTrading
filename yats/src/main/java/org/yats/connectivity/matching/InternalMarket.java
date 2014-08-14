@@ -24,8 +24,10 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         String productId = order.getProductId();
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        log.debug("Matching new order "+order.toString());
+        log.debug("matching new order "+order.toString());
         orderBooks.get(productId).match(order);
+        log.debug("orders in book: "+orderBooks.get(productId).getOrderCount());
+
     }
 
     @Override
@@ -33,12 +35,13 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         String productId = order.getProductId();
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        log.debug("Canceling order "+order.toString());
+        log.debug("canceling order "+order.toString());
         LimitOrderBook book = orderBooks.get(productId);
         if(book.isOrderInBooks(order.getOrderId()))
             book.cancel(order.getOrderId());
         else
             rejectUnknownCancelOrder(order);
+        log.debug("orders in book: "+orderBooks.get(productId).getOrderCount());
     }
 
     @Override

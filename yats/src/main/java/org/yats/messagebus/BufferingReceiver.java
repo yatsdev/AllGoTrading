@@ -19,6 +19,7 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
         try {
             return buffer.take();
         } catch (InterruptedException e) {
+            log.error(e.getMessage());
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
@@ -28,6 +29,7 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
     public void run() {
         while(!shutdown) {
             T m = receive();
+            log.info("BufferingReceiver got:" + m.toString());
             buffer.add(m);
             try {
                 observer.onCallback();

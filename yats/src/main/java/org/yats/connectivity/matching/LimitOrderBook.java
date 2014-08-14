@@ -12,6 +12,10 @@ public class LimitOrderBook implements IConsumeReceipt {
 
     final Logger log = LoggerFactory.getLogger(LimitOrderBook.class);
 
+    public int getOrderCount() {
+        return book[0].getOrderCount() + book[1].getOrderCount();
+    }
+
     public void match(OrderNew orderNew) {
         Receipt takerReceipt = orderNew.createReceiptDefault();
         int oppositeIndex = takerReceipt.getBookSide().toOpposite().toIndex();
