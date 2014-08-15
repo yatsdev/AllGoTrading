@@ -50,7 +50,6 @@ public class LimitOrderBook implements IConsumeReceipt {
 
     //todo: only send if changed
     private void sendMarketData() {
-        log.info("sendMarketData counter start="+counter);
         try {
             Decimal bid = book[0].getFrontRowPrice();
             Decimal bidSize = book[0].getFrontRowSize();
@@ -70,7 +69,6 @@ public class LimitOrderBook implements IConsumeReceipt {
         } catch(Throwable t) {
             log.error(t.getMessage());
         }
-        log.info("sendMarketData counter end="+counter++);
     }
 
     public int getSize(BookSide _side) {

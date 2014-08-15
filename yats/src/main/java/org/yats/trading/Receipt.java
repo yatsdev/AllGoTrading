@@ -136,6 +136,9 @@ public class Receipt {
     public UniqueId getOrderId() {
         return orderId;
     }
+    public String getOrderIdString() {
+        return orderId.toString();
+    }
 
     public void setOrderId(UniqueId orderId) {
         this.orderId = orderId;

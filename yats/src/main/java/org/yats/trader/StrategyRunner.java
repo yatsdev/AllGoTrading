@@ -55,7 +55,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
 
     private void fillReceiptWithOrderData(Receipt receipt) {
         if(!orderMap.containsKey(receipt.getOrderId().toString())) {
-            log.error("received receipt for unknown order: {}", receipt);
+            log.debug("received receipt for unknown order: {}", receipt);
             return;
         }
         String key = receipt.getOrderId().toString();
@@ -139,6 +139,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
     public void run() {
         try {
             while (!shutdown) {
+                Thread.yield();
                 String updatedProductId = updatedProductQueue.take();
 
                 //todo: receipts and settings should only be passed to the strategy that sent the corresponding order

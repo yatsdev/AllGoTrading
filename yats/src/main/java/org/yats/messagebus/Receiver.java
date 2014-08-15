@@ -8,8 +8,6 @@ import com.rabbitmq.client.QueueingConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 public class Receiver<T> {
 
     final Logger log = LoggerFactory.getLogger(Receiver.class);
@@ -31,8 +29,10 @@ public class Receiver<T> {
             T msg = deserializer.convertFromString(jsonMessage);
 //            log.debug("Receiver parsed: "+msg.toString());
             return msg;
-        } catch (InterruptedException e) {
-//            e.printStackTrace();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            System.exit(-1);
             throw new RuntimeException("Receiver: problem with receiving message! " + e.getMessage());
         }
     }
@@ -46,9 +46,11 @@ public class Receiver<T> {
 //            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
             return deserializer.convertFromString(jsonMessage);
-        } catch (InterruptedException e) {
-//            e.printStackTrace();
-            throw new RuntimeException("Receiver: problem with receiving message!");
+        } catch (Throwable e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            System.exit(-1);
+            throw new RuntimeException("Receiver: problem with receiving message! " + e.getMessage());
         }
     }
 
@@ -64,8 +66,10 @@ public class Receiver<T> {
             channel.queueBind(queueName, exchangeName, topic);
             consumer = new QueueingConsumer(channel);
             channel.basicConsume(queueName, true, consumer);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             e.printStackTrace();
+            log.error(e.getMessage());
+            System.exit(-1);
             throw new RuntimeException("Receiver could not create rabbitmq connection.");
         }
     }

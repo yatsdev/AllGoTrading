@@ -28,13 +28,16 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
     @Override
     public void run() {
         while(!shutdown) {
-            T m = receive();
-            log.info("BufferingReceiver got:" + m.toString());
-            buffer.add(m);
+            Thread.yield();
             try {
+                T m = receive();
+                log.info("BufferingReceiver got:" + m.toString());
+                buffer.add(m);
                 observer.onCallback();
             } catch(Throwable t) {
                 log.error(t.getMessage());
+                t.printStackTrace();
+                System.exit(-1);
             }
         }
     }

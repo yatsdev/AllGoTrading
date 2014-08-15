@@ -24,10 +24,16 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         String productId = order.getProductId();
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
-        log.debug("matching new order "+order.toString());
-        orderBooks.get(productId).match(order);
-        log.debug("orders in book: "+orderBooks.get(productId).getOrderCount());
 
+        String orderId = order.getOrderIdString();
+        if(cancelOrderMap.containsKey(orderId)) {
+            log.debug("received OrderNew was already canceled: "+orderId);
+            cancelOrderMap.remove(orderId);
+        } else {
+            log.debug("matching OrderNew "+order.toString());
+            orderBooks.get(productId).match(order);
+        }
+        log.debug("#orders in book: "+orderBooks.get(productId).getOrderCount());
     }
 
     @Override
@@ -37,11 +43,13 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         createOrderBookForProductId(productId);
         log.debug("canceling order "+order.toString());
         LimitOrderBook book = orderBooks.get(productId);
+
         if(book.isOrderInBooks(order.getOrderId()))
             book.cancel(order.getOrderId());
         else
-            rejectUnknownCancelOrder(order);
-        log.debug("orders in book: "+orderBooks.get(productId).getOrderCount());
+            confirmAndStoreCancelForNotYetArrivedOrderNew(order);
+
+        log.debug("#orders in book: "+orderBooks.get(productId).getOrderCount());
     }
 
     @Override
@@ -79,6 +87,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         externalAccount = _externalAccount;
         marketName = _marketName;
         orderBooks = new ConcurrentHashMap<String, LimitOrderBook>();
+        cancelOrderMap = new ConcurrentHashMap<String, OrderCancel>();
         priceConsumer=null;
         receiptConsumer=null;
         productProvider=null;
@@ -98,12 +107,26 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         onReceipt(r);
     }
 
+    private void confirmAndStoreCancelForNotYetArrivedOrderNew(OrderCancel order) {
+        log.info("remembering OrderCancel for later: "+order.getOrderIdString());
+        rememberCancelOrder(order);
+        Receipt r = order.createReceiptDefault().withEndState(true);
+        onReceipt(r);
+    }
+
+    private void rememberCancelOrder(OrderCancel order) {
+        if(!cancelOrderMap.containsKey(order.getOrderIdString())) {
+            cancelOrderMap.put(order.getOrderIdString(), order);
+        }
+    }
+
     private void createOrderBookForProductId(String productId) {
         if(!orderBooks.containsKey(productId)) {
             orderBooks.put(productId, new LimitOrderBook(productId, this));
         }
     }
 
+    private ConcurrentHashMap<String, OrderCancel> cancelOrderMap;
     private ConcurrentHashMap<String, LimitOrderBook> orderBooks;
     private IConsumeMarketData priceConsumer;
     private IConsumeReceipt receiptConsumer;

@@ -50,26 +50,40 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
     public void run() {
         try {
             while (!shuttingDown) {
+                Thread.yield();
                 updatedProductQueue.take();
                 while(subscriptionQueue.size()>0) {
                     SubscriptionMsg m = subscriptionQueue.take();
                     log.info("processing Subscription: "+m);
                     market.subscribe(m.productId, this);
                 }
-                while(orderCancelQueue.size()>0){
-                    OrderCancel c = orderCancelQueue.take();
-                    log.info("processing OrderCancel: "+c);
-                    market.sendOrderCancel(c);
-                }
                 while(orderNewQueue.size()>0){
                     OrderNew o = orderNewQueue.take();
                     log.info("processing OrderNew: "+o);
                     market.sendOrderNew(o);
+                    if(orderCancelQueue.size()>0) {
+                        log.debug("orderCancelQueue.size()="+orderCancelQueue.size());
+                        break;
+                    }
+                    Thread.yield();
+                }
+                while(orderCancelQueue.size()>0){
+                    OrderCancel c = orderCancelQueue.take();
+                    log.info("processing OrderCancel: "+c);
+                    market.sendOrderCancel(c);
+                    if(orderNewQueue.size()>0) {
+                        log.debug("orderNewQueue.size()="+orderNewQueue.size());
+                        break;
+                    }
+                    Thread.yield();
                 }
             }
         }catch(InterruptedException e) {
             log.error(e.getMessage());
             e.printStackTrace();
+        } catch(Throwable t) {
+            log.error(t.getMessage());
+            t.printStackTrace();
         }
     }
 

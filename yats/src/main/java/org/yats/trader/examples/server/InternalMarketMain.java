@@ -20,7 +20,7 @@ public class InternalMarketMain {
         IProvideProperties prop = PropertiesReader.createFromConfigFile(configFilename);
         InternalMarketRunner logic = new InternalMarketRunner(prop);
 
-        Thread.sleep(1000);
+        Thread.sleep(500);
 
         System.out.println("\n===");
         System.out.println("Initialization done.");

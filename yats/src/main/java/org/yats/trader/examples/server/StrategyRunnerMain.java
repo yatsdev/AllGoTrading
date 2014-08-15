@@ -77,6 +77,7 @@ public class StrategyRunnerMain {
         strategyRunner.setRateConverter(rateConverter);
         strategyToBusConnection.setReceiptConsumer(strategyRunner);
         strategyToBusConnection.setSettingsConsumer(strategyRunner);
+        strategyToBusConnection.setMarketDataConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
@@ -90,7 +91,7 @@ public class StrategyRunnerMain {
 
         positionServerLogic.requestPositionSnapshotFromPositionServer();
 
-        Thread.sleep(2000);
+        Thread.sleep(500);
 
         for(StrategyBase strategy : strategies) strategy.init();
 

@@ -54,19 +54,20 @@ public class Quoter extends StrategyBase {
         if(!isInitialised()) return;
         if(shuttingDown) return;
 
-        log.info("Received receipt: " + receipt);
+        log.info("received receipt: " + receipt);
 
         if(receipt.isEndState()) {
             orders.remove(receipt.getOrderId().toString());
+            cancelMap.remove(receipt.getOrderIdString());
         }
 
         if(!receipt.hasProductId(tradeProductId)){
-            log.error("Received receipt for unknown product: " + receipt);
+            log.error("received receipt for unknown product: " + receipt);
             return;
         }
 
         if(receipt.getRejectReason().length()>0) {
-            log.error("Received rejection "+receipt);
+            log.error("received rejection "+receipt);
             orders.remove(receipt.getOrderId().toString());
             return;
 //            shutdown();
@@ -107,7 +108,7 @@ public class Quoter extends StrategyBase {
     public void shutdown()
     {
         shuttingDown=true;
-        cancelOrders();
+        cancelAllOrders();
     }
 
     private void sendBidRelativeTo(Decimal price) {
@@ -161,7 +162,7 @@ public class Quoter extends StrategyBase {
         sendNewOrder(order);
     }
 
-    private void cancelOrders() {
+    private void cancelAllOrders() {
         for(OrderNew order : orders.values()) {
             OrderCancel o = order.createCancelOrder();
             sendOrderCancel(o);
@@ -170,8 +171,10 @@ public class Quoter extends StrategyBase {
 
     private void cancelOrders(BookSide side) {
         for(OrderNew order : orders.values()) {
+            if(cancelMap.containsKey(order.getOrderIdString())) continue;
             if(order.isForBookSide(side)) {
                 OrderCancel o = order.createCancelOrder();
+                cancelMap.put(o.getOrderIdString(), o);
                 sendOrderCancel(o);
             }
         }
@@ -183,6 +186,7 @@ public class Quoter extends StrategyBase {
         shuttingDown=false;
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
+        cancelMap = new HashMap<String, OrderCancel>();
         prevRefMarketData = MarketData.NULL;
         prop = new PropertiesReader();
     }
@@ -192,6 +196,7 @@ public class Quoter extends StrategyBase {
     private String tradeProductId;
     private String refProductId;
     private HashMap<String, OrderNew> orders;
+    private HashMap<String, OrderCancel> cancelMap;
     private MarketData prevRefMarketData;
 
     private double stepFactor = 0.0;//0031;
