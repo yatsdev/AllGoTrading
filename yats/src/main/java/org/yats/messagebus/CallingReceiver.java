@@ -7,9 +7,9 @@ import org.yats.common.IAmCalledBack;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
+public class CallingReceiver<T> extends Receiver<T> implements Runnable {
 
-    final Logger log = LoggerFactory.getLogger(BufferingReceiver.class);
+    final Logger log = LoggerFactory.getLogger(CallingReceiver.class);
 
     public boolean hasMoreMessages()
     {
@@ -27,25 +27,19 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     }
 
     @Override
-    public void onCallback() {
-        while(receiver.hasMoreMessages()) {
-            buffer.add(receiver.get());
-            if(buffer.size()>5) log.debug("buffer size "+buffer.size());
-        }
-    }
-
-    @Override
     public void run() {
         while(!shutdown) {
             try {
                 Thread.yield();
-                //TODO: replace with waiting for the buffer to fill with one element
-                while(buffer.size()<1) Thread.sleep(20);
-                //log.info("BufferingReceiver got one" );
+                T m = receive();
+                log.info("got:" + m.toString());
+                buffer.add(m);
+                if(buffer.size()>1)
+                    log.error("buffer should never be greater 1. size:"+buffer.size());
                 observer.onCallback();
             } catch(ShutdownSignalException e) {
                 shutdown=true;
-                log.debug("closed connection of receiver.");
+                log.debug("closed connection");
             } catch(Throwable t) {
                 log.error(t.getMessage());
                 t.printStackTrace();
@@ -57,7 +51,6 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
 
     public void start() {
         thread.start();
-        receiver.start();
     }
 //todo: close procedure for threads would be nice
 //    public void close() {
@@ -65,24 +58,19 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
 //        thread.interrupt();
 //    }
 
-    public void close() {
-        receiver.close();
-    }
-
     public void setObserver(IAmCalledBack observer) {
         this.observer = observer;
     }
 
-    public BufferingReceiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
-        receiver = new CallingReceiver<T>(_tClass,_exchange, _topic, _rabbitServerAddress);
+    public CallingReceiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
+        super(_tClass, _exchange, _topic, _rabbitServerAddress);
         thread = new Thread(this);
         buffer = new LinkedBlockingQueue<T>();
         observer = new IamCalledBackDummy();
         shutdown=false;
-        receiver.setObserver(this);
     }
 
-    private CallingReceiver<T> receiver;
+
     private IAmCalledBack observer;
     private Thread thread;
     private LinkedBlockingQueue<T> buffer;
@@ -95,3 +83,8 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     }
 
 } // class
+
+
+
+
+

@@ -28,7 +28,6 @@ public class PositionServerLogic implements IAmCalledBack {
         while(receiverReceipts.hasMoreMessages()) {
             positionServer.onReceipt(receiverReceipts.get().toReceipt());
         }
-        Thread.yield();
     }
 
     private void receiveNewPositionSnapshot() {
@@ -63,6 +62,7 @@ public class PositionServerLogic implements IAmCalledBack {
     }
 
     public PositionServerLogic(IProvideProperties p) {
+        gotSnapshotOnce=false;
         this.config=Config.fromProperties(p);
         positionServer = new PositionServer();
         receiverPositionRequests = new BufferingReceiver<PositionRequestMsg>(PositionRequestMsg.class,
@@ -70,19 +70,19 @@ public class PositionServerLogic implements IAmCalledBack {
                 "#",
                 config.getServerIP());
         receiverPositionRequests.setObserver(this);
+        //receiverPositionRequests.start(); // started in separate method
 
         receiverPositionSnapshots= new BufferingReceiver<PositionSnapshotMsg>(PositionSnapshotMsg.class,
                 config.getExchangePositionSnapshot(),
                 "#",
                 config.getServerIP());
         receiverPositionSnapshots.setObserver(this);
+        //receiverPositionSnapshots.start();  // started in separate method
 
         receiverReceipts = new BufferingReceiver<ReceiptMsg>(ReceiptMsg.class,
                 config.getExchangeReceipts(),
                 "#",
                 config.getServerIP());
-
-        gotSnapshotOnce=false;
         if(config.isListeningForReceipts()) {
             receiverReceipts.setObserver(this);
             receiverReceipts.start();

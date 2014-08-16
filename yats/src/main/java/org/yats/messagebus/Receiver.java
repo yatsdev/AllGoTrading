@@ -12,7 +12,7 @@ public class Receiver<T> {
     final Logger log = LoggerFactory.getLogger(Receiver.class);
 
 
-    private String rabbitServerAddress;
+
 
 //    public String getLastTopic() {
 //        return lastTopic;
@@ -21,6 +21,7 @@ public class Receiver<T> {
     public T receive()
     {
         try {
+
             QueueingConsumer.Delivery delivery = consumer.nextDelivery();
 //            lastTopic = delivery.getEnvelope().getRoutingKey();
             String jsonMessage = new String(delivery.getBody());
@@ -95,12 +96,13 @@ public class Receiver<T> {
         init();
     }
 
-    Deserializer<T> deserializer;
-    ConnectionFactory factory;
-    Connection connection;
-    Channel channel;
-    String queueName;
-    QueueingConsumer consumer;
+    private String rabbitServerAddress;
+    private Deserializer<T> deserializer;
+    private ConnectionFactory factory;
+    private Connection connection;
+    private Channel channel;
+    private String queueName;
+    private QueueingConsumer consumer;
     private String exchangeName;
     private String topic;
 
