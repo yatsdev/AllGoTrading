@@ -223,6 +223,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         catch (DDEException e)
         {
             System.out.println("DDEException: " + e.getMessage());
+            close();
+            System.exit(-1);
         }
     }
 
@@ -270,8 +272,14 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         strategyToBusConnection.setReceiptConsumer(this);
         strategyToBusConnection.setReportsConsumer(this);
         if(Tool.isWindows()) {
-            conversation = new DDEClientConversation();  // cant use this on Linux
-            conversation.setEventListener(this);
+            try {
+                conversation = new DDEClientConversation();  // cant use this on Linux
+                conversation.setEventListener(this);
+            } catch(UnsatisfiedLinkError  e){
+                log.error(e.getMessage());
+                close();
+                System.exit(-1);
+            }
         } else {
             System.out.println("This is not Windows! DDEClient will not work!");
 //            System.exit(0);
