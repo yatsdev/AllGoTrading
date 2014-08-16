@@ -3,6 +3,7 @@ package org.yats.messagebus;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ShutdownSignalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,16 +30,20 @@ public class Sender<T>
         }
     }
 
-    private void close()  {
+    public void close()  {
         try{
-            channel.close();
+            //channel.close();
             connection.close();
+        } catch(ShutdownSignalException e) {
+            log.error("problem with closing connection of sender.");
+            throw new RuntimeException(e.toString());
         } catch(Throwable e)
         {
             e.printStackTrace();
             log.error(e.getMessage());
             throw new RuntimeException(e.toString());
         }
+        log.debug("closed connection of sender.");
     }
 
     public void init() {
@@ -62,12 +67,6 @@ public class Sender<T>
         exchangeName = _exchangeName;
         rabbitServerAddress=_rabbitServerAddress;
         init();
-    }
-
-    protected void finalize( ) throws Throwable
-    {
-        close();
-        super.finalize( );
     }
 
     private Serializer<T> serializer;

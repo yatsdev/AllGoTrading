@@ -54,6 +54,14 @@ public class PositionServerLogic implements IAmCalledBack {
                 PositionRequestMsg.fromPositionRequest(pr));
     }
 
+    public void close() {
+        receiverPositionRequests.close();
+        receiverPositionSnapshots.close();
+        receiverReceipts.close();
+        senderPositionSnapshot.close();
+        senderPositionRequest.close();
+    }
+
     public PositionServerLogic(IProvideProperties p) {
         this.config=Config.fromProperties(p);
         positionServer = new PositionServer();

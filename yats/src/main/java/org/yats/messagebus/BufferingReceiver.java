@@ -1,5 +1,6 @@
 package org.yats.messagebus;
 
+import com.rabbitmq.client.ShutdownSignalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
@@ -34,10 +35,14 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
                 log.info("BufferingReceiver got:" + m.toString());
                 buffer.add(m);
                 observer.onCallback();
+            } catch(ShutdownSignalException e) {
+                shutdown=true;
+                log.debug("closed connection of receiver.");
             } catch(Throwable t) {
                 log.error(t.getMessage());
                 t.printStackTrace();
                 System.exit(-1);
+                throw new RuntimeException("Problem during run! "+t.getMessage());
             }
         }
     }
@@ -45,9 +50,9 @@ public class BufferingReceiver<T> extends Receiver<T> implements Runnable {
     public void start() {
         thread.start();
     }
-//todo: shutdown procedure for threads would be nice
-//    public void stop() {
-//        shutdown=true;
+//todo: close procedure for threads would be nice
+//    public void close() {
+//        close=true;
 //        thread.interrupt();
 //    }
 

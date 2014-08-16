@@ -107,6 +107,9 @@ public class StrategyRunnerMain {
         Thread.sleep(1000);
 
         strategyRunner.stop();
+        strategyToBusConnection.close();
+        positionServerLogic.close();
+
         System.exit(0);
     }
 

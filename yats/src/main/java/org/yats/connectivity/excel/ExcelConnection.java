@@ -236,6 +236,10 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         }
     }
 
+    public void close() {
+        strategyToBusConnection.close();
+    }
+
     public void go() throws InterruptedException, IOException {
         log.info("Starting ExcelConnection...");
 
@@ -250,6 +254,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         System.in.read();
         System.out.println("\nexiting...\n");
 
+        close();
         if(Tool.isWindows()) stopDDE();
         if(Tool.isWindows()) Thread.sleep(1000);
         if(!Tool.isWindows())Thread.sleep(60000);
@@ -292,6 +297,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
+
 
 
 } // class

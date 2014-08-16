@@ -54,6 +54,11 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     public void shutdown()
     {
         shuttingDown=true;
+        receiverOrderCancel.close();
+        receiverOrderNew.close();
+        receiverSubscription.close();
+        senderMarketDataMsg.close();
+        senderReceipt.close();
     }
 
     public void onCallback() {

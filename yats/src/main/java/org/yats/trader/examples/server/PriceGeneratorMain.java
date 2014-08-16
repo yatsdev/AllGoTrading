@@ -32,6 +32,8 @@ public class PriceGeneratorMain {
 
         Thread.sleep(1000);
 
+        logic.close();
+
         log.info("ReceiptStorageMain done.");
         System.exit(0);
     }

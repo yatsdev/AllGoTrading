@@ -114,6 +114,18 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         this.receiptConsumer = receiptConsumer;
     }
 
+    public void close() {
+        receiverMarketdata.close();
+        receiverReceipt.close();
+        if(receiverReports!=null) receiverReports.close();
+        if(receiverSettings!=null) receiverSettings.close();
+        senderOrderNew.close();
+        senderOrderCancel.close();
+        senderReports.close();
+        senderSettings.close();
+        senderSubscription.close();
+    }
+
     public StrategyToBusConnection(IProvideProperties p) {
         shuttingDown=false;
 
@@ -194,6 +206,8 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private LinkedBlockingQueue<OrderNew> orderNewQueue;
     private LinkedBlockingQueue<OrderCancel> orderCancelQueue;
     private LinkedBlockingQueue<String> updatedProductQueue;
+
+
 
     private static class MarketDataConsumerDummy implements IConsumeMarketData {
         private MarketDataConsumerDummy() {

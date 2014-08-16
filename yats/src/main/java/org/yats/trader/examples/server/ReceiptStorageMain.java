@@ -23,6 +23,8 @@ public class ReceiptStorageMain {
         System.in.read();
         System.out.println("\nexiting...\n");
 
+        storage.close();
+
         Thread.sleep(1000);
 
         log.info("ReceiptStorageMain done.");

@@ -38,8 +38,9 @@ public class PriceGeneratorLogic implements Runnable {
         thread.start();
     }
 
-    public void shutdown() {
+    public void close() {
         shutdownThread = true;
+        senderMarketDataMsg.close();
     }
 
     public PriceGeneratorLogic(IProvideProperties prop)
@@ -51,7 +52,6 @@ public class PriceGeneratorLogic implements Runnable {
         lastData = MarketData.createFromLast(pid, Decimal.ONE);
         productList = ProductList.createFromFile("config/CFDProductList.csv");
         senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
-        senderMarketDataMsg.init();
         shutdownThread = false;
         thread = new Thread(this);
         counter=0;
@@ -68,6 +68,7 @@ public class PriceGeneratorLogic implements Runnable {
     private MarketData lastData;
     private int counter;
     private int interval;
+
 
 
 } // class

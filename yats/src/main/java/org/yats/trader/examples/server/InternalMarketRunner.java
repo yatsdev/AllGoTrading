@@ -89,6 +89,11 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
 
     public void shutdown() {
         shuttingDown = true;
+        receiverOrderCancel.close();
+        receiverOrderNew.close();
+        receiverSubscription.close();
+        senderMarketDataMsg.close();
+        senderReceipt.close();
     }
 
     public InternalMarketRunner(IProvideProperties prop) {

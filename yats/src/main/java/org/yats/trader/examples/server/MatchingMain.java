@@ -62,7 +62,7 @@ public class MatchingMain implements IConsumeMarketData {
         System.out.println("\nexiting...\n");
 
         marketToBusConnection.shutdown();
-//        oandaFeed.shutdown();
+//        oandaFeed.close();
         Thread.sleep(1000);
 
         System.exit(0);

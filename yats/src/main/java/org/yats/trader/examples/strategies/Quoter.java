@@ -70,7 +70,7 @@ public class Quoter extends StrategyBase {
             log.error("received rejection "+receipt);
             orders.remove(receipt.getOrderId().toString());
             return;
-//            shutdown();
+//            close();
 //            System.exit(-1);
         }
 

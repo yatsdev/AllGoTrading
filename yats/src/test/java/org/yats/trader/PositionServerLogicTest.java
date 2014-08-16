@@ -2,6 +2,7 @@ package org.yats.trader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.IProvideProperties;
@@ -19,20 +20,19 @@ import java.util.ArrayList;
 
 public class PositionServerLogicTest {
 
-    final Logger log = LoggerFactory.getLogger(PositionServerLogicTest.class);
+    //final Logger log = LoggerFactory.getLogger(PositionServerLogicTest.class);
 
     @Test
     public void canInitializeOnePositionServerFromAnother()
     {
-        IProvideProperties p = Config.createTestProperties();
-        PositionServerLogic logic1 = new PositionServerLogic(p);
+        PositionServerLogic logic1 = new PositionServerLogic(prop);
         PositionServer server1 = new PositionServer();
         logic1.setPositionServer(server1);
         server1.onReceipt(ReceiptTest.RECEIPT1);
         server1.onReceipt(ReceiptTest.RECEIPT4);
         logic1.startRequestListener();
 
-        PositionServerLogic logic2 = new PositionServerLogic(p);
+        PositionServerLogic logic2 = new PositionServerLogic(prop);
         PositionServer server2 = new PositionServer();
         logic2.setPositionServer(server2);
 
@@ -41,35 +41,46 @@ public class PositionServerLogicTest {
         Tool.sleepABit();
 
         assert(2==server2.getNumberOfPositions());
+
+        logic1.close();
+        logic2.close();
     }
 
     @Test
     public void canStorePositionSnapshot() {
-        IProvideProperties p = Config.createTestProperties();
-        Config c = Config.fromProperties(p);
 
-        c.setStorePositionsToDisk(true);
-        c.setListeningForReceipts(true);
-        PositionServerLogic logic = new PositionServerLogic(p);
+        config.setStorePositionsToDisk(true);
+        config.setListeningForReceipts(true);
+        PositionServerLogic logic = new PositionServerLogic(prop);
         logic.setPositionStorage(positionStorage);
-        senderReceipts = new Sender<ReceiptMsg>(c.getExchangeReceipts(),c.getServerIP());
         ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
         senderReceipts.publish(m.getTopic(), m);
         Tool.sleepABit();
 
         assert(1==positionStorage.getSnapshotCount());
+        logic.close();
     }
 
 
     @BeforeMethod
     public void setUp() {
+        prop = Config.createTestProperties();
+        config = Config.fromProperties(prop);
+        senderReceipts = new Sender<ReceiptMsg>(config.getExchangeReceipts(),config.getServerIP());
+
         positionStorage = new PositionSnapshotStorageMem();
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        senderReceipts.close();
     }
 
 
     private PositionSnapshotStorageMem positionStorage;
     private Sender<ReceiptMsg> senderReceipts;
-
+    private Config config;
+    private IProvideProperties prop;
 
     private class PositionSnapshotStorageMem implements IStorePositionSnapshots  {
         @Override

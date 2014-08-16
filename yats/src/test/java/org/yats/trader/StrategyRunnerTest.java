@@ -2,6 +2,7 @@ package org.yats.trader;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
@@ -139,6 +140,10 @@ public class StrategyRunnerTest {
 
     }
 
+    @AfterMethod
+    public void tearDown() {
+        strategyRunner.stop();
+    }
 
     private StrategyRunner strategyRunner;
     private PriceFeedMock feed;

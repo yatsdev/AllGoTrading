@@ -1,12 +1,11 @@
 package org.yats.messagebus;
 
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class Receiver<T> {
 
@@ -29,6 +28,8 @@ public class Receiver<T> {
             T msg = deserializer.convertFromString(jsonMessage);
 //            log.debug("Receiver parsed: "+msg.toString());
             return msg;
+        } catch(ShutdownSignalException e) {
+            throw e;
         } catch (Throwable e) {
             e.printStackTrace();
             log.error(e.getMessage());
@@ -39,7 +40,6 @@ public class Receiver<T> {
 
     public T tryReceive(int timeoutMillisec)
     {
-
         try {
             QueueingConsumer.Delivery delivery = consumer.nextDelivery(timeoutMillisec);
             if(delivery==null) return null;
@@ -51,6 +51,17 @@ public class Receiver<T> {
             log.error(e.getMessage());
             System.exit(-1);
             throw new RuntimeException("Receiver: problem with receiving message! " + e.getMessage());
+        }
+    }
+
+    public void close() {
+        try {
+            //channel.close();
+            connection.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(e.getMessage());
+            throw new RuntimeException("Receiver: problem with close! " + e.getMessage());
         }
     }
 
@@ -92,5 +103,7 @@ public class Receiver<T> {
     QueueingConsumer consumer;
     private String exchangeName;
     private String topic;
+
+
 //    private String lastTopic;
 }

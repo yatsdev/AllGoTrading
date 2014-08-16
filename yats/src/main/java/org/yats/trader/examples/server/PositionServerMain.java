@@ -42,6 +42,8 @@ public class PositionServerMain {
 
         Thread.sleep(1000);
 
+        positionServerLogic.close();
+
         log.info("PositionServerMain done.");
         System.exit(0);
     }
