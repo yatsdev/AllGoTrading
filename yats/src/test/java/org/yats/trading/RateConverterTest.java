@@ -11,117 +11,117 @@ public class RateConverterTest {
 
     @Test
     public void canConvertPositionInEURToEUR() {
-        Position p1InEUR = converter.convert(p1, TestMarketData.EUR_PID);
-        assert(p1InEUR.isSize(TestMarketData.SAP_LAST.multiply(SAP_SIZE)));
+        Position p1InEUR = converter.convert(p1, TestMarketData.TEST_EUR_PID);
+        assert(p1InEUR.isSize(TestMarketData.TEST_SAP_LAST.multiply(SAP_SIZE)));
     }
 
     @Test
     public void canConvertPositionInEURToUSD() {
-        Position p1InUSD = converter.convert(p1, TestMarketData.USD_PID);
-        Decimal expectedSize = TestMarketData.SAP_LAST.multiply(SAP_SIZE).multiply(TestMarketData.EURUSD_LAST);
+        Position p1InUSD = converter.convert(p1, TestMarketData.TEST_USD_PID);
+        Decimal expectedSize = TestMarketData.TEST_SAP_LAST.multiply(SAP_SIZE).multiply(TestMarketData.TEST_EURUSD_LAST);
         assert(p1InUSD.isSize(expectedSize));
     }
 
     @Test
     public void canConvertPositionInEURToCHF() {
-        Position p1InCHF = converter.convert(p1, TestMarketData.CHF_PID);
-        Decimal expectedSize = TestMarketData.SAP_LAST
+        Position p1InCHF = converter.convert(p1, TestMarketData.TEST_CHF_PID);
+        Decimal expectedSize = TestMarketData.TEST_SAP_LAST
                 .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.USDCHF_LAST)
+                .multiply(TestMarketData.TEST_EURUSD_LAST)
+                .multiply(TestMarketData.TEST_USDCHF_LAST)
                 ;
         assert(p1InCHF.isSize(expectedSize));
     }
 
     @Test
     public void canCache() {
-        Position p1InCHF = converter.convert(p1, TestMarketData.CHF_PID);
+        Position p1InCHF = converter.convert(p1, TestMarketData.TEST_CHF_PID);
         assert(converter.getCacheHits()==0);
         assert(converter.getCacheSize()==1);
-        Position p2InCHF = converter.convert(p1, TestMarketData.CHF_PID);
+        Position p2InCHF = converter.convert(p1, TestMarketData.TEST_CHF_PID);
         assert(converter.getCacheHits()==1);
         assert(converter.getCacheSize()==1);
 
-        Decimal expectedSize = TestMarketData.SAP_LAST
+        Decimal expectedSize = TestMarketData.TEST_SAP_LAST
                 .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.USDCHF_LAST)
+                .multiply(TestMarketData.TEST_EURUSD_LAST)
+                .multiply(TestMarketData.TEST_USDCHF_LAST)
                 ;
         assert(p2InCHF.isSize(expectedSize));
     }
 
     @Test
     public void canConvertPositionInEURToGBPUsingInversionOfCurrencyPair() {
-        Position p1InGBP = converter.convert(p1, TestMarketData.GBP_PID);
-        Decimal expectedSize = TestMarketData.SAP_LAST
+        Position p1InGBP = converter.convert(p1, TestMarketData.TEST_GBP_PID);
+        Decimal expectedSize = TestMarketData.TEST_SAP_LAST
                 .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.GBPUSD_LAST.invert())
+                .multiply(TestMarketData.TEST_EURUSD_LAST)
+                .multiply(TestMarketData.TEST_GBPUSD_LAST.invert())
                 ;
         assert(p1InGBP.isSize(expectedSize));
     }
 
     @Test
     public void canConvertPositionInEURToNZDUsingShortestChainOfConversions() {
-        converter.onMarketData(TestMarketData.XAUUSD);
-        converter.onMarketData(TestMarketData.XAUXAG);
-        converter.onMarketData(TestMarketData.XAGNZD);
-        converter.onMarketData(TestMarketData.AUDHKD);
-        converter.onMarketData(TestMarketData.CADHKD);
-        converter.onMarketData(TestMarketData.CADSGD);
-        converter.onMarketData(TestMarketData.NZDCAD);
-        converter.onMarketData(TestMarketData.SGDHKD);
+        converter.onMarketData(TestMarketData.TEST_XAUUSD);
+        converter.onMarketData(TestMarketData.TEST_XAUXAG);
+        converter.onMarketData(TestMarketData.TEST_XAGNZD);
+        converter.onMarketData(TestMarketData.TEST_AUDHKD);
+        converter.onMarketData(TestMarketData.TEST_CADHKD);
+        converter.onMarketData(TestMarketData.TEST_CADSGD);
+        converter.onMarketData(TestMarketData.TEST_NZDCAD);
+        converter.onMarketData(TestMarketData.TEST_SGDHKD);
 
         // long chains using AUDCHF are wrong anyways. lets make this market data corrupt artificially:
-        converter.onMarketData(MarketData.createFromLast(TestMarketData.AUDCHF_PID,
-                TestMarketData.AUDCHF_LAST.multiply(Decimal.fromString("0.9"))));
+        converter.onMarketData(MarketData.createFromLast(TestMarketData.TEST_AUDCHF_PID,
+                TestMarketData.TEST_AUDCHF_LAST.multiply(Decimal.fromString("0.9"))));
 
-        Position p1InNZD = converter.convert(p1, TestMarketData.NZD_PID);
+        Position p1InNZD = converter.convert(p1, TestMarketData.TEST_NZD_PID);
 
         // some possible conversion chains:
-        // SAP->EUR->USD->XAU->XAG->NZD
-        // SAP->EUR->USD->CHF->AUD->HKD->CAD->NZD
-        // SAP->EUR->USD->CHF->AUD->HKD->CAD->SGD->NZD
+        // TEST_SAP->EUR->USD->XAU->XAG->NZD
+        // TEST_SAP->EUR->USD->CHF->AUD->HKD->CAD->NZD
+        // TEST_SAP->EUR->USD->CHF->AUD->HKD->CAD->SGD->NZD
         // pitfall chain with a loop:
-        // SAP->EUR->USD->CHF->AUD->HKD->SGD->CAD->HKD->...
+        // TEST_SAP->EUR->USD->CHF->AUD->HKD->SGD->CAD->HKD->...
 
 
-        Decimal expectedSize = TestMarketData.SAP_LAST
+        Decimal expectedSize = TestMarketData.TEST_SAP_LAST
                 .multiply(SAP_SIZE)
-                .multiply(TestMarketData.EURUSD_LAST)
-                .multiply(TestMarketData.XAUUSD_LAST.invert())
-                .multiply(TestMarketData.XAUXAG_LAST)
-                .multiply(TestMarketData.XAGNZD_LAST)
+                .multiply(TestMarketData.TEST_EURUSD_LAST)
+                .multiply(TestMarketData.TEST_XAUUSD_LAST.invert())
+                .multiply(TestMarketData.TEST_XAUXAG_LAST)
+                .multiply(TestMarketData.TEST_XAGNZD_LAST)
                 ;
         assert(p1InNZD.isSize(expectedSize));
     }
 
     @Test
     public void canConvertPositionInHKDToSAPUsingShortestChainOfConversions() {
-        converter.onMarketData(TestMarketData.XAUUSD);
-        converter.onMarketData(TestMarketData.XAUXAG);
-        converter.onMarketData(TestMarketData.XAGNZD);
-        converter.onMarketData(TestMarketData.AUDHKD);
-        converter.onMarketData(TestMarketData.CADHKD);
-        converter.onMarketData(TestMarketData.CADSGD);
-        converter.onMarketData(TestMarketData.NZDCAD);
-        converter.onMarketData(TestMarketData.SGDHKD);
+        converter.onMarketData(TestMarketData.TEST_XAUUSD);
+        converter.onMarketData(TestMarketData.TEST_XAUXAG);
+        converter.onMarketData(TestMarketData.TEST_XAGNZD);
+        converter.onMarketData(TestMarketData.TEST_AUDHKD);
+        converter.onMarketData(TestMarketData.TEST_CADHKD);
+        converter.onMarketData(TestMarketData.TEST_CADSGD);
+        converter.onMarketData(TestMarketData.TEST_NZDCAD);
+        converter.onMarketData(TestMarketData.TEST_SGDHKD);
 
-        Position p2InSAP = converter.convert(p2, TestMarketData.SAP_PID);
+        Position p2InSAP = converter.convert(p2, TestMarketData.TEST_SAP_PID);
 
         Decimal expectedSize = HKD_SIZE
-                .multiply(TestMarketData.CADHKD_LAST.invert())
-                .multiply(TestMarketData.NZDCAD_LAST.invert())
-                .multiply(TestMarketData.XAGNZD_LAST.invert())
-                .multiply(TestMarketData.XAUXAG_LAST.invert())
-                .multiply(TestMarketData.XAUUSD_LAST)
-                .multiply(TestMarketData.EURUSD_LAST.invert())
-                .multiply(TestMarketData.SAP_LAST.invert())
+                .multiply(TestMarketData.TEST_CADHKD_LAST.invert())
+                .multiply(TestMarketData.TEST_NZDCAD_LAST.invert())
+                .multiply(TestMarketData.TEST_XAGNZD_LAST.invert())
+                .multiply(TestMarketData.TEST_XAUXAG_LAST.invert())
+                .multiply(TestMarketData.TEST_XAUUSD_LAST)
+                .multiply(TestMarketData.TEST_EURUSD_LAST.invert())
+                .multiply(TestMarketData.TEST_SAP_LAST.invert())
                 ;
 
         assert(p2InSAP.isSize(expectedSize));
         assert(converter.getCacheSize()==1);
-        assert(converter.isChainInCache(p2.getProductId(), TestMarketData.SAP_PID));
+        assert(converter.isChainInCache(p2.getProductId(), TestMarketData.TEST_SAP_PID));
     }
 
     @BeforeMethod
@@ -129,11 +129,11 @@ public class RateConverterTest {
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         converter = new RateConverter(productList);
         converter.onMarketData(TestMarketData.TEST_EURUSD);
-        converter.onMarketData(TestMarketData.USDCHF);
+        converter.onMarketData(TestMarketData.TEST_USDCHF);
         converter.onMarketData(TestMarketData.TEST_GBPUSD);
-        converter.onMarketData(TestMarketData.SAP);
-        p1 = new Position(TestMarketData.SAP_PID, SAP_SIZE);
-        p2 = new Position(TestMarketData.HKD_PID, HKD_SIZE);
+        converter.onMarketData(TestMarketData.TEST_SAP);
+        p1 = new Position(TestMarketData.TEST_SAP_PID, SAP_SIZE);
+        p2 = new Position(TestMarketData.TEST_HKD_PID, HKD_SIZE);
     }
 
 

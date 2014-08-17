@@ -30,7 +30,7 @@ public class StrategyRunnerTest {
     public void canDoSubscriptionForMarketData()
     {
         strategy.init();
-        assert (strategyRunner.isProductSubscribed(TestMarketData.SAP_PID));
+        assert (strategyRunner.isProductSubscribed(TestMarketData.TEST_SAP_PID));
     }
 
     @Test
@@ -99,12 +99,12 @@ public class StrategyRunnerTest {
         strategyRunner.waitForProcessingQueues();
         orderConnection.partialFillOrder(2);
         strategyRunner.waitForProcessingQueues();
-        Decimal positionSize = strategy.getPositionForProduct(TestMarketData.SAP_PID);
+        Decimal positionSize = strategy.getPositionForProduct(TestMarketData.TEST_SAP_PID);
         assert (positionSize.isEqualTo(Decimal.fromString("2")));
-        Position positionValueUSD = strategy.getValueForProduct(TestMarketData.USD_PID, TestMarketData.SAP_PID);
+        Position positionValueUSD = strategy.getValueForProduct(TestMarketData.TEST_USD_PID, TestMarketData.TEST_SAP_PID);
         Decimal expected = Decimal.fromString("2")
                 .multiply(data1.getLast())
-                .multiply(TestMarketData.EURUSD_LAST);
+                .multiply(TestMarketData.TEST_EURUSD_LAST);
         assert (positionValueUSD.isSize(expected));
     }
 
@@ -112,7 +112,7 @@ public class StrategyRunnerTest {
 
     @BeforeMethod
     public void setUp() {
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.SAP_PID,
+        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.TEST_SAP_PID,
                 Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
                 Decimal.ONE,Decimal.ONE,Decimal.ONE);
 
@@ -155,7 +155,7 @@ public class StrategyRunnerTest {
     private ProductList productList;
 
 
-    private static Product testProduct = new Product(TestMarketData.SAP_PID, TestMarketData.SAP_SYMBOL, "exchange");
+    private static Product testProduct = new Product(TestMarketData.TEST_SAP_PID, TestMarketData.TEST_SAP_SYMBOL, "exchange");
 
     private class StrategyMock extends StrategyBase {
 
