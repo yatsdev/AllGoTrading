@@ -33,6 +33,19 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.01"))));
     }
 
+    @Test
+    public void canProduceProductCounterReceipts() {
+        OrderNew makerBid = createCopy(bid133);
+        market.sendOrderNew(makerBid);
+        OrderNew crossingAsk = createCopy(ask135).withLimit(bid133.getLimit());
+        market.sendOrderNew(crossingAsk);
+        assert(mdCounter==2);
+        assert(receiptCounter==5);
+        for(Receipt r : receiptUnitsList) {
+            assert(r.getCurrentTradedSize().isEqualTo(bid133.getLimit()));
+        }
+
+    }
 
     @Test
     public void canHandleMultipleCrossingOrders() {
@@ -58,7 +71,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
                 .withSize(Decimal.fromString("98.5"));
         market.sendOrderNew(newAsk);
         assert(mdCounter==100);
-        assert(receiptCounter==297);
+        assert(receiptCounter==5*99);
         assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
         assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
     }
@@ -149,6 +162,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         mdCounter=0;
         receiptCounter=0;
         receiptList=new ArrayList<Receipt>();
+        receiptUnitsList=new ArrayList<Receipt>();
         mdList=new ArrayList<MarketData>();
     }
 
@@ -156,7 +170,11 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
     public void onReceipt(Receipt receipt) {
         receiptCounter++;
         lastReceipt=receipt;
-        receiptList.add(receipt);
+        if(receipt.isForProduct(ProductTest.PRODUCT_TEST))
+            receiptList.add(receipt);
+        if(receipt.hasProductId(ProductTest.PRODUCT_TEST.getUnitId()))
+            receiptUnitsList.add(receipt);
+
 //        System.out.println(receipt);
     }
 
@@ -179,6 +197,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
     MarketData lastMarketData;
     Receipt lastReceipt;
     List<Receipt> receiptList;
+    List<Receipt> receiptUnitsList;
     List<MarketData> mdList;
 
 

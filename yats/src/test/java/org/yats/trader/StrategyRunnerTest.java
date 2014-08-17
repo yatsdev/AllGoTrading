@@ -118,7 +118,7 @@ public class StrategyRunnerTest {
 
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         rateConverter = new RateConverter(productList);
-        rateConverter.onMarketData(TestMarketData.EURUSD);
+        rateConverter.onMarketData(TestMarketData.TEST_EURUSD);
         rateConverter.onMarketData(data1);
         positionServer = new PositionServer();
         positionServer.setRateConverter(rateConverter);

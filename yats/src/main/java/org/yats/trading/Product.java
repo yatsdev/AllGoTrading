@@ -1,5 +1,6 @@
 package org.yats.trading;
 
+import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 
 public class Product {
@@ -133,6 +134,8 @@ public class Product {
         unitId = s;
         return this;
     }
+
+
 
     public Product(String productId, String symbol, String exchange) {
         this.productId = productId;

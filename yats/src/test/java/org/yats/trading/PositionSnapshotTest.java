@@ -59,7 +59,7 @@ public class PositionSnapshotTest {
         Decimal expected =
                 Decimal.ONE
                 .multiply(TestMarketData.PRODUCT1_DATA.getLast())
-                .multiply(TestMarketData.EURUSD.getLast());
+                .multiply(TestMarketData.TEST_EURUSD.getLast());
         assert(positionInUSD.getSize().isEqualTo(expected));
     }
 
@@ -97,8 +97,8 @@ public class PositionSnapshotTest {
         productList.add(ProductTest.PRODUCT2);
         productList.add(ProductTest.PRODUCT3);
         converter = new RateConverter(productList);
-        converter.onMarketData(TestMarketData.EURUSD);
-        converter.onMarketData(TestMarketData.GBPUSD);
+        converter.onMarketData(TestMarketData.TEST_EURUSD);
+        converter.onMarketData(TestMarketData.TEST_GBPUSD);
         converter.onMarketData(TestMarketData.PRODUCT1_DATA);
         converter.onMarketData(TestMarketData.PRODUCT2_DATA);
         converter.onMarketData(TestMarketData.PRODUCT3_DATA);

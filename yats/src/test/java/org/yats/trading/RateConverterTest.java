@@ -128,9 +128,9 @@ public class RateConverterTest {
     public void setUp() {
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         converter = new RateConverter(productList);
-        converter.onMarketData(TestMarketData.EURUSD);
+        converter.onMarketData(TestMarketData.TEST_EURUSD);
         converter.onMarketData(TestMarketData.USDCHF);
-        converter.onMarketData(TestMarketData.GBPUSD);
+        converter.onMarketData(TestMarketData.TEST_GBPUSD);
         converter.onMarketData(TestMarketData.SAP);
         p1 = new Position(TestMarketData.SAP_PID, SAP_SIZE);
         p2 = new Position(TestMarketData.HKD_PID, HKD_SIZE);

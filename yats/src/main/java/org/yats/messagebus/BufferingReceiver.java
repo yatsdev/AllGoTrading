@@ -4,8 +4,8 @@ import com.rabbitmq.client.ShutdownSignalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
+import org.yats.common.WaitingLinkedBlockingQueue;
 
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
 
@@ -40,8 +40,7 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
             try {
                 Thread.yield();
                 //TODO: replace with waiting for the buffer to fill with one element
-                while(buffer.size()<1) Thread.sleep(20);
-                //log.info("BufferingReceiver got one" );
+                buffer.waitNotEmpty();
                 observer.onCallback();
             } catch(ShutdownSignalException e) {
                 shutdown=true;
@@ -76,7 +75,7 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     public BufferingReceiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
         receiver = new CallingReceiver<T>(_tClass,_exchange, _topic, _rabbitServerAddress);
         thread = new Thread(this);
-        buffer = new LinkedBlockingQueue<T>();
+        buffer = new WaitingLinkedBlockingQueue<T>();
         observer = new IamCalledBackDummy();
         shutdown=false;
         receiver.setObserver(this);
@@ -85,7 +84,7 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     private CallingReceiver<T> receiver;
     private IAmCalledBack observer;
     private Thread thread;
-    private LinkedBlockingQueue<T> buffer;
+    private WaitingLinkedBlockingQueue<T> buffer;
     private boolean shutdown;
 
     private static class IamCalledBackDummy implements IAmCalledBack {

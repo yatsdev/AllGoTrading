@@ -73,38 +73,38 @@ public class OrderNew extends OrderBase {
         return limit;
     }
 
-    public OrderNew withTimestamp(DateTime d) {
-        timestamp=d;
+    public OrderNew withTimestamp(DateTime _dateTime) {
+        timestamp=_dateTime;
         return this;
     }
 
-    public OrderNew withOrderId(UniqueId i) {
-        setOrderId(i);
+    public OrderNew withOrderId(UniqueId _id) {
+        setOrderId(_id);
         return this;
     }
 
-    public OrderNew withInternalAccount(String a) {
-        internalAccount=a;
+    public OrderNew withInternalAccount(String _account) {
+        internalAccount=_account;
         return this;
     }
 
-    public OrderNew withProductId(String pid) {
-        productId =pid;
+    public OrderNew withProductId(String _pid) {
+        productId =_pid;
         return this;
     }
 
-    public OrderNew withBookSide(BookSide b) {
-        bookSide=b;
+    public OrderNew withBookSide(BookSide _bookside) {
+        bookSide=_bookside;
         return this;
     }
 
-    public OrderNew withSize(Decimal s) {
-        size=s;
+    public OrderNew withSize(Decimal _size) {
+        size=_size;
         return this;
     }
 
-    public OrderNew withLimit(Decimal l) {
-        limit=l;
+    public OrderNew withLimit(Decimal _limit) {
+        this.limit = _limit;
         return this;
     }
 

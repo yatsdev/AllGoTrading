@@ -94,7 +94,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
 
     public void waitForProcessingQueues() {
         try {
-            while(!updatedProductQueue.isEmpty()) Thread.sleep(150);
+            while(!updatedProductQueue.isEmpty()) Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage()); // todo: inherit class to throw

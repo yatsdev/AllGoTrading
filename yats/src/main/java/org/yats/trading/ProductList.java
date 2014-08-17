@@ -83,8 +83,9 @@ public class ProductList implements IProvideProduct {
             CSVReader reader = new CSVReader(new FileReader(path));
             String[] nextLine;
             reader.readNext();
+            int lineNumber=0;
             while ((nextLine = reader.readNext()) != null) {
-                if(nextLine.length<8) throw new CommonExceptions.FieldNotFoundException("too few fields!");
+                if(nextLine.length<8) throw new CommonExceptions.FieldNotFoundException("too few fields! line #"+lineNumber);
                 Product p = new Product()
                         .withProductId(checkForNull(nextLine[0].trim()))
                         .withSymbol(checkForNull(nextLine[1].trim()))
@@ -96,6 +97,7 @@ public class ProductList implements IProvideProduct {
                         .withUnitId(checkForNull(nextLine[7].trim()))
                         ;
                 add(p);
+                lineNumber++;
             }
         } catch (Exception e) {
             e.printStackTrace();
