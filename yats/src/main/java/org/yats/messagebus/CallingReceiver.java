@@ -13,17 +13,13 @@ public class CallingReceiver<T> extends Receiver<T> implements Runnable {
 
     public boolean hasMoreMessages()
     {
-        return buffer.size()>0;
+        return buffer!=null;
     }
 
     public T get() {
-        try {
-            return buffer.take();
-        } catch (InterruptedException e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
+        T temp = buffer;
+        buffer=null;
+        return temp;
     }
 
     @Override
@@ -33,9 +29,10 @@ public class CallingReceiver<T> extends Receiver<T> implements Runnable {
                 Thread.yield();
                 T m = receive();
                 log.info("got:" + m.toString());
-                buffer.add(m);
-                if(buffer.size()>1)
-                    log.error("buffer should never be greater 1. size:"+buffer.size());
+                if(buffer!=null) {
+                    log.error("previous packet has not been picket up! discarded:"+buffer);
+                }
+                buffer = m;
                 observer.onCallback();
             } catch(ShutdownSignalException e) {
                 shutdown=true;
@@ -65,7 +62,7 @@ public class CallingReceiver<T> extends Receiver<T> implements Runnable {
     public CallingReceiver(Class<T> _tClass, String _exchange, String _topic, String _rabbitServerAddress) {
         super(_tClass, _exchange, _topic, _rabbitServerAddress);
         thread = new Thread(this);
-        buffer = new LinkedBlockingQueue<T>();
+        buffer = null;
         observer = new IamCalledBackDummy();
         shutdown=false;
     }
@@ -73,7 +70,7 @@ public class CallingReceiver<T> extends Receiver<T> implements Runnable {
 
     private IAmCalledBack observer;
     private Thread thread;
-    private LinkedBlockingQueue<T> buffer;
+    private T buffer;
     private boolean shutdown;
 
     private static class IamCalledBackDummy implements IAmCalledBack {
