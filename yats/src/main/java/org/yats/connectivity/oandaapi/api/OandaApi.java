@@ -16,7 +16,9 @@ package org.yats.connectivity.oandaapi.api;
 import com.oanda.fxtrade.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.trading.*;
 
@@ -37,13 +39,31 @@ public class OandaApi implements IProvidePriceFeed, ISendOrder {
         String oandaSymbol = prop.get(order.getProductId());
         FXPair pair = API.createFXPair(oandaSymbol);
 
-        LimitOrder o = API.createLimitOrder();
-        o.setPair(pair);
-        o.setUnits(order.getSize().toInt());
-        o.setPrice(order.getLimit().toDouble());
+        LimitOrder oandaOrder = API.createLimitOrder();
+        oandaOrder.setPair(pair);
+        int size = order.getSize().toInt();
+        double price = order.getLimit().toDouble();
+        boolean buy = order.isForBookSide(BookSide.BID);
+        if(buy) {
+            oandaOrder.setLowPriceLimit(0.000001);
+            oandaOrder.setHighPriceLimit(1.00001*price);
+        } else
+        {
+            oandaOrder.setLowPriceLimit(0.99999*price);
+            oandaOrder.setHighPriceLimit(100*price);
+            size = -size;
+        }
+        oandaOrder.setUnits(size);
+        oandaOrder.setPrice(price);
+
+        long tempDuration = 24 * 60 * 60 + fxclient.getServerTime(); // 24h duration
+        oandaOrder.setExpiry(tempDuration);
 
         try {
-            account.execute(o);
+            account.execute(oandaOrder);
+
+            LimitOrderEvent event = new LimitOrderEvent(order, oandaOrder, receiptConsumer,account);
+            eventManager.add(event);
 
         } catch (OAException e) {
             log.error(e.getMessage());
@@ -52,8 +72,12 @@ public class OandaApi implements IProvidePriceFeed, ISendOrder {
                     .withEndState(true)
                     ;
             receiptConsumer.onReceipt(r);
+            return;
         }
-
+        Receipt r = order.createReceiptDefault()
+                .withEndState(false)
+                ;
+//        receiptConsumer.onReceipt(r);
     }
 
     @Override
@@ -86,15 +110,7 @@ public class OandaApi implements IProvidePriceFeed, ISendOrder {
                         fxclient.logout();
                         System.exit(-1);
                     }
-
                     eventManager = account.getEventManager();
-                    FXAccountEvent event = new FXAccountEvent() {
-                        @Override
-                        public void handle(FXEventInfo fxEventInfo, FXEventManager fxEventManager) {
-                        }
-                    };
-
-                    eventManager.add(event);
                     break;
                 }
                 catch (OAException oe) {
@@ -137,6 +153,7 @@ public class OandaApi implements IProvidePriceFeed, ISendOrder {
         receiptConsumer=null;
         productProvider=null;
         eventManager=null;
+
     }
 
     private IProvideProperties prop;
@@ -146,4 +163,71 @@ public class OandaApi implements IProvidePriceFeed, ISendOrder {
     private Account account;
     private FXEventManager eventManager;
 
+
 } // class
+
+
+class LimitOrderEvent extends FXAccountEvent
+{
+
+    final Logger log = LoggerFactory.getLogger(LimitOrderEvent.class);
+
+    @Override
+    public void handle(FXEventInfo fxEventInfo, FXEventManager EM) {
+        try
+        {
+            int oandaOrderId = oandaOrder.getTransactionNumber();
+            LimitOrder oldOrder = account.getOrderWithId(oandaOrderId);
+            if (oldOrder == null)
+            {
+                log.info("Order closed: "
+                        + order.getOrderId() + " oandaId:"
+                        + oandaOrder.getTransactionNumber());
+                EM.remove(this);
+                Receipt r = order.createReceiptDefault()
+                        .withEndState(true)
+                        .withCurrentTradedSize(Decimal.ZERO)
+                        .withTotalTradedSize(Decimal.ZERO)
+                        ;
+                receiptConsumer.onReceipt(r);
+                return;
+            }
+        }
+        catch (OAException err)
+        {
+            log.error("Exception handling order "
+                    + order.getOrderId() + " oandaId:"
+                    + oandaOrder.getTransactionNumber()
+                    + " " + err.getMessage());
+            EM.remove(this);
+        }
+        Receipt r = order.createReceiptDefault()
+                .withEndState(true)
+                .withCurrentTradedSize(order.getSize())
+                .withTotalTradedSize(order.getSize())
+                ;
+        receiptConsumer.onReceipt(r);
+    }
+
+
+    LimitOrderEvent(OrderNew _order, LimitOrder _oandaOrder, IConsumeReceipt _receiptConsumer, Account _account) {
+//        super(""+_oandaOrder.getTransactionNumber());
+        super();
+        order = _order;
+        oandaOrder=_oandaOrder;
+        receiptConsumer=_receiptConsumer;
+        account = _account;
+    }
+
+    private Account account;
+    private OrderNew order;
+    private LimitOrder oandaOrder;
+    private IConsumeReceipt receiptConsumer;
+
+
+
+
+
+
+}
+
