@@ -1,11 +1,23 @@
-package org.yats.trader.examples.server;
+/*
+
+If you do not plan to send orders to Oanda exclude "oandaapi" recursively from compilation
+(Settings->Compiler->Excludes in IntelliJ IDEA)
+
+To use the Oanda connection to send orders you need to
+- apply for an account with Oanda
+- obtain the Oanda_fxtrade Java library
+- include it in the library path
+- duplicate the configuration template file and add your Oanda user/password
+
+ */
+
+package org.yats.connectivity.oandaapi.api;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
-import org.yats.connectivity.oandarest.OandaApi;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.ProductList;
 
