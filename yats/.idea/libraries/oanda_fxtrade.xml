@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="oanda_fxtrade">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/oanda_fxtrade.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
