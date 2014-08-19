@@ -1,71 +1,161 @@
 package org.yats.connectivity.oandarest;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.DateTime;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
-import org.yats.common.Tool;
+import org.yats.common.*;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.MarketDataMsg;
+import org.yats.trader.StrategyRunner;
+import org.yats.trading.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class FXOrders {
+public class FXOrders implements ISendOrder {
 
-    final Logger log = LoggerFactory.getLogger(FXRates.class);
+    final Logger log = LoggerFactory.getLogger(FXOrders.class);
 
 
-    public String retrieve(String request) {
-        HttpUriRequest httpGet = new HttpGet(serverUrl+request);
-        httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+secret));
+    public void getOrders() {
+        String res = retrieve("/v1/accounts/"+ getOandaAccount()+"/orders");
+        log.info("orders:"+res);
+    }
+
+    public void getAccounts() {
+        String res = retrieve("/v1/accounts?username="+getUserName());
+        log.info("accounts:"+res);
+    }
+
+    @Override
+    public void sendOrderNew(OrderNew orderNew) {
+        String oandaSymbol = prop.get(orderNew.getProductId());
+        HttpPost post = new HttpPost(getServerUrl()+"/v1/accounts/"+ getOandaAccount()+"/orders");
+        post.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
+        List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+        nameValuePairs.add(new BasicNameValuePair("instrument",oandaSymbol));
+        long size = (long) orderNew.getSize().roundToDigits(0).toDouble();
+        nameValuePairs.add(new BasicNameValuePair("units",""+size));
+        nameValuePairs.add(new BasicNameValuePair("side", orderNew.getBookSide().toBuySellString()));
+        nameValuePairs.add(new BasicNameValuePair("type","limit"));
+        nameValuePairs.add(new BasicNameValuePair("price",orderNew.getLimit().toString()));
+        DateTime expiry = Tool.getUTCTimestamp().plusMonths(1);
+        String expiryString = expiry.toString();
+        // format:"2014-09-01T00:00:00Z"
+        nameValuePairs.add(new BasicNameValuePair("expiry",expiryString));
+        //instrument=EUR_USD&units=2&side=sell&type=marketIfTouched&price=1.2&expiry=2013-04-01T00%3A00%3A00Z
+        HttpResponse response=null;
+        try {
+            post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+            response = httpClient.execute(post);
+            boolean orderAccepted = (response.getStatusLine().toString().contains("CREATED"));
+            if(!orderAccepted) {
+                    EntityUtils.consume(response.getEntity());
+                    return;
+            }
+            String oandaOrderId = extractServerOrderId(response);
+            log.debug("created Oanda order with orderId="+orderNew.getOrderId()+" oandaId=" + oandaOrderId);
+            oandaId2OrderMap.put(oandaOrderId, orderNew);
+            orderId2OandaIdMap.put(orderNew.getOrderId().toString(), oandaOrderId);
+            EntityUtils.consume(response.getEntity());
+            return;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if(response!=null && response.getEntity()!=null) {
+            try {
+                EntityUtils.consume(response.getEntity());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return;
+    }
+
+    @Override
+    public void sendOrderCancel(OrderCancel orderCancel) {
+        boolean orderIdKnown = orderId2OandaIdMap.containsKey(orderCancel.getOrderId().toString());
+        if(!orderIdKnown) {
+            String rejection = "No Oanda order id found for "+orderCancel.getOrderId();
+            Receipt r = orderCancel.createReceiptDefault()
+                    .withRejectReason(rejection)
+                    .withEndState(true)
+                    ;
+            log.error(rejection);
+            receiptConsumer.onReceipt(r);
+        }
+        String oandaOrderId = orderId2OandaIdMap.get(orderCancel.getOrderId().toString());
+
+
+        String urlString = getServerUrl()+"/v1/accounts/"+ getOandaAccount()+"/orders/"+oandaOrderId;
+        HttpUriRequest httpGet = new HttpDelete(urlString);
+        httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
 
         HttpResponse resp = null;
         try {
             resp = httpClient.execute(httpGet);
             HttpEntity entity = resp.getEntity();
 
-        if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
-            InputStream stream = entity.getContent();
-            String line;
-            BufferedReader br = new BufferedReader(new InputStreamReader(stream));
-            String all = "";
-            while ((line = br.readLine()) != null) {
-                all += line;
+            if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
+                log.info("Canceled order with orderId="+orderCancel.getOrderId()+" oandaId="+oandaOrderId);
+                OrderNew orderNew = oandaId2OrderMap.get(oandaOrderId);
+                orderId2OandaIdMap.remove(orderCancel.getOrderId().toString());
+                oandaId2OrderMap.remove(oandaOrderId);
+                Receipt r = orderNew.createReceiptDefault().withEndState(true);
+                receiptConsumer.onReceipt(r);
             }
-            return all;
-        }
+            if(entity!=null) EntityUtils.consume(entity);
+            return;
         } catch (IOException e) {
             e.printStackTrace();
+
+            if(resp!=null && resp.getEntity()!=null) {
+                try {
+                    EntityUtils.consume(resp.getEntity());
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            throw new CommonExceptions.NetworkException("Error canceling order "
+                    +orderCancel.getOrderId().toString()+" : "+e.getMessage());
         }
-
-        return "";
     }
 
-    public void getOrders() {
-        String res = retrieve("/v1/accounts/"+account+"/orders");
-        log.info("orders:"+res);
+    private String extractServerOrderId(HttpResponse response) {
+        String serverOrderId="";
+        for(Header h : response.getHeaders("Location")) {
+            String[] parts =  h.getValue().split("/");
+            if(parts.length<1) throw new CommonExceptions.FieldNotFoundException("Short response! No serverOrderId found in response from Oanda! "+response.toString());
+            serverOrderId = parts[parts.length-1];
+        }
+        if(serverOrderId.length()==0)
+            throw new CommonExceptions.FieldNotFoundException("No serverOrderId found in response from Oanda! "+response.toString());
+        return serverOrderId;
     }
-
-    public void getAccounts() {
-        String res = retrieve("/v1/accounts?username="+username);
-        log.info("accounts:"+res);
-    }
-
-
 
     public void getRates() {
         try {
@@ -136,26 +226,101 @@ public class FXOrders {
         }
     }
 
-    public FXOrders() {
+    public void setReceiptConsumer(IConsumeReceipt _receiptConsumer) {
+        this.receiptConsumer = _receiptConsumer;
+    }
+
+    public FXOrders(IProvideProperties _prop) {
+        prop=_prop;
         httpClient = new DefaultHttpClient();
-        account="3564938";
-        secret="37e6eba904c5a0599c364647b5bb39ed-49b4e985887799ca2a4fb4724b5ebda4";
-//        serverUrl="https://stream-fxpractice.oanda.com";
-        serverUrl="https://api-fxpractice.oanda.com";
-        username="annalange";
+        oandaId2OrderMap = new ConcurrentHashMap<String, OrderNew>();
+        orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
+
+        receiptConsumer = new IConsumeReceipt() {
+            @Override
+            public void onReceipt(Receipt receipt) {}
+        };
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
 
-    private String account;
+    private String getOandaAccount() {
+        return prop.get("externalAccount");
+    }
+
+    private String getSecret() {
+        return prop.get("secret");
+    }
+
+    private String getServerUrl() {
+        return prop.get("serverUrl");
+    }
+
+    private String getUserName() {
+        return prop.get("userName");
+    }
+
+    private String retrieve(String request) {
+        HttpUriRequest httpGet = new HttpGet(getServerUrl()+request);
+        httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
+
+        HttpResponse resp = null;
+        try {
+            resp = httpClient.execute(httpGet);
+
+            HttpEntity entity = resp.getEntity();
+
+            if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
+                InputStream stream = entity.getContent();
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+                String all = "";
+                while ((line = br.readLine()) != null) {
+                    all += line;
+                }
+                stream.close();
+                EntityUtils.consume(resp.getEntity());
+                return all;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+        try {
+            EntityUtils.consume(resp.getEntity());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    private IProvideProperties prop;
     private DefaultHttpClient httpClient;
     private String secret;
     private String serverUrl;
     private String username;
+    private ConcurrentHashMap<String, OrderNew> oandaId2OrderMap;
+    private ConcurrentHashMap<String, String> orderId2OandaIdMap;
+    private IConsumeReceipt receiptConsumer;
 
     public static void main (String[]args) throws IOException {
 
-        FXOrders fx = new FXOrders();
+        String configFilename = Tool.getPersonalConfigFilename("config/OandaConnection");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+
+        FXOrders fx = new FXOrders(prop);
+
+        OrderNew order = OrderNew.create()
+                .withBookSide(BookSide.BID)
+                .withInternalAccount("test")
+                .withSize(Decimal.ONE)
+                .withLimit(Decimal.fromString("1.331"))
+                .withProductId("OANDA_EURUSD")
+                ;
+        fx.sendOrderNew(order);
+        fx.sendOrderCancel(order.createCancelOrder());
+
         fx.getAccounts();
         fx.getOrders();
 

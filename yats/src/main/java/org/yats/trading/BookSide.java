@@ -29,6 +29,8 @@ public abstract class BookSide {
 
     public abstract BookSide toOpposite();
 
+    public abstract String toBuySellString();
+
 
     public static class Ask extends BookSide {
         @Override
@@ -51,6 +53,11 @@ public abstract class BookSide {
         @Override
         public BookSide toOpposite() {
             return BookSide.BID;
+        }
+
+        @Override
+        public String toBuySellString() {
+            return "sell";
         }
     } // class Ask
 
@@ -76,6 +83,10 @@ public abstract class BookSide {
             return BookSide.ASK;
         }
 
+        @Override
+        public String toBuySellString() {
+            return "buy";
+        }
     } // class Ask
 
     private static class BookSideNULL extends BookSide {
@@ -100,6 +111,10 @@ public abstract class BookSide {
             throw new RuntimeException("This is BookSideNULL");
         }
 
+        @Override
+        public String toBuySellString() {
+            return "";
+        }
     }
 } // class
 

@@ -6,6 +6,7 @@ import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
+import org.yats.connectivity.oandarest.FXOrders;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.IConsumeMarketData;
@@ -44,12 +45,10 @@ public class OandaClientMain implements IConsumeMarketData {
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);
 
-//        OrderConnection orderConnection = OrderConnection.createFromProperties(configFIXOrderFilename);
-//        orderConnection.setProductProvider(products);
-//        orderConnection.logon();
+        FXOrders orderConnection = new FXOrders(prop);
 
-//        strategyRunner.setOrderSender(orderConnection);
-//        orderConnection.setReceiptConsumer(strategyRunner);
+        strategyRunner.setOrderSender(orderConnection);
+        orderConnection.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
         strategyRunner.subscribe("OANDA_EURUSD", this);

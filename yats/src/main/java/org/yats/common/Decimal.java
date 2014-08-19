@@ -42,7 +42,8 @@ public class Decimal implements Comparable<Decimal> {
         return divide(tickSize).round().multiply(tickSize);
     }
     public Decimal roundToDigits(int digits) {
-        return multiply(Decimal.fromDouble(digits)).round().divide(Decimal.fromDouble(digits));
+        int multiplier = (int) Math.round(Math.pow(10,digits));
+        return multiply(Decimal.fromDouble(multiplier)).round().divide(Decimal.fromDouble(multiplier));
     }
 
 
