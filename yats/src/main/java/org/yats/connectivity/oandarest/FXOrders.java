@@ -23,7 +23,6 @@ import org.yats.common.*;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.MarketDataMsg;
-import org.yats.trader.StrategyRunner;
 import org.yats.trading.*;
 
 import java.io.*;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class FXOrders implements ISendOrder {
+public class FXOrders implements ISendOrder, Runnable {
 
     final Logger log = LoggerFactory.getLogger(FXOrders.class);
 
@@ -49,7 +48,7 @@ public class FXOrders implements ISendOrder {
     @Override
     public void sendOrderNew(OrderNew orderNew) {
         String oandaSymbol = prop.get(orderNew.getProductId());
-        HttpPost post = new HttpPost(getServerUrl()+"/v1/accounts/"+ getOandaAccount()+"/orders");
+        HttpPost post = new HttpPost(getServerUrlApi()+"/v1/accounts/"+ getOandaAccount()+"/orders");
         post.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
         List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
         nameValuePairs.add(new BasicNameValuePair("instrument",oandaSymbol));
@@ -66,7 +65,7 @@ public class FXOrders implements ISendOrder {
         HttpResponse response=null;
         try {
             post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            response = httpClient.execute(post);
+            response = httpPoll.execute(post);
             boolean orderAccepted = (response.getStatusLine().toString().contains("CREATED"));
             if(!orderAccepted) {
                     EntityUtils.consume(response.getEntity());
@@ -110,13 +109,13 @@ public class FXOrders implements ISendOrder {
         String oandaOrderId = orderId2OandaIdMap.get(orderCancel.getOrderId().toString());
 
 
-        String urlString = getServerUrl()+"/v1/accounts/"+ getOandaAccount()+"/orders/"+oandaOrderId;
+        String urlString = getServerUrlApi()+"/v1/accounts/"+ getOandaAccount()+"/orders/"+oandaOrderId;
         HttpUriRequest httpGet = new HttpDelete(urlString);
         httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
 
         HttpResponse resp = null;
         try {
-            resp = httpClient.execute(httpGet);
+            resp = httpPoll.execute(httpGet);
             HttpEntity entity = resp.getEntity();
 
             if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
@@ -166,7 +165,7 @@ public class FXOrders implements ISendOrder {
 
             System.out.println("Executing request: " + httpGet.getRequestLine());
 
-            HttpResponse resp = httpClient.execute(httpGet);
+            HttpResponse resp = httpPoll.execute(httpGet);
             HttpEntity entity = resp.getEntity();
 
             if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
@@ -222,8 +221,64 @@ public class FXOrders implements ISendOrder {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            httpClient.getConnectionManager().shutdown();
+            httpPoll.getConnectionManager().shutdown();
         }
+    }
+
+    @Override
+    public void run() {
+        HttpUriRequest httpGet = new HttpGet(getServerUrlStream()+"/v1/events?accountIds="+getOandaAccount());
+        httpGet.setHeader(new BasicHeader("Authorization", "Bearer a"+secret));
+
+        System.out.println("Executing request: " + httpGet.getRequestLine());
+
+        HttpResponse resp = null;
+        try {
+            resp = httpStream.execute(httpGet);
+            HttpEntity entity = resp.getEntity();
+
+            if (resp.getStatusLine().getStatusCode() == 200 && entity != null) {
+                InputStream stream = entity.getContent();
+                String line;
+                BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+
+                while ((line = br.readLine()) != null) {
+                    log.info("got event line: "+line);
+                    if(stopReceiving) break;
+                }
+
+                EntityUtils.consume(entity);
+
+//                Object obj = JSONValue.parse(line);
+//                JSONObject tick = (JSONObject) obj;
+
+//                    JSONObject values = (JSONObject)tick.get("tick");
+
+
+            } else {
+                // print error message
+                String responseString = EntityUtils.toString(entity, "UTF-8");
+                System.out.println(responseString);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            if(resp!=null && resp.getEntity()!=null) {
+                try {
+                    EntityUtils.consume(resp.getEntity());
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    public void logon() {
+        eventStreamThread.start();
+    }
+
+    public void shutdown() {
+        stopReceiving=true;
     }
 
     public void setReceiptConsumer(IConsumeReceipt _receiptConsumer) {
@@ -232,7 +287,8 @@ public class FXOrders implements ISendOrder {
 
     public FXOrders(IProvideProperties _prop) {
         prop=_prop;
-        httpClient = new DefaultHttpClient();
+        httpPoll = new DefaultHttpClient();
+        httpStream = new DefaultHttpClient();
         oandaId2OrderMap = new ConcurrentHashMap<String, OrderNew>();
         orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
 
@@ -240,6 +296,9 @@ public class FXOrders implements ISendOrder {
             @Override
             public void onReceipt(Receipt receipt) {}
         };
+
+        stopReceiving=false;
+        eventStreamThread = new Thread(this);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -252,8 +311,12 @@ public class FXOrders implements ISendOrder {
         return prop.get("secret");
     }
 
-    private String getServerUrl() {
-        return prop.get("serverUrl");
+    private String getServerUrlApi() {
+        return prop.get("serverUrlApi");
+    }
+
+    private String getServerUrlStream() {
+        return prop.get("serverUrlStream");
     }
 
     private String getUserName() {
@@ -261,12 +324,12 @@ public class FXOrders implements ISendOrder {
     }
 
     private String retrieve(String request) {
-        HttpUriRequest httpGet = new HttpGet(getServerUrl()+request);
+        HttpUriRequest httpGet = new HttpGet(getServerUrlApi()+request);
         httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+getSecret()));
 
         HttpResponse resp = null;
         try {
-            resp = httpClient.execute(httpGet);
+            resp = httpPoll.execute(httpGet);
 
             HttpEntity entity = resp.getEntity();
 
@@ -296,13 +359,16 @@ public class FXOrders implements ISendOrder {
 
 
     private IProvideProperties prop;
-    private DefaultHttpClient httpClient;
+    private DefaultHttpClient httpPoll;
+    private DefaultHttpClient httpStream;
     private String secret;
     private String serverUrl;
     private String username;
     private ConcurrentHashMap<String, OrderNew> oandaId2OrderMap;
     private ConcurrentHashMap<String, String> orderId2OandaIdMap;
     private IConsumeReceipt receiptConsumer;
+    private Thread eventStreamThread;
+    private boolean stopReceiving;
 
     public static void main (String[]args) throws IOException {
 
@@ -310,6 +376,9 @@ public class FXOrders implements ISendOrder {
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         FXOrders fx = new FXOrders(prop);
+
+        fx.logon();
+
 
         OrderNew order = OrderNew.create()
                 .withBookSide(BookSide.BID)
@@ -319,7 +388,15 @@ public class FXOrders implements ISendOrder {
                 .withProductId("OANDA_EURUSD")
                 ;
         fx.sendOrderNew(order);
+
+        System.out.println("Order sent. Press enter to continue");
+        System.in.read();
+
         fx.sendOrderCancel(order.createCancelOrder());
+
+        System.out.println("Order canceled. Press enter to continue");
+        System.in.read();
+
 
         fx.getAccounts();
         fx.getOrders();

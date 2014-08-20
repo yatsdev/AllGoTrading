@@ -50,6 +50,7 @@ public class OandaClientMain implements IConsumeMarketData {
         strategyRunner.setOrderSender(orderConnection);
         orderConnection.setReceiptConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
+        orderConnection.logon();
 
         strategyRunner.subscribe("OANDA_EURUSD", this);
         Thread.sleep(2000);
