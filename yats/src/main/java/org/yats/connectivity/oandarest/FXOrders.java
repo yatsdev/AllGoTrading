@@ -228,7 +228,7 @@ public class FXOrders implements ISendOrder, Runnable {
     @Override
     public void run() {
         HttpUriRequest httpGet = new HttpGet(getServerUrlStream()+"/v1/events?accountIds="+getOandaAccount());
-        httpGet.setHeader(new BasicHeader("Authorization", "Bearer a"+secret));
+        httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+secret));
 
         System.out.println("Executing request: " + httpGet.getRequestLine());
 
