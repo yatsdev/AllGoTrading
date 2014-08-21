@@ -148,6 +148,24 @@ public class MarketData
                 Decimal.ONE, Decimal.ONE, Decimal.ONE);
     }
 
+    public static MarketData createFromLastWithDepth(String productId, Decimal last, int depth, Decimal step) {
+        Decimal bidFront=last.subtract(Decimal.CENT);
+        Decimal askFront=last.add(Decimal.CENT);
+        MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC), productId,
+                bidFront, askFront, last,
+                Decimal.ONE, Decimal.ONE, Decimal.ONE);
+
+        OfferBookSide bid=new OfferBookSide(BookSide.BID);
+        OfferBookSide ask=new OfferBookSide(BookSide.ASK);
+        for(int i =0; i<depth; i++) {
+            bid.add(new BookRow(Decimal.CENT, bidFront.subtract(step.multiply(Decimal.fromDouble(i)))));
+            ask.add(new BookRow(Decimal.CENT, askFront.add(step.multiply(Decimal.fromDouble(i)))));
+        }
+        OfferBook o = new OfferBook(bid,ask);
+        m.setBook(o);
+        return m;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////
 
     private DateTime timestamp;

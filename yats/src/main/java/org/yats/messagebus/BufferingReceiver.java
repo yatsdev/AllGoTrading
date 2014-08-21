@@ -39,7 +39,6 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
         while(!shutdown) {
             try {
                 Thread.yield();
-                //TODO: replace with waiting for the buffer to fill with one element
                 buffer.waitNotEmpty();
                 observer.onCallback();
             } catch(ShutdownSignalException e) {

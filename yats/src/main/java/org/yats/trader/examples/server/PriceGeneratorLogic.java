@@ -30,10 +30,10 @@ public class PriceGeneratorLogic implements Runnable {
                 Decimal lastRounded = last.roundToDigits(0);
                 boolean aboveBasePrice = (last.isGreaterThan(lastRounded));
                 Decimal change = aboveBasePrice
-                        ? Decimal.CENT.multiply(Decimal.MINUSONE)
+                        ? Decimal.CENT.multiply(Decimal.MINUSONE).multiply(Decimal.fromString("20"))
                         : Decimal.CENT;
 
-                MarketData newData = MarketData.createFromLast(pid, lastRounded.add(change));
+                MarketData newData = MarketData.createFromLastWithDepth(pid, last.add(change),10,Decimal.CENT);
                 lastData.put(pid, newData);
                 MarketDataMsg m = MarketDataMsg.createFrom(newData);
                 senderMarketDataMsg.publish(m.getTopic(), m);

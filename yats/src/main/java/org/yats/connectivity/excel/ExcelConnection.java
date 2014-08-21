@@ -40,7 +40,11 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
 
-                    String marketDataString=new String(marketData.getTimestamp().toString()+"\t"+marketData.getBidSize().toString()+"\t"+marketData.getBid().toString()+"\t"+marketData.getAskSize().toString()+"\t"+marketData.getAsk().toString());
+                    String marketDataString=new String(marketData.getTimestamp().toString()+"\t"
+                            +marketData.getBidSize().toString()+"\t"
+                            +marketData.getBid().toString()+"\t"
+                            +marketData.getAskSize().toString()
+                            +"\t"+marketData.getAsk().toString());
 
 
                    //Lv1

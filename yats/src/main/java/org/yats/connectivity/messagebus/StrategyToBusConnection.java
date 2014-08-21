@@ -11,6 +11,7 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
 import org.yats.trading.*;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
@@ -68,10 +69,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     private void sendAllReceivedMarketData() {
         while(receiverMarketdata.hasMoreMessages()) {
-            MarketData m = receiverMarketdata.get().toMarketData();
-//            log.info("STB: "+m);
-            marketDataConsumer.onMarketData(m);
+            MarketDataMsg m = receiverMarketdata.get();
+            marketDataMap.put(m.productId, m);
         }
+        for(MarketDataMsg m : marketDataMap.values()) {
+//            log.info("STB: "+m);
+            marketDataConsumer.onMarketData(m.toMarketData());
+        }
+        marketDataMap.clear();
     }
 
     private void sendAllReceivedReceipts() {
@@ -129,6 +134,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     public StrategyToBusConnection(IProvideProperties p) {
         shuttingDown=false;
 
+        marketDataMap = new ConcurrentHashMap<String, MarketDataMsg>();
         orderNewQueue = new LinkedBlockingQueue<OrderNew>();
         orderCancelQueue = new LinkedBlockingQueue<OrderCancel>();
         subscriptionQueue = new LinkedBlockingQueue<SubscriptionMsg>();
@@ -196,6 +202,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     IConsumeSettings settingsConsumer;
     IConsumeReports reportsConsumer;
     BufferingReceiver<MarketDataMsg> receiverMarketdata;
+    ConcurrentHashMap<String, MarketDataMsg> marketDataMap;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
     BufferingReceiver<KeyValueMsg> receiverSettings;
     BufferingReceiver<KeyValueMsg> receiverReports;
