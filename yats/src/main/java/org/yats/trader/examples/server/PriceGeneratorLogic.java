@@ -11,6 +11,11 @@ import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.trading.MarketData;
 import org.yats.trading.ProductList;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PriceGeneratorLogic implements Runnable {
 
     final Logger log = LoggerFactory.getLogger(PriceGeneratorLogic.class);
@@ -19,16 +24,23 @@ public class PriceGeneratorLogic implements Runnable {
     @Override
     public void run() {
         while(!shutdownThread) {
-            Decimal change = (lastData.getLast().isGreaterThan(Decimal.ONE))
-                    ? Decimal.CENT.multiply(Decimal.MINUSONE)
-                    : Decimal.CENT;
+            for(String pid : pidList) {
 
-            lastData = MarketData.createFromLast(pid, Decimal.ONE.add(change));
-            MarketDataMsg m = MarketDataMsg.createFrom(lastData);
+                Decimal last = lastData.get(pid).getLast();
+                Decimal lastRounded = last.roundToDigits(0);
+                boolean aboveBasePrice = (last.isGreaterThan(lastRounded));
+                Decimal change = aboveBasePrice
+                        ? Decimal.CENT.multiply(Decimal.MINUSONE)
+                        : Decimal.CENT;
 
-            senderMarketDataMsg.publish(m.getTopic(), m);
-            log.info("Published: #"+counter+":"+lastData);
+                MarketData newData = MarketData.createFromLast(pid, lastRounded.add(change));
+                lastData.put(pid, newData);
+                MarketDataMsg m = MarketDataMsg.createFrom(newData);
+                senderMarketDataMsg.publish(m.getTopic(), m);
+
 //            System.out.println("Published: #"+counter+":"+lastData);
+            }
+            log.info("Published "+counter+" data sets of "+pidList.size()+" prices.");
             counter++;
             Tool.sleepFor(interval);
         }
@@ -46,11 +58,19 @@ public class PriceGeneratorLogic implements Runnable {
     public PriceGeneratorLogic(IProvideProperties prop)
     {
         interval = prop.getAsDecimal("interval").toInt();
-        pid=prop.get("productId");
 
-        Config config =  Config.fromProperties(prop);
-        lastData = MarketData.createFromLast(pid, Decimal.ONE);
+        String pidListString=prop.get("productId");
+        String[] parts = pidListString.split(",");
+        pidList = Arrays.asList(parts);
+        lastData = new ConcurrentHashMap<String, MarketData>();
+        int i=1;
+        for(String pid : pidList) {
+            Decimal priceBase = Decimal.fromDouble(i++);
+            lastData.put(pid, MarketData.createFromLast(pid, priceBase));
+        }
+
         productList = ProductList.createFromFile("config/CFDProductList.csv");
+        Config config =  Config.fromProperties(prop);
         senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
         shutdownThread = false;
         thread = new Thread(this);
@@ -64,8 +84,8 @@ public class PriceGeneratorLogic implements Runnable {
     private boolean shutdownThread;
     private Thread thread;
     private ProductList productList;
-    private String pid;
-    private MarketData lastData;
+    private List<String> pidList;
+    private ConcurrentHashMap<String,MarketData> lastData;
     private int counter;
     private int interval;
 

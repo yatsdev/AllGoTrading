@@ -69,7 +69,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private void sendAllReceivedMarketData() {
         while(receiverMarketdata.hasMoreMessages()) {
             MarketData m = receiverMarketdata.get().toMarketData();
-            log.info("STB: "+m);
+//            log.info("STB: "+m);
             marketDataConsumer.onMarketData(m);
         }
     }

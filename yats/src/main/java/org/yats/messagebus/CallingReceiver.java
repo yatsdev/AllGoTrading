@@ -28,7 +28,7 @@ public class CallingReceiver<T> extends Receiver<T> implements Runnable {
             try {
                 Thread.yield();
                 T m = receive();
-                log.info("got:" + m.toString());
+//                log.info("got:" + m.toString());
                 if(buffer!=null) {
                     log.error("previous packet has not been picket up! discarded:"+buffer);
                 }
