@@ -53,12 +53,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv1AskSize=new String("");
                     String lv1AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==2) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=2) {
                          lv1BidSize=marketData.getBook().getBookRow(BookSide.BID, 1).getSize().toString();
                          lv1BidPrice=marketData.getBook().getBookRow(BookSide.BID, 1).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==2) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=2) {
                         lv1AskSize = marketData.getBook().getBookRow(BookSide.ASK, 1).getSize().toString();
                         lv1AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 1).getPrice().toString();
                     }
@@ -71,12 +71,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv2AskSize=new String("");
                     String lv2AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==3) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=3) {
                         lv2BidSize=marketData.getBook().getBookRow(BookSide.BID, 2).getSize().toString();
                         lv2BidPrice=marketData.getBook().getBookRow(BookSide.BID, 2).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==3) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=3) {
                         lv2AskSize = marketData.getBook().getBookRow(BookSide.ASK, 2).getSize().toString();
                         lv2AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 2).getPrice().toString();
                     }
@@ -89,12 +89,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv3AskSize=new String("");
                     String lv3AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==4) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=4) {
                         lv3BidSize=marketData.getBook().getBookRow(BookSide.BID, 3).getSize().toString();
                         lv3BidPrice=marketData.getBook().getBookRow(BookSide.BID, 3).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==4) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=4) {
                         lv3AskSize = marketData.getBook().getBookRow(BookSide.ASK, 3).getSize().toString();
                         lv3AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 3).getPrice().toString();
                     }
@@ -108,12 +108,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv4AskSize=new String("");
                     String lv4AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==5) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=5) {
                         lv4BidSize=marketData.getBook().getBookRow(BookSide.BID, 4).getSize().toString();
                         lv4BidPrice=marketData.getBook().getBookRow(BookSide.BID, 4).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==5) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=5) {
                         lv4AskSize = marketData.getBook().getBookRow(BookSide.ASK, 4).getSize().toString();
                         lv4AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 4).getPrice().toString();
                     }
@@ -126,12 +126,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv5AskSize=new String("");
                     String lv5AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==6) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=6) {
                         lv5BidSize=marketData.getBook().getBookRow(BookSide.BID, 5).getSize().toString();
                         lv5BidPrice=marketData.getBook().getBookRow(BookSide.BID, 5).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==6) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=6) {
                         lv5AskSize = marketData.getBook().getBookRow(BookSide.ASK, 5).getSize().toString();
                         lv5AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 5).getPrice().toString();
                     }
@@ -144,12 +144,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv6AskSize=new String("");
                     String lv6AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==7) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=7) {
                         lv6BidSize=marketData.getBook().getBookRow(BookSide.BID, 6).getSize().toString();
                         lv6BidPrice=marketData.getBook().getBookRow(BookSide.BID, 6).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==7) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=7) {
                         lv6AskSize = marketData.getBook().getBookRow(BookSide.ASK, 6).getSize().toString();
                         lv6AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 6).getPrice().toString();
                     }
@@ -162,12 +162,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv7AskSize=new String("");
                     String lv7AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==8) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=8) {
                         lv7BidSize=marketData.getBook().getBookRow(BookSide.BID, 7).getSize().toString();
                         lv7BidPrice=marketData.getBook().getBookRow(BookSide.BID, 7).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==8) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=8) {
                         lv7AskSize = marketData.getBook().getBookRow(BookSide.ASK, 7).getSize().toString();
                         lv7AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 7).getPrice().toString();
                     }
@@ -180,12 +180,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv8AskSize=new String("");
                     String lv8AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==9) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=9) {
                         lv8BidSize=marketData.getBook().getBookRow(BookSide.BID, 8).getSize().toString();
                         lv8BidPrice=marketData.getBook().getBookRow(BookSide.BID, 8).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==9) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=9) {
                         lv8AskSize = marketData.getBook().getBookRow(BookSide.ASK, 8).getSize().toString();
                         lv8AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 8).getPrice().toString();
                     }
@@ -198,12 +198,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     String lv9AskSize=new String("");
                     String lv9AskPrice=new String("");
 
-                    if(marketData.getBook().getDepth(BookSide.BID)==10) {
+                    if(marketData.getBook().getDepth(BookSide.BID)>=10) {
                         lv9BidSize=marketData.getBook().getBookRow(BookSide.BID, 9).getSize().toString();
                         lv9BidPrice=marketData.getBook().getBookRow(BookSide.BID, 9).getPrice().toString();
                     }
 
-                    if(marketData.getBook().getDepth(BookSide.ASK)==10) {
+                    if(marketData.getBook().getDepth(BookSide.ASK)>=10) {
                         lv9AskSize = marketData.getBook().getBookRow(BookSide.ASK, 9).getSize().toString();
                         lv9AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 9).getPrice().toString();
                     }

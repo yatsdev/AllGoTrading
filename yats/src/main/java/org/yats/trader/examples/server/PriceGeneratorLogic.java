@@ -14,6 +14,7 @@ import org.yats.trading.ProductList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PriceGeneratorLogic implements Runnable {
@@ -23,6 +24,7 @@ public class PriceGeneratorLogic implements Runnable {
 
     @Override
     public void run() {
+        Random rnd = new Random();
         while(!shutdownThread) {
             for(String pid : pidList) {
 
@@ -33,7 +35,9 @@ public class PriceGeneratorLogic implements Runnable {
                         ? Decimal.CENT.multiply(Decimal.MINUSONE).multiply(Decimal.fromString("20"))
                         : Decimal.CENT;
 
-                MarketData newData = MarketData.createFromLastWithDepth(pid, last.add(change),10,Decimal.CENT);
+                int bidDepth = 1+rnd.nextInt(10);
+                int askDepth = 1+rnd.nextInt(10);
+                MarketData newData = MarketData.createFromLastWithDepth(pid, last.add(change), bidDepth, askDepth, Decimal.CENT);
                 lastData.put(pid, newData);
                 MarketDataMsg m = MarketDataMsg.createFrom(newData);
                 senderMarketDataMsg.publish(m.getTopic(), m);

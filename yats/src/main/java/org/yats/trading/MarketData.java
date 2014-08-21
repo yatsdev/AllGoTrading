@@ -148,7 +148,7 @@ public class MarketData
                 Decimal.ONE, Decimal.ONE, Decimal.ONE);
     }
 
-    public static MarketData createFromLastWithDepth(String productId, Decimal last, int depth, Decimal step) {
+    public static MarketData createFromLastWithDepth(String productId, Decimal last, int bidDepth, int askDepth, Decimal step) {
         Decimal bidFront=last.subtract(Decimal.CENT);
         Decimal askFront=last.add(Decimal.CENT);
         MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC), productId,
@@ -157,8 +157,10 @@ public class MarketData
 
         OfferBookSide bid=new OfferBookSide(BookSide.BID);
         OfferBookSide ask=new OfferBookSide(BookSide.ASK);
-        for(int i =0; i<depth; i++) {
+        for(int i =0; i<bidDepth; i++) {
             bid.add(new BookRow(Decimal.CENT, bidFront.subtract(step.multiply(Decimal.fromDouble(i)))));
+        }
+        for(int i =0; i<askDepth; i++) {
             ask.add(new BookRow(Decimal.CENT, askFront.add(step.multiply(Decimal.fromDouble(i)))));
         }
         OfferBook o = new OfferBook(bid,ask);
