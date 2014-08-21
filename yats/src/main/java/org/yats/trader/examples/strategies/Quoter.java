@@ -102,6 +102,8 @@ public class Quoter extends StrategyBase {
         tickSize =getConfigAsDecimal("tickSize");
         stepFactor=getConfigAsDouble("stepFactor");
         orderSize=getConfigAsDouble("orderSize");
+        bidSteps=getConfigAsInt("bidSteps");
+        askSteps=getConfigAsInt("askSteps");
     }
 
     @Override
@@ -113,23 +115,22 @@ public class Quoter extends StrategyBase {
 
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
-        Decimal bidPrice1 = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
-        Decimal bidPrice2 = Decimal.fromDouble(bidMarket*(1.0-(2.0*stepFactor))- tickSize.toDouble()).roundToTickSize(tickSize);
-        sendOrderIfNotExisting(BookSide.BID, bidPrice1);
-        sendOrderIfNotExisting(BookSide.BID, bidPrice2);
-        prop.set("bidPrice1", bidPrice1);
-        prop.set("bidPrice2", bidPrice2);
+        for(int i=1; i<=bidSteps; i++) {
+            double step = i;
+            Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-step*stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
+            sendOrderIfNotExisting(BookSide.BID, bidPrice);
+            prop.set("bidPrice"+i, bidPrice);
+        }
     }
 
     private void sendAskRelativeTo(Decimal price) {
         double askMarket=price.toDouble();
-        Decimal askPrice1 = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
-        Decimal askPrice2 = Decimal.fromDouble(askMarket*(1.0+(2.0*stepFactor))+ tickSize.toDouble()).roundToTickSize(tickSize);
-        sendOrderIfNotExisting(BookSide.ASK, askPrice1);
-        sendOrderIfNotExisting(BookSide.ASK, askPrice2);
-        prop.set("askPrice1", askPrice1);
-        prop.set("askPrice2", askPrice2);
-
+        for(int i=1; i<=askSteps; i++) {
+            double step = i;
+            Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+step*stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
+            sendOrderIfNotExisting(BookSide.ASK, askPrice);
+            prop.set("askPrice"+i, askPrice);
+        }
     }
 
     private void sendOrderIfNotExisting(BookSide _side, Decimal _price) {
@@ -202,6 +203,8 @@ public class Quoter extends StrategyBase {
     private double stepFactor = 0.0;//0031;
     private Decimal tickSize = Decimal.ONE;
     private double orderSize = 0.01;
+    private int bidSteps=1;
+    private int askSteps=1;
 
     PropertiesReader prop;
 

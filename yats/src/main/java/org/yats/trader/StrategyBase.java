@@ -32,6 +32,9 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     protected double getConfigAsDouble(String key) {
         return new Decimal(config.get(key)).toDouble();
     }
+    protected int getConfigAsInt(String key) {
+        return new Decimal(config.get(key)).toInt();
+    }
 
     protected Decimal getConfigAsDecimal(String key) {
         return new Decimal(config.get(key));
