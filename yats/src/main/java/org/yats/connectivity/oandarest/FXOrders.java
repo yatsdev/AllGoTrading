@@ -258,7 +258,7 @@ public class FXOrders implements ISendOrder, Runnable {
             } else {
                 // print error message
                 String responseString = EntityUtils.toString(entity, "UTF-8");
-                System.out.println(responseString);
+                System.out.println("response: "+responseString);
             }
         } catch (IOException e) {
             e.printStackTrace();
