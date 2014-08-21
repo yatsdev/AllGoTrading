@@ -370,7 +370,7 @@ public class FXOrders implements ISendOrder, Runnable {
     private Thread eventStreamThread;
     private boolean stopReceiving;
 
-    public static void main (String[]args) throws IOException {
+    public static void main(String[]args) throws IOException {
 
         String configFilename = Tool.getPersonalConfigFilename("config/OandaConnection");
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);

@@ -5,6 +5,7 @@ import org.yats.common.UniqueId;
 
 public class Product {
 
+
 //    public static ProductNULL NULL = new ProductNULL();
 
     public boolean isRoute(String r) {
@@ -25,7 +26,6 @@ public class Product {
         return false;
     }
 
-
     @Override
     public String toString() {
         return "Product{" +
@@ -37,6 +37,10 @@ public class Product {
                 ", route='" + route + '\'' +
                 ", underlyingId='" + underlyingId + '\'' +
                 ", unitId='" + unitId + '\'' +
+                ", contractType='" + contractType + '\'' +
+                ", contractSize=" + contractSize +
+                ", tickSize=" + tickSize +
+                ", lotSize=" + lotSize +
                 '}';
     }
 
@@ -91,8 +95,18 @@ public class Product {
         return unitId;
     }
 
+    public String getContractType() { return contractType; }
+
+    public Decimal getContractSize() { return contractSize; }
+
+    public Decimal getTickSize() { return tickSize; }
+
+    public Decimal getLotSize() { return lotSize; }
+
     public String toStringCSV() {
-        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route+","+ underlyingId +","+unitId;
+        return ""+productId+","+symbol+","+exchange+","+bloombergId+","+name+","+route
+                +","+ underlyingId +","+unitId+","+contractType
+                +","+contractSize.toString()+","+tickSize.toString()+","+lotSize.toString();
     }
 
     public Product withProductId(String p) {
@@ -135,7 +149,25 @@ public class Product {
         return this;
     }
 
+    public Product withContractType(String s) {
+        contractType = s;
+        return this;
+    }
 
+    public Product withContractSize(String s) {
+        contractSize = Decimal.fromString(s);
+        return this;
+    }
+
+    public Product withTickSize(String s) {
+        tickSize = Decimal.fromString(s);
+        return this;
+    }
+
+    public Product withLotSize(String s) {
+        lotSize = Decimal.fromString(s);
+        return this;
+    }
 
     public Product(String productId, String symbol, String exchange) {
         this.productId = productId;
@@ -163,10 +195,15 @@ public class Product {
     private String route;
     private String underlyingId;
     private String unitId;
+    private String contractType;
+    private Decimal contractSize=Decimal.ONE;
+    private Decimal tickSize=Decimal.CENT;
+    private Decimal lotSize=Decimal.ONE;
 
     public boolean isNoRateProduct() {
         return unitId.compareTo(underlyingId)==0;
     }
+
 
 
 //    private static class ProductNULL extends Product {

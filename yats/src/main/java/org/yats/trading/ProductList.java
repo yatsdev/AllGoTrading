@@ -85,7 +85,7 @@ public class ProductList implements IProvideProduct {
             reader.readNext();
             int lineNumber=0;
             while ((nextLine = reader.readNext()) != null) {
-                if(nextLine.length<8) throw new CommonExceptions.FieldNotFoundException("too few fields! line #"+lineNumber);
+                if(nextLine.length<12) throw new CommonExceptions.FieldNotFoundException("too few fields! line #"+lineNumber);
                 Product p = new Product()
                         .withProductId(checkForNull(nextLine[0].trim()))
                         .withSymbol(checkForNull(nextLine[1].trim()))
@@ -95,6 +95,10 @@ public class ProductList implements IProvideProduct {
                         .withRoute(checkForNull(nextLine[5].trim()))
                         .withUnderlyingId(checkForNull(nextLine[6].trim()))
                         .withUnitId(checkForNull(nextLine[7].trim()))
+                        .withContractType(checkForNull(nextLine[8].trim()))
+                        .withContractSize(checkForNull(nextLine[9].trim()))
+                        .withTickSize(checkForNull(nextLine[10].trim()))
+                        .withLotSize(checkForNull(nextLine[11].trim()))
                         ;
                 add(p);
                 lineNumber++;

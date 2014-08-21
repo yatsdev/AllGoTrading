@@ -53,19 +53,20 @@ public class Receipt {
 
     // product and unit both needed to calculate value in units for leveraged products
     public Receipt createCounterReceipt(Product product, Product unit) {
-        Decimal currentValue = getCurrentTradedSize().multiply(getPrice());
-        Decimal totalValue = getTotalTradedSize().multiply(getPrice());
-        Decimal residualValue = getResidualSize().multiply(getPrice());
-        Decimal rate = Decimal.ONE.divide(getPrice());
+        Decimal productRate = getPrice().multiply(product.getContractSize());
+        Decimal currentValue = getCurrentTradedSize().multiply(productRate);
+        Decimal totalValue = getTotalTradedSize().multiply(productRate);
+        Decimal residualValue = getResidualSize().multiply(productRate);
+        Decimal unitRate = Decimal.ONE.divide(productRate);
         Receipt counterReceipt = createCopy()
-                .withProductId(unit.getUnderlyingId())
+                .withProductId(product.getUnitId())
                 .withBookSide(getBookSide().toOpposite())
                 .withCurrentTradedSize(currentValue)
                 .withTotalTradedSize(totalValue)
                 .withExternalAccount(getExternalAccount())
                 .withInternalAccount(getInternalAccount())
                 .withOrderId(getOrderId())
-                .withPrice(rate)
+                .withPrice(unitRate)
                 .withResidualSize(residualValue)
                 ;
         return counterReceipt;
