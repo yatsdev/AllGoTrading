@@ -2,6 +2,7 @@ package org.yats.messagebus;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
@@ -48,7 +49,6 @@ public class SenderReceiverTest {
     public void setUp() {
         Config config = Config.DEFAULT_FOR_TESTS;
         senderMarketData = new Sender<MarketDataMsg>(config.getExchangeMarketData(),config.getServerIP());
-        senderMarketData.init();
         receiverMarketData = new Receiver<MarketDataMsg>(
                 MarketDataMsg.class,
                 config.getExchangeMarketData(),
@@ -60,7 +60,6 @@ public class SenderReceiverTest {
         dataMsg = MarketDataMsg.createFrom(data);
 
         senderPositionSnapshot = new Sender<PositionSnapshotMsg>(config.getExchangePositionSnapshot(),config.getServerIP());
-        senderPositionSnapshot.init();
         receiverPositionSnapshot = new Receiver<PositionSnapshotMsg>(
                 PositionSnapshotMsg.class,
                 config.getExchangePositionSnapshot(),
@@ -73,6 +72,13 @@ public class SenderReceiverTest {
         positionSnapshot.add(new AccountPosition("product1", "account2", Decimal.fromDouble(13)));
     }
 
+    @AfterMethod
+    public void tearDown() {
+        senderMarketData.close();
+        senderPositionSnapshot.close();
+        receiverMarketData.close();
+        receiverPositionSnapshot.close();
+    }
 
     private Sender<MarketDataMsg> senderMarketData;
     private Receiver<MarketDataMsg> receiverMarketData;

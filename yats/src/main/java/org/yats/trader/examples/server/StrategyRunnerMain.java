@@ -3,7 +3,6 @@ package org.yats.trader.examples.server;
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
-import org.yats.messagebus.Config;
 import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
@@ -56,9 +55,10 @@ public class StrategyRunnerMain {
     public void go() throws InterruptedException, IOException
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
-        StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
+
+        StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
 
         rateConverter = new RateConverter(productList);
 
@@ -69,12 +69,15 @@ public class StrategyRunnerMain {
         positionServerLogic.startSnapshotListener();
 
         strategyRunner = new StrategyRunner();
-        strategyRunner.setPriceFeed(priceAndOrderConnection);
+        strategyRunner.setPriceFeed(strategyToBusConnection);
         strategyRunner.addReceiptConsumer(positionServer);
         strategyRunner.setProductProvider(productList);
-        strategyRunner.setOrderSender(priceAndOrderConnection);
+        strategyRunner.setOrderSender(strategyToBusConnection);
+        strategyRunner.setReportSender(strategyToBusConnection);
         strategyRunner.setRateConverter(rateConverter);
-        priceAndOrderConnection.setReceiptConsumer(strategyRunner);
+        strategyToBusConnection.setReceiptConsumer(strategyRunner);
+        strategyToBusConnection.setSettingsConsumer(strategyRunner);
+        strategyToBusConnection.setMarketDataConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
@@ -88,7 +91,7 @@ public class StrategyRunnerMain {
 
         positionServerLogic.requestPositionSnapshotFromPositionServer();
 
-        Thread.sleep(2000);
+        Thread.sleep(500);
 
         for(StrategyBase strategy : strategies) strategy.init();
 
@@ -104,6 +107,9 @@ public class StrategyRunnerMain {
         Thread.sleep(1000);
 
         strategyRunner.stop();
+        strategyToBusConnection.close();
+        positionServerLogic.close();
+
         System.exit(0);
     }
 
@@ -116,6 +122,7 @@ public class StrategyRunnerMain {
 //        strategy.setProfitProvider(positionServer);
         strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
+        strategy.setReportSender(strategyRunner);
         strategy.setConfig(strategyConfig);
         return strategy;
     }

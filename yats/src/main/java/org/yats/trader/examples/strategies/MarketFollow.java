@@ -3,6 +3,7 @@ package org.yats.trader.examples.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
@@ -43,6 +44,11 @@ public class MarketFollow extends StrategyBase {
         }
         log.debug("Received receipt: " + receipt);
         position = receipt.getPositionChange().add(position);
+    }
+
+    @Override
+    public void onSettings(IProvideProperties p) {
+
     }
 
     @Override

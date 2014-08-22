@@ -10,9 +10,17 @@ public class MarketData
 {
     public static MarketDataNULL NULL = new MarketDataNULL();
 
-
     public boolean hasProductId(String pid) {
         return productId.compareTo(pid) == 0;
+    }
+
+    public boolean isBookSideEmpty(BookSide _side) {
+        return book.isBookSideEmpty(_side);
+    }
+
+    public boolean isFrontRowEmpty(BookSide _side) {
+        if(book.isBookSideEmpty(_side)) return true;
+        return book.getBookRow(_side, 0).isSize(Decimal.ZERO);
     }
 
     public boolean isPriceAndSizeSame(MarketData other) {
@@ -59,6 +67,18 @@ public class MarketData
 
     public boolean isInitialized() {
         return true;
+    }
+
+
+    public boolean hasFrontRow(BookSide _side, BookRow _row) {
+        BookRow dataRow = book.getRow(_side, 0);
+        return dataRow.isSameAs(_row);
+    }
+
+
+
+    public BookRow getPrice(BookSide _side, int _row) {
+        return book.getBookRow(_side, _row);
     }
 
     public String getOfferBookAsCSV() {
@@ -128,6 +148,28 @@ public class MarketData
                 Decimal.ONE, Decimal.ONE, Decimal.ONE);
     }
 
+    public static MarketData createFromLastWithDepth(String productId, Decimal last, int bidDepth, int askDepth, Decimal step) {
+        Decimal bidFront=last.subtract(Decimal.CENT);
+        Decimal askFront=last.add(Decimal.CENT);
+        MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC), productId,
+                bidFront, askFront, last,
+                Decimal.ONE, Decimal.ONE, Decimal.ONE);
+
+        OfferBookSide bid=new OfferBookSide(BookSide.BID);
+        OfferBookSide ask=new OfferBookSide(BookSide.ASK);
+        for(int i =0; i<bidDepth; i++) {
+            bid.add(new BookRow(Decimal.CENT, bidFront.subtract(step.multiply(Decimal.fromDouble(i)))));
+        }
+        for(int i =0; i<askDepth; i++) {
+            ask.add(new BookRow(Decimal.CENT, askFront.add(step.multiply(Decimal.fromDouble(i)))));
+        }
+        OfferBook o = new OfferBook(bid,ask);
+        m.setBook(o);
+        return m;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+
     private DateTime timestamp;
     private String productId;
     private Decimal bid;
@@ -137,6 +179,8 @@ public class MarketData
     private Decimal askSize;
     private Decimal lastSize;
     private OfferBook book;
+
+
 
     private static class MarketDataNULL extends MarketData {
 

@@ -11,7 +11,7 @@ public class Receipt {
 
     public static ReceiptNULL NULL = new ReceiptNULL();
 
-    boolean isRejection()
+    public boolean isRejection()
     {
         return rejectReason.length() > 0;
     }
@@ -28,6 +28,7 @@ public class Receipt {
 
 
     public boolean isExecutingWith(Decimal frontRowPrice) {
+        if(!frontRowPrice.isGreaterThan(Decimal.ZERO)) return false;
         if(bookSide.isMoreBehindThan(price, frontRowPrice)) return false;
         return true;
     }
@@ -48,6 +49,28 @@ public class Receipt {
         currentTradedSize = Decimal.min(takerReceipt.getResidualSize(), residualSize);
         takerReceipt.adjustByTradedSize(currentTradedSize);
         adjustByTradedSize(currentTradedSize);
+    }
+
+    // product and unit both needed to calculate value in units for leveraged products
+    public Receipt createCounterReceipt(Product product, Product unit) {
+        Decimal productRate = getPrice().multiply(product.getContractSize());
+        Decimal currentValue = getCurrentTradedSize().multiply(productRate);
+        Decimal totalValue = getTotalTradedSize().multiply(productRate);
+        Decimal residualValue = getResidualSize().multiply(productRate);
+        Decimal unitRate = Decimal.ONE.divide(productRate);
+        Receipt counterReceipt = createCopy()
+                .withProductId(product.getUnitId())
+                .withBookSide(getBookSide().toOpposite())
+                .withCurrentTradedSize(currentValue)
+                .withTotalTradedSize(totalValue)
+                .withExternalAccount(getExternalAccount())
+                .withInternalAccount(getInternalAccount())
+                .withOrderId(getOrderId())
+                .withPrice(unitRate)
+                .withResidualSize(residualValue)
+                ;
+        return counterReceipt;
+
     }
 
     private void adjustByTradedSize(Decimal _currentTradedSize) {
@@ -134,6 +157,9 @@ public class Receipt {
 
     public UniqueId getOrderId() {
         return orderId;
+    }
+    public String getOrderIdString() {
+        return orderId.toString();
     }
 
     public void setOrderId(UniqueId orderId) {
@@ -350,6 +376,15 @@ public class Receipt {
 
     public boolean hasOrderId(String _orderId) {
         return _orderId.compareTo(orderId.toString()) == 0;
+    }
+
+    public OrderCancel createOrderCancel(Receipt r) {
+        OrderCancel c = new OrderCancel()
+                .withBookSide(r.getBookSide())
+                .withOrderId(r.getOrderId())
+                .withProductId(r.getProductId())
+                ;
+        return c;
     }
 
 

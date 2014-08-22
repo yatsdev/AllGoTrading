@@ -2,6 +2,8 @@ package org.yats.trader.examples.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
@@ -35,12 +37,14 @@ public class FixClientMain {
          */
         String configFIXOrderFilename = Tool.getPersonalConfigFilename("config/FIXOrder");
         String configFIXPriceFilename = Tool.getPersonalConfigFilename("config/FIXPrice");
+        String configFIXFilename = Tool.getPersonalConfigFilename("config/FIXClient");
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
-        MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
+        IProvideProperties prop = PropertiesReader.createFromConfigFile(configFIXFilename);
+        MarketToBusConnection marketToBusConnection = new MarketToBusConnection(prop);
 
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);

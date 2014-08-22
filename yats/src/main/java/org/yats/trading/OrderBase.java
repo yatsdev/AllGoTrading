@@ -12,12 +12,14 @@ public abstract class OrderBase {
     public UniqueId getOrderId() {
         return orderId;
     }
+    public String getOrderIdString() {
+        return orderId.toString();
+    }
 
     public void setOrderId(UniqueId orderId) {
         this.orderId = orderId;
     }
 
     protected UniqueId orderId;
-
 
 } // class
