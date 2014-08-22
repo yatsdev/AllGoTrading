@@ -92,6 +92,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                     if(marketData.getBook().getDepth(BookSide.BID)>=4) {
                         lv3BidSize=marketData.getBook().getBookRow(BookSide.BID, 3).getSize().toString();
                         lv3BidPrice=marketData.getBook().getBookRow(BookSide.BID, 3).getPrice().toString();
+
+                        if(lv3BidSize.length()==0) log.info("lvl3bidSize empty");
+                        if(lv3BidPrice.length()==0) log.info("lvl3bidPrice empty");
                     }
 
                     if(marketData.getBook().getDepth(BookSide.ASK)>=4) {
@@ -210,6 +213,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
                     marketDataString=marketDataString+"\t"+lv9BidSize+"\t"+lv9BidPrice+"\t"+lv9AskSize+"\t"+lv9AskPrice;
 
+                    log.info(marketDataString);
                     conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
                    
 
