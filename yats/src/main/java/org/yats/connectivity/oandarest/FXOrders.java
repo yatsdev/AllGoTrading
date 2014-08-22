@@ -243,16 +243,19 @@ public class FXOrders implements ISendOrder, Runnable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(stream));
 
                 while ((line = br.readLine()) != null) {
-                    log.info("got event line: "+line);
+//                    log.info("got event line: "+line);
                     if(stopReceiving) break;
+                    Object obj = JSONValue.parse(line);
+                    JSONObject msg = (JSONObject) obj;
+                    log.info(msg.toString());
+
+//                    JSONObject values = (JSONObject)tick.get("tick");
+
+
                 }
 
                 EntityUtils.consume(entity);
 
-//                Object obj = JSONValue.parse(line);
-//                JSONObject tick = (JSONObject) obj;
-
-//                    JSONObject values = (JSONObject)tick.get("tick");
 
 
             } else {
@@ -376,6 +379,8 @@ public class FXOrders implements ISendOrder, Runnable {
 
         fx.logon();
 
+        System.out.println("Init comletent. Press enter to continue");
+        System.in.read();
 
         OrderNew order = OrderNew.create()
                 .withBookSide(BookSide.BID)
