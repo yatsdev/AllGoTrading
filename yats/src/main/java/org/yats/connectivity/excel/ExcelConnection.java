@@ -48,6 +48,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
                     for(int n=1;n<10;n++){
+
                         int p=n+1;
 
                         String lvnBidSize=new String("");
@@ -71,12 +72,14 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
                     }
 
-                    log.info(marketDataString);
+//                    log.info(marketDataString);
+                    if(shutdown) return;
                     conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
                    
 
                 } catch (DDEException e) {
                     e.printStackTrace();
+                    System.exit(-1);
                 }
             }
         }
@@ -150,7 +153,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         {
             System.out.print("conversation.connect...");
             conversation.setTimeout(50000);
-            conversation.connect("Excel", "MarketData");
+            conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
 
             System.out.println("done.");
             System.out.print("conversation.request...");
@@ -178,6 +181,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     public void stopDDE()
     {
         try {
+            shutdown = true;
+            Tool.sleepFor(500);
             conversation.stopAdvice("C1");//This means all elements in column 1
             conversation.disconnect();
         } catch (DDEException e) {
@@ -214,6 +219,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     public ExcelConnection(IProvideProperties _prop)
     {
+        shutdown=false;
+        prop = _prop;
         strategyToBusConnection = new StrategyToBusConnection(_prop);
         strategyToBusConnection.setMarketDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
@@ -253,7 +260,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
     private DDEClientConversation conversationReports;
-
+    private IProvideProperties prop;
+    private boolean shutdown;
 
 
 } // class
