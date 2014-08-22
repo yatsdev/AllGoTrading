@@ -115,7 +115,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             e.printStackTrace();
         }
 
-        // reports from strategies are coming in here. send them to Excel
+       // reports from strategies are coming in here. send them to Excel
 
         // for now writing to console:
         System.out.println("Strategy reports: "+PropertiesReader.toString(p));
