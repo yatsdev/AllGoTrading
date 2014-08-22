@@ -47,171 +47,29 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                             +"\t"+marketData.getAsk().toString());
 
 
-                   //Lv1
-                    String lv1BidSize=new String("");
-                    String lv1BidPrice=new String("");
-                    String lv1AskSize=new String("");
-                    String lv1AskPrice=new String("");
+                    for(int n=1;n<10;n++){
+                        int p=n+1;
 
-                    if(marketData.getBook().getDepth(BookSide.BID)>=2) {
-                         lv1BidSize=marketData.getBook().getBookRow(BookSide.BID, 1).getSize().toString();
-                         lv1BidPrice=marketData.getBook().getBookRow(BookSide.BID, 1).getPrice().toString();
+                        String lvnBidSize=new String("");
+                        String lvnBidPrice=new String("");
+                        String lvnAskSize=new String("");
+                        String lvnAskPrice=new String("");
+
+                        if(marketData.getBook().getDepth(BookSide.BID)>=p) {
+                            lvnBidSize=marketData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
+                            lvnBidPrice=marketData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
+                        }
+
+                        if(marketData.getBook().getDepth(BookSide.ASK)>=p) {
+                            lvnAskSize = marketData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
+                            lvnAskPrice = marketData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
+                        }
+
+                        marketDataString=marketDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
+
+
+
                     }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=2) {
-                        lv1AskSize = marketData.getBook().getBookRow(BookSide.ASK, 1).getSize().toString();
-                        lv1AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 1).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv1BidSize+"\t"+lv1BidPrice+"\t"+lv1AskSize+"\t"+lv1AskPrice;
-
-                   //Lv2
-                    String lv2BidSize=new String("");
-                    String lv2BidPrice=new String("");
-                    String lv2AskSize=new String("");
-                    String lv2AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=3) {
-                        lv2BidSize=marketData.getBook().getBookRow(BookSide.BID, 2).getSize().toString();
-                        lv2BidPrice=marketData.getBook().getBookRow(BookSide.BID, 2).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=3) {
-                        lv2AskSize = marketData.getBook().getBookRow(BookSide.ASK, 2).getSize().toString();
-                        lv2AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 2).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv2BidSize+"\t"+lv2BidPrice+"\t"+lv2AskSize+"\t"+lv2AskPrice;
-
-                    //Lv3
-                    String lv3BidSize=new String("");
-                    String lv3BidPrice=new String("");
-                    String lv3AskSize=new String("");
-                    String lv3AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=4) {
-                        lv3BidSize=marketData.getBook().getBookRow(BookSide.BID, 3).getSize().toString();
-                        lv3BidPrice=marketData.getBook().getBookRow(BookSide.BID, 3).getPrice().toString();
-
-                        if(lv3BidSize.length()==0) log.info("lvl3bidSize empty");
-                        if(lv3BidPrice.length()==0) log.info("lvl3bidPrice empty");
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=4) {
-                        lv3AskSize = marketData.getBook().getBookRow(BookSide.ASK, 3).getSize().toString();
-                        lv3AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 3).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv3BidSize+"\t"+lv3BidPrice+"\t"+lv3AskSize+"\t"+lv3AskPrice;
-
-
-                    //Lv4
-                    String lv4BidSize=new String("");
-                    String lv4BidPrice=new String("");
-                    String lv4AskSize=new String("");
-                    String lv4AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=5) {
-                        lv4BidSize=marketData.getBook().getBookRow(BookSide.BID, 4).getSize().toString();
-                        lv4BidPrice=marketData.getBook().getBookRow(BookSide.BID, 4).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=5) {
-                        lv4AskSize = marketData.getBook().getBookRow(BookSide.ASK, 4).getSize().toString();
-                        lv4AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 4).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv4BidSize+"\t"+lv4BidPrice+"\t"+lv4AskSize+"\t"+lv4AskPrice;
-
-                    //Lv5
-                    String lv5BidSize=new String("");
-                    String lv5BidPrice=new String("");
-                    String lv5AskSize=new String("");
-                    String lv5AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=6) {
-                        lv5BidSize=marketData.getBook().getBookRow(BookSide.BID, 5).getSize().toString();
-                        lv5BidPrice=marketData.getBook().getBookRow(BookSide.BID, 5).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=6) {
-                        lv5AskSize = marketData.getBook().getBookRow(BookSide.ASK, 5).getSize().toString();
-                        lv5AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 5).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv5BidSize+"\t"+lv5BidPrice+"\t"+lv5AskSize+"\t"+lv5AskPrice;
-
-                    //Lv6
-                    String lv6BidSize=new String("");
-                    String lv6BidPrice=new String("");
-                    String lv6AskSize=new String("");
-                    String lv6AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=7) {
-                        lv6BidSize=marketData.getBook().getBookRow(BookSide.BID, 6).getSize().toString();
-                        lv6BidPrice=marketData.getBook().getBookRow(BookSide.BID, 6).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=7) {
-                        lv6AskSize = marketData.getBook().getBookRow(BookSide.ASK, 6).getSize().toString();
-                        lv6AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 6).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv6BidSize+"\t"+lv6BidPrice+"\t"+lv6AskSize+"\t"+lv6AskPrice;
-
-                    //Lv7
-                    String lv7BidSize=new String("");
-                    String lv7BidPrice=new String("");
-                    String lv7AskSize=new String("");
-                    String lv7AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=8) {
-                        lv7BidSize=marketData.getBook().getBookRow(BookSide.BID, 7).getSize().toString();
-                        lv7BidPrice=marketData.getBook().getBookRow(BookSide.BID, 7).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=8) {
-                        lv7AskSize = marketData.getBook().getBookRow(BookSide.ASK, 7).getSize().toString();
-                        lv7AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 7).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv7BidSize+"\t"+lv7BidPrice+"\t"+lv7AskSize+"\t"+lv7AskPrice;
-
-                    //Lv8
-                    String lv8BidSize=new String("");
-                    String lv8BidPrice=new String("");
-                    String lv8AskSize=new String("");
-                    String lv8AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=9) {
-                        lv8BidSize=marketData.getBook().getBookRow(BookSide.BID, 8).getSize().toString();
-                        lv8BidPrice=marketData.getBook().getBookRow(BookSide.BID, 8).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=9) {
-                        lv8AskSize = marketData.getBook().getBookRow(BookSide.ASK, 8).getSize().toString();
-                        lv8AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 8).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv8BidSize+"\t"+lv8BidPrice+"\t"+lv8AskSize+"\t"+lv8AskPrice;
-
-                    //Lv9
-                    String lv9BidSize=new String("");
-                    String lv9BidPrice=new String("");
-                    String lv9AskSize=new String("");
-                    String lv9AskPrice=new String("");
-
-                    if(marketData.getBook().getDepth(BookSide.BID)>=10) {
-                        lv9BidSize=marketData.getBook().getBookRow(BookSide.BID, 9).getSize().toString();
-                        lv9BidPrice=marketData.getBook().getBookRow(BookSide.BID, 9).getPrice().toString();
-                    }
-
-                    if(marketData.getBook().getDepth(BookSide.ASK)>=10) {
-                        lv9AskSize = marketData.getBook().getBookRow(BookSide.ASK, 9).getSize().toString();
-                        lv9AskPrice = marketData.getBook().getBookRow(BookSide.ASK, 9).getPrice().toString();
-                    }
-
-                    marketDataString=marketDataString+"\t"+lv9BidSize+"\t"+lv9BidPrice+"\t"+lv9AskSize+"\t"+lv9AskPrice;
 
                     log.info(marketDataString);
                     conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
