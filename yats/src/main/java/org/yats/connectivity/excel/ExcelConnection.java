@@ -90,10 +90,32 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     }
 
+    public void ReportsConversation(){
+
+
+        conversationReports = new DDEClientConversation();
+        conversationReports.setTimeout(50000);
+        try {
+            conversationReports.connect("Excel", "Reports");
+        } catch (DDEException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
     @Override
     public void onReport(IProvideProperties p) {
 
-        // reports from strategies are coming in here. send them to Excel
+       ReportsConversation();
+
+        try {
+            conversationReports.poke("R2C1","Strategy reports: "+PropertiesReader.toString(p));
+        } catch (DDEException e) {
+            e.printStackTrace();
+        }
+
+       // reports from strategies are coming in here. send them to Excel
 
         // for now writing to console:
         System.out.println("Strategy reports: "+PropertiesReader.toString(p));
@@ -230,6 +252,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
+    private DDEClientConversation conversationReports;
 
 
 
