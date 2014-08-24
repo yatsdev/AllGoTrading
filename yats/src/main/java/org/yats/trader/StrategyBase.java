@@ -4,10 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
+public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
@@ -21,12 +22,19 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     @Override
     public abstract void onReceipt(Receipt receipt);
 
+    @Override
+    public abstract void onSettings(IProvideProperties p);
+
+
     protected String getConfig(String key) {
         return config.get(key);
     }
 
     protected double getConfigAsDouble(String key) {
         return new Decimal(config.get(key)).toDouble();
+    }
+    protected int getConfigAsInt(String key) {
+        return new Decimal(config.get(key)).toInt();
     }
 
     protected Decimal getConfigAsDecimal(String key) {
@@ -35,6 +43,14 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     public void setConfig(IProvideProperties config) {
         this.config = config;
+    }
+
+    public void setConfigItem(String key, String value) {
+        config.set(key, value);
+    }
+
+    public void sendConfig() {
+
     }
 
     public void init() {
@@ -63,6 +79,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         orderSender.sendOrderCancel(order);
     }
 
+    public void sendReports(IProvideProperties p) {
+        reportSender.sendReports(p);
+    }
+
     public Product getProductForProductId(String productId) {
         return productProvider.getProductForProductId(productId);
     }
@@ -89,6 +109,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         return positionProvider.getValueForAccountProduct(targetProductId, r);
     }
 
+    public PropertiesReader getReports() {
+        return reports;
+    }
+
 //    public Decimal getProfitForProduct(String productId)
 //    {
 //        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
@@ -102,12 +126,12 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.orderSender = orderSender;
     }
 
-    public void setPositionProvider(IProvidePosition positionProvider) {
-        this.positionProvider = positionProvider;
+    public void setReportSender(ISendReports reportSender) {
+        this.reportSender = reportSender;
     }
 
-    public void setProfitProvider(IProvideProfit profitProvider) {
-        this.profitProvider = profitProvider;
+    public void setPositionProvider(IProvidePosition positionProvider) {
+        this.positionProvider = positionProvider;
     }
 
     public String getInternalAccount() {
@@ -122,11 +146,18 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
         this.productProvider = productProvider;
     }
 
-    public StrategyBase() {
+    public void setName(String name) {
+        this.name = name;
+        reports.set("strategyName", name);
+    }
 
+
+    public StrategyBase() {
         consumerId = UniqueId.create();
         initialised = false;
         converter = new RateConverter(new ProductList());
+        reports = new PropertiesReader();
+        setName("unnamedStrategy");
     }
 
 
@@ -134,9 +165,9 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
 
     private IProvidePriceFeed priceProvider;
     private ISendOrder orderSender;
+    private ISendReports reportSender;
 
     private IProvidePosition positionProvider;
-    private IProvideProfit profitProvider;
     private IProvideProduct productProvider;
 
     private final UniqueId consumerId;
@@ -145,4 +176,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt {
     private boolean initialised;
     private RateConverter converter;
 
+    PropertiesReader reports;
+    private String name;
 }

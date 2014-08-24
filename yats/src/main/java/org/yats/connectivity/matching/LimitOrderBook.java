@@ -1,5 +1,7 @@
 package org.yats.connectivity.matching;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
 import org.yats.common.Decimal;
 import org.yats.common.Tool;
@@ -7,6 +9,12 @@ import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 public class LimitOrderBook implements IConsumeReceipt {
+
+    final Logger log = LoggerFactory.getLogger(LimitOrderBook.class);
+
+    public int getOrderCount() {
+        return book[0].getOrderCount() + book[1].getOrderCount();
+    }
 
     public void match(OrderNew orderNew) {
         Receipt takerReceipt = orderNew.createReceiptDefault();
@@ -38,6 +46,8 @@ public class LimitOrderBook implements IConsumeReceipt {
         consumer.onReceipt(receipt);
     }
 
+    int counter = 0;
+
     //todo: only send if changed
     private void sendMarketData() {
         try {
@@ -45,10 +55,6 @@ public class LimitOrderBook implements IConsumeReceipt {
             Decimal bidSize = book[0].getFrontRowSize();
             Decimal ask = book[1].getFrontRowPrice();
             Decimal askSize = book[1].getFrontRowSize();
-
-            if(bidSize.isZero() || askSize.isZero()) {
-                return;
-            }
 
             Decimal last = lastReceipt != null ? lastReceipt.getPrice() : Decimal.ZERO;
             Decimal lastSize = lastReceipt != null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
@@ -59,7 +65,9 @@ public class LimitOrderBook implements IConsumeReceipt {
             m.setBook(offerBook);
             consumer.onMarketData(m);
         } catch(CommonExceptions.ContainerEmptyException e) {
-            // todo: enable sending even if only half the book is filled or totally empty?
+            log.error(e.getMessage());
+        } catch(Throwable t) {
+            log.error(t.getMessage());
         }
     }
 

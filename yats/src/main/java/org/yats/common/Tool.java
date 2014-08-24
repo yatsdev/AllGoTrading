@@ -33,7 +33,7 @@ public class Tool {
 
 
     public static void sleepABit() {
-        sleepFor(500);
+        sleepFor(200);
     }
 
     public static void sleepFor(int millis) {

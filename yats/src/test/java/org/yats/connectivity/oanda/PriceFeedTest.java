@@ -24,7 +24,7 @@ public class PriceFeedTest {
 //    {
 //        Tool.sleepFor(5000);
 //        assert (consumer.getReceived() > 0);
-//        priceFeed.shutdown();
+//        priceFeed.close();
 //        while(priceFeed.isRunning()) Tool.sleepABit();
 //        System.out.println("done.");
 //    }

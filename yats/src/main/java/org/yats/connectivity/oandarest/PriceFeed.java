@@ -53,6 +53,7 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
         while(!shutdown)
         {
             try {
+                Thread.yield();
                 receive();
                 stopReceiving=false;
                 httpClient.getConnectionManager().shutdown();

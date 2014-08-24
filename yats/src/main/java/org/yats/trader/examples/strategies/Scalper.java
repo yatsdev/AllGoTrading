@@ -3,6 +3,7 @@ package org.yats.trader.examples.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
@@ -60,6 +61,11 @@ public class Scalper extends StrategyBase {
                 sendBidRelativeTo(receipt.getPrice());
             }
         }
+
+    }
+
+    @Override
+    public void onSettings(IProvideProperties p) {
 
     }
 

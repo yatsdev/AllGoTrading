@@ -12,6 +12,12 @@ public class BookRow {
                 '}';
     }
 
+    public boolean isSameAs(BookRow _row) {
+        if(!isPrice(_row.price)) return false;
+        if(!isSize(_row.size)) return false;
+        return true;
+    }
+
     public boolean isPrice(Decimal _price) {
         return price.isEqualTo(_price);
     }
@@ -60,5 +66,6 @@ public class BookRow {
 
     private Decimal size;
     private Decimal price;
+
 
 } // class

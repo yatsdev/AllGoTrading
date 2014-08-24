@@ -23,6 +23,10 @@ public class ReceiptStorageLogic implements IAmCalledBack{
         }
     }
 
+    public void close() {
+        receiverReceipt.close();
+    }
+
     public ReceiptStorageLogic() {
         storage = new ReceiptStorageCSV();
         Config config = Config.fromProperties(Config.createRealProperties());
@@ -36,5 +40,6 @@ public class ReceiptStorageLogic implements IAmCalledBack{
 
     private BufferingReceiver<ReceiptMsg> receiverReceipt;
     private ReceiptStorageCSV storage;
+
 
 }

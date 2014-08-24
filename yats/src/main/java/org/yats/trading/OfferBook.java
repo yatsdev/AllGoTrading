@@ -13,6 +13,14 @@ public class OfferBook {
     }
 
 
+    public boolean isBookSideEmpty(BookSide _side) {
+        return getDepth(_side)==0;
+    }
+
+    public BookRow getRow(BookSide _side, int _row) {
+        return bookSides[_side.toIndex()].getRow(_row);
+    }
+
     public int getDepth(BookSide _side) {
         return bookSides[_side.toIndex()].size();
     }
@@ -40,7 +48,8 @@ public class OfferBook {
             book.bookSides[1] = OfferBookSide.fromStringCSV(splitArray[1], BookSide.ASK);
         } else if(csv.charAt(0)=='|') {
             book.bookSides[0] = OfferBookSide.fromStringCSV("", BookSide.BID);
-            book.bookSides[1] = OfferBookSide.fromStringCSV(splitArray[0], BookSide.ASK);
+            String rightSide = (splitArray.length==0) ? "" : splitArray[0];
+            book.bookSides[1] = OfferBookSide.fromStringCSV(rightSide, BookSide.ASK);
         } else {
             book.bookSides[0] = OfferBookSide.fromStringCSV(splitArray[0], BookSide.BID);
             book.bookSides[1] = OfferBookSide.fromStringCSV("", BookSide.ASK);
@@ -77,7 +86,7 @@ public class OfferBook {
         bookSides[1] = new OfferBookSide(BookSide.ASK);
     }
 
-
+    //////////////////////////////////////////////////////////////////////////////////////////////
 
     private OfferBookSide[] bookSides;
 

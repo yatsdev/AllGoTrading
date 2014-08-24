@@ -31,9 +31,9 @@ public class MatchingMain implements IConsumeMarketData {
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
 
-        MarketToBusConnection marketToBusConnection = new MarketToBusConnection();
+        MarketToBusConnection marketToBusConnection = new MarketToBusConnection(prop);
 
-        InternalMarket internalMarket = new InternalMarket(prop);
+        InternalMarket internalMarket = new InternalMarket(prop.get("externalAccount"), prop.get("marketName"));
         internalMarket.setProductProvider(products);
 
         StrategyRunner strategyRunner = new StrategyRunner();
@@ -47,6 +47,7 @@ public class MatchingMain implements IConsumeMarketData {
 
         strategyRunner.setOrderSender(internalMarket);
         internalMarket.setReceiptConsumer(strategyRunner);
+        internalMarket.setPriceConsumer(strategyRunner);
         marketToBusConnection.setOrderSender(strategyRunner);
 
         Thread.sleep(2000);
@@ -61,7 +62,7 @@ public class MatchingMain implements IConsumeMarketData {
         System.out.println("\nexiting...\n");
 
         marketToBusConnection.shutdown();
-//        oandaFeed.shutdown();
+//        oandaFeed.close();
         Thread.sleep(1000);
 
         System.exit(0);
