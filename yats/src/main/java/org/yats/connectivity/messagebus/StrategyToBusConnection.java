@@ -73,7 +73,6 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             marketDataMap.put(m.productId, m);
         }
         for(MarketDataMsg m : marketDataMap.values()) {
-//            log.info("STB: "+m);
             marketDataConsumer.onMarketData(m.toMarketData());
         }
         marketDataMap.clear();
@@ -98,9 +97,16 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private void sendAllReceivedReports() {
         if(receiverReports==null) return;
         while(receiverReports.hasMoreMessages()) {
-            IProvideProperties p = receiverReports.get().toProperties();
+            KeyValueMsg m = receiverReports.get();
+            String strategyName="unknown";
+            IProvideProperties p = m.toProperties();
+            if(p.exists("strategyName")) strategyName = p.get("strategyName");
+            reportsMap.put(strategyName, p);
+        }
+        for(IProvideProperties p : reportsMap.values()) {
             reportsConsumer.onReport(p);
         }
+        reportsMap.clear();
     }
 
     public void setMarketDataConsumer(IConsumeMarketData marketDataConsumer) {
@@ -135,6 +141,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         shuttingDown=false;
 
         marketDataMap = new ConcurrentHashMap<String, MarketDataMsg>();
+        reportsMap = new ConcurrentHashMap<String, IProvideProperties>();
         orderNewQueue = new LinkedBlockingQueue<OrderNew>();
         orderCancelQueue = new LinkedBlockingQueue<OrderCancel>();
         subscriptionQueue = new LinkedBlockingQueue<SubscriptionMsg>();
@@ -203,6 +210,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     IConsumeReports reportsConsumer;
     BufferingReceiver<MarketDataMsg> receiverMarketdata;
     ConcurrentHashMap<String, MarketDataMsg> marketDataMap;
+    ConcurrentHashMap<String, IProvideProperties> reportsMap;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
     BufferingReceiver<KeyValueMsg> receiverSettings;
     BufferingReceiver<KeyValueMsg> receiverReports;
