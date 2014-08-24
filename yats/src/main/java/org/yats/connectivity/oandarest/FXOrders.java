@@ -243,13 +243,34 @@ public class FXOrders implements ISendOrder, Runnable {
                 BufferedReader br = new BufferedReader(new InputStreamReader(stream));
 
                 while ((line = br.readLine()) != null) {
+                    if(line.contains("{\"heartbeat")) continue;
 //                    log.info("got event line: "+line);
                     if(stopReceiving) break;
                     Object obj = JSONValue.parse(line);
                     JSONObject msg = (JSONObject) obj;
                     log.info(msg.toString());
+                    if(line.startsWith("{\"transaction")) {
+                        JSONObject values = (JSONObject)msg.get("transaction");
+                        String id = values.get("id").toString();
+                        String type = values.get("type").toString();
+                        String reason = values.get("reason").toString();
+                        if(oandaId2OrderMap.containsKey(id)) {
+                            OrderNew o = oandaId2OrderMap.get(id);
+                            Receipt r = o.createReceiptDefault()
+                                    .withExternalAccount(getOandaAccount())
+                                    ;
+                            if(type.compareTo("LIMIT_ORDER_CREATE")==0){
+                                log.info("OandaReceipt: LIMIT_ORDER_CREATE for "+id);
+                            }
+                            if(type.compareTo("ORDER_CANCEL")==0) {
+                                log.info("OandaReceipt: ORDER_CANCEL for "+id);
+                                r=r.withEndState(true);
+                            }
+                            receiptConsumer.onReceipt(r);
+                        }
 
-//                    JSONObject values = (JSONObject)tick.get("tick");
+                    }
+
 
 
                 }
@@ -370,6 +391,7 @@ public class FXOrders implements ISendOrder, Runnable {
     private Thread eventStreamThread;
     private boolean stopReceiving;
 
+
     public static void main(String[]args) throws IOException {
 
         String configFilename = Tool.getPersonalConfigFilename("config/OandaConnection");
@@ -379,14 +401,14 @@ public class FXOrders implements ISendOrder, Runnable {
 
         fx.logon();
 
-        System.out.println("Init comletent. Press enter to continue");
+        System.out.println("Init completed. Press enter to continue");
         System.in.read();
 
         OrderNew order = OrderNew.create()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount("test")
                 .withSize(Decimal.ONE)
-                .withLimit(Decimal.fromString("1.331"))
+                .withLimit(Decimal.fromString("1.3260"))
                 .withProductId("OANDA_EURUSD")
                 ;
         fx.sendOrderNew(order);
