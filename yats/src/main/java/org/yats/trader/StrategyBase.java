@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
@@ -108,6 +109,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         return positionProvider.getValueForAccountProduct(targetProductId, r);
     }
 
+    public PropertiesReader getReports() {
+        return reports;
+    }
+
 //    public Decimal getProfitForProduct(String productId)
 //    {
 //        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
@@ -129,10 +134,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         this.positionProvider = positionProvider;
     }
 
-    public void setProfitProvider(IProvideProfit profitProvider) {
-        this.profitProvider = profitProvider;
-    }
-
     public String getInternalAccount() {
         return internalAccount;
     }
@@ -145,10 +146,18 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         this.productProvider = productProvider;
     }
 
+    public void setName(String name) {
+        this.name = name;
+        reports.set("strategyName", name);
+    }
+
+
     public StrategyBase() {
         consumerId = UniqueId.create();
         initialised = false;
         converter = new RateConverter(new ProductList());
+        reports = new PropertiesReader();
+        setName("unnamedStrategy");
     }
 
 
@@ -159,7 +168,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     private ISendReports reportSender;
 
     private IProvidePosition positionProvider;
-    private IProvideProfit profitProvider;
     private IProvideProduct productProvider;
 
     private final UniqueId consumerId;
@@ -168,4 +176,6 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     private boolean initialised;
     private RateConverter converter;
 
+    PropertiesReader reports;
+    private String name;
 }
