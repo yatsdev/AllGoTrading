@@ -110,13 +110,13 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     @Override
     public void onReport(IProvideProperties p) {
 
-       ReportsConversation();
-
-        try {
-            conversationReports.poke("R2C1","Strategy reports: "+PropertiesReader.toString(p));
-        } catch (DDEException e) {
-            e.printStackTrace();
-        }
+//       ReportsConversation();
+//
+//        try {
+//            conversationReports.poke("R2C1","Strategy reports: "+PropertiesReader.toString(p));
+//        } catch (DDEException e) {
+//            e.printStackTrace();
+//        }
 
        // reports from strategies are coming in here. send them to Excel
 
@@ -124,7 +124,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         System.out.println("Strategy reports: "+PropertiesReader.toString(p));
 
         //lets send the report back as settings to test the way back to the strategy
-        strategyToBusConnection.sendSettings(p);
+//        strategyToBusConnection.sendSettings(p);
     }
 
     @Override
