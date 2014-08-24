@@ -123,6 +123,7 @@ public class StrategyRunnerMain {
         strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
         strategy.setReportSender(strategyRunner);
+        strategy.setName(strategyName);
         strategy.setConfig(strategyConfig);
         return strategy;
     }

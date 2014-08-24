@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 public class Quoter extends StrategyBase {
 
+
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
@@ -41,7 +42,7 @@ public class Quoter extends StrategyBase {
         if(!marketData.isSameFrontRowAskAs(prevRefMarketData)) {
             cancelOrders(BookSide.ASK);
             sendAskRelativeTo(marketData.getAsk());
-            sendReports(prop);
+            sendReports(getReports());
         }
 
         prevRefMarketData = marketData;
@@ -119,17 +120,17 @@ public class Quoter extends StrategyBase {
             double step = i;
             Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-step*stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.BID, bidPrice);
-            prop.set("bidPrice"+i, bidPrice);
+            getReports().set("bidPrice"+i, bidPrice);
         }
     }
 
     private void sendAskRelativeTo(Decimal price) {
-        double askMarket=price.toDouble();
-        for(int i=1; i<=askSteps; i++) {
+        double askMarket = price.toDouble();
+        for (int i = 1; i <= askSteps; i++) {
             double step = i;
-            Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+step*stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
+            Decimal askPrice = Decimal.fromDouble(askMarket * (1.0 + step * stepFactor) + tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.ASK, askPrice);
-            prop.set("askPrice"+i, askPrice);
+            getReports().set("askPrice" + i, askPrice);
         }
     }
 
@@ -189,7 +190,7 @@ public class Quoter extends StrategyBase {
         orders = new HashMap<String, OrderNew>();
         cancelMap = new HashMap<String, OrderCancel>();
         prevRefMarketData = MarketData.NULL;
-        prop = new PropertiesReader();
+
     }
 
     private Decimal position;
@@ -206,7 +207,6 @@ public class Quoter extends StrategyBase {
     private int bidSteps=1;
     private int askSteps=1;
 
-    PropertiesReader prop;
 
 
 //    private boolean receivedOrderReceiptBidSide;
