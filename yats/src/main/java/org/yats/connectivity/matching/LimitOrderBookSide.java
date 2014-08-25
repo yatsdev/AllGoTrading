@@ -32,7 +32,7 @@ public class LimitOrderBookSide implements IConsumeReceipt {
             if(!takerReceipt.isExecutingWith(frontRowPrice)) throw new CommonExceptions.ContainerEmptyException("cant execute");
             PriceLevel frontRow = book.get(frontRowPrice);
             frontRow.match(takerReceipt);
-            if(frontRow.isEmpty()) book.remove(frontRowPrice);
+//            if(frontRow.isEmpty()) book.remove(frontRowPrice);
             removeEmptyFrontRows();
         }
     }
@@ -40,7 +40,8 @@ public class LimitOrderBookSide implements IConsumeReceipt {
     public void cancel(UniqueId orderId) {
         String idString = orderId.toString();
         if(isOrderIdInBook(idString)) {
-            bookByOrderId.get(idString).remove(idString);
+            PriceLevel priceLevel = bookByOrderId.get(idString);
+            priceLevel.remove(idString);
             bookByOrderId.remove(idString);
             removeEmptyFrontRows();
         }
@@ -71,6 +72,14 @@ public class LimitOrderBookSide implements IConsumeReceipt {
         return bookSide;
     }
 
+    public int getOrderCount() {
+        int sum =0;
+        for(PriceLevel l : book.values()) {
+            sum += l.getOrderCount();
+        }
+        return sum;
+    }
+
     private void removeOrderFromBook(String orderId) {
         if(bookByOrderId.containsKey(orderId)) bookByOrderId.remove(orderId);
     }
@@ -89,7 +98,8 @@ public class LimitOrderBookSide implements IConsumeReceipt {
     }
 
     public Decimal getFrontRowPrice() {
-        if(isEmpty()) throw new CommonExceptions.ContainerEmptyException("book is empty!");
+        if(isEmpty()) return Decimal.MINUSONE;
+            //throw new CommonExceptions.ContainerEmptyException("book is empty!");
         return book.firstKey();
     }
 
@@ -121,6 +131,7 @@ public class LimitOrderBookSide implements IConsumeReceipt {
         PriceLevel frontRow;
         do {
             Decimal frontRowPrice = getFrontRowPrice();
+            if(!frontRowPrice.isGreaterThan(Decimal.ZERO)) return;
             frontRow = book.get(frontRowPrice);
             if (frontRow.isEmpty()) book.remove(frontRowPrice);
         } while(frontRow.isEmpty() && book.size()>0);

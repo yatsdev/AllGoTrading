@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ProductList implements IProvideProduct {
 
+    public static final String PATH = "config/CFDProductList.csv";
+
     public static final String EUR_PID = "CCY_EUR";
     public static final String USD_PID = "CCY_USD";
     public static final String CHF_PID = "CCY_CHF";
@@ -81,8 +83,9 @@ public class ProductList implements IProvideProduct {
             CSVReader reader = new CSVReader(new FileReader(path));
             String[] nextLine;
             reader.readNext();
+            int lineNumber=0;
             while ((nextLine = reader.readNext()) != null) {
-                if(nextLine.length<8) throw new CommonExceptions.FieldNotFoundException("too few fields!");
+                if(nextLine.length<12) throw new CommonExceptions.FieldNotFoundException("too few fields! line #"+lineNumber);
                 Product p = new Product()
                         .withProductId(checkForNull(nextLine[0].trim()))
                         .withSymbol(checkForNull(nextLine[1].trim()))
@@ -92,8 +95,13 @@ public class ProductList implements IProvideProduct {
                         .withRoute(checkForNull(nextLine[5].trim()))
                         .withUnderlyingId(checkForNull(nextLine[6].trim()))
                         .withUnitId(checkForNull(nextLine[7].trim()))
+                        .withContractType(checkForNull(nextLine[8].trim()))
+                        .withContractSize(checkForNull(nextLine[9].trim()))
+                        .withTickSize(checkForNull(nextLine[10].trim()))
+                        .withLotSize(checkForNull(nextLine[11].trim()))
                         ;
                 add(p);
+                lineNumber++;
             }
         } catch (Exception e) {
             e.printStackTrace();

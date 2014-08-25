@@ -19,8 +19,8 @@ public class ProductListTest {
     @Test
     public void canFindSAPBySymbol()
     {
-        Product productSAP = list.findBySymbol("SAP");
-        assert (productSAP.getSymbol().compareTo("SAP")==0);
+        Product productSAP = list.findBySymbol("TEST_SAP");
+        assert (productSAP.getSymbol().compareTo("TEST_SAP")==0);
     }
 
     @Test

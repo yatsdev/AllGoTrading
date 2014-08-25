@@ -3,6 +3,7 @@ package org.yats.trader.examples.strategies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
@@ -24,7 +25,7 @@ public class SingleOrder extends StrategyBase {
         startPrice = marketData;
 
         //sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
-        sendOrder(BookSide.BID, marketData.getBid().add(Decimal.ONE), Decimal.fromString("0.01"));
+        sendOrder(BookSide.BID, marketData.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
     }
 
 
@@ -49,6 +50,11 @@ public class SingleOrder extends StrategyBase {
         if(receipt.isEndState()) {
             orders.remove(receipt.getOrderId().toString()); ;
         }
+
+    }
+
+    @Override
+    public void onSettings(IProvideProperties p) {
 
     }
 

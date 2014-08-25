@@ -6,11 +6,13 @@ import java.math.RoundingMode;
 public class Decimal implements Comparable<Decimal> {
 
 
+    public static final Decimal MINUSONE = new Decimal("-1");
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal DIME = new Decimal("0.10");
     public static final Decimal CENT = new Decimal("0.01");
     private static final int DEFAULT_SCALE = 10;
+    public static final Decimal HUNDRED = new Decimal("100");;
 
 
     @Override
@@ -40,7 +42,8 @@ public class Decimal implements Comparable<Decimal> {
         return divide(tickSize).round().multiply(tickSize);
     }
     public Decimal roundToDigits(int digits) {
-        return multiply(Decimal.fromDouble(digits)).round().divide(Decimal.fromDouble(digits));
+        int multiplier = (int) Math.round(Math.pow(10,digits));
+        return multiply(Decimal.fromDouble(multiplier)).round().divide(Decimal.fromDouble(multiplier));
     }
 
 

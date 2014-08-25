@@ -55,36 +55,36 @@ public class PositionSnapshotTest {
     public void canCalculateValuationForAccountProduct()
     {
         PositionRequest r = new PositionRequest(account1, productId1);
-        Position positionInUSD = positionSnapshot.getValueForAccountProduct(TestMarketData.USD_PID, r);
+        Position positionInUSD = positionSnapshot.getValueForAccountProduct(TestMarketData.TEST_USD_PID, r);
         Decimal expected =
                 Decimal.ONE
                 .multiply(TestMarketData.PRODUCT1_DATA.getLast())
-                .multiply(TestMarketData.EURUSD.getLast());
+                .multiply(TestMarketData.TEST_EURUSD.getLast());
         assert(positionInUSD.getSize().isEqualTo(expected));
     }
 
     @Test
     public void canCalculateValuationForAllPositions()
     {
-        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.TEST_EUR_PID);
         assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
     }
 
     @Test
     public void canCalculateProfitFromDifferentSnapshots()
     {
-        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.USD_PID);
-        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
-        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.TEST_USD_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.TEST_EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.TEST_EUR_PID);
         assert(profitInEUR.isSize(Decimal.ZERO,5));
     }
 
     @Test
     public void verifyThatProfitFromSameSnapshotIsZero()
     {
-        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
-        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.EUR_PID);
-        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.EUR_PID);
+        Position positionInUSD = positionSnapshot.getValueForAllPositions(TestMarketData.TEST_EUR_PID);
+        Position positionInEUR = positionSnapshot.getValueForAllPositions(TestMarketData.TEST_EUR_PID);
+        Position profitInEUR = converter.calculateProfit(positionInUSD, positionInEUR, TestMarketData.TEST_EUR_PID);
         assert(profitInEUR.isSize(Decimal.ZERO,5));
     }
 
@@ -97,8 +97,8 @@ public class PositionSnapshotTest {
         productList.add(ProductTest.PRODUCT2);
         productList.add(ProductTest.PRODUCT3);
         converter = new RateConverter(productList);
-        converter.onMarketData(TestMarketData.EURUSD);
-        converter.onMarketData(TestMarketData.GBPUSD);
+        converter.onMarketData(TestMarketData.TEST_EURUSD);
+        converter.onMarketData(TestMarketData.TEST_GBPUSD);
         converter.onMarketData(TestMarketData.PRODUCT1_DATA);
         converter.onMarketData(TestMarketData.PRODUCT2_DATA);
         converter.onMarketData(TestMarketData.PRODUCT3_DATA);

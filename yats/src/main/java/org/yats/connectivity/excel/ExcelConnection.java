@@ -7,19 +7,17 @@ import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.IConsumeReceipt;
-import org.yats.trading.MarketData;
-import org.yats.trading.Receipt;
+import org.yats.trading.*;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener {
+public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener, IConsumeReports {
 
     final Logger log = LoggerFactory.getLogger(ExcelConnection.class);
 
@@ -41,18 +39,92 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             int j = i + 1;
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
-                    conversation.poke("R" + j + "C2", marketData.getBid().toString());
-                    conversation.poke("R" + j + "C3", marketData.getAsk().toString());
+
+                    String marketDataString=new String(marketData.getTimestamp().toString()+"\t"
+                            +marketData.getBidSize().toString()+"\t"
+                            +marketData.getBid().toString()+"\t"
+                            +marketData.getAskSize().toString()
+                            +"\t"+marketData.getAsk().toString());
+
+
+                    for(int n=1;n<10;n++){
+
+                        int p=n+1;
+
+                        String lvnBidSize=new String("");
+                        String lvnBidPrice=new String("");
+                        String lvnAskSize=new String("");
+                        String lvnAskPrice=new String("");
+
+                        if(marketData.getBook().getDepth(BookSide.BID)>=p) {
+                            lvnBidSize=marketData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
+                            lvnBidPrice=marketData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
+                        }
+
+                        if(marketData.getBook().getDepth(BookSide.ASK)>=p) {
+                            lvnAskSize = marketData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
+                            lvnAskPrice = marketData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
+                        }
+
+                        marketDataString=marketDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
+
+
+
+                    }
+
+//                    log.info(marketDataString);
+                    if(shutdown) return;
+                    conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
+                   
+
                 } catch (DDEException e) {
                     e.printStackTrace();
+                    System.exit(-1);
                 }
             }
         }
+
+        // use strategyToBusConnection.sendSettings(...) to send settings to the strategies like in onReport(..) below
+
     }
 
     @Override
     public void onReceipt(Receipt receipt) {
 
+    }
+
+    public void ReportsConversation(){
+
+
+        conversationReports = new DDEClientConversation();
+        conversationReports.setTimeout(50000);
+        try {
+            conversationReports.connect("Excel", "Reports");
+        } catch (DDEException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+    @Override
+    public void onReport(IProvideProperties p) {
+
+//       ReportsConversation();
+//
+//        try {
+//            conversationReports.poke("R2C1","Strategy reports: "+PropertiesReader.toString(p));
+//        } catch (DDEException e) {
+//            e.printStackTrace();
+//        }
+
+       // reports from strategies are coming in here. send them to Excel
+
+        // for now writing to console:
+        System.out.println("Strategy reports: "+PropertiesReader.toString(p));
+
+        //lets send the report back as settings to test the way back to the strategy
+//        strategyToBusConnection.sendSettings(p);
     }
 
     @Override
@@ -80,7 +152,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         try
         {
             System.out.print("conversation.connect...");
-            conversation.connect("Excel", "MarketData");
+            conversation.setTimeout(50000);
+            conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
+
             System.out.println("done.");
             System.out.print("conversation.request...");
             String s = conversation.request("C1");
@@ -99,17 +173,25 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         catch (DDEException e)
         {
             System.out.println("DDEException: " + e.getMessage());
+            close();
+            System.exit(-1);
         }
     }
 
     public void stopDDE()
     {
         try {
+            shutdown = true;
+            Tool.sleepFor(500);
             conversation.stopAdvice("C1");//This means all elements in column 1
             conversation.disconnect();
         } catch (DDEException e) {
             e.printStackTrace();
         }
+    }
+
+    public void close() {
+        strategyToBusConnection.close();
     }
 
     public void go() throws InterruptedException, IOException {
@@ -118,7 +200,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 //        thread = new Thread(this);
 //        thread.start();
 
-        startDDE();
+        if(Tool.isWindows()) startDDE();
         System.out.println("\n===");
         System.out.println("Initialization done.");
         System.out.println("Press enter to exit.");
@@ -126,8 +208,10 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         System.in.read();
         System.out.println("\nexiting...\n");
 
-        stopDDE();
-        Thread.sleep(1000);
+        close();
+        if(Tool.isWindows()) stopDDE();
+        if(Tool.isWindows()) Thread.sleep(1000);
+        if(!Tool.isWindows())Thread.sleep(60000);
 
         log.info("ExcelConnection done.");
         System.exit(0);
@@ -135,15 +219,24 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     public ExcelConnection(IProvideProperties _prop)
     {
+        shutdown=false;
+        prop = _prop;
         strategyToBusConnection = new StrategyToBusConnection(_prop);
         strategyToBusConnection.setMarketDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
+        strategyToBusConnection.setReportsConsumer(this);
         if(Tool.isWindows()) {
-            conversation = new DDEClientConversation();  // cant use this on Linux
-            conversation.setEventListener(this);
+            try {
+                conversation = new DDEClientConversation();  // cant use this on Linux
+                conversation.setEventListener(this);
+            } catch(UnsatisfiedLinkError  e){
+                log.error(e.getMessage());
+                close();
+                System.exit(-1);
+            }
         } else {
             System.out.println("This is not Windows! DDEClient will not work!");
-            System.exit(0);
+//            System.exit(0);
         }
     }
 
@@ -163,11 +256,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     }
 
 
-    private Vector<String> productIDs=new Vector<String>();
     private Vector<String> currentProductIDs=new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
-    private int j;
+    private DDEClientConversation conversationReports;
+    private IProvideProperties prop;
+    private boolean shutdown;
 
 
 } // class
