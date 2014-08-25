@@ -61,6 +61,26 @@ public class PropertiesReader implements IProvideProperties {
         }
     }
 
+    public static PropertiesReader createFromStringKeyValue(String csv)
+    {
+        PropertiesReader p = new PropertiesReader();
+        String[] parts = csv.split(",");
+        if(parts.length<2) return p;
+        for(int i=0; i<parts.length; i++) {
+            String[] keyvalue = parts[i].split("=");
+            p.properties.setProperty(keyvalue[0], keyvalue[1]);
+        }
+        return p;
+    }
+
+    public ConcurrentHashMap<String,String> toMap() {
+        ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
+        for(String key : properties.stringPropertyNames()) {
+            map.put(key, properties.getProperty(key));
+        }
+        return map;
+    }
+
     public static PropertiesReader createFromMap(ConcurrentHashMap<String, String> map) {
         PropertiesReader r = new PropertiesReader();
         for(String key : map.keySet()) {
@@ -119,6 +139,19 @@ public class PropertiesReader implements IProvideProperties {
             b.append(key).append("=").append(value);
         }
             return "PropertiesReader: "+b.toString();
+    }
+
+    public String toStringKeyValue() {
+        StringBuilder b = new StringBuilder();
+        Enumeration enuKeys = properties.keys();
+        boolean first = true;
+        while (enuKeys.hasMoreElements()) {
+            String key = (String) enuKeys.nextElement();
+            String value = properties.getProperty(key);
+            if(!first){b.append(","); first=false;}
+            b.append(key).append("=").append(value);
+        }
+        return b.toString();
     }
 
     @Override

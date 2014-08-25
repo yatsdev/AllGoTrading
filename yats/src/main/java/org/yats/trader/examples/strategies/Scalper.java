@@ -48,10 +48,13 @@ public class Scalper extends StrategyBase {
         position = receipt.getPositionChange().add(position);
         log.info("position(strategy)="+position);
         log.info("position(server)="+getPositionForProduct(tradeProductId));
-        if(isConversionAvailable(ProductList.USD_PID, tradeProductId))
-            log.info("positionValueUSD(server)="+getValueForProduct(ProductList.USD_PID, tradeProductId));
-        log.info("positionValueEUR(server)="+getValueForProduct(ProductList.EUR_PID, tradeProductId));
-
+        try {
+            if (isConversionAvailable(ProductList.USD_PID, tradeProductId))
+                log.info("positionValueUSD(server)=" + getValueForProduct(ProductList.USD_PID, tradeProductId));
+            log.info("positionValueEUR(server)=" + getValueForProduct(ProductList.EUR_PID, tradeProductId));
+        } catch(TradingExceptions.RateConverterException e) {
+            log.error("Can not calculate position value: "+e.getMessage());
+        }
         log.debug("Received receipt: " + receipt);
 
         if(receipt.isEndState()) {
