@@ -41,7 +41,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     protected Decimal getConfigAsDecimal(String key) {
         return new Decimal(config.get(key));
     }
-    protected boolean getConfigAsBoolean(String key) { return getConfigAsBoolean(key); }
+    protected boolean getConfigAsBoolean(String key) { return config.getAsBoolean(key); }
     public void setConfig(IProvideProperties config) {
         this.config = config;
     }

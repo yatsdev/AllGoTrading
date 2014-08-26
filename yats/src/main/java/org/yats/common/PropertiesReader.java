@@ -122,6 +122,13 @@ public class PropertiesReader implements IProvideProperties {
     }
 
     @Override
+    public boolean getAsBoolean(String _key)
+    {
+        if(!properties.containsKey(_key)) throw new CommonExceptions.FieldNotFoundException("No such key: " + _key);
+        return fromBooleanString(properties.getProperty(_key));
+    }
+
+    @Override
     public Decimal getAsDecimal(String _key) {
         if(!exists(_key)) throw new CommonExceptions.FieldNotFoundException("No such key: " + _key);
         return Decimal.fromString(get(_key));
