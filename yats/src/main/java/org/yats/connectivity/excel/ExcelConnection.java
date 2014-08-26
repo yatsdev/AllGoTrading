@@ -93,30 +93,56 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     }
 
-    public void ReportsConversation(){
 
-
-        conversationReports = new DDEClientConversation();
-        conversationReports.setTimeout(50000);
-        try {
-            conversationReports.connect("Excel", "Reports");
-        } catch (DDEException e) {
-            e.printStackTrace();
-        }
-
-    }
 
 
     @Override
     public void onReport(IProvideProperties p) {
 
-//       ReportsConversation();
-//
-//        try {
-//            conversationReports.poke("R2C1","Strategy reports: "+PropertiesReader.toString(p));
-//        } catch (DDEException e) {
-//            e.printStackTrace();
-//        }
+        conversationReports = new DDEClientConversation();
+        conversationReports.setTimeout(50000);
+        try {
+            conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
+            String StrategyNamesString=conversationReports.request("C1");
+            parseStrategyNames(StrategyNamesString);
+            String KeyValuesString=conversationReports.request("R1");
+            parsekeyValues(KeyValuesString);
+
+           Vector<keyvalue> vectorkeyvalue=new Vector<keyvalue>();
+
+            for(String key : p.getKeySet()) {
+                keyvalue kv=new keyvalue();
+                String value = p.get(key);
+                kv.setKey(key);
+                kv.setValue(value);
+                vectorkeyvalue.add(kv);
+
+
+////                //adding key/values not present on R1
+////                  if(!(KeyValues.contains(key))){
+////                        conversationReports.poke("R1C"+KeyValues.size(),key);
+//                    }
+
+            }
+
+
+         for ( int q=0;q<StrategyNames.size();q++){
+             int position=q+1;
+             if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
+                 conversationReports.poke("R"+position+"C2:R"+position+"C55",generatePerRowPokeString(KeyValues,vectorkeyvalue));
+             }
+         }
+
+
+
+
+
+        } catch (DDEException e) {
+            e.printStackTrace();
+        }
+
+
+
 
        // reports from strategies are coming in here. send them to Excel
 
@@ -255,8 +281,49 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         currentProductIDs = new Vector<String>(Arrays.asList(parts));
     }
 
+    private void parseStrategyNames(String strategyNames) {
+        String[] parts = strategyNames.split("\r\n");
+        StrategyNames = new Vector<String>(Arrays.asList(parts));
+
+    }
+
+    private void parsekeyValues(String keyValues) {
+        String[] parts = keyValues.split("\t");
+        KeyValues = new Vector<String>(Arrays.asList(parts));
+
+    }
+
+
+
+    private String generatePerRowPokeString(Vector<String> KeyValues,Vector<keyvalue> vectorkeyvalue){
+
+        String PerRowPokeString = "";
+
+     for(int i=0;i<KeyValues.size();i++){//R1C1 is empty
+          for(int j=0;j<vectorkeyvalue.size();j++){
+              if(KeyValues.elementAt(i).compareTo(vectorkeyvalue.elementAt(j).getKey())==0){
+                  if(j==0){
+                      PerRowPokeString=vectorkeyvalue.elementAt(j).getValue();
+                  }
+                  PerRowPokeString=PerRowPokeString+"\t"+vectorkeyvalue.elementAt(j).getValue();
+
+              }else{
+
+                  //PerRowPokeString=PerRowPokeString+"\t"+"";
+              }
+
+
+          }
+     }
+
+
+return PerRowPokeString;
+    }
+
 
     private Vector<String> currentProductIDs=new Vector<String>();
+    private Vector<String> StrategyNames=new Vector<String>();
+    private Vector<String> KeyValues =new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
     private DDEClientConversation conversation;
     private DDEClientConversation conversationReports;
@@ -265,3 +332,24 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
 } // class
+
+class keyvalue{
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    private String key;
+    private String value;
+        }
