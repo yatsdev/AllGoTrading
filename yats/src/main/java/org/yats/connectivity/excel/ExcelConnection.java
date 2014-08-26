@@ -100,7 +100,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     public void onReport(IProvideProperties p) {
 
         conversationReports = new DDEClientConversation();
-        conversationReports.setTimeout(50000);
+        conversationReports.setTimeout(3000);
         try {
             conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
             String StrategyNamesString=conversationReports.request("C1");

@@ -26,7 +26,8 @@ public class Scalper extends StrategyBase {
         startPrice = marketData;
 
         sendBidRelativeTo(startPrice.getBid());
-        sendAskRelativeTo(startPrice.getAsk());
+        Decimal step = getStepSize(startPrice.getAsk());
+        sendAskRelativeTo(startPrice.getAsk().add(step));
     }
 
 
@@ -83,8 +84,11 @@ public class Scalper extends StrategyBase {
         position = getPositionForProduct(tradeProductId);
         log.info("position="+position);
         tickSize =getConfigAsDecimal("tickSize");
-        stepFactor=getConfigAsDouble("stepFactor");
+
+        if(isConfigExists("stepFactor")) stepFactor=getConfigAsDecimal("stepFactor");
+        if(isConfigExists("stepInTicks")) {stepInTicks=getConfigAsDecimal("stepInTicks"); stepFactor=Decimal.ZERO; }
         orderSize=getConfigAsDouble("orderSize");
+        if(isConfigExists("shortingAllowed")) shortingAllowed = getConfigAsBoolean("shortingAllowed");
     }
 
     @Override
@@ -94,22 +98,35 @@ public class Scalper extends StrategyBase {
         cancelOrders();
     }
 
+
     private void sendBidRelativeTo(Decimal price) {
         double bidMarket=price.toDouble();
-        Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal bidPrice = Decimal.fromDouble(bidMarket);
+        bidPrice = bidPrice.subtract(getStepSize(bidPrice));
         if(!orderExists(BookSide.BID, bidPrice))
             sendOrder(BookSide.BID, bidPrice);
     }
 
     private void sendAskRelativeTo(Decimal price) {
-        if(position.isLessThan(Decimal.fromDouble(orderSize))) {
+
+        if(!shortingAllowed && position.isLessThan(Decimal.fromDouble(orderSize))) {
             log.info("Can not sell. Position less than orderSize. positionSize="+position);
             return;
         }
         double askMarket=price.toDouble();
-        Decimal askPrice = Decimal.fromDouble(askMarket*(1.0+stepFactor)+ tickSize.toDouble()).roundToTickSize(tickSize);
+        Decimal askPrice = Decimal.fromDouble(askMarket);
+        askPrice = askPrice.add(getStepSize(askPrice));
         if(!orderExists(BookSide.ASK, askPrice))
             sendOrder(BookSide.ASK, askPrice);
+    }
+
+    private Decimal getStepSize(Decimal price) {
+        Decimal stepSize = tickSize;
+        if(stepFactor.isGreaterThan(Decimal.ZERO))
+            stepSize = Decimal.max(tickSize, price.multiply(stepFactor).roundToTickSize(tickSize));
+        else
+            stepSize = stepInTicks.multiply(tickSize);
+        return stepSize;
     }
 
     private boolean orderExists(BookSide side, Decimal price) {
@@ -158,10 +175,11 @@ public class Scalper extends StrategyBase {
     private String tradeProductId;
     private HashMap<String, OrderNew> orders;
 
-    private double stepFactor = 0.0;//0031;
-    private Decimal tickSize = Decimal.ONE;
+    private Decimal stepInTicks = Decimal.ONE;
+    private Decimal stepFactor = Decimal.ZERO;
+    private Decimal tickSize = Decimal.CENT;
     private double orderSize = 0.01;
-
+    private boolean shortingAllowed = false;
 
 //    private boolean receivedOrderReceiptBidSide;
 

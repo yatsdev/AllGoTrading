@@ -2,6 +2,7 @@ package org.yats.trader.examples.server;
 
 import org.yats.common.CommonExceptions;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyRunner;
@@ -56,7 +57,8 @@ public class StrategyRunnerMain {
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
 
-        PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile("config/StrategyRunner.properties");
+        String configFilename = Tool.getPersonalConfigFilename("config/StrategyRunner");
+        PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile(configFilename);
 
         StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
 
