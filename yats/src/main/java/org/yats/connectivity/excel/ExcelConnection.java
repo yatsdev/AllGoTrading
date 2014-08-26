@@ -106,7 +106,6 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             String StrategyNamesString=conversationReports.request("C1");
             parseStrategyNames(StrategyNamesString);
             String KeyValuesString=conversationReports.request("R1");
-            System.out.println(KeyValuesString);
             parsekeyValues(KeyValuesString);
 
            Vector<keyvalue> vectorkeyvalue=new Vector<keyvalue>();
@@ -125,6 +124,14 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 //                    }
 
             }
+
+
+         for ( int q=0;q<StrategyNames.size();q++){
+             int position=q+1;
+             if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
+                 conversationReports.poke("R"+position+"C2:R"+position+"C55",generatePerRowPokeString(KeyValues,vectorkeyvalue));
+             }
+         }
 
 
 
@@ -287,6 +294,31 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     }
 
 
+
+    private String generatePerRowPokeString(Vector<String> KeyValues,Vector<keyvalue> vectorkeyvalue){
+
+        String PerRowPokeString = "";
+
+     for(int i=0;i<KeyValues.size();i++){//R1C1 is empty
+          for(int j=0;j<vectorkeyvalue.size();j++){
+              if(KeyValues.elementAt(i).compareTo(vectorkeyvalue.elementAt(j).getKey())==0){
+                  if(j==0){
+                      PerRowPokeString=vectorkeyvalue.elementAt(j).getValue();
+                  }
+                  PerRowPokeString=PerRowPokeString+"\t"+vectorkeyvalue.elementAt(j).getValue();
+
+              }else{
+
+                  //PerRowPokeString=PerRowPokeString+"\t"+"";
+              }
+
+
+          }
+     }
+
+
+return PerRowPokeString;
+    }
 
 
     private Vector<String> currentProductIDs=new Vector<String>();
