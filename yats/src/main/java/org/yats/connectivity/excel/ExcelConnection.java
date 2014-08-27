@@ -181,6 +181,10 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             conversation.setTimeout(50000);
             conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
 
+
+            conversationReports.setTimeout(50000);
+            conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
+
             System.out.println("done.");
             System.out.print("conversation.request...");
             String s = conversation.request("C1");
@@ -255,6 +259,8 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             try {
                 conversation = new DDEClientConversation();  // cant use this on Linux
                 conversation.setEventListener(this);
+                conversationReports = new DDEClientConversation();
+                conversationReports.setEventListener(this);
             } catch(UnsatisfiedLinkError  e){
                 log.error(e.getMessage());
                 close();
