@@ -108,34 +108,68 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             String KeyValuesString=conversationReports.request("R1");
             parsekeyValues(KeyValuesString);
 
+
+
            Vector<keyvalue> vectorkeyvalue=new Vector<keyvalue>();
-
-            for(String key : p.getKeySet()) {
-                keyvalue kv=new keyvalue();
-                String value = p.get(key);
-                kv.setKey(key);
-                kv.setValue(value);
-                vectorkeyvalue.add(kv);
+            String StrategyNameOfThisReport = null;
 
 
-////                //adding key/values not present on R1
-////                  if(!(KeyValues.contains(key))){
-////                        conversationReports.poke("R1C"+KeyValues.size(),key);
-//                    }
+            if(!p.exists("strategyName")) {
+                log.error("strategy without name found:"+p.toString());
+                return; }else {
+
+
+                for (String key : p.getKeySet()) {
+
+                    if (!(key.compareTo("strategyName") == 0)) {
+                        keyvalue kv = new keyvalue();
+                        String value = p.get(key);
+                        kv.setKey(key);
+                        kv.setValue(value);
+                        vectorkeyvalue.add(kv);
+                    } else {
+
+                        StrategyNameOfThisReport = p.get("strategyName");
+                    }
+                }
+            }
+
+            //Adding key/values not present in R1
+            int positionKeyValues=2;
+            positionKeyValues=positionKeyValues+KeyValues.size();
+            for(int z=0;z<vectorkeyvalue.size();z++){
+                System.out.println(vectorkeyvalue.elementAt(z));
+                if(!KeyValues.contains(vectorkeyvalue.elementAt(z).getKey())){
+                    conversationReports.poke("R1C"+positionKeyValues,vectorkeyvalue.elementAt(z).getKey());//KeyValues.size()+2
+                    positionKeyValues=positionKeyValues+1;
+                }
 
             }
 
-
-         for ( int q=0;q<StrategyNames.size();q++){
-             int position=q+1;
-             if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
-                 conversationReports.poke("R"+position+"C2:R"+position+"C55",generatePerRowPokeString(KeyValues,vectorkeyvalue));
-             }
-         }
-
+            //Adding StrategyNames not present in C1
+            int positionStrategyName=2;
+            positionStrategyName=positionStrategyName+StrategyNames.size();
+            if(!StrategyNames.contains(StrategyNameOfThisReport)){
+                 conversationReports.poke("R"+positionStrategyName+"C1",StrategyNameOfThisReport);
+            }
 
 
 
+           // Updating again the Data Structures holding R1 and C1 (in case values were added by the current report)
+            StrategyNamesString=conversationReports.request("C1");
+            parseStrategyNames(StrategyNamesString);
+            KeyValuesString=conversationReports.request("R1");
+            parsekeyValues(KeyValuesString);
+
+
+            //Finally poking data from reports in a per row poke transaction fashion
+            int RightMostCell=positionKeyValues+KeyValues.size();
+            for ( int q=0;q<StrategyNames.size();q++){
+               int strategyIndex=q+positionStrategyName;
+                if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
+                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C"+RightMostCell,generatePerRowPokeString(KeyValues,vectorkeyvalue));
+                }
+            }
 
         } catch (DDEException e) {
             e.printStackTrace();
@@ -144,7 +178,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
 
-       // reports from strategies are coming in here. send them to Excel
+        // reports from strategies are coming in here. send them to Excel
 
         // for now writing to console:
         System.out.println("Strategy reports: "+PropertiesReader.toString(p));
@@ -290,13 +324,19 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     private void parseStrategyNames(String strategyNames) {
         String[] parts = strategyNames.split("\r\n");
         StrategyNames = new Vector<String>(Arrays.asList(parts));
+        StrategyNames.removeElementAt(0);//R1C1 is empty
 
     }
 
     private void parsekeyValues(String keyValues) {
+
         String[] parts = keyValues.split("\t");
         KeyValues = new Vector<String>(Arrays.asList(parts));
-
+        KeyValues.removeElementAt(0);//R1C1 is empty
+        String lastElement=KeyValues.lastElement();
+        String lastElement2=lastElement.replace("\r\n","");
+        KeyValues.removeElementAt(KeyValues.size()-1);
+        KeyValues.add(lastElement2);
     }
 
 
@@ -315,7 +355,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
               }else{
 
-                  //PerRowPokeString=PerRowPokeString+"\t"+"";
+                  PerRowPokeString=PerRowPokeString+"\t"+"";  //For blank cells
               }
 
 
