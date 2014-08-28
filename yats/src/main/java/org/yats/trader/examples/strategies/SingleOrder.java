@@ -48,7 +48,7 @@ public class SingleOrder extends StrategyBase {
         log.debug("Received receipt: " + receipt);
 
         if(receipt.isEndState()) {
-            orders.remove(receipt.getOrderId().toString()); ;
+            orders.remove(receipt.getOrderId().toString());
         }
 
     }

@@ -26,6 +26,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     public abstract void onSettings(IProvideProperties p);
 
 
+    protected boolean isConfigExists(String key) { return config.exists(key); }
     protected String getConfig(String key) {
         return config.get(key);
     }
@@ -40,7 +41,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     protected Decimal getConfigAsDecimal(String key) {
         return new Decimal(config.get(key));
     }
-
+    protected boolean getConfigAsBoolean(String key) { return config.getAsBoolean(key); }
     public void setConfig(IProvideProperties config) {
         this.config = config;
     }

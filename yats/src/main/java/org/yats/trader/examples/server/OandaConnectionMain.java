@@ -21,7 +21,7 @@ import java.io.IOException;
   and create your personal config file.
  */
 
-public class OandaClientMain implements IConsumeMarketData {
+public class OandaConnectionMain implements IConsumeMarketData {
 
     final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
@@ -71,11 +71,11 @@ public class OandaClientMain implements IConsumeMarketData {
         System.exit(0);
     }
 
-    public OandaClientMain() {
+    public OandaConnectionMain() {
     }
 
     public static void main(String args[]) throws Exception {
-        OandaClientMain q = new OandaClientMain();
+        OandaConnectionMain q = new OandaConnectionMain();
 
         try {
             q.go();

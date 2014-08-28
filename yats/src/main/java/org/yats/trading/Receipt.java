@@ -88,16 +88,16 @@ public class Receipt {
     @Override
     public String toString() {
         return "Receipt{" +
-                "timestamp=" + timestamp +
-                ",orderId=" + orderId +
-                ",externalAccount=" + externalAccount +
-                ",internalAccount=" + internalAccount +
+                "internalAccount=" + internalAccount +
                 ",productId=" + productId +
                 ",bookSide=" + bookSide +
-                ",residualSize=" + residualSize +
+                ",price=" + price +
                 ",currentTradedSize=" + currentTradedSize +
                 ",totalTradedSize=" + totalTradedSize +
-                ",price=" + price +
+                ",residualSize=" + residualSize +
+                ",orderId=" + orderId +
+                ",externalAccount=" + externalAccount +
+                ",timestamp=" + timestamp +
                 ",rejectReason=" + rejectReason +
                 ",endState=" + endState +
                 '}';
