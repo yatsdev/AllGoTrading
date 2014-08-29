@@ -15,7 +15,9 @@ import org.yats.trading.*;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener, IConsumeReports {
 
@@ -110,7 +112,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
 
-           Vector<keyvalue> vectorkeyvalue=new Vector<keyvalue>();
+           ConcurrentHashMap<String,String> hashmapKeyValue=new ConcurrentHashMap();
             String StrategyNameOfThisReport = null;
 
 
@@ -122,11 +124,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                 for (String key : p.getKeySet()) {
 
                     if (!(key.compareTo("strategyName") == 0)) {
-                        keyvalue kv = new keyvalue();
                         String value = p.get(key);
-                        kv.setKey(key);
-                        kv.setValue(value);
-                        vectorkeyvalue.add(kv);
+                        hashmapKeyValue.put(key,value);
+
                     } else {
 
                         StrategyNameOfThisReport = p.get("strategyName");
@@ -137,13 +137,14 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             //Adding key/values not present in R1
             int positionKeyValues=2;
             positionKeyValues=positionKeyValues+KeyValues.size();
-            for(int z=0;z<vectorkeyvalue.size();z++){
-                System.out.println(vectorkeyvalue.elementAt(z));
-                if(!KeyValues.contains(vectorkeyvalue.elementAt(z).getKey())){
-                    conversationReports.poke("R1C"+positionKeyValues,vectorkeyvalue.elementAt(z).getKey());//KeyValues.size()+2
-                    positionKeyValues=positionKeyValues+1;
+            Enumeration<String> keys=  hashmapKeyValue.keys();
+            while(keys.hasMoreElements()){
+                String currentKey = keys.nextElement();
+                if(!KeyValues.contains(currentKey)){
+                    conversationReports.poke("R1C" + positionKeyValues, currentKey);//KeyValues.size()+2
+                    positionKeyValues = positionKeyValues + 1;
+                    KeyValues.add(currentKey);
                 }
-
             }
 
             //Adding StrategyNames not present in C1
@@ -151,23 +152,17 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             positionStrategyName=positionStrategyName+StrategyNames.size();
             if(!StrategyNames.contains(StrategyNameOfThisReport)){
                  conversationReports.poke("R"+positionStrategyName+"C1",StrategyNameOfThisReport);
+                StrategyNames.add(StrategyNameOfThisReport);
             }
-
-
-
-           // Updating again the Data Structures holding R1 and C1 (in case values were added by the current report)
-            StrategyNamesString=conversationReports.request("C1");
-            parseStrategyNames(StrategyNamesString);
-            KeyValuesString=conversationReports.request("R1");
-            parsekeyValues(KeyValuesString);
 
 
             //Finally poking data from reports in a per row poke transaction fashion
             int RightMostCell=positionKeyValues+KeyValues.size();
+            int strategyIndex=2;
             for ( int q=0;q<StrategyNames.size();q++){
-               int strategyIndex=q+positionStrategyName;
+               strategyIndex=q+2;
                 if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
-                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C"+RightMostCell,generatePerRowPokeString(KeyValues,vectorkeyvalue));
+                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C55",generatePerRowPokeString(KeyValues,hashmapKeyValue));//RightMostCell
                 }
             }
 
@@ -341,25 +336,26 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
 
-    private String generatePerRowPokeString(Vector<String> KeyValues,Vector<keyvalue> vectorkeyvalue){
+    private String generatePerRowPokeString(Vector<String> KeyValues,ConcurrentHashMap<String,String> hashmapKeyValue){
 
         String PerRowPokeString = "";
 
-     for(int i=0;i<KeyValues.size();i++){//R1C1 is empty
-          for(int j=0;j<vectorkeyvalue.size();j++){
-              if(KeyValues.elementAt(i).compareTo(vectorkeyvalue.elementAt(j).getKey())==0){
-                  if(j==0){
-                      PerRowPokeString=vectorkeyvalue.elementAt(j).getValue();
-                  }
-                  PerRowPokeString=PerRowPokeString+"\t"+vectorkeyvalue.elementAt(j).getValue();
+     for(int i=0;i<KeyValues.size();i++) {//R1C1 is empty
 
-              }else{
+             if (hashmapKeyValue.containsKey(KeyValues.elementAt(i))) {
+                 if (i == 0) {
+                     PerRowPokeString = hashmapKeyValue.get(KeyValues.elementAt(i));
+                 } else {
+                     PerRowPokeString = PerRowPokeString + "\t" + hashmapKeyValue.get(KeyValues.elementAt(i));
+                 }
 
-                  PerRowPokeString=PerRowPokeString+"\t"+"";  //For blank cells
-              }
+             }else {
+
+                 PerRowPokeString = PerRowPokeString + "\t" + "";  //For blank cells
+             }
 
 
-          }
+
      }
 
 
@@ -379,23 +375,3 @@ return PerRowPokeString;
 
 } // class
 
-class keyvalue{
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    private String key;
-    private String value;
-        }
