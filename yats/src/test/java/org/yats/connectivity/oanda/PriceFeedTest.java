@@ -1,9 +1,7 @@
 package org.yats.connectivity.oanda;
 
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 import org.yats.common.PropertiesReader;
-import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trading.IConsumeMarketData;

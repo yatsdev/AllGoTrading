@@ -6,7 +6,9 @@ import org.yats.common.FileTool;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.messagebus.Config;
+import org.yats.trading.IProvideProduct;
 import org.yats.trading.PositionStorageCSV;
+import org.yats.trading.ProductList;
 
 import java.io.IOException;
 
@@ -26,10 +28,12 @@ public class PositionServerMain {
         IProvideProperties p =FileTool.exists(pathToConfigFile)
                 ? PropertiesReader.createFromConfigFile(pathToConfigFile)
                 : Config.createRealProperties();
+        IProvideProduct productList = ProductList.createFromFile("config/CFDProductList.csv");
         PositionServerLogic positionServerLogic = new PositionServerLogic(p);
         positionServerLogic.startRequestListener();
         PositionStorageCSV storage = new PositionStorageCSV(p.get("positionFilename"));
         positionServerLogic.setPositionStorage(storage);
+        positionServerLogic.setProductList(productList);
 
         Thread.sleep(2000);
 

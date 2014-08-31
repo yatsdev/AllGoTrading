@@ -93,9 +93,9 @@ public class PositionSnapshotTest {
     public void setUp() {
         productList = new ProductList();
         productList.read(ProductListTest.PRODUCT_LIST_PATH);
-        productList.add(ProductTest.PRODUCT1);
-        productList.add(ProductTest.PRODUCT2);
-        productList.add(ProductTest.PRODUCT3);
+//        productList.add(ProductTest.PRODUCT1);
+//        productList.add(ProductTest.PRODUCT2);
+//        productList.add(ProductTest.PRODUCT3);
         converter = new RateConverter(productList);
         converter.onMarketData(TestMarketData.TEST_EURUSD);
         converter.onMarketData(TestMarketData.TEST_GBPUSD);
@@ -121,9 +121,9 @@ public class PositionSnapshotTest {
         positionSnapshot2.setRateConverter(converter);
     }
 
-    String productId1 = ProductTest.PRODUCT1.getProductId();
-    String productId2 = ProductTest.PRODUCT2.getProductId();
-    String productId3 = ProductTest.PRODUCT3.getProductId();
+    String productId1 = ProductTest.TEST_PRODUCT1_ID;
+    String productId2 = ProductTest.TEST_PRODUCT2_ID;
+    String productId3 = ProductTest.TEST_PRODUCT3_ID;
     String account1 = "account1";
     String account2 = "account2";
     PositionSnapshot positionSnapshot;

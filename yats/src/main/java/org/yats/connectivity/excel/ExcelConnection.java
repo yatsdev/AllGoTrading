@@ -40,21 +40,21 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             if (marketData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
 
-                    String marketDataString=new String(marketData.getTimestamp().toString()+"\t"
-                            +marketData.getBidSize().toString()+"\t"
-                            +marketData.getBid().toString()+"\t"
-                            +marketData.getAskSize().toString()
-                            +"\t"+marketData.getAsk().toString());
+                    String marketDataString= marketData.getTimestamp().toString() + "\t"
+                            + marketData.getBidSize().toString() + "\t"
+                            + marketData.getBid().toString() + "\t"
+                            + marketData.getAskSize().toString()
+                            + "\t" + marketData.getAsk().toString();
 
 
                     for(int n=1;n<10;n++){
 
                         int p=n+1;
 
-                        String lvnBidSize=new String("");
-                        String lvnBidPrice=new String("");
-                        String lvnAskSize=new String("");
-                        String lvnAskPrice=new String("");
+                        String lvnBidSize= "";
+                        String lvnBidPrice= "";
+                        String lvnAskSize= "";
+                        String lvnAskPrice= "";
 
                         if(marketData.getBook().getDepth(BookSide.BID)>=p) {
                             lvnBidSize=marketData.getBook().getBookRow(BookSide.BID, n).getSize().toString();

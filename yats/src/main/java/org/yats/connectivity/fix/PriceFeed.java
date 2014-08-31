@@ -43,7 +43,7 @@ public class PriceFeed implements IProvidePriceFeed {
 
         SessionID sessionId = initiator.getSessions().get(0);
 
-        Product p = productProvider.getProductForProductId(productId);
+        Product p = productProvider.getProductWith(productId);
         group.set(new Symbol(p.getSymbol()));
         group.set(new SecurityID(p.getProductId()));
         group.set(new SecurityExchange(p.getExchange()));

@@ -93,50 +93,50 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         bid100At10 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(10))
                 .withSize(Decimal.fromDouble(100));
         bid200At9 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(9))
                 .withSize(Decimal.fromDouble(200));
         bid200At12 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT2)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(200));
         bid50At8 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT2)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(8))
                 .withSize(Decimal.fromDouble(50));
 
         ask100At11 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(100));
         ask300At12 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(300));
         ask10At9_80 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(9.8))
                 .withSize(Decimal.fromDouble(10));
         ask15At10_10 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(10.1))
                 .withSize(Decimal.fromDouble(15));
         tradedAccount1=0;

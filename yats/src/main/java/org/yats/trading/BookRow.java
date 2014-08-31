@@ -14,8 +14,7 @@ public class BookRow {
 
     public boolean isSameAs(BookRow _row) {
         if(!isPrice(_row.price)) return false;
-        if(!isSize(_row.size)) return false;
-        return true;
+        return isSize(_row.size);
     }
 
     public boolean isPrice(Decimal _price) {

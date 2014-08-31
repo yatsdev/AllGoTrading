@@ -1,7 +1,5 @@
 package org.yats.trader;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -11,10 +9,7 @@ import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.ReceiptMsg;
 import org.yats.trader.examples.server.PositionServerLogic;
-import org.yats.trading.IStorePositionSnapshots;
-import org.yats.trading.PositionServer;
-import org.yats.trading.PositionSnapshot;
-import org.yats.trading.ReceiptTest;
+import org.yats.trading.*;
 
 import java.util.ArrayList;
 
@@ -27,6 +22,7 @@ public class PositionServerLogicTest {
     {
         PositionServerLogic logic1 = new PositionServerLogic(prop);
         PositionServer server1 = new PositionServer();
+        server1.setProductList(productList);
         logic1.setPositionServer(server1);
         server1.onReceipt(ReceiptTest.RECEIPT1);
         server1.onReceipt(ReceiptTest.RECEIPT4);
@@ -40,7 +36,7 @@ public class PositionServerLogicTest {
         logic2.requestPositionSnapshotFromPositionServer();
         Tool.sleepABit();
 
-        assert(2==server2.getNumberOfPositions());
+        assert(4==server2.getNumberOfPositions());
 
         logic1.close();
         logic2.close();
@@ -52,6 +48,7 @@ public class PositionServerLogicTest {
         config.setStorePositionsToDisk(true);
         config.setListeningForReceipts(true);
         PositionServerLogic logic = new PositionServerLogic(prop);
+        logic.setProductList(productList);
         logic.setPositionStorage(positionStorage);
         ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
         senderReceipts.publish(m.getTopic(), m);
@@ -64,6 +61,7 @@ public class PositionServerLogicTest {
 
     @BeforeMethod
     public void setUp() {
+        productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         prop = Config.createTestProperties();
         config = Config.fromProperties(prop);
         senderReceipts = new Sender<ReceiptMsg>(config.getExchangeReceipts(),config.getServerIP());
@@ -76,7 +74,7 @@ public class PositionServerLogicTest {
         senderReceipts.close();
     }
 
-
+    ProductList productList;
     private PositionSnapshotStorageMem positionStorage;
     private Sender<ReceiptMsg> senderReceipts;
     private Config config;
@@ -99,6 +97,6 @@ public class PositionServerLogicTest {
             positionSnapshots=new ArrayList<PositionSnapshot>();
         }
         ArrayList<PositionSnapshot> positionSnapshots;
-    };
+    }
 
 } // class

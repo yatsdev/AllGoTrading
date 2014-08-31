@@ -4,8 +4,8 @@ public class OptionBase {
 
 
     public double calcNormalized(double z) {
-        if (z >  6.0) { return 1.0; }; // this guards against overflow
-        if (z < -6.0) { return 0.0; };
+        if (z >  6.0) { return 1.0; }// this guards against overflow
+        if (z < -6.0) { return 0.0; }
 
         double b1 =  0.31938153;
         double b2 = -0.356563782;
@@ -27,8 +27,7 @@ public class OptionBase {
 
     public double calcNormalDistribution(double z)  {  // normal distribution function
         return (1.0/Math.sqrt(2.0 * Math.PI))*Math.exp(-0.5 * z * z);
-    };
-
+    }
 
 
 } // class

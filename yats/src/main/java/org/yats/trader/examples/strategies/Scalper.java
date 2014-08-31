@@ -46,7 +46,7 @@ public class Scalper extends StrategyBase {
             return;
         }
 
-        position = receipt.getPositionChange().add(position);
+        position = receipt.getPositionChangeOfBase().add(position);
         log.info("position(strategy)="+position);
         log.info("position(server)="+getPositionForProduct(tradeProductId));
         try {

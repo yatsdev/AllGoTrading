@@ -75,7 +75,7 @@ public class Quoter extends StrategyBase {
 //            System.exit(-1);
         }
 
-        position = position.add(receipt.getPositionChange());
+        position = position.add(receipt.getPositionChangeOfBase());
         log.info("position="+position);
 
 

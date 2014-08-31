@@ -121,6 +121,7 @@ public class StrategyRunnerTest {
         rateConverter.onMarketData(TestMarketData.TEST_EURUSD);
         rateConverter.onMarketData(data1);
         positionServer = new PositionServer();
+        positionServer.setProductList(productList);
         positionServer.setRateConverter(rateConverter);
         feed = new PriceFeedMock();
         strategy = new StrategyMock();
@@ -200,7 +201,7 @@ public class StrategyRunnerTest {
             if(!receipt.isForSameOrderAs(lastReceipt)) numberOfOrderInMarket++;
             if(receipt.isEndState()) numberOfOrderInMarket--;
 
-            position += receipt.getPositionChange().toInt();
+            position += receipt.getPositionChangeOfBase().toInt();
             lastReceipt=receipt;
         }
 

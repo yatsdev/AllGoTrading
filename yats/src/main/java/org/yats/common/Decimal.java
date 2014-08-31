@@ -10,12 +10,15 @@ public class Decimal implements Comparable<Decimal> {
     public static final Decimal ZERO = new Decimal(BigDecimal.ZERO);
     public static final Decimal ONE = new Decimal(BigDecimal.ONE);
     public static final Decimal TWO = new Decimal("2");
-    public static final Decimal THREE = new Decimal("3");
-    public static final Decimal DIME = new Decimal("0.10");
     public static final Decimal CENT = new Decimal("0.01");
+
+    public Decimal negate() {
+        return this.multiply(Decimal.MINUSONE);
+    }
+
     private static final int DEFAULT_SCALE = 10;
     public static final Decimal TEN = new Decimal("10");
-    public static final Decimal HUNDRED = new Decimal("100");
+//    public static final Decimal HUNDRED = new Decimal("100");
 
 
     @Override
@@ -103,7 +106,7 @@ public class Decimal implements Comparable<Decimal> {
     }
 
     public static Decimal fromString(String s) {
-        if(s.indexOf(".")>=0) {
+        if(s.contains(".")) {
             return new Decimal(s.replace(",",""));
         }
         return new Decimal(s.replace(",","."));

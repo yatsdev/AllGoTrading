@@ -2,7 +2,6 @@ package org.yats.connectivity.matching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
@@ -65,16 +64,6 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     public void onReceipt(Receipt receipt) {
         receipt.setExternalAccount(externalAccount);
         receiptConsumer.onReceipt(receipt);
-        if(receipt.getCurrentTradedSize().isGreaterThan(Decimal.ZERO)) {
-            produceUnitReceipt(receipt);
-        }
-    }
-
-    private void produceUnitReceipt(Receipt receipt) {
-        Product product = productProvider.getProductForProductId(receipt.getProductId());
-        Product unit = productProvider.getProductForProductId(product.getUnitId());
-        Receipt counterReceipt = receipt.createCounterReceipt(product, unit);
-        receiptConsumer.onReceipt(counterReceipt);
     }
 
     @Override
@@ -107,15 +96,9 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
     private boolean isProductValid(String productId) {
-        if(!productProvider.isProductIdExisting(productId)) return false;
-        Product p = productProvider.getProductForProductId(productId);
-        if(!p.hasExchange(marketName)) return false;
-        return true;
-    }
-
-    private void rejectUnknownCancelOrder(OrderCancel order) {
-        Receipt r = order.createReceiptDefault().withEndState(true).withRejectReason("Unknown order.");
-        onReceipt(r);
+        if(!productProvider.containsProductWith(productId)) return false;
+        Product p = productProvider.getProductWith(productId);
+        return p.hasExchange(marketName);
     }
 
     private void confirmAndStoreCancelForNotYetArrivedOrderNew(OrderCancel order) {

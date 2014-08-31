@@ -32,7 +32,7 @@ public class EuroPut extends OptionBase {
         double vega  = p.getSpotPrice() * time_sqrt * calcNormalDistribution(d1);
         double rho   = -strikePrice*expTime*Math.exp(-p.getInterestRate()*expTime) * calcNormalized(-d2);
         return new Greeks(delta,gamma,thetaPerYear,vega,rho);
-    };
+    }
 
     private double calcD1(Parameter p)
     {

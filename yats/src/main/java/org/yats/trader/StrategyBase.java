@@ -85,7 +85,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     }
 
     public Product getProductForProductId(String productId) {
-        return productProvider.getProductForProductId(productId);
+        return productProvider.getProductWith(productId);
     }
 
     public Decimal getPositionForProduct(String productId)
