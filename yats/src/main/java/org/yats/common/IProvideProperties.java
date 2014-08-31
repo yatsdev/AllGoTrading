@@ -10,6 +10,7 @@ public interface IProvideProperties {
     boolean getAsBoolean(String _key);
     boolean getAsBoolean(String _key, boolean _defaultValue);
     Decimal getAsDecimal(String _key);
+    String[] getCSVAsArray(String _key);
     Set<String> getKeySet();
 
     void set(String key, boolean value);

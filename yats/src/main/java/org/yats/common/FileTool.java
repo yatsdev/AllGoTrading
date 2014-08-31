@@ -46,6 +46,11 @@ public class FileTool {
         return f.exists();
     }
 
+    public static void createDirectories(String path) {
+        File theFile = new File(path);
+        theFile.mkdirs();
+    }
+
 
     public static String getTail( String filename, int lines) {
         if(!exists(filename)) throw new CommonExceptions.FileReadException("File not found: "+filename);

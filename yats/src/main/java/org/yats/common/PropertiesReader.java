@@ -135,6 +135,13 @@ public class PropertiesReader implements IProvideProperties {
     }
 
     @Override
+    public String[] getCSVAsArray(String _key) {
+        String all = get(_key);
+        String[] parts = all.split(",");
+        return parts;
+    }
+
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         Enumeration enuKeys = properties.keys();
