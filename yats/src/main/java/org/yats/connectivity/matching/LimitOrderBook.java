@@ -31,22 +31,17 @@ public class LimitOrderBook implements IConsumeReceipt {
         sendMarketData();
     }
 
-
     public boolean isOrderInBooks(UniqueId orderId){
         boolean inBookBid =book[0].isOrderIdInBook(orderId.toString());
         boolean inBookAsk =book[1].isOrderIdInBook(orderId.toString());
         return inBookBid || inBookAsk;
     }
 
-
-
     @Override
     public void onReceipt(Receipt receipt) {
         lastReceipt=receipt;
         consumer.onReceipt(receipt);
     }
-
-    int counter = 0;
 
     //todo: only send if changed
     private void sendMarketData() {
@@ -79,7 +74,6 @@ public class LimitOrderBook implements IConsumeReceipt {
         return book[0].getSize() + book[1].getSize();
     }
 
-
     public LimitOrderBook(String _productId, IConsumeMarketDataAndReceipt _consumer)
     {
         productId=_productId;
@@ -87,18 +81,11 @@ public class LimitOrderBook implements IConsumeReceipt {
         book = new LimitOrderBookSide[2];
         book[0] = new LimitOrderBookSide(BookSide.BID, this);
         book[1] = new LimitOrderBookSide(BookSide.ASK, this);
-        frontRowPrice = new Decimal[2];
-        frontRowPrice[0] = null;
-        frontRowPrice[1] = null;
     }
 
-    Receipt lastBidReceipt;
-    Receipt lastAskReceipt;
-    Receipt lastReceipt;
-    LimitOrderBookSide book[];
-    private Decimal frontRowPrice[];
-    IConsumeMarketDataAndReceipt consumer;
-    String productId;
-
+    private Receipt lastReceipt;
+    private LimitOrderBookSide book[];
+    private IConsumeMarketDataAndReceipt consumer;
+    private String productId;
 
 } // class
