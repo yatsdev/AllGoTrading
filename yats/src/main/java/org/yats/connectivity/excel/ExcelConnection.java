@@ -116,6 +116,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
            ConcurrentHashMap<String,String> hashmapKeyValue=new ConcurrentHashMap();
+
+
+
             String StrategyNameOfThisReport = null;
 
 
@@ -135,6 +138,15 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                         StrategyNameOfThisReport = p.get("strategyName");
                     }
                 }
+
+
+                ConcurrentHashMap<String,ConcurrentHashMap> theOldMatrix=new ConcurrentHashMap(theMatrix);
+                theMatrix.put(StrategyNameOfThisReport,hashmapKeyValue);
+
+                if(theOldMatrix.equals(theMatrix)){
+                    return;
+                }
+
             }
 
             //Adding key/values not present in R1
@@ -359,7 +371,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
              else {
 
-                 PerRowPokeString = PerRowPokeString + "\t\t";  //For blank cells
+                 PerRowPokeString = PerRowPokeString + "\t";  //For blank cells
 
              }
 
@@ -371,7 +383,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 return PerRowPokeString;
     }
 
-
+    private ConcurrentHashMap<String,ConcurrentHashMap> theMatrix=new ConcurrentHashMap();
     private Vector<String> currentProductIDs=new Vector<String>();
     private Vector<String> StrategyNames=new Vector<String>();
     private Vector<String> KeyValues =new Vector<String>();
