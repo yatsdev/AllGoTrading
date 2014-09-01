@@ -6,9 +6,9 @@ import org.joda.time.format.ISODateTimeFormat;
 import org.yats.common.Decimal;
 
 
-public class MarketData
+public class PriceData
 {
-    public static MarketDataNULL NULL = new MarketDataNULL();
+    public static PriceDataNULL NULL = new PriceDataNULL();
 
     public boolean hasProductId(String pid) {
         return productId.compareTo(pid) == 0;
@@ -22,7 +22,7 @@ public class MarketData
         return book.isBookSideEmpty(_side) || book.getBookRow(_side, 0).isSize(Decimal.ZERO);
     }
 
-    public boolean isPriceAndSizeSame(MarketData other) {
+    public boolean isPriceAndSizeSame(PriceData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
         if(bidSize.isEqualTo(other.bidSize)) return false;
@@ -31,7 +31,7 @@ public class MarketData
         return ask.isEqualTo(other.ask) && askSize == other.askSize;
     }
 
-    public boolean isSameAs(MarketData other) {
+    public boolean isSameAs(PriceData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
         if(!bidSize.isEqualTo(other.bidSize)) return false;
@@ -43,18 +43,18 @@ public class MarketData
         return timestamp.toString().compareTo(other.timestamp.toString()) == 0;
     }
 
-    public boolean isSameFrontRowPricesAs(MarketData other) {
+    public boolean isSameFrontRowPricesAs(PriceData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
         return ask.isEqualTo(other.ask);
     }
 
-    public boolean isSameFrontRowBidAs(MarketData other) {
+    public boolean isSameFrontRowBidAs(PriceData other) {
         if(other==NULL) return false;
         return bid.isEqualTo(other.bid);
     }
 
-    public boolean isSameFrontRowAskAs(MarketData other) {
+    public boolean isSameFrontRowAskAs(PriceData other) {
         if(other==NULL) return false;
         return ask.isEqualTo(other.ask);
     }
@@ -79,7 +79,7 @@ public class MarketData
         return book.toStringCSV();
     }
 
-    public MarketData(DateTime timestamp, String productId, Decimal bid, Decimal ask, Decimal last, Decimal bidSize, Decimal askSize, Decimal lastSize) {
+    public PriceData(DateTime timestamp, String productId, Decimal bid, Decimal ask, Decimal last, Decimal bidSize, Decimal askSize, Decimal lastSize) {
         this.timestamp = timestamp;
         this.productId = productId;
         this.bid = bid;
@@ -136,16 +136,16 @@ public class MarketData
     }
 
 
-    public static MarketData createFromLast(String productId, Decimal last) {
-        return new MarketData(DateTime.now(DateTimeZone.UTC), productId,
+    public static PriceData createFromLast(String productId, Decimal last) {
+        return new PriceData(DateTime.now(DateTimeZone.UTC), productId,
                 last.subtract(Decimal.CENT), last.add(Decimal.CENT), last,
                 Decimal.ONE, Decimal.ONE, Decimal.ONE);
     }
 
-    public static MarketData createFromLastWithDepth(String productId, Decimal last, int bidDepth, int askDepth, Decimal step) {
+    public static PriceData createFromLastWithDepth(String productId, Decimal last, int bidDepth, int askDepth, Decimal step) {
         Decimal bidFront=last.subtract(Decimal.CENT);
         Decimal askFront=last.add(Decimal.CENT);
-        MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC), productId,
+        PriceData m = new PriceData(DateTime.now(DateTimeZone.UTC), productId,
                 bidFront, askFront, last,
                 Decimal.ONE, Decimal.ONE, Decimal.ONE);
 
@@ -176,7 +176,7 @@ public class MarketData
 
 
 
-    private static class MarketDataNULL extends MarketData {
+    private static class PriceDataNULL extends PriceData {
 
         @Override
         public boolean isInitialized() {
@@ -222,7 +222,7 @@ public class MarketData
             throw new RuntimeException("This is NULL!");
         }
 
-        private MarketDataNULL() {
+        private PriceDataNULL() {
             super(DateTime.now(DateTimeZone.UTC),"", Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO,Decimal.ZERO);
         }
 

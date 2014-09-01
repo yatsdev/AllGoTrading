@@ -9,8 +9,8 @@ import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.connectivity.oandarest.FXOrders;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trader.StrategyRunner;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.MarketData;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.PriceData;
 import org.yats.trading.ProductList;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ import java.io.IOException;
   and create your personal config file.
  */
 
-public class OandaConnectionMain implements IConsumeMarketData {
+public class OandaConnectionMain implements IConsumePriceData {
 
     final Logger log = LoggerFactory.getLogger(FixClientMain.class);
 
@@ -89,7 +89,7 @@ public class OandaConnectionMain implements IConsumeMarketData {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
     }
 
     @Override

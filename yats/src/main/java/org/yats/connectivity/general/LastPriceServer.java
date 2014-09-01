@@ -1,26 +1,24 @@
 package org.yats.connectivity.general;
 
-import com.pretty_tools.dde.client.DDEClientConversation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.*;
-import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.*;
-import org.yats.messagebus.messages.MarketDataMsg;
+import org.yats.messagebus.messages.PriceDataMsg;
 import org.yats.messagebus.messages.SubscriptionMsg;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.MarketData;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.PriceData;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LastPriceServer implements IConsumeMarketData, IAmCalledBack {
+public class LastPriceServer implements IConsumePriceData, IAmCalledBack {
 
     final Logger log = LoggerFactory.getLogger(LastPriceServer.class);
 
     @Override
-    public void onMarketData(MarketData marketData) {
-        cache.put(marketData.getProductId(), marketData);
+    public void onPriceData(PriceData priceData) {
+        cache.put(priceData.getProductId(), priceData);
     }
 
     @Override
@@ -33,8 +31,8 @@ public class LastPriceServer implements IConsumeMarketData, IAmCalledBack {
         while(receiverSubscription.hasMoreMessages()) {
             String productId = receiverSubscription.get().productId;
             if(cache.containsKey(productId)) {
-                MarketDataMsg d = MarketDataMsg.createFrom(cache.get(productId));
-                senderMarketDataMsg.publish(d.getTopic(), d);
+                PriceDataMsg d = PriceDataMsg.createFrom(cache.get(productId));
+                senderPriceDataMsg.publish(d.getTopic(), d);
             }
         }
     }
@@ -55,11 +53,11 @@ public class LastPriceServer implements IConsumeMarketData, IAmCalledBack {
         shutdown=false;
         prop = _prop;
         cacheFilename = prop.get("cacheFilename");
-        cache = new ConcurrentHashMap<String, MarketData>();
+        cache = new ConcurrentHashMap<String, PriceData>();
         readCacheFromDisk();
         Config config =  Config.fromProperties(prop);
         strategyToBusConnection = new StrategyToBusConnection(_prop);
-        strategyToBusConnection.setMarketDataConsumer(this);
+        strategyToBusConnection.setPriceDataConsumer(this);
 
         receiverSubscription = new BufferingReceiver<SubscriptionMsg>(SubscriptionMsg.class,
                 config.getExchangeSubscription(),
@@ -67,17 +65,17 @@ public class LastPriceServer implements IConsumeMarketData, IAmCalledBack {
                 config.getServerIP());
         receiverSubscription.setObserver(this);
         receiverSubscription.start();
-        senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
+        senderPriceDataMsg = new Sender<PriceDataMsg>(config.getExchangePriceData(), config.getServerIP());
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     private void writeCacheToDisk() {
         StringBuilder b = new StringBuilder();
-        Serializer<MarketDataMsg> serializer = new Serializer<MarketDataMsg>();
+        Serializer<PriceDataMsg> serializer = new Serializer<PriceDataMsg>();
         for(String key : cache.keySet()) {
-            MarketData d = cache.get(key);
-            MarketDataMsg m = MarketDataMsg.createFrom(d);
+            PriceData d = cache.get(key);
+            PriceDataMsg m = PriceDataMsg.createFrom(d);
             String s = serializer.convertToString(m);
             b.append(s).append("\n");
         }
@@ -89,21 +87,21 @@ public class LastPriceServer implements IConsumeMarketData, IAmCalledBack {
         if(!FileTool.exists(cacheFilename)) return;
         cache.clear();
         StringBuilder b = new StringBuilder();
-        Deserializer<MarketDataMsg> deserializer = new Deserializer<MarketDataMsg>(MarketDataMsg.class);
+        Deserializer<PriceDataMsg> deserializer = new Deserializer<PriceDataMsg>(PriceDataMsg.class);
         String wholeFile = FileTool.readFromTextFile(cacheFilename);
         String[] parts = wholeFile.split("\n");
         for(String s : parts) {
             if(s.length()==0) continue;
-            MarketDataMsg m = deserializer.convertFromString(s);
-            MarketData d = m.toMarketData();
+            PriceDataMsg m = deserializer.convertFromString(s);
+            PriceData d = m.toPriceData();
             cache.put(d.getProductId(), d);
         }
         log.info("Cache read from disk with "+cache.size()+" items.");
     }
 
     private final String cacheFilename;
-    private Sender<MarketDataMsg> senderMarketDataMsg;
-    private ConcurrentHashMap<String, MarketData> cache;
+    private Sender<PriceDataMsg> senderPriceDataMsg;
+    private ConcurrentHashMap<String, PriceData> cache;
     private BufferingReceiver<SubscriptionMsg> receiverSubscription;
     private final boolean shutdown;
     private final StrategyToBusConnection strategyToBusConnection;

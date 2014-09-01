@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMarketData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings {
+public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePriceData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
@@ -19,25 +19,25 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
 
 
     @Override
-    public void subscribe(String productId, IConsumeMarketData consumer)
+    public void subscribe(String productId, IConsumePriceData consumer)
     {
 //        Product p = productProvider.getProductWith(productId);
         priceFeed.subscribe(productId, this);
         addConsumerForProductId(productId, consumer);
     }
 
-    private void addConsumerForProductId(String productId, IConsumeMarketData consumer)
+    private void addConsumerForProductId(String productId, IConsumePriceData consumer)
     {
-        ConcurrentHashMap<String, IConsumeMarketData> consumers = getConsumersOfProductId(productId);
+        ConcurrentHashMap<String, IConsumePriceData> consumers = getConsumersOfProductId(productId);
         consumers.put(consumer.getConsumerId().toString(), consumer);
         mapProductIdToConsumers.put(productId, consumers);
     }
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
-        marketDataMap.put(marketData.getProductId(), marketData);
-        updatedProductQueue.add(marketData.getProductId());
+        priceDataMap.put(priceData.getProductId(), priceData);
+        updatedProductQueue.add(priceData.getProductId());
     }
 
     @Override
@@ -159,12 +159,12 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
                     }
                 }
 
-                MarketData newData = marketDataMap.remove(updatedProductId);
+                PriceData newData = priceDataMap.remove(updatedProductId);
                 if(newData!=null) {
-                    rateConverter.onMarketData(newData);
-                    ConcurrentHashMap<String, IConsumeMarketData> marketDataConsumers = getConsumersOfProductId(newData.getProductId());
-                    for(IConsumeMarketData md : marketDataConsumers.values()) {
-                        md.onMarketData(newData);
+                    rateConverter.onPriceData(newData);
+                    ConcurrentHashMap<String, IConsumePriceData> priceDataConsumers = getConsumersOfProductId(newData.getProductId());
+                    for(IConsumePriceData md : priceDataConsumers.values()) {
+                        md.onPriceData(newData);
                     }
                 }
             }
@@ -188,9 +188,9 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
         priceFeed = new PriceFeedDummy();
         orderSender = new OrderSenderDummy();
         orderMap = new ConcurrentHashMap<String, OrderNew>();
-        marketDataMap = new ConcurrentHashMap<String, MarketData>();
+        priceDataMap = new ConcurrentHashMap<String, PriceData>();
 //        subscribedProducts = new ConcurrentHashMap<String, Product>();
-        mapProductIdToConsumers = new ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumeMarketData>>();
+        mapProductIdToConsumers = new ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumePriceData>>();
         updatedProductQueue = new LinkedBlockingQueue<String>();
         receiptQueue = new LinkedBlockingQueue<Receipt>();
         settingsQueue = new LinkedBlockingQueue<IProvideProperties>();
@@ -207,15 +207,15 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    private ConcurrentHashMap<String, IConsumeMarketData> getConsumersOfProductId(String productId) {
+    private ConcurrentHashMap<String, IConsumePriceData> getConsumersOfProductId(String productId) {
         return mapProductIdToConsumers.containsKey(productId)
                 ? mapProductIdToConsumers.get(productId)
-                : new ConcurrentHashMap<String, IConsumeMarketData>();
+                : new ConcurrentHashMap<String, IConsumePriceData>();
     }
 
     private class PriceFeedDummy implements IProvidePriceFeed {
         @Override
-        public void subscribe(String productId, IConsumeMarketData consumer) {
+        public void subscribe(String productId, IConsumePriceData consumer) {
             throw new RuntimeException("PriceFeedDummy can not subscribe.");
         }
     }
@@ -236,8 +236,8 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
     private Thread strategyThread;
     private IProvidePriceFeed priceFeed;
     //    private ConcurrentHashMap<String, Product> subscribedProducts;
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumeMarketData>> mapProductIdToConsumers;
-    private ConcurrentHashMap<String, MarketData> marketDataMap;
+    private ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumePriceData>> mapProductIdToConsumers;
+    private ConcurrentHashMap<String, PriceData> priceDataMap;
     private ConcurrentHashMap<String, OrderNew> orderMap;
     private LinkedBlockingQueue<Receipt> receiptQueue;
     private LinkedBlockingQueue<IProvideProperties> settingsQueue;

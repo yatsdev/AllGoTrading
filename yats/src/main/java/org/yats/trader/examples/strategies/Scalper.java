@@ -17,13 +17,13 @@ public class Scalper extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(!isInitialised()) return;
-        if(!marketData.hasProductId(tradeProductId)) return;
-        if(!startPrice.equals(MarketData.NULL)) return;
+        if(!priceData.hasProductId(tradeProductId)) return;
+        if(!startPrice.equals(PriceData.NULL)) return;
         if(shuttingDown) return;
-        startPrice = marketData;
+        startPrice = priceData;
 
         sendBidRelativeTo(startPrice.getBid());
         Decimal step = getStepSize(startPrice.getAsk());
@@ -161,13 +161,13 @@ public class Scalper extends StrategyBase {
 
     public Scalper() {
         super();
-        startPrice = MarketData.NULL;
+        startPrice = PriceData.NULL;
         shuttingDown=false;
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
     }
 
-    private MarketData startPrice;
+    private PriceData startPrice;
 
 
     private Decimal position;

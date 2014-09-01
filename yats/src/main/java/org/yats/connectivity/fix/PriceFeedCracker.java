@@ -2,8 +2,8 @@ package org.yats.connectivity.fix;
 
 import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.MarketData;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.PriceData;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -97,33 +97,33 @@ public class PriceFeedCracker extends MessageCracker implements Application {
 
             Decimal last = bid.add(ask).divide(Decimal.fromString("2"));
 
-            MarketData m = new MarketData(DateTime.now(DateTimeZone.UTC),productId
+            PriceData m = new PriceData(DateTime.now(DateTimeZone.UTC),productId
                     ,bid,ask,last
                     ,bidSize,askSize, Decimal.ONE);
 //        log.debug("FIX: "+m.toString());
-            marketDataConsumer.onMarketData(m);
+            priceDataConsumer.onPriceData(m);
 
         } catch(FieldNotFound e) {
             log.debug("Error parsing market data! "+e.getMessage());
         }
 	}
 
-    public void setMarketDataConsumer(IConsumeMarketData marketDataConsumer) {
-        this.marketDataConsumer = marketDataConsumer;
+    public void setPriceDataConsumer(IConsumePriceData priceDataConsumer) {
+        this.priceDataConsumer = priceDataConsumer;
     }
 
     public PriceFeedCracker() {
-        this.marketDataConsumer = new MarketDataConsumerDummy();
+        this.priceDataConsumer = new PriceDataConsumerDummy();
     }
 
-    private IConsumeMarketData marketDataConsumer;
+    private IConsumePriceData priceDataConsumer;
 
-    private class MarketDataConsumerDummy implements IConsumeMarketData {
-        private MarketDataConsumerDummy() {
+    private class PriceDataConsumerDummy implements IConsumePriceData {
+        private PriceDataConsumerDummy() {
             id = UniqueId.create();
         }
         @Override
-        public void onMarketData(MarketData marketData) {
+        public void onPriceData(PriceData priceData) {
             throw new RuntimeException("MarketDataConsumerDummy can not handle market data!");
         }
         @Override

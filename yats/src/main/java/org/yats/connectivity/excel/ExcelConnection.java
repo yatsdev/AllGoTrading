@@ -19,7 +19,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDEClientEventListener, IConsumeReports {
+public class ExcelConnection implements IConsumePriceData, IConsumeReceipt, DDEClientEventListener, IConsumeReports {
 
     final Logger log = LoggerFactory.getLogger(ExcelConnection.class);
 
@@ -36,17 +36,17 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
         for (int i = 1; i < currentProductIDs.size(); i++) {
             int j = i + 1;
-            if (marketData.hasProductId(currentProductIDs.elementAt(i))){
+            if (priceData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
 
-                    String marketDataString= marketData.getTimestamp().toString() + "\t"
-                            + marketData.getBidSize().toString() + "\t"
-                            + marketData.getBid().toString() + "\t"
-                            + marketData.getAskSize().toString()
-                            + "\t" + marketData.getAsk().toString();
+                    String marketDataString= priceData.getTimestamp().toString() + "\t"
+                            + priceData.getBidSize().toString() + "\t"
+                            + priceData.getBid().toString() + "\t"
+                            + priceData.getAskSize().toString()
+                            + "\t" + priceData.getAsk().toString();
 
 
                     for(int n=1;n<10;n++){
@@ -58,14 +58,14 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
                         String lvnAskSize= "";
                         String lvnAskPrice= "";
 
-                        if(marketData.getBook().getDepth(BookSide.BID)>=p) {
-                            lvnBidSize=marketData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
-                            lvnBidPrice=marketData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
+                        if(priceData.getBook().getDepth(BookSide.BID)>=p) {
+                            lvnBidSize= priceData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
+                            lvnBidPrice= priceData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
                         }
 
-                        if(marketData.getBook().getDepth(BookSide.ASK)>=p) {
-                            lvnAskSize = marketData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
-                            lvnAskPrice = marketData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
+                        if(priceData.getBook().getDepth(BookSide.ASK)>=p) {
+                            lvnAskSize = priceData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
+                            lvnAskPrice = priceData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
                         }
 
                         marketDataString=marketDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
@@ -282,7 +282,7 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
         shutdown=false;
         prop = _prop;
         strategyToBusConnection = new StrategyToBusConnection(_prop);
-        strategyToBusConnection.setMarketDataConsumer(this);
+        strategyToBusConnection.setPriceDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
         strategyToBusConnection.setReportsConsumer(this);
         if(Tool.isWindows()) {

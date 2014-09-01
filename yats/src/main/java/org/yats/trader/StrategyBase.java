@@ -8,13 +8,13 @@ import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, IConsumeSettings {
+public abstract class StrategyBase implements IConsumePriceDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
 
     @Override
-    public abstract void onMarketData(MarketData marketData);
+    public abstract void onPriceData(PriceData priceData);
 
     @Override
     public UniqueId getConsumerId() { return consumerId; }

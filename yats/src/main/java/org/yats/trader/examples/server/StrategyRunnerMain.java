@@ -80,7 +80,7 @@ public class StrategyRunnerMain {
         strategyRunner.setRateConverter(rateConverter);
         strategyToBusConnection.setReceiptConsumer(strategyRunner);
         strategyToBusConnection.setSettingsConsumer(strategyRunner);
-        strategyToBusConnection.setMarketDataConsumer(strategyRunner);
+        strategyToBusConnection.setPriceDataConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");

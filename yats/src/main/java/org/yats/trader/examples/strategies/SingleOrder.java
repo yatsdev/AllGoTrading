@@ -17,15 +17,15 @@ public class SingleOrder extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
-        if(!marketData.hasProductId(tradeProductId)) return;
-        if(!startPrice.equals(MarketData.NULL)) return;
+        if(!priceData.hasProductId(tradeProductId)) return;
+        if(!startPrice.equals(PriceData.NULL)) return;
         if(shuttingDown) return;
-        startPrice = marketData;
+        startPrice = priceData;
 
         //sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
-        sendOrder(BookSide.BID, marketData.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
+        sendOrder(BookSide.BID, priceData.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
     }
 
 
@@ -98,13 +98,13 @@ public class SingleOrder extends StrategyBase {
 
     public SingleOrder() {
         super();
-        startPrice = MarketData.NULL;
+        startPrice = PriceData.NULL;
         shuttingDown=false;
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
     }
 
-    private MarketData startPrice;
+    private PriceData startPrice;
 
 
     private Decimal position;

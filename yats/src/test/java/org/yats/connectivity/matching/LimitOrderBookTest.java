@@ -6,7 +6,7 @@ import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
+public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
 
     @Test
     public void canMatchIntoEmptyBookCreatingMakerReceipts()
@@ -99,7 +99,7 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
 
     }
 

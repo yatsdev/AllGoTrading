@@ -12,10 +12,10 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.*;
-import org.yats.trading.IConsumeMarketData;
+import org.yats.trading.IConsumePriceData;
 import org.yats.trading.IProvidePriceFeed;
 import org.yats.trading.IProvideProduct;
-import org.yats.trading.MarketData;
+import org.yats.trading.PriceData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,8 +29,8 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
 
 
     @Override
-    public void subscribe(String productId, IConsumeMarketData consumer) {
-        marketDataConsumer = consumer;
+    public void subscribe(String productId, IConsumePriceData consumer) {
+        priceDataConsumer = consumer;
         if(subscriptionList.containsKey(productId)) return;
         if(!properties.exists(productId)) {
             log.debug("Subscription not available:"+productId);
@@ -126,14 +126,14 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
                     System.out.println(ask);
 
                     String productId = mapSymbolToPid.get(instrument);
-                    MarketData data = new MarketData(Tool.getUTCTimestamp(),
+                    PriceData data = new PriceData(Tool.getUTCTimestamp(),
                             productId, Decimal.fromDouble(bid), Decimal.fromDouble(ask), last,
                             Decimal.ONE, Decimal.ONE, Decimal.ONE);
 
-                    marketDataConsumer.onMarketData(data);
+                    priceDataConsumer.onPriceData(data);
 
 //                        Sender<MarketDataMsg> sender = null;
-//                        sender = new Sender<MarketDataMsg>(Config.DEFAULT.getExchangeMarketData(),
+//                        sender = new Sender<MarketDataMsg>(Config.DEFAULT.getExchangePriceData(),
 //                                Config.DEFAULT.getServerIP());
 //                        data.productId=instrument;
 //                        data.bid= Decimal.fromDouble(bid).toString();
@@ -165,7 +165,7 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
     public PriceFeed(IProvideProperties properties) {
         this.properties = properties;
         mapPidToSymbol = new ConcurrentHashMap<String, String>();
-        subscriptionList = new ConcurrentHashMap<String, IConsumeMarketData>();
+        subscriptionList = new ConcurrentHashMap<String, IConsumePriceData>();
         mapSymbolToPid = new ConcurrentHashMap<String, String>();
         thread = new Thread(this);
         httpClient = new DefaultHttpClient();
@@ -187,9 +187,9 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
     private String secret;
     private IProvideProperties properties;
     private IProvideProduct productProvider;
-    private ConcurrentHashMap<String, IConsumeMarketData> subscriptionList;
+    private ConcurrentHashMap<String, IConsumePriceData> subscriptionList;
     private ConcurrentHashMap<String, String> mapPidToSymbol;
     private ConcurrentHashMap<String, String> mapSymbolToPid;
-    IConsumeMarketData marketDataConsumer;
+    IConsumePriceData priceDataConsumer;
 
 }

@@ -4,8 +4,8 @@ import org.testng.annotations.BeforeMethod;
 import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.oandarest.PriceFeed;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.MarketData;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.PriceData;
 
 public class PriceFeedTest {
 
@@ -40,10 +40,10 @@ public class PriceFeedTest {
     PriceFeed priceFeed;
     RateConsumer consumer;
 
-    private class RateConsumer implements IConsumeMarketData {
+    private class RateConsumer implements IConsumePriceData {
         @Override
-        public void onMarketData(MarketData marketData) {
-            System.out.println(marketData.toString());
+        public void onPriceData(PriceData priceData) {
+            System.out.println(priceData.toString());
             received++;
         }
 

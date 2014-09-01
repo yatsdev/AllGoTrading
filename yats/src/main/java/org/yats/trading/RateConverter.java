@@ -6,7 +6,7 @@ import org.yats.common.UniqueId;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class RateConverter implements IConsumeMarketData, IConvertRate {
+public class RateConverter implements IConsumePriceData, IConvertRate {
 
     public Position calculateProfit(Position oldPosition, Position newPosition, String targetPid) {
         Position oldPositionInTarget = convert(oldPosition, targetPid);
@@ -95,8 +95,8 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
-        rates.put(marketData.getProductId(), marketData);
+    public void onPriceData(PriceData priceData) {
+        rates.put(priceData.getProductId(), priceData);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
 
     public RateConverter(IProvideProduct p) {
         products = p;
-        rates = new MarketDataMap();
+        rates = new PriceDataMap();
         cache = new ConcurrentHashMap<String, RatesChain>();
         cacheHits=0;
     }
@@ -225,7 +225,7 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
         return startProductId+"->"+targetProductId;
     }
 
-    private MarketDataMap rates;
+    private PriceDataMap rates;
     private IProvideProduct products;
     private ConcurrentHashMap<String, RatesChain> cache;
     private int cacheHits;

@@ -20,11 +20,11 @@ public class MarketFollow extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(shuttingDown) return;
-        if(!marketData.hasProductId(tradeProductId)) return;
-        handleMarketDataBidSide(marketData);
+        if(!priceData.hasProductId(tradeProductId)) return;
+        handlePriceDataBidSide(priceData);
     }
 
     @Override
@@ -66,15 +66,15 @@ public class MarketFollow extends StrategyBase {
         if(isInMarketBidSide() && receivedOrderReceiptBidSide) cancelLastOrderBidSide();
     }
 
-    private void handleMarketDataBidSide(MarketData marketData) {
+    private void handlePriceDataBidSide(PriceData priceData) {
 
         if(isInMarketBidSide()) {
-            boolean changedSinceLastTick = !marketData.isPriceAndSizeSame(previousMarketData);
+            boolean changedSinceLastTick = !priceData.isPriceAndSizeSame(previousPriceData);
             Decimal lastBid = lastBidOrder.getLimit();
-            Decimal bid = marketData.getBid();
+            Decimal bid = priceData.getBid();
             Decimal bidChange=lastBid.subtract(getNewBid(bid)).abs();
             if(changedSinceLastTick && bidChange.isGreaterThan(Decimal.fromDouble(0.01))) {
-                log.info("changed price since last order: " + marketData);
+                log.info("changed price since last order: " + priceData);
             }
 
             boolean bidChangedEnoughForOrderUpdate = bidChange.isGreaterThan(Decimal.fromDouble(0.02));
@@ -85,10 +85,10 @@ public class MarketFollow extends StrategyBase {
 
         boolean positionLessThanMaximum = position.isLessThan(Decimal.ONE);
         if(!isInMarketBidSide() && positionLessThanMaximum) {
-            Decimal bid = marketData.getBid();
+            Decimal bid = priceData.getBid();
             sendOrderBidSide(getNewBid(bid));
         }
-        previousMarketData=marketData;
+        previousPriceData = priceData;
     }
 
     private Decimal getNewBid(Decimal oldBid) {
@@ -125,7 +125,7 @@ public class MarketFollow extends StrategyBase {
         super();
         lastBidOrder = OrderNew.NULL;
         shuttingDown=false;
-        previousMarketData = MarketData.NULL;
+        previousPriceData = PriceData.NULL;
         position = Decimal.ZERO;
     }
 
@@ -133,7 +133,7 @@ public class MarketFollow extends StrategyBase {
     private boolean shuttingDown;
     private String tradeProductId;
     private OrderNew lastBidOrder;
-    private MarketData previousMarketData;
+    private PriceData previousPriceData;
     private boolean receivedOrderReceiptBidSide;
 
 } // class

@@ -16,7 +16,7 @@ public class Config {
         return properties.get("serverIP");
     }
 
-    public String getExchangeMarketData() {
+    public String getExchangePriceData() {
         return properties.get("exchangeMarketData");
     }
 

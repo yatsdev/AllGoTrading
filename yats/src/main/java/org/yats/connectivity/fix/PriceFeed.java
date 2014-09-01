@@ -31,7 +31,7 @@ public class PriceFeed implements IProvidePriceFeed {
     }
 
     @Override
-    public void subscribe(String productId, IConsumeMarketData consumer)
+    public void subscribe(String productId, IConsumePriceData consumer)
     {
         Random generator = new Random();
         int r = generator.nextInt();
@@ -53,7 +53,7 @@ public class PriceFeed implements IProvidePriceFeed {
         marketDataRequest.addGroup(group);
 
         try {
-            application.setMarketDataConsumer(consumer);
+            application.setPriceDataConsumer(consumer);
             Session.sendToTarget(marketDataRequest, sessionId);
         } catch (SessionNotFound e) {
             e.printStackTrace();

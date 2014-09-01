@@ -22,13 +22,13 @@ public class LimitOrderBook implements IConsumeReceipt {
         book[oppositeIndex].match(takerReceipt);
         int index = takerReceipt.getBookSide().toIndex();
         if(!takerReceipt.isEndState()) book[index].add(takerReceipt);
-        sendMarketData();
+        sendPriceData();
     }
 
     public void cancel(UniqueId orderId) {
         book[0].cancel(orderId);
         book[1].cancel(orderId);
-        sendMarketData();
+        sendPriceData();
     }
 
     public boolean isOrderInBooks(UniqueId orderId){
@@ -44,7 +44,7 @@ public class LimitOrderBook implements IConsumeReceipt {
     }
 
     //todo: only send if changed
-    private void sendMarketData() {
+    private void sendPriceData() {
         try {
             Decimal bid = book[0].getFrontRowPrice();
             Decimal bidSize = book[0].getFrontRowSize();
@@ -53,12 +53,12 @@ public class LimitOrderBook implements IConsumeReceipt {
 
             Decimal last = lastReceipt != null ? lastReceipt.getPrice() : Decimal.ZERO;
             Decimal lastSize = lastReceipt != null ? lastReceipt.getCurrentTradedSize() : Decimal.ZERO;
-            MarketData m = new MarketData(Tool.getUTCTimestamp(), productId, bid, ask, last, bidSize, askSize, lastSize);
+            PriceData m = new PriceData(Tool.getUTCTimestamp(), productId, bid, ask, last, bidSize, askSize, lastSize);
             OfferBook offerBook = new OfferBook(
                     book[0].toOfferBookSide(10),
                     book[1].toOfferBookSide(10));
             m.setBook(offerBook);
-            consumer.onMarketData(m);
+            consumer.onPriceData(m);
         } catch(CommonExceptions.ContainerEmptyException e) {
             log.error(e.getMessage());
         } catch(Throwable t) {
@@ -74,7 +74,7 @@ public class LimitOrderBook implements IConsumeReceipt {
         return book[0].getSize() + book[1].getSize();
     }
 
-    public LimitOrderBook(String _productId, IConsumeMarketDataAndReceipt _consumer)
+    public LimitOrderBook(String _productId, IConsumePriceDataAndReceipt _consumer)
     {
         productId=_productId;
         consumer = _consumer;
@@ -85,7 +85,7 @@ public class LimitOrderBook implements IConsumeReceipt {
 
     private Receipt lastReceipt;
     private LimitOrderBookSide book[];
-    private IConsumeMarketDataAndReceipt consumer;
+    private IConsumePriceDataAndReceipt consumer;
     private String productId;
 
 } // class

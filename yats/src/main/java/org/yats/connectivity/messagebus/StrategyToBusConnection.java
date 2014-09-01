@@ -23,8 +23,8 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
 
     @Override
-    public void subscribe(String productId, IConsumeMarketData consumer) {
-        setMarketDataConsumer(consumer);
+    public void subscribe(String productId, IConsumePriceData consumer) {
+        setPriceDataConsumer(consumer);
         SubscriptionMsg m = SubscriptionMsg.fromProductId(productId);
 //        Config config = Config.DEFAULT;
         senderSubscription.publish(config.getTopicSubscriptions(), m);
@@ -61,21 +61,21 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     @Override
     public void onCallback() {
-        sendAllReceivedMarketData();
+        sendAllReceivedPriceData();
         sendAllReceivedReceipts();
         sendAllReceivedSettings();
         sendAllReceivedReports();
     }
 
-    private void sendAllReceivedMarketData() {
-        while(receiverMarketdata.hasMoreMessages()) {
-            MarketDataMsg m = receiverMarketdata.get();
-            marketDataMap.put(m.productId, m);
+    private void sendAllReceivedPriceData() {
+        while(receiverPriceData.hasMoreMessages()) {
+            PriceDataMsg m = receiverPriceData.get();
+            priceDataMap.put(m.productId, m);
         }
-        for(MarketDataMsg m : marketDataMap.values()) {
-            marketDataConsumer.onMarketData(m.toMarketData());
+        for(PriceDataMsg m : priceDataMap.values()) {
+            priceDataConsumer.onPriceData(m.toPriceData());
         }
-        marketDataMap.clear();
+        priceDataMap.clear();
     }
 
     private void sendAllReceivedReceipts() {
@@ -109,8 +109,8 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         reportsMap.clear();
     }
 
-    public void setMarketDataConsumer(IConsumeMarketData marketDataConsumer) {
-        this.marketDataConsumer = marketDataConsumer;
+    public void setPriceDataConsumer(IConsumePriceData priceDataConsumer) {
+        this.priceDataConsumer = priceDataConsumer;
     }
 
     public void setSettingsConsumer(IConsumeSettings settingsConsumer) {
@@ -126,7 +126,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     public void close() {
-        receiverMarketdata.close();
+        receiverPriceData.close();
         receiverReceipt.close();
         if(receiverReports!=null) receiverReports.close();
         if(receiverSettings!=null) receiverSettings.close();
@@ -140,7 +140,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     public StrategyToBusConnection(IProvideProperties p) {
         shuttingDown=false;
 
-        marketDataMap = new ConcurrentHashMap<String, MarketDataMsg>();
+        priceDataMap = new ConcurrentHashMap<String, PriceDataMsg>();
         reportsMap = new ConcurrentHashMap<String, IProvideProperties>();
         orderNewQueue = new LinkedBlockingQueue<OrderNew>();
         orderCancelQueue = new LinkedBlockingQueue<OrderCancel>();
@@ -148,7 +148,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         updatedProductQueue = new LinkedBlockingQueue<String>();
 
 
-        marketDataConsumer=new MarketDataConsumerDummy();
+        priceDataConsumer =new PriceDataConsumerDummy();
         receiptConsumer=new ReceiptConsumerDummy();
         settingsConsumer =new SettingsConsumerDummy();
         reportsConsumer=new ReportsConsumerDummy();
@@ -181,13 +181,13 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             receiverReports.start();
         }
 
-        receiverMarketdata = new BufferingReceiver<MarketDataMsg>(
-                MarketDataMsg.class,
-                config.getExchangeMarketData(),
+        receiverPriceData = new BufferingReceiver<PriceDataMsg>(
+                PriceDataMsg.class,
+                config.getExchangePriceData(),
                 "#",
                 config.getServerIP());
-        receiverMarketdata.setObserver(this);
-        receiverMarketdata.start();
+        receiverPriceData.setObserver(this);
+        receiverPriceData.start();
 
         receiverReceipt = new BufferingReceiver<ReceiptMsg>(
                 ReceiptMsg.class,
@@ -204,12 +204,12 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     Sender<KeyValueMsg> senderSettings;
     Sender<KeyValueMsg> senderReports;
 
-    IConsumeMarketData marketDataConsumer;
+    IConsumePriceData priceDataConsumer;
     IConsumeReceipt receiptConsumer;
     IConsumeSettings settingsConsumer;
     IConsumeReports reportsConsumer;
-    BufferingReceiver<MarketDataMsg> receiverMarketdata;
-    ConcurrentHashMap<String, MarketDataMsg> marketDataMap;
+    BufferingReceiver<PriceDataMsg> receiverPriceData;
+    ConcurrentHashMap<String, PriceDataMsg> priceDataMap;
     ConcurrentHashMap<String, IProvideProperties> reportsMap;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
     BufferingReceiver<KeyValueMsg> receiverSettings;
@@ -224,13 +224,13 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
 
 
-    private static class MarketDataConsumerDummy implements IConsumeMarketData {
-        private MarketDataConsumerDummy() {
+    private static class PriceDataConsumerDummy implements IConsumePriceData {
+        private PriceDataConsumerDummy() {
             id=new UniqueId();
         }
 
         @Override
-        public void onMarketData(MarketData marketData) {
+        public void onPriceData(PriceData priceData) {
         }
 
         @Override

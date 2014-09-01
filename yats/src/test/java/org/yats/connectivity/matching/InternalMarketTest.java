@@ -11,14 +11,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
+public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
 
     @Test
     public void canInsertAndCancel() {
         market.sendOrderNew(bid133);
         market.sendOrderNew(ask135);
         assert(mdCounter==2);
-        assert(lastMarketData.hasFrontRow(BookSide.BID, bid133.getAsRow()));
+        assert(lastPriceData.hasFrontRow(BookSide.BID, bid133.getAsRow()));
     }
 
     @Test
@@ -29,8 +29,8 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         OrderNew newAsk = ask135;
         sendMultipleOrders(newAsk, 99);
         assert(mdCounter==198);
-        assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.99"))));
-        assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.01"))));
+        assert(lastPriceData.hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.99"))));
+        assert(lastPriceData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.01"))));
     }
 
     @Test
@@ -55,8 +55,8 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         OrderNew newAsk = createCopy(ask135).withLimit(bid133.getLimit().add(Decimal.ONE));
         sendMultipleOrders(newAsk, 99);
         assert(mdCounter==198);
-        assert(lastMarketData.isBookSideEmpty(BookSide.BID)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
-        assert(lastMarketData.isBookSideEmpty(BookSide.ASK)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
+        assert(lastPriceData.isBookSideEmpty(BookSide.BID)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
+        assert(lastPriceData.isBookSideEmpty(BookSide.ASK)); //hasFrontRow(BookSide.BID, new BookRow(Decimal.ONE, Decimal.fromString("133.01"))));
 //        assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.00"))));
     }
 
@@ -72,8 +72,8 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         market.sendOrderNew(newAsk);
         assert(mdCounter==100);
         assert(receiptCounter==3*99);
-        assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
-        assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
+        assert(lastPriceData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
+        assert(lastPriceData.isBookSideEmpty(BookSide.ASK));
     }
 
     @Test
@@ -90,8 +90,8 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
             OrderCancel c = r.createOrderCancel(r);
             market.sendOrderCancel(c);
             Decimal expected = bid133.getLimit().add(Decimal.fromString("0.99"));
-            if(counter<99) assert(lastMarketData.getBid().isEqualTo(expected));
-            if(counter==99) assert(lastMarketData.isBookSideEmpty(BookSide.BID));
+            if(counter<99) assert(lastPriceData.getBid().isEqualTo(expected));
+            if(counter==99) assert(lastPriceData.isBookSideEmpty(BookSide.BID));
             counter++;
         }
         assert(receiptCounter==2*99);
@@ -113,8 +113,8 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         for(Receipt r : snapshot) {
             OrderCancel c = r.createOrderCancel(r);
             market.sendOrderCancel(c);
-            if(counter<99) assert(lastMarketData.getAsk().isEqualTo(expected));
-            if(counter==99) assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
+            if(counter<99) assert(lastPriceData.getAsk().isEqualTo(expected));
+            if(counter==99) assert(lastPriceData.isBookSideEmpty(BookSide.ASK));
             counter++;
             expected=expected.add(Decimal.CENT);
         }
@@ -163,7 +163,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         receiptCounter=0;
         receiptList=new ArrayList<Receipt>();
         receiptUnitsList=new ArrayList<Receipt>();
-        mdList=new ArrayList<MarketData>();
+        mdList=new ArrayList<PriceData>();
     }
 
     @Override
@@ -179,9 +179,9 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
         mdCounter++;
-        lastMarketData=marketData;
+        lastPriceData = priceData;
     }
 
     @Override
@@ -194,11 +194,11 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
     InternalMarket market;
     int mdCounter;
     int receiptCounter;
-    MarketData lastMarketData;
+    PriceData lastPriceData;
     Receipt lastReceipt;
     List<Receipt> receiptList;
     List<Receipt> receiptUnitsList;
-    List<MarketData> mdList;
+    List<PriceData> mdList;
 
 
 } // class
