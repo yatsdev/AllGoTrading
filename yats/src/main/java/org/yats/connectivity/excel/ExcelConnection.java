@@ -110,6 +110,9 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             String KeyValuesString=conversationReports.request("R1");
             parsekeyValues(KeyValuesString);
 
+            if(KeyValues.lastElement().compareTo("")==0){
+                KeyValues.remove("");
+            }
 
 
            ConcurrentHashMap<String,String> hashmapKeyValue=new ConcurrentHashMap();
@@ -135,14 +138,12 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
             }
 
             //Adding key/values not present in R1
-            int positionKeyValues=2;
-            positionKeyValues=positionKeyValues+KeyValues.size();
+            int positionKeyValues=KeyValues.size()+2;
             Enumeration<String> keys=  hashmapKeyValue.keys();
             while(keys.hasMoreElements()){
                 String currentKey = keys.nextElement();
                 if(!KeyValues.contains(currentKey)){
-                    conversationReports.poke("R1C" + positionKeyValues, currentKey);//KeyValues.size()+2
-                    positionKeyValues = positionKeyValues + 1;
+                    conversationReports.poke("R1C" + positionKeyValues, currentKey);
                     KeyValues.add(currentKey);
                 }
             }
@@ -157,13 +158,13 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
 
             //Finally poking data from reports in a per row poke transaction fashion
-            int RightMostCell=positionKeyValues+KeyValues.size();
+            int RightMostCell=2+KeyValues.size();
             int strategyIndex=2;
             for ( int q=0;q<StrategyNames.size();q++){
-               strategyIndex=q+2;
+               strategyIndex=q+strategyIndex;
                 if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
-                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C55",generatePerRowPokeString(KeyValues,hashmapKeyValue));//RightMostCell
-                }
+                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C"+RightMostCell,generatePerRowPokeString(KeyValues,hashmapKeyValue));//RightMostCell
+            }
             }
 
         } catch (DDEException e) {
@@ -338,20 +339,28 @@ public class ExcelConnection implements IConsumeMarketData, IConsumeReceipt, DDE
 
     private String generatePerRowPokeString(Vector<String> KeyValues,ConcurrentHashMap<String,String> hashmapKeyValue){
 
-        String PerRowPokeString = "";
+        String PerRowPokeString = new String();
+        boolean wasLastEmpty = false;
 
      for(int i=0;i<KeyValues.size();i++) {//R1C1 is empty
+
 
              if (hashmapKeyValue.containsKey(KeyValues.elementAt(i))) {
                  if (i == 0) {
                      PerRowPokeString = hashmapKeyValue.get(KeyValues.elementAt(i));
                  } else {
-                     PerRowPokeString = PerRowPokeString + "\t" + hashmapKeyValue.get(KeyValues.elementAt(i));
+
+
+
+                     PerRowPokeString = PerRowPokeString  + "\t"+hashmapKeyValue.get(KeyValues.elementAt(i));
+
+                     }
                  }
 
-             }else {
+             else {
 
-                 PerRowPokeString = PerRowPokeString + "\t" + "";  //For blank cells
+                 PerRowPokeString = PerRowPokeString + "\t\t";  //For blank cells
+
              }
 
 
