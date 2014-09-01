@@ -66,6 +66,7 @@ public class StrategyRunnerMain {
 
         positionServer = new PositionServer();
         positionServer.setRateConverter(rateConverter);
+        positionServer.setProductList(productList);
         PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();

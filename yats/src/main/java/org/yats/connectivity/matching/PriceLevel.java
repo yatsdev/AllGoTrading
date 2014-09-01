@@ -36,7 +36,7 @@ public class PriceLevel {
 
     public void match(Receipt takerReceipt) {
         for(Receipt makerReceipt : list) {
-            if(!takerReceipt.isSamePriceOrInfront(makerReceipt)) throw new CommonExceptions.ContainerEmptyException("taker infront of maker receipt");;
+            if(!takerReceipt.isSamePriceOrInfront(makerReceipt)) throw new CommonExceptions.ContainerEmptyException("taker infront of maker receipt");
             makerReceipt.match(takerReceipt);
             Receipt takerIntermediateReceipt = takerReceipt.createCopy().withPrice(makerReceipt.getPrice());
             receiptConsumer.onReceipt(takerIntermediateReceipt);

@@ -66,8 +66,8 @@ public class PropertiesReader implements IProvideProperties {
         PropertiesReader p = new PropertiesReader();
         String[] parts = csv.split(",");
         if(parts.length<2) return p;
-        for(int i=0; i<parts.length; i++) {
-            String[] keyvalue = parts[i].split("=");
+        for (String part : parts) {
+            String[] keyvalue = part.split("=");
             p.properties.setProperty(keyvalue[0], keyvalue[1]);
         }
         return p;
@@ -195,8 +195,7 @@ public class PropertiesReader implements IProvideProperties {
         if(lowerCase.compareTo("yes")==0) return true;
         if(lowerCase.compareTo("y")==0) return true;
         if(lowerCase.compareTo("1")==0) return true;
-        if(lowerCase.compareTo("true")==0) return true;
-        return false;
+        return lowerCase.compareTo("true") == 0;
     }
 
 

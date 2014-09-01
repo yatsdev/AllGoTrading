@@ -11,7 +11,6 @@ import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.trading.MarketData;
 import org.yats.trading.ProductList;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;

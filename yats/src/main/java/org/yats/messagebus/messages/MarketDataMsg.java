@@ -49,8 +49,7 @@ public class MarketDataMsg {
         if(lastSize.compareTo(data.lastSize)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
         if(timestamp.compareTo(data.timestamp)!=0) return false;
-        if(offerBook.compareTo(data.offerBook)!=0) return false;
-        return true;
+        return offerBook.compareTo(data.offerBook) == 0;
     }
 
     @Override

@@ -39,7 +39,7 @@ public class MessageConversionTest {
 
         @BeforeMethod
         public void setUp() {
-            positionRequest = new PositionRequest(ProductTest.ACCOUNT1, ProductTest.PRODUCT1.getProductId());
+            positionRequest = new PositionRequest(ProductTest.ACCOUNT1, ProductTest.TEST_PRODUCT1_ID);
 
         }
 

@@ -40,7 +40,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
         OrderNew crossingAsk = createCopy(ask135).withLimit(bid133.getLimit());
         market.sendOrderNew(crossingAsk);
         assert(mdCounter==2);
-        assert(receiptCounter==5);
+        assert(receiptCounter==3);
         for(Receipt r : receiptUnitsList) {
             assert(r.getCurrentTradedSize().isEqualTo(bid133.getLimit()));
         }
@@ -71,7 +71,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumeMarketData {
                 .withSize(Decimal.fromString("98.5"));
         market.sendOrderNew(newAsk);
         assert(mdCounter==100);
-        assert(receiptCounter==5*99);
+        assert(receiptCounter==3*99);
         assert(lastMarketData.hasFrontRow(BookSide.BID, new BookRow(Decimal.fromString("0.5"), Decimal.fromString("133.01"))));
         assert(lastMarketData.isBookSideEmpty(BookSide.ASK));
     }

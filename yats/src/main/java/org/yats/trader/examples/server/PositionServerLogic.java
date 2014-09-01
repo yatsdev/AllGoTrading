@@ -26,7 +26,11 @@ public class PositionServerLogic implements IAmCalledBack {
             receiveNewPositionSnapshot();
         }
         while(receiverReceipts.hasMoreMessages()) {
-            positionServer.onReceipt(receiverReceipts.get().toReceipt());
+            try {
+                positionServer.onReceipt(receiverReceipts.get().toReceipt());
+            } catch(TradingExceptions.UnknownIdException e) {
+                log.error(e.getMessage());
+            }
         }
     }
 
@@ -111,13 +115,18 @@ public class PositionServerLogic implements IAmCalledBack {
         this.positionServer = positionServer;
     }
 
+    public void setProductList(IProvideProduct productList) {
+        positionServer.setProductList(productList);
+    }
+
     public void setPositionStorage(IStorePositionSnapshots positionStorage) {
         positionServer.setPositionStorage(positionStorage);
         if(config.isStorePositionsToDisk()) {
             positionServer.initFromLastStoredPositionSnapshot();
         }
-
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
     private BufferingReceiver<ReceiptMsg> receiverReceipts;
     private BufferingReceiver<PositionRequestMsg> receiverPositionRequests;

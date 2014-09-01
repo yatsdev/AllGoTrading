@@ -21,7 +21,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
     @Override
     public void subscribe(String productId, IConsumeMarketData consumer)
     {
-//        Product p = productProvider.getProductForProductId(productId);
+//        Product p = productProvider.getProductWith(productId);
         priceFeed.subscribe(productId, this);
         addConsumerForProductId(productId, consumer);
     }
@@ -151,7 +151,12 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumeMark
                 while(receiptQueue.size()>0){
                     Receipt r = receiptQueue.take();
                     for(IConsumeReceipt c : receiptConsumers) {
-                        c.onReceipt(r); }
+                        try {
+                            c.onReceipt(r);
+                        } catch (TradingExceptions.UnknownIdException e) {
+                            log.error(e.getMessage());
+                        }
+                    }
                 }
 
                 MarketData newData = marketDataMap.remove(updatedProductId);

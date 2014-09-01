@@ -43,7 +43,7 @@ public class SingleOrder extends StrategyBase {
             return;
         }
 
-        position = receipt.getPositionChange().add(position);
+        position = receipt.getPositionChangeOfBase().add(position);
 
         log.debug("Received receipt: " + receipt);
 

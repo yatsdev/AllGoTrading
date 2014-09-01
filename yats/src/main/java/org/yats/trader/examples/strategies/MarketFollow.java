@@ -43,7 +43,7 @@ public class MarketFollow extends StrategyBase {
             receivedOrderReceiptBidSide =true;
         }
         log.debug("Received receipt: " + receipt);
-        position = receipt.getPositionChange().add(position);
+        position = receipt.getPositionChangeOfBase().add(position);
     }
 
     @Override

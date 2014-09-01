@@ -22,15 +22,21 @@ public class Receipt {
     }
 
 
-    public AccountPosition toAccountPosition() {
-        return new AccountPosition(getProductId(), getInternalAccount(), getPositionChange());
+    public AccountPosition getPositionChangeOfBaseAsAccountPosition() {
+        return new AccountPosition(getProductId(), getInternalAccount(), getPositionChangeOfBase());
     }
 
+    public AccountPosition getPositionChangeOfCounterAsAccountPosition(IProvideProduct productList) {
+        Product p = productList.getProductWith(productId);
+        Decimal baseChange = getPositionChangeOfBase();
+        Decimal counterChange = baseChange.multiply(price).multiply(p.getContractSize()).negate();
+        AccountPosition ap = new AccountPosition(p.getUnitId(), internalAccount, counterChange);
+        return ap;
+    }
 
     public boolean isExecutingWith(Decimal frontRowPrice) {
         if(!frontRowPrice.isGreaterThan(Decimal.ZERO)) return false;
-        if(bookSide.isMoreBehindThan(price, frontRowPrice)) return false;
-        return true;
+        return !bookSide.isMoreBehindThan(price, frontRowPrice);
     }
 
     public boolean isForOrder(OrderNew order) {
@@ -49,28 +55,6 @@ public class Receipt {
         currentTradedSize = Decimal.min(takerReceipt.getResidualSize(), residualSize);
         takerReceipt.adjustByTradedSize(currentTradedSize);
         adjustByTradedSize(currentTradedSize);
-    }
-
-    // product and unit both needed to calculate value in units for leveraged products
-    public Receipt createCounterReceipt(Product product, Product unit) {
-        Decimal productRate = getPrice().multiply(product.getContractSize());
-        Decimal currentValue = getCurrentTradedSize().multiply(productRate);
-        Decimal totalValue = getTotalTradedSize().multiply(productRate);
-        Decimal residualValue = getResidualSize().multiply(productRate);
-        Decimal unitRate = Decimal.ONE.divide(productRate);
-        Receipt counterReceipt = createCopy()
-                .withProductId(product.getUnitId())
-                .withBookSide(getBookSide().toOpposite())
-                .withCurrentTradedSize(currentValue)
-                .withTotalTradedSize(totalValue)
-                .withExternalAccount(getExternalAccount())
-                .withInternalAccount(getInternalAccount())
-                .withOrderId(getOrderId())
-                .withPrice(unitRate)
-                .withResidualSize(residualValue)
-                ;
-        return counterReceipt;
-
     }
 
     private void adjustByTradedSize(Decimal _currentTradedSize) {
@@ -142,7 +126,7 @@ public class Receipt {
         return other != NULL && orderId.isSameAs(other.getOrderId());
     }
 
-    public Decimal getPositionChange() {
+    public Decimal getPositionChangeOfBase() {
         return Decimal.fromDouble(bookSide.toDirection()).multiply(currentTradedSize);
     }
 
@@ -196,7 +180,7 @@ public class Receipt {
 
     public Decimal getCurrentTradedSizeSigned() {
 
-        return currentTradedSize.multiply(bookSide.toDecimal());
+        return bookSide.toSigned(currentTradedSize);
     }
 
     public void setCurrentTradedSize(Decimal currentTradedSize) {
@@ -305,22 +289,6 @@ public class Receipt {
         return this;
     }
 
-    public Decimal getResidualSizeSigned() {
-
-        return  residualSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
-
-    public Decimal currentTradedSize() {
-
-        return  currentTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
-
-    public Decimal totalTradedSize() {
-
-        return  totalTradedSize.multiply(Decimal.fromDouble(bookSide.toDirection()));
-    }
-
-
     public void setInternalAccount(String internalAccount) {
         this.internalAccount = internalAccount;
     }
@@ -366,8 +334,7 @@ public class Receipt {
     }
 
     public boolean isSamePriceOrInfront(Receipt other) {
-        if(price.isEqualTo(other.getPrice())) return true;
-        return bookSide.isMoreInfrontThan(price, other.getPrice());
+        return price.isEqualTo(other.getPrice()) || bookSide.isMoreInfrontThan(price, other.getPrice());
     }
 
     public boolean isOpposite(BookSide side) {

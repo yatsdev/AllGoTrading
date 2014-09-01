@@ -19,8 +19,7 @@ public class MarketData
     }
 
     public boolean isFrontRowEmpty(BookSide _side) {
-        if(book.isBookSideEmpty(_side)) return true;
-        return book.getBookRow(_side, 0).isSize(Decimal.ZERO);
+        return book.isBookSideEmpty(_side) || book.getBookRow(_side, 0).isSize(Decimal.ZERO);
     }
 
     public boolean isPriceAndSizeSame(MarketData other) {
@@ -29,8 +28,7 @@ public class MarketData
         if(bidSize.isEqualTo(other.bidSize)) return false;
         if(!last.isEqualTo(other.last)) return false;
         if(lastSize.isEqualTo(other.lastSize)) return false;
-        if(!ask.isEqualTo(other.ask)) return false;
-        return askSize == other.askSize;
+        return ask.isEqualTo(other.ask) && askSize == other.askSize;
     }
 
     public boolean isSameAs(MarketData other) {
@@ -42,27 +40,23 @@ public class MarketData
         if(!last.isEqualTo(other.last)) return false;
         if(!lastSize.isEqualTo(other.lastSize)) return false;
         if(productId.compareTo(other.productId)!=0) return false;
-        if(timestamp.toString().compareTo(other.timestamp.toString())!=0) return false;
-        return true;
+        return timestamp.toString().compareTo(other.timestamp.toString()) == 0;
     }
 
     public boolean isSameFrontRowPricesAs(MarketData other) {
         if(other==NULL) return false;
         if(!bid.isEqualTo(other.bid)) return false;
-        if(!ask.isEqualTo(other.ask)) return false;
-        return true;
+        return ask.isEqualTo(other.ask);
     }
 
     public boolean isSameFrontRowBidAs(MarketData other) {
         if(other==NULL) return false;
-        if(bid.isEqualTo(other.bid)) return true;
-        return false;
+        return bid.isEqualTo(other.bid);
     }
 
     public boolean isSameFrontRowAskAs(MarketData other) {
         if(other==NULL) return false;
-        if(ask.isEqualTo(other.ask)) return true;
-        return false;
+        return ask.isEqualTo(other.ask);
     }
 
     public boolean isInitialized() {

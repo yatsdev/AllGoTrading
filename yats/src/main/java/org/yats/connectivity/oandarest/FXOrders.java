@@ -20,11 +20,8 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.*;
-import org.yats.messagebus.Config;
 import org.yats.messagebus.Deserializer;
-import org.yats.messagebus.Sender;
 import org.yats.messagebus.Serializer;
-import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.messagebus.messages.OrderNewMsg;
 import org.yats.trading.*;
 
@@ -105,7 +102,6 @@ public class FXOrders implements ISendOrder, Runnable {
                 e.printStackTrace();
             }
         }
-        return;
     }
 
     @Override
@@ -143,7 +139,6 @@ public class FXOrders implements ISendOrder, Runnable {
 //                receiptConsumer.onReceipt(r);
             }
             if(entity!=null) EntityUtils.consume(entity);
-            return;
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -395,9 +390,9 @@ public class FXOrders implements ISendOrder, Runnable {
     private void parseOandaId2OrderMap(String csv) {
         String[] lines = csv.split(FileTool.getLineSeparator());
         Deserializer<OrderNewMsg> deserializer = new Deserializer<OrderNewMsg>(OrderNewMsg.class);
-        for(int i=0; i<lines.length; i++) {
-            String[] parts = lines[i].split(";");
-            if(parts.length<2) continue;
+        for (String line : lines) {
+            String[] parts = line.split(";");
+            if (parts.length < 2) continue;
             OrderNewMsg m = deserializer.convertFromString(parts[1]);
             OrderNew o = m.toOrderNew();
             oandaId2OrderMap.put(parts[0], o);

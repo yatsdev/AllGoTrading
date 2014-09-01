@@ -145,7 +145,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
     private void sendAllReceivedSubscriptionToMarket() {
         while(receiverSubscription.hasMoreMessages()) {
             SubscriptionMsg m = receiverSubscription.get();
-            if(!productList.isProductIdExisting(m.productId)) {
+            if(!productList.containsProductWith(m.productId)) {
                 log.debug("Attempt to subscribe for unknown product: "+m.productId);
                 continue;
             }

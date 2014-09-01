@@ -36,8 +36,7 @@ public class Position {
 
     public boolean isSameAs(Position other) {
         if(!isForProductId(other.productId)) return false;
-        if(!size.isEqualTo(other.size)) return false;
-        return true;
+        return size.isEqualTo(other.size);
     }
 
     public boolean isForProductId(String otherProductId) {
@@ -45,7 +44,7 @@ public class Position {
     }
 
     public String toStringCSV() {
-        return new StringBuilder().append(productId).append(",").append(size.toString()).toString();
+        return productId + "," + size.toString();
     }
     
     public String getProductId() {

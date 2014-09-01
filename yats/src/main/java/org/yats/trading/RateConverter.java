@@ -53,7 +53,7 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
             return new Position(targetProductId, positionInTargetProduct.multiply(position.getSize()));
         }
 
-        Product startProduct = products.getProductForProductId(position.getProductId());
+        Product startProduct = products.getProductWith(position.getProductId());
         String currentProductId;
 
         String firstUnitId = bestRatesChain.getFirstElementUnitId();
@@ -121,7 +121,7 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
         }
 
 //In this segment I collect the pairs that are good as the first link of my chain
-        Product startProduct = products.getProductForProductId(startProductId);
+        Product startProduct = products.getProductWith(startProductId);
         for (int z = 0; z < onlinePairs.size(); z++) {
             if (onlinePairs.elementAt(z).getUnitId().compareTo(startProduct.getUnitId()) == 0 || onlinePairs.elementAt(z).getUnderlyingId().compareTo(startProduct.getUnitId()) == 0) {
                 originalProducts.add(onlinePairs.elementAt(z));
@@ -191,7 +191,7 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
 
 //    public Decimal returnPositionInTargetCurrency(String targetProductId, Position position, String fromCurrency, String toCurrency, Decimal priceInOriginalCurrency, Decimal positionInTargetCurrency, String OANDAFXPAIR) {
 //
-//        if (targetProductId.compareTo(toCurrency) == 0 && (products.getProductForProductId(position.getProductId()).getUnitId().compareTo(fromCurrency) == 0)) {
+//        if (targetProductId.compareTo(toCurrency) == 0 && (products.getProductWith(position.getProductId()).getUnitId().compareTo(fromCurrency) == 0)) {
 //            positionInTargetCurrency = priceInOriginalCurrency.multiply(rates.get(OANDAFXPAIR).getLast());
 //        }
 //
@@ -206,14 +206,14 @@ public class RateConverter implements IConsumeMarketData, IConvertRate {
     }
 
     private boolean isPositionHasUnitId(Position position, String unitId) {
-        return products.getProductForProductId(position.getProductId()).hasUnitId(unitId);
+        return products.getProductWith(position.getProductId()).hasUnitId(unitId);
     }
 
     private Decimal getLastForProductId(String pid) {
 
-        if (!products.isProductIdExisting(pid))
+        if (!products.containsProductWith(pid))
             throw new TradingExceptions.ItemNotFoundException("Can not find product for pid=" + pid);
-        Product p = products.getProductForProductId(pid);
+        Product p = products.getProductWith(pid);
         if(p.isNoRateProduct())
             return Decimal.ONE;
         if (!rates.containsKey(pid))
