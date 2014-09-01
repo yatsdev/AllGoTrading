@@ -42,7 +42,7 @@ public class ExcelConnection implements IConsumePriceData, IConsumeReceipt, DDEC
             if (priceData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
 
-                    String marketDataString= priceData.getTimestamp().toString() + "\t"
+                    String priceDataString= priceData.getTimestamp().toString() + "\t"
                             + priceData.getBidSize().toString() + "\t"
                             + priceData.getBid().toString() + "\t"
                             + priceData.getAskSize().toString()
@@ -68,15 +68,14 @@ public class ExcelConnection implements IConsumePriceData, IConsumeReceipt, DDEC
                             lvnAskPrice = priceData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
                         }
 
-                        marketDataString=marketDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
+                        priceDataString=priceDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
 
 
 
                     }
 
-//                    log.info(marketDataString);
                     if(shutdown) return;
-                    conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
+                    conversation.poke("R"+j+"C2:R"+j+"C42",priceDataString);
                    
 
                 } catch (DDEException e) {

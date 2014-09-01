@@ -124,7 +124,7 @@ public class PriceFeedCracker extends MessageCracker implements Application {
         }
         @Override
         public void onPriceData(PriceData priceData) {
-            throw new RuntimeException("MarketDataConsumerDummy can not handle market data!");
+            throw new RuntimeException("PriceDataConsumerDummy can not handle market data!");
         }
         @Override
         public UniqueId getConsumerId() {
