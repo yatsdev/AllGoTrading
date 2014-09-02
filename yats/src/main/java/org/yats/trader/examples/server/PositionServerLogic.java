@@ -11,6 +11,7 @@ import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.PositionRequestMsg;
 import org.yats.messagebus.messages.PositionSnapshotMsg;
 import org.yats.messagebus.messages.ReceiptMsg;
+import org.yats.messagebus.messages.SubscriptionMsg;
 import org.yats.trading.*;
 
 public class PositionServerLogic implements IAmCalledBack {
@@ -35,12 +36,13 @@ public class PositionServerLogic implements IAmCalledBack {
     }
 
     private void receiveNewPositionSnapshot() {
-        PositionSnapshotMsg m = receiverPositionSnapshots.get();
+        PositionSnapshotMsg p = receiverPositionSnapshots.get();
         if(gotSnapshotOnce) return;
         gotSnapshotOnce=true;
-        PositionSnapshot s = m.toPositionSnapshot();
-        log.debug("receiveNewPositionSnapshot received:" + m.toString());
+        PositionSnapshot s = p.toPositionSnapshot();
+        log.debug("receiveNewPositionSnapshot received:" + p.toString());
         positionServer.setPositionSnapshot(s);
+        subscribeAllProductsOf(s);
     }
 
     private void answerPositionRequest() {
@@ -63,6 +65,7 @@ public class PositionServerLogic implements IAmCalledBack {
         receiverReceipts.close();
         senderPositionSnapshot.close();
         senderPositionRequest.close();
+        senderSubscription.close();
     }
 
     public PositionServerLogic(IProvideProperties p) {
@@ -96,9 +99,8 @@ public class PositionServerLogic implements IAmCalledBack {
                 config.getExchangePositionSnapshot(),
                 config.getServerIP());
 
-        senderPositionRequest = new Sender<PositionRequestMsg>(
-                config.getExchangePositionRequest(),
-                config.getServerIP());
+        senderPositionRequest = new Sender<PositionRequestMsg>(config.getExchangePositionRequest(),config.getServerIP());
+        senderSubscription = new Sender<SubscriptionMsg>(config.getExchangeSubscription(), config.getServerIP());
     }
 
     public void startRequestListener()   // todo: make setting
@@ -128,11 +130,19 @@ public class PositionServerLogic implements IAmCalledBack {
 
     /////////////////////////////////////////////////////////////////////////////////////////////
 
+    private void subscribeAllProductsOf(PositionSnapshot s) {
+        for(AccountPosition a : s.getAllPositions()) {
+            SubscriptionMsg m = SubscriptionMsg.fromProductId(a.getProductId());
+            senderSubscription.publish(config.getTopicSubscriptions(), m);
+        }
+    }
+
     private BufferingReceiver<ReceiptMsg> receiverReceipts;
     private BufferingReceiver<PositionRequestMsg> receiverPositionRequests;
     private BufferingReceiver<PositionSnapshotMsg> receiverPositionSnapshots;
     private Sender<PositionSnapshotMsg> senderPositionSnapshot;
     private Sender<PositionRequestMsg> senderPositionRequest;
+    Sender<SubscriptionMsg> senderSubscription;
     private PositionServer positionServer;
     private Config config;
     private boolean gotSnapshotOnce;

@@ -53,6 +53,8 @@ public class Scalper extends StrategyBase {
             if (isConversionAvailable(ProductList.USD_PID, tradeProductId))
                 log.info("positionValueUSD(server)=" + getValueForProduct(ProductList.USD_PID, tradeProductId));
             log.info("positionValueEUR(server)=" + getValueForProduct(ProductList.EUR_PID, tradeProductId));
+            log.info("accountValueEUR="+getValueForAccount(getInternalAccount(), ProductList.EUR_PID));
+            log.info("accountValueUSD="+getValueForAccount(getInternalAccount(), ProductList.USD_PID));
         } catch(TradingExceptions.RateConverterException e) {
             log.error("Can not calculate position value: "+e.getMessage());
         }

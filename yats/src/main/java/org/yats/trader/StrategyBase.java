@@ -104,10 +104,22 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         }
     }
 
-    public Position getValueForProduct(String targetProductId, String productId)
+    public Position getValueForProduct(String accountUnitProductId, String productId)
     {
         PositionRequest r = new PositionRequest(getInternalAccount(), productId);
-        return positionProvider.getValueForAccountProduct(targetProductId, r);
+        return positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+    }
+
+    public Position getValueForAccount(String account, String accountUnitProductId)
+    {
+        Position totalValue = new Position(accountUnitProductId, Decimal.ZERO);
+        IProvidePosition allPos = positionProvider.getAllPositionsForOneAccount(account);
+        for(AccountPosition pos : allPos.getAllPositions()) {
+            PositionRequest r = new PositionRequest(account, pos.getProductId());
+            Position v = positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+            totalValue = totalValue.add(v);
+        }
+        return totalValue;
     }
 
     public PropertiesReader getReports() {
@@ -161,6 +173,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         setName("unnamedStrategy");
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private String internalAccount;
 

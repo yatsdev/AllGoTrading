@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.FileTool;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.trading.IProvideProduct;
 import org.yats.trading.PositionStorageCSV;
@@ -20,18 +21,21 @@ public class PositionServerMain {
     public void go() throws InterruptedException, IOException
     {
         log.info("Starting PositionServerMain...");
-        String pathToConfigFile = "config/PositionServer.properties";
+        String configFilename = Tool.getPersonalConfigFilename("config/PositionServer");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+
 //        Config positionServerConfig =  FileTool.exists(pathToConfigFile)
 //                ? Config.fromProperties(PropertiesReader.createFromConfigFile(pathToConfigFile))
 //                : Config.fromProperties(Config.createRealProperties());
 
-        IProvideProperties p =FileTool.exists(pathToConfigFile)
-                ? PropertiesReader.createFromConfigFile(pathToConfigFile)
-                : Config.createRealProperties();
+//        IProvideProperties p =FileTool.exists(pathToConfigFile)
+//                ? PropertiesReader.createFromConfigFile(pathToConfigFile)
+//                : Config.createRealProperties();
+
         IProvideProduct productList = ProductList.createFromFile("config/CFDProductList.csv");
-        PositionServerLogic positionServerLogic = new PositionServerLogic(p);
+        PositionServerLogic positionServerLogic = new PositionServerLogic(prop);
         positionServerLogic.startRequestListener();
-        PositionStorageCSV storage = new PositionStorageCSV(p.get("positionFilename"));
+        PositionStorageCSV storage = new PositionStorageCSV(prop.get("positionFilename"));
         positionServerLogic.setPositionStorage(storage);
         positionServerLogic.setProductList(productList);
 
