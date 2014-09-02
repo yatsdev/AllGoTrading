@@ -2,6 +2,8 @@ package org.yats.trader.examples.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 
 import java.io.IOException;
 
@@ -12,7 +14,9 @@ public class ReceiptStorageMain {
     public void go() throws InterruptedException, IOException
     {
         log.info("Starting ReceiptStorageMain...");
-        ReceiptStorageLogic storage = new ReceiptStorageLogic();
+        String configFilename = Tool.getPersonalConfigFilename("config/ReceiptStorage");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+        ReceiptStorageLogic storage = new ReceiptStorageLogic(prop);
 
         Thread.sleep(2000);
 

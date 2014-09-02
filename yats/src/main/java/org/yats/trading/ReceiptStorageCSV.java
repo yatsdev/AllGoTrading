@@ -1,12 +1,9 @@
 package org.yats.trading;
 
 import org.yats.common.FileTool;
+import org.yats.common.IProvideProperties;
 
 public class ReceiptStorageCSV implements IConsumeReceipt {
-
-    public static String FILENAME_RECEIPTS_DEFAULT = "Receipts";
-    public static String FILENAME_TRANSACTIONS_DEFAULT = "Transactions";
-    public static String FILENAME_EXTENSION = ".csv";
 
     @Override
     public void onReceipt(Receipt receipt) {
@@ -16,18 +13,10 @@ public class ReceiptStorageCSV implements IConsumeReceipt {
             FileTool.writeToTextFile(transactionsFilename, receiptString + FileTool.getLineSeparator(), true);
     }
 
-    public void setReceiptsFilename(String filename) {
-        this.receiptsFilename = filename;
-    }
+    public ReceiptStorageCSV(IProvideProperties _prop) {
 
-    public void setTransactionsFilename(String transactionsFilename) {
-        this.transactionsFilename = transactionsFilename;
-    }
-
-    public ReceiptStorageCSV() {
-
-        this.receiptsFilename = FILENAME_RECEIPTS_DEFAULT+FILENAME_EXTENSION;
-        this.transactionsFilename = FILENAME_TRANSACTIONS_DEFAULT+FILENAME_EXTENSION;
+        this.receiptsFilename = _prop.get("filenameReceipts");
+        this.transactionsFilename = _prop.get("filenameTransactions");
     }
 
     private String receiptsFilename;

@@ -3,6 +3,7 @@ package org.yats.trader.examples.server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
+import org.yats.common.IProvideProperties;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.messages.*;
@@ -27,9 +28,11 @@ public class ReceiptStorageLogic implements IAmCalledBack{
         receiverReceipt.close();
     }
 
-    public ReceiptStorageLogic() {
-        storage = new ReceiptStorageCSV();
-        Config config = Config.fromProperties(Config.createRealProperties());
+    public ReceiptStorageLogic(IProvideProperties _prop) {
+        prop = _prop;
+        storage = new ReceiptStorageCSV(prop);
+
+        Config config = Config.fromProperties(prop);
         receiverReceipt = new BufferingReceiver<ReceiptMsg>(ReceiptMsg.class,
                 config.getExchangeReceipts(),
                 "#",
@@ -38,6 +41,7 @@ public class ReceiptStorageLogic implements IAmCalledBack{
         receiverReceipt.start();
     }
 
+    private IProvideProperties prop;
     private BufferingReceiver<ReceiptMsg> receiverReceipt;
     private ReceiptStorageCSV storage;
 
