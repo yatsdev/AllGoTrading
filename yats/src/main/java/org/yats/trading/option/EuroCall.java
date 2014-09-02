@@ -9,6 +9,10 @@ public class EuroCall extends OptionBase {
         this.expiration = expiration;
     }
 
+    public boolean isCall() {
+        return true;
+    }
+
     public double getPrice(Parameter p)
     {
         double time_sqrt = Math.sqrt(p.getTimeToExpirationAsFractionOfYear(expiration));
@@ -40,7 +44,5 @@ public class EuroCall extends OptionBase {
         return d1;
     }
 
-    private double strikePrice;
-    private DateTime expiration;
 
 } // class

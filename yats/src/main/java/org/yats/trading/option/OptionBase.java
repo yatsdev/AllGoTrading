@@ -1,7 +1,21 @@
 package org.yats.trading.option;
 
-public class OptionBase {
+import org.joda.time.DateTime;
 
+public abstract class OptionBase {
+
+    public abstract double getPrice(Parameter p);
+    public abstract Greeks getGreeks(Parameter p);
+    public abstract boolean isCall();
+
+    @Override
+    public String toString() {
+        return "OptionBase{" +
+                "strikePrice=" + strikePrice +
+                ", expiration=" + expiration +
+                ", " + (isCall() ? "CALL" : "PUT ") +
+                '}';
+    }
 
     public double calcNormalized(double z) {
         if (z >  6.0) { return 1.0; }// this guards against overflow
@@ -28,6 +42,10 @@ public class OptionBase {
     public double calcNormalDistribution(double z)  {  // normal distribution function
         return (1.0/Math.sqrt(2.0 * Math.PI))*Math.exp(-0.5 * z * z);
     }
+
+
+    protected double strikePrice;
+    protected DateTime expiration;
 
 
 } // class

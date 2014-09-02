@@ -2,6 +2,17 @@ package org.yats.trading.option;
 
 public class Greeks {
 
+    @Override
+    public String toString() {
+        return "Greeks{" +
+                "delta=" + delta +
+                ", gamma=" + gamma +
+                ", thetaPerYear=" + thetaPerYear +
+                ", vega=" + vega +
+                ", rho=" + rho +
+                '}';
+    }
+
     public Greeks(double delta, double gamma, double thetaPerYear, double vega, double rho) {
         this.delta = delta;
         this.gamma = gamma;
