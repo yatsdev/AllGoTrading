@@ -209,9 +209,11 @@ public class FXOrders implements ISendOrder, Runnable {
                     if(type.compareTo("ORDER_FILLED")==0) {
                         log.info("OandaReceipt: ORDER_FILLED for "+id);
                         Decimal size = Decimal.fromString(values.get("units").toString());
+                        if(size.isLessThan(o.getSize())) log.info("Order "+id+" filled partially. Assuming complete fill!");
                         r=r.withEndState(true)
-                                .withCurrentTradedSize(size)
-                                .withTotalTradedSize(size)
+                                .withCurrentTradedSize(o.getSize())
+                                .withTotalTradedSize(o.getSize())
+                                .withResidualSize(Decimal.ZERO)
                         ;
                         oandaId2OrderMap.remove(id);
                         orderId2OandaIdMap.remove(o.getOrderId().toString());
