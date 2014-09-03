@@ -14,8 +14,12 @@ public class PropertiesReader implements IProvideProperties {
         properties = new ConcurrentHashMap<String, String>();
     }
 
+    @Override
+    public int size() {
+        return properties.size();
+    }
 
-//    public void read(String filename) {
+    //    public void read(String filename) {
 //        try {
 //            File file = new File(filename);
 //            FileInputStream fileInput = new FileInputStream(file);
