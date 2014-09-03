@@ -42,7 +42,7 @@ public class Scalper extends StrategyBase {
             System.exit(-1);
         }
         if(!receipt.hasProductId(tradeProductId)){
-            log.error("Received receipt for unknown product: " + receipt);
+//            log.error("Received receipt for unknown product: " + receipt);
             return;
         }
 
