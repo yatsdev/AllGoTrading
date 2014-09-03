@@ -40,6 +40,11 @@ public class Decimal implements Comparable<Decimal> {
         return value.toString();
     }
 
+    public String toString2Digits(int digits) {
+        BigDecimal d = new BigDecimal(value.toString());
+        return d.setScale(digits, BigDecimal.ROUND_HALF_UP).toPlainString();
+    }
+
     public Decimal round() {
         return new Decimal(value.setScale(0, RoundingMode.HALF_UP));
     }

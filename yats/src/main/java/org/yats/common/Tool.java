@@ -53,6 +53,13 @@ public class Tool {
     }
 
 
+    public static String removeBlanks(String s) {
+        return s.replace(" ","").replace("\\t","");
+    }
+
+    public static String removeReturns(String s) {
+        return s.replace("\\r","");
+    }
 
     ///////////////////////////
 

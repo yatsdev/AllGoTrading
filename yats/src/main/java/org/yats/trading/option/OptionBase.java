@@ -8,12 +8,25 @@ public abstract class OptionBase {
     public abstract Greeks getGreeks(Parameter p);
     public abstract boolean isCall();
 
+
+    public String toCallPutString() {
+        return (isCall() ? "CALL" : "PUT ");
+    }
+
+    public double getStrikePrice() {
+        return strikePrice;
+    }
+
+    public DateTime getExpiration() {
+        return expiration;
+    }
+
     @Override
     public String toString() {
         return "OptionBase{" +
                 "strikePrice=" + strikePrice +
                 ", expiration=" + expiration +
-                ", " + (isCall() ? "CALL" : "PUT ") +
+                ", " + toCallPutString() +
                 '}';
     }
 
