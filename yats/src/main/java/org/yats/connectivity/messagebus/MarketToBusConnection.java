@@ -59,13 +59,13 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         senderReceipt.close();
     }
 
-    public void onCallback() {
+    public synchronized void onCallback() {
         sendAllReceivedSubscription();
         sendAllReceivedOrderNew();
         sendAllReceivedOrderCancel();
     }
 
-    private void sendAllReceivedSubscription() {
+    private void sendAllReceivedSubscription()  {
         while(receiverSubscription.hasMoreMessages()) {
             SubscriptionMsg m = receiverSubscription.get();
             try {

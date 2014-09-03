@@ -19,7 +19,7 @@ public class PositionServerLogic implements IAmCalledBack {
     final Logger log = LoggerFactory.getLogger(PositionServerLogic.class);
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         while(receiverPositionRequests.hasMoreMessages()) {
             answerPositionRequest();
         }

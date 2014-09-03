@@ -15,7 +15,7 @@ public class ReceiptStorageLogic implements IAmCalledBack{
     final Logger log = LoggerFactory.getLogger(ReceiptStorageLogic.class);
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         while(receiverReceipt.hasMoreMessages()) {
             ReceiptMsg m = receiverReceipt.get();
             Receipt r = m.toReceipt();

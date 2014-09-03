@@ -19,7 +19,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumePriceDataAnd
     final Logger log = LoggerFactory.getLogger(InternalMarketRunner.class);
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         sendAllReceivedSubscriptionToMarket();
         sendAllReceivedOrderCancelToMarket();
         sendAllReceivedOrderNewToMarket();

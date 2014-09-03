@@ -27,7 +27,7 @@ public class LastPriceServer implements IConsumePriceData, IAmCalledBack {
     }
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         while(receiverSubscription.hasMoreMessages()) {
             String productId = receiverSubscription.get().productId;
             if(cache.containsKey(productId)) {

@@ -60,7 +60,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     }
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         sendAllReceivedPriceData();
         sendAllReceivedReceipts();
         sendAllReceivedSettings();
