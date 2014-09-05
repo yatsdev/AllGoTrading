@@ -57,6 +57,10 @@ public class Receipt {
         adjustByTradedSize(currentTradedSize);
     }
 
+    public boolean isPartialFill() {
+        return !residualSize.isEqualTo(Decimal.ZERO);
+    }
+
     private void adjustByTradedSize(Decimal _currentTradedSize) {
         currentTradedSize=_currentTradedSize;
         totalTradedSize=totalTradedSize.add(_currentTradedSize);
