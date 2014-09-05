@@ -65,6 +65,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         sendAllReceivedReceipts();
         sendAllReceivedSettings();
         sendAllReceivedReports();
+        sendAllReceivedPositionSnapshots();
     }
 
     private void sendAllReceivedPriceData() {
@@ -109,6 +110,13 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         reportsMap.clear();
     }
 
+    private void sendAllReceivedPositionSnapshots() {
+        while(receiverPositionSnapshot.hasMoreMessages()) {
+            PositionSnapshot m = receiverPositionSnapshot.get();
+            positionSnapshotConsumer.onPositionSnapshot(m);
+        }
+    }
+
     public void setPriceDataConsumer(IConsumePriceData priceDataConsumer) {
         this.priceDataConsumer = priceDataConsumer;
     }
@@ -125,9 +133,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         this.receiptConsumer = receiptConsumer;
     }
 
+    public void setPositionSnapshotConsumer(IConsumePositionSnapshot positionSnapshotConsumer) {
+        this.positionSnapshotConsumer = positionSnapshotConsumer;
+    }
+
     public void close() {
         receiverPriceData.close();
         receiverReceipt.close();
+        receiverPositionSnapshot.close();
         if(receiverReports!=null) receiverReports.close();
         if(receiverSettings!=null) receiverSettings.close();
         senderOrderNew.close();
@@ -152,6 +165,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         receiptConsumer=new ReceiptConsumerDummy();
         settingsConsumer =new SettingsConsumerDummy();
         reportsConsumer=new ReportsConsumerDummy();
+        positionSnapshotConsumer = new PositionSnapshotConsumerDummy();
         config = Config.fromProperties(p);
         senderSubscription = new Sender<SubscriptionMsg>(config.getExchangeSubscription(), config.getServerIP());
         senderOrderNew = new Sender<OrderNewMsg>(config.getExchangeOrderNew(), config.getServerIP());
@@ -181,6 +195,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             receiverReports.start();
         }
 
+        receiverPositionSnapshot = new BufferingReceiver<PositionSnapshot>(
+                PositionSnapshot.class,
+                config.getExchangePositionSnapshot(),
+                "#",
+                config.getServerIP());
+        receiverPositionSnapshot.setObserver(this);
+        receiverPositionSnapshot.start();
+
         receiverPriceData = new BufferingReceiver<PriceDataMsg>(
                 PriceDataMsg.class,
                 config.getExchangePriceData(),
@@ -208,12 +230,15 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     IConsumeReceipt receiptConsumer;
     IConsumeSettings settingsConsumer;
     IConsumeReports reportsConsumer;
+    IConsumePositionSnapshot positionSnapshotConsumer;
+
     BufferingReceiver<PriceDataMsg> receiverPriceData;
     ConcurrentHashMap<String, PriceDataMsg> priceDataMap;
     ConcurrentHashMap<String, IProvideProperties> reportsMap;
     BufferingReceiver<ReceiptMsg> receiverReceipt;
     BufferingReceiver<KeyValueMsg> receiverSettings;
     BufferingReceiver<KeyValueMsg> receiverReports;
+    BufferingReceiver<PositionSnapshot> receiverPositionSnapshot;
     Config config;
     boolean shuttingDown;
 
@@ -255,6 +280,12 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private static class ReportsConsumerDummy implements IConsumeReports {
         @Override
         public void onReport(IProvideProperties p) {
+        }
+    }
+
+    private static class PositionSnapshotConsumerDummy implements IConsumePositionSnapshot {
+        @Override
+        public void onPositionSnapshot(PositionSnapshot p) {
         }
     }
 

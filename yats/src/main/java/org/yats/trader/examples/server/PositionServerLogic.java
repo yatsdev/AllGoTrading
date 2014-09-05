@@ -26,13 +26,19 @@ public class PositionServerLogic implements IAmCalledBack {
         while(receiverPositionSnapshots.hasMoreMessages()) {
             receiveNewPositionSnapshot();
         }
+        boolean gotNewReceipt=false;
         while(receiverReceipts.hasMoreMessages()) {
+            gotNewReceipt=true;
             try {
                 positionServer.onReceipt(receiverReceipts.get().toReceipt());
             } catch(TradingExceptions.UnknownIdException e) {
                 log.error(e.getMessage());
             }
         }
+        if(gotNewReceipt && config.isPublishAllPositionSnapshots()) {
+            publishPositionSnapshot();
+        }
+
     }
 
     private void receiveNewPositionSnapshot() {
@@ -47,9 +53,13 @@ public class PositionServerLogic implements IAmCalledBack {
 
     private void answerPositionRequest() {
         receiverPositionRequests.get();
+        publishPositionSnapshot();
+    }
+
+    private void publishPositionSnapshot() {
         PositionSnapshot snapshot = positionServer.getPositionSnapshot();
         PositionSnapshotMsg msg = PositionSnapshotMsg.fromPositionSnapshot(snapshot);
-        log.debug("answerPositionRequest publishing:"+msg.toString());
+        log.debug("publishing snapshot:"+msg.toString());
         senderPositionSnapshot.publish(config.getTopicPositionSnapshot(), msg);
     }
 

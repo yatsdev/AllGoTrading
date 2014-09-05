@@ -11,6 +11,7 @@ public class Config {
     public static final Config DEFAULT_FOR_TESTS = createTestConfig();
 
 
+    public boolean isPublishAllPositionSnapshots() { return properties.getAsBoolean("publishAllPositionSnapshots",false);}
 
     public String getServerIP() {
         return properties.get("serverIP");
