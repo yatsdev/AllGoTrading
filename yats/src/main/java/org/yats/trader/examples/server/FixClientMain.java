@@ -35,9 +35,10 @@ public class FixClientMain {
         config/FIXOrder_<username>.properties needs to provide the external account number of the user in the form:
         externalAccount=1234
          */
+        final String className = FixClientMain.class.getSimpleName();
         String configFIXOrderFilename = Tool.getPersonalConfigFilename("config/FIXOrder");
         String configFIXPriceFilename = Tool.getPersonalConfigFilename("config/FIXPrice");
-        String configFIXFilename = Tool.getPersonalConfigFilename("config/FIXClient");
+        String configFIXFilename = Tool.getPersonalConfigFilename("config/"+className);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);

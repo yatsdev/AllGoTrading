@@ -481,6 +481,7 @@ public class ExcelConnection implements DDEClientEventListener,
     @Override
     public synchronized void onPositionSnapshot(PositionSnapshot snapshot) {
         updatePositionsAxis(snapshot);
+        productAccount2PositionMap.clear();
         ConcurrentHashMap<String,String> productsToUpdate = getProductsToUpdate(snapshot);
         updateProductAccount2PositionMap(snapshot);
 
@@ -501,7 +502,7 @@ public class ExcelConnection implements DDEClientEventListener,
             if(productAccount2PositionMap.containsKey(key)) {
                 AccountPosition ap = productAccount2PositionMap.get(key);
                 s+=ap.getSize().toString();
-            }
+            } else s+="n/a";
             s+="\t";
         }
         pokePositionsRow(row,count,s);

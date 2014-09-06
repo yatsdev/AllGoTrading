@@ -69,7 +69,9 @@ public class PositionGeneratorTool implements Runnable {
             for(String account : accountList) {
                 for(String pid : pidList) {
                     Decimal size = Decimal.fromDouble((int)(Math.random()*2000.0)-1000);
-                    if(size.isLessThan(Decimal.TEN)) size=Decimal.ZERO;
+                    boolean leaveBlank = (size.isLessThan(Decimal.fromString("80")));
+                    if(leaveBlank) continue;
+                    if(size.isLessThan(Decimal.fromString("180"))) size=Decimal.ZERO;
                     AccountPosition ap = new AccountPosition(pid, account, size);
                     p.add(ap);
                 }

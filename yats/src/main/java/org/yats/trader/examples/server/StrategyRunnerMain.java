@@ -57,7 +57,8 @@ public class StrategyRunnerMain {
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
 
-        String configFilename = Tool.getPersonalConfigFilename("config/StrategyRunner");
+        final String className = StrategyRunnerMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile(configFilename);
 
         StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
@@ -67,7 +68,7 @@ public class StrategyRunnerMain {
         positionServer = new PositionServer();
         positionServer.setRateConverter(rateConverter);
         positionServer.setProductList(productList);
-        PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
+        PositionServerMain positionServerLogic = new PositionServerMain(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
