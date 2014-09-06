@@ -68,12 +68,11 @@ public class PropertiesReader implements IProvideProperties {
             else if(!line.contains("="))
             {
                 continue;
-            } else {
-                String[] keyValue = line.split("=");
-                String keyTrimmedNoBlanks = keyValue[0].replace(" ","").replace("\t","");
-                String valueTrimmed = keyValue[1].trim();
-                p.properties.put(keyTrimmedNoBlanks, valueTrimmed);
             }
+            String[] keyValue = line.split("=");
+            String keyTrimmedNoBlanks = keyValue[0].replace(" ","").replace("\t","");
+            String valueTrimmed = keyValue[1].trim();
+            p.properties.put(keyTrimmedNoBlanks, valueTrimmed);
         }
         return p;
     }
