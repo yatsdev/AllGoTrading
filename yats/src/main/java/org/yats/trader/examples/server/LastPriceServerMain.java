@@ -10,7 +10,8 @@ public class LastPriceServerMain {
 
     public static void main(String args[])  {
 
-        String configFilename = Tool.getPersonalConfigFilename("config/LastPriceServer");
+        final String className = LastPriceServerMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
         LastPriceServer c = new LastPriceServer(prop);
         try {

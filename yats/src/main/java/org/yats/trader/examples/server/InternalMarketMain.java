@@ -16,8 +16,9 @@ public class InternalMarketMain {
     public void go() throws InterruptedException, IOException
     {
 
-        log.info("Starting InternalMarketMain...");
-        String configFilename = Tool.getPersonalConfigFilename("config/InternalMarketMain");
+        final String className = InternalMarketMain.class.getSimpleName();
+        log.info("Starting "+className);
+        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
         IProvideProperties prop = PropertiesReader.createFromConfigFile(configFilename);
         InternalMarketRunner logic = new InternalMarketRunner(prop);
 
@@ -35,7 +36,7 @@ public class InternalMarketMain {
 
         Thread.sleep(1000);
 
-        log.info("ReceiptStorageMain done.");
+        log.info("done with "+className);
         System.exit(0);
     }
 
