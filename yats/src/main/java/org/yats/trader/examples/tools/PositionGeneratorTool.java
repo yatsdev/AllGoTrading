@@ -1,4 +1,4 @@
-package org.yats.trader.examples.server;
+package org.yats.trader.examples.tools;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,29 +9,26 @@ import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.PositionSnapshotMsg;
-import org.yats.messagebus.messages.PriceDataMsg;
 import org.yats.trading.AccountPosition;
 import org.yats.trading.PositionSnapshot;
-import org.yats.trading.PriceData;
 import org.yats.trading.ProductList;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class PositionGeneratorDemo implements Runnable {
+public class PositionGeneratorTool implements Runnable {
 
     public static void main(String args[]) throws Exception {
 
         try {
-
-            String configFilename = Tool.getPersonalConfigFilename("config/PositionGeneratorDemo");
+            final String className = PositionGeneratorTool.class.getSimpleName();
+            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
-            PositionGeneratorDemo demo = new PositionGeneratorDemo(prop);
+            PositionGeneratorTool demo = new PositionGeneratorTool(prop);
 
-            PositionGeneratorDemo q = new PositionGeneratorDemo(prop);
-            q.log.info("Starting PositionGeneratorDemo...");
+            PositionGeneratorTool q = new PositionGeneratorTool(prop);
+            q.log.info("Starting "+className);
 
             Thread.sleep(1000);
 
@@ -48,7 +45,7 @@ public class PositionGeneratorDemo implements Runnable {
 
             demo.close();
 
-            q.log.info("PositionGeneratorDemo done.");
+            q.log.info("Done with "+className);
             System.exit(0);
 
         } catch (RuntimeException r)
@@ -62,7 +59,7 @@ public class PositionGeneratorDemo implements Runnable {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
-    public final Logger log = LoggerFactory.getLogger(PositionGeneratorDemo.class);
+    public final Logger log = LoggerFactory.getLogger(PositionGeneratorTool.class);
 
     @Override
     public void run() {
@@ -96,7 +93,7 @@ public class PositionGeneratorDemo implements Runnable {
         senderPosition.close();
     }
 
-    public PositionGeneratorDemo(IProvideProperties prop)
+    public PositionGeneratorTool(IProvideProperties prop)
     {
         interval = prop.getAsDecimal("interval").toInt();
 
