@@ -30,52 +30,61 @@ public class ExcelConnection implements DDEClientEventListener,
     @Override
     public void onItemChanged(String topic, String item, String data)
     {
-        parsePriceDataProductIds(data);
-        subscribeAllProductIds();
+        if(topic.compareTo(prop.get("DDEPathToExcelFile"))==0){
+            parseProductIds(data);
+            subscribeAllProductIds();}
+
+        if(topic.compareTo(prop.get("DDEPathToExcelFileWReports"))==0){
+            if(data.startsWith("\t")){
+                parseStrategyNames(data);
+            }else if(data.startsWith("\r")){
+                parsekeyValues(data);}
+        }
     }
 
     @Override
-    public void onPriceData(PriceData priceData) {
+    public void onPriceData(PriceData marketData) {
         for (int i = 1; i < currentProductIDs.size(); i++) {
             int j = i + 1;
-            if (priceData.hasProductId(currentProductIDs.elementAt(i))){
+            if (marketData.hasProductId(currentProductIDs.elementAt(i))){
                 try {
 
-                    String priceDataString= priceData.getTimestamp().toString() + "\t"
-                            + priceData.getBidSize().toString() + "\t"
-                            + priceData.getBid().toString() + "\t"
-                            + priceData.getAskSize().toString()
-                            + "\t" + priceData.getAsk().toString();
+                    String marketDataString=new String(marketData.getTimestamp().toString()+"\t"
+                            +marketData.getBidSize().toString()+"\t"
+                            +marketData.getBid().toString()+"\t"
+                            +marketData.getAskSize().toString()
+                            +"\t"+marketData.getAsk().toString());
 
 
                     for(int n=1;n<10;n++){
 
                         int p=n+1;
 
-                        String lvnBidSize= "";
-                        String lvnBidPrice= "";
-                        String lvnAskSize= "";
-                        String lvnAskPrice= "";
+                        String lvnBidSize=new String("");
+                        String lvnBidPrice=new String("");
+                        String lvnAskSize=new String("");
+                        String lvnAskPrice=new String("");
 
-                        if(priceData.getBook().getDepth(BookSide.BID)>=p) {
-                            lvnBidSize= priceData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
-                            lvnBidPrice= priceData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
+                        if(marketData.getBook().getDepth(BookSide.BID)>=p) {
+                            lvnBidSize=marketData.getBook().getBookRow(BookSide.BID, n).getSize().toString();
+                            lvnBidPrice=marketData.getBook().getBookRow(BookSide.BID, n).getPrice().toString();
                         }
 
-                        if(priceData.getBook().getDepth(BookSide.ASK)>=p) {
-                            lvnAskSize = priceData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
-                            lvnAskPrice = priceData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
+                        if(marketData.getBook().getDepth(BookSide.ASK)>=p) {
+                            lvnAskSize = marketData.getBook().getBookRow(BookSide.ASK, n).getSize().toString();
+                            lvnAskPrice = marketData.getBook().getBookRow(BookSide.ASK, n).getPrice().toString();
                         }
 
-                        priceDataString=priceDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
+                        marketDataString=marketDataString+"\t"+lvnBidSize+"\t"+lvnBidPrice+"\t"+lvnAskSize+"\t"+lvnAskPrice;
 
 
 
                     }
 
+//                    log.info(marketDataString);
                     if(shutdown) return;
-                    conversation.poke("R"+j+"C2:R"+j+"C42",priceDataString);
-                   
+                    conversation.poke("R"+j+"C2:R"+j+"C42",marketDataString);
+
 
                 } catch (DDEException e) {
                     e.printStackTrace();
@@ -103,26 +112,18 @@ public class ExcelConnection implements DDEClientEventListener,
 
         try {
 
-            String StrategyNamesString=conversationReports.request("C1");
-            parseStrategyNames(StrategyNamesString);
-            String KeyValuesString=conversationReports.request("R1");
-            parsekeyValues(KeyValuesString);
-
-            if(KeyValues.lastElement().compareTo("")==0){
-                KeyValues.remove("");
-            }
-
-
-           ConcurrentHashMap<String,String> hashmapKeyValue=new ConcurrentHashMap();
-
-
-
             String StrategyNameOfThisReport = null;
-
+            ConcurrentHashMap<String,String> hashmapKeyValue=new ConcurrentHashMap();
 
             if(!p.exists("strategyName")) {
                 log.error("strategy without name found:"+p.toString());
-                return; }else {
+                return; }
+            if(p.size()<2){
+                log.error("strategy without key/values found:"+p.toString());
+                return;
+            }
+
+            else {
 
 
                 for (String key : p.getKeySet()) {
@@ -137,60 +138,83 @@ public class ExcelConnection implements DDEClientEventListener,
                     }
                 }
 
-
-                ConcurrentHashMap<String,ConcurrentHashMap> theOldMatrix=new ConcurrentHashMap(theMatrix);
                 theMatrix.put(StrategyNameOfThisReport,hashmapKeyValue);
 
-                if(theOldMatrix.equals(theMatrix)){
-                    return;
-                }
-
             }
 
-            //Adding key/values not present in R1
-            int positionKeyValues=KeyValues.size()+2;
-            Enumeration<String> keys=  hashmapKeyValue.keys();
-            while(keys.hasMoreElements()){
-                String currentKey = keys.nextElement();
-                if(!KeyValues.contains(currentKey)){
-                    conversationReports.poke("R1C" + positionKeyValues, currentKey);
-                    KeyValues.add(currentKey);
-                }
-            }
 
-            //Adding StrategyNames not present in C1
-            int positionStrategyName=2;
-            positionStrategyName=positionStrategyName+StrategyNames.size();
-            if(!StrategyNames.contains(StrategyNameOfThisReport)){
-                 conversationReports.poke("R"+positionStrategyName+"C1",StrategyNameOfThisReport);
-                StrategyNames.add(StrategyNameOfThisReport);
-            }
-
+            addKeyValuesNotPresentInR1(StrategyNameOfThisReport);
+            addStrategyNamesNotPresentInC1(StrategyNameOfThisReport);
 
             //Finally poking data from reports in a per row poke transaction fashion
-            int RightMostCell=2+KeyValues.size();
-            int strategyIndex=2;
+
+            int strategyIndex;
             for ( int q=0;q<StrategyNames.size();q++){
-               strategyIndex=q+strategyIndex;
+                strategyIndex=q+2;
                 if(StrategyNames.elementAt(q).compareTo(p.get("strategyName"))==0){
-                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C"+RightMostCell,generatePerRowPokeString(KeyValues,hashmapKeyValue));//RightMostCell
-            }
+                    conversationReports.poke("R"+strategyIndex+"C2:R"+strategyIndex+"C"+positionKeyValues,generatePerRowPokeString(KeyValues,hashmapKeyValue));//RightMostCell
+                }
             }
 
         } catch (DDEException e) {
             e.printStackTrace();
         }
 
-
-
-
-        // reports from strategies are coming in here. send them to Excel
-
-        // for now writing to console:
         System.out.println("Strategy reports: "+PropertiesReader.toString(p));
 
         //lets send the report back as settings to test the way back to the strategy
 //        strategyToBusConnection.sendSettings(p);
+    }
+
+    private void addStrategyNamesNotPresentInC1(String StrategyNameOfThisReport) {
+        if(!StrategyNames.contains(StrategyNameOfThisReport)){
+            try {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                conversationReports.poke("R"+positionStrategyName+"C1",StrategyNameOfThisReport);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+            } catch (DDEException e) {
+                e.printStackTrace();
+            }
+            StrategyNames.add(StrategyNameOfThisReport);
+            positionStrategyName=StrategyNames.size()+2;
+        }
+    }
+
+
+    private void addKeyValuesNotPresentInR1(String nameOfThisStrategy) {
+        Enumeration<String> keys =  theMatrix.get(nameOfThisStrategy).keys();
+        while(keys.hasMoreElements()){
+            String currentKey = keys.nextElement();
+            if(!KeyValues.contains(currentKey)){
+                try {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    conversationReports.poke("R1C" + positionKeyValues, currentKey);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (DDEException e) {
+                    e.printStackTrace();
+                }
+                KeyValues.add(currentKey);
+                positionKeyValues=KeyValues.size()+2;
+            }
+        }
     }
 
     @Override
@@ -220,18 +244,12 @@ public class ExcelConnection implements DDEClientEventListener,
             System.out.print("conversation.connect...");
             conversation.setTimeout(50000);
             conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
-
-
-            conversationReports.setTimeout(50000);
-            conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
-
             initConversationPositions();
-
             System.out.println("done.");
             System.out.print("conversation.request...");
             String s = conversation.request("C1");
             System.out.println("done.");
-            parsePriceDataProductIds(s);
+            parseProductIds(s);
             subscribeAllProductIds();
             System.out.print("conversation.startAdvice...");
             conversation.startAdvice("C1");
@@ -257,7 +275,38 @@ public class ExcelConnection implements DDEClientEventListener,
 
     }
 
-
+    public void startDDEReports() {
+        try
+        {
+            System.out.print("conversationReports.connect...");
+            conversationReports.setTimeout(5000);
+            conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
+            System.out.println("done.");
+            System.out.print("conversationReports.request...");
+            String data = conversationReports.request("C1");
+            String data2 = conversationReports.request("R1");
+            System.out.println("conversationReports done.");
+            parseStrategyNames(data);
+            parsekeyValues(data2);
+            System.out.print("conversationReports.startAdvice...");
+            //conversationReports.startAdvice("C1");
+            //conversationReports.startAdvice("R1");
+            System.out.println("done.");
+        }
+        catch (DDEMLException e)
+        {
+            System.out.println("DDEMLException: 0x" + Integer.toHexString(e.getErrorCode())
+                    + " " + e.getMessage());
+            close();
+            System.exit(-1);
+        }
+        catch (DDEException e)
+        {
+            System.out.println("DDEException: " + e.getMessage());
+            close();
+            System.exit(-1);
+        }
+    }
 
     public void stopDDE()
     {
@@ -266,8 +315,20 @@ public class ExcelConnection implements DDEClientEventListener,
             Tool.sleepFor(500);
             conversation.stopAdvice("C1");//This means all elements in column 1
             conversation.disconnect();
-            conversationReports.disconnect();
             conversationPositions.disconnect();
+        } catch (DDEException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopDDEReports()
+    {
+        try {
+            shutdown = true;
+            Tool.sleepFor(500);
+//            conversationReports.stopAdvice("R1");//This means all elements in Row 1
+//            conversationReports.stopAdvice("C1");//This means all elements in Column 1
+            conversationReports.disconnect();
         } catch (DDEException e) {
             e.printStackTrace();
         }
@@ -283,7 +344,7 @@ public class ExcelConnection implements DDEClientEventListener,
 //        thread = new Thread(this);
 //        thread.start();
 
-        if(Tool.isWindows()) startDDE();
+        if(Tool.isWindows()) {startDDE();startDDEReports();}
         System.out.println("\n===");
         System.out.println("Initialization done.");
         System.out.println("Press enter to exit.");
@@ -292,7 +353,7 @@ public class ExcelConnection implements DDEClientEventListener,
         System.out.println("\nexiting...\n");
 
         close();
-        if(Tool.isWindows()) stopDDE();
+        if(Tool.isWindows()) {stopDDE();stopDDEReports();}
         if(Tool.isWindows()) Thread.sleep(1000);
         if(!Tool.isWindows())Thread.sleep(60000);
 
@@ -339,8 +400,8 @@ public class ExcelConnection implements DDEClientEventListener,
         }
     }
 
-    private void parsePriceDataProductIds(String s3) {
-        String[] parts = s3.split("\r\n");
+    private void parseProductIds(String data) {
+        String[] parts = data.split("\r\n");
         currentProductIDs = new Vector<String>(Arrays.asList(parts));
     }
 
@@ -348,7 +409,7 @@ public class ExcelConnection implements DDEClientEventListener,
         String[] parts = strategyNames.split("\r\n");
         StrategyNames = new Vector<String>(Arrays.asList(parts));
         StrategyNames.removeElementAt(0);//R1C1 is empty
-
+        positionStrategyName=StrategyNames.size()+2;
     }
 
     private void parsekeyValues(String keyValues) {
@@ -360,13 +421,19 @@ public class ExcelConnection implements DDEClientEventListener,
         String lastElement2=lastElement.replace("\r\n","");
         KeyValues.removeElementAt(KeyValues.size()-1);
         KeyValues.add(lastElement2);
+
+        if(KeyValues.lastElement().compareTo("")==0){
+            KeyValues.remove("");
+        }
+
+        positionKeyValues=KeyValues.size()+2;
     }
 
 
 
     private String generatePerRowPokeString(Vector<String> KeyValues,ConcurrentHashMap<String,String> hashmapKeyValue){
+
         String PerRowPokeString = new String();
-        boolean wasLastEmpty = false;
 
         for(int i=0;i<KeyValues.size();i++) {//R1C1 is empty
             if (hashmapKeyValue.containsKey(KeyValues.elementAt(i))) {
@@ -375,13 +442,17 @@ public class ExcelConnection implements DDEClientEventListener,
                 } else {
                     PerRowPokeString = PerRowPokeString  + "\t"+hashmapKeyValue.get(KeyValues.elementAt(i));
                 }
-            } else {
+            }
+            else {
                 PerRowPokeString = PerRowPokeString + "\t";  //For blank cells
             }
         }
+
         return PerRowPokeString;
     }
 
+    private int positionStrategyName;
+    private int positionKeyValues;
     private ConcurrentHashMap<String,ConcurrentHashMap> theMatrix=new ConcurrentHashMap();
     private Vector<String> currentProductIDs=new Vector<String>();
     private Vector<String> StrategyNames=new Vector<String>();
@@ -480,7 +551,7 @@ public class ExcelConnection implements DDEClientEventListener,
     private void updateList(List<String> list, ConcurrentHashMap<String, String> map, String item) {
         if(map.containsKey(item)) return;
         list.add(item);
-        map.put(item,item);
+        map.put(item, item);
     }
 
     private void pokePositionsProducts() {

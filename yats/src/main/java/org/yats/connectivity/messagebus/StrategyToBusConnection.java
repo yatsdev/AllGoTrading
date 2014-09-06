@@ -113,7 +113,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     private void sendAllReceivedPositionSnapshots() {
         while(receiverPositionSnapshot.hasMoreMessages()) {
             PositionSnapshotMsg m = receiverPositionSnapshot.get();
-            //if(receiverPositionSnapshot.hasMoreMessages()) continue;
+            if(receiverPositionSnapshot.hasMoreMessages()) continue;
             positionSnapshotConsumer.onPositionSnapshot(m.toPositionSnapshot());
         }
     }
