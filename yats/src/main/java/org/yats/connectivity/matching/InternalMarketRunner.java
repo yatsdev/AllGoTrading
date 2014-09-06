@@ -1,11 +1,10 @@
-package org.yats.trader.examples.server;
+package org.yats.connectivity.matching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
 import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
-import org.yats.connectivity.matching.InternalMarket;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;

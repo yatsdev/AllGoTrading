@@ -8,7 +8,7 @@ import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.ReceiptMsg;
-import org.yats.trader.examples.server.PositionServerLogic;
+import org.yats.trader.examples.server.PositionServerMain;
 import org.yats.trading.*;
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class PositionServerLogicTest {
     @Test
     public void canInitializeOnePositionServerFromAnother()
     {
-        PositionServerLogic logic1 = new PositionServerLogic(prop);
+        PositionServerMain logic1 = new PositionServerMain(prop);
         PositionServer server1 = new PositionServer();
         server1.setProductList(productList);
         logic1.setPositionServer(server1);
@@ -28,7 +28,7 @@ public class PositionServerLogicTest {
         server1.onReceipt(ReceiptTest.RECEIPT4);
         logic1.startRequestListener();
 
-        PositionServerLogic logic2 = new PositionServerLogic(prop);
+        PositionServerMain logic2 = new PositionServerMain(prop);
         PositionServer server2 = new PositionServer();
         logic2.setPositionServer(server2);
 
@@ -47,7 +47,7 @@ public class PositionServerLogicTest {
 
         config.setStorePositionsToDisk(true);
         config.setListeningForReceipts(true);
-        PositionServerLogic logic = new PositionServerLogic(prop);
+        PositionServerMain logic = new PositionServerMain(prop);
         logic.setProductList(productList);
         logic.setPositionStorage(positionStorage);
         ReceiptMsg m = ReceiptMsg.fromReceipt(ReceiptTest.RECEIPT1);
