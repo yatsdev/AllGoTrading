@@ -65,6 +65,7 @@ public class PriceGeneratorLogic implements Runnable {
         String pidListString=prop.get("productId");
         String[] parts = pidListString.split(",");
         pidList = Arrays.asList(parts);
+
         lastData = new ConcurrentHashMap<String, PriceData>();
         int i=1;
         for(String pid : pidList) {

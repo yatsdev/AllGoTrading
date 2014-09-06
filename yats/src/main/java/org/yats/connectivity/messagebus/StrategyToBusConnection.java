@@ -112,8 +112,9 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     private void sendAllReceivedPositionSnapshots() {
         while(receiverPositionSnapshot.hasMoreMessages()) {
-            PositionSnapshot m = receiverPositionSnapshot.get();
-            positionSnapshotConsumer.onPositionSnapshot(m);
+            PositionSnapshotMsg m = receiverPositionSnapshot.get();
+            //if(receiverPositionSnapshot.hasMoreMessages()) continue;
+            positionSnapshotConsumer.onPositionSnapshot(m.toPositionSnapshot());
         }
     }
 
@@ -195,8 +196,8 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             receiverReports.start();
         }
 
-        receiverPositionSnapshot = new BufferingReceiver<PositionSnapshot>(
-                PositionSnapshot.class,
+        receiverPositionSnapshot = new BufferingReceiver<PositionSnapshotMsg>(
+                PositionSnapshotMsg.class,
                 config.getExchangePositionSnapshot(),
                 "#",
                 config.getServerIP());
@@ -238,7 +239,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     BufferingReceiver<ReceiptMsg> receiverReceipt;
     BufferingReceiver<KeyValueMsg> receiverSettings;
     BufferingReceiver<KeyValueMsg> receiverReports;
-    BufferingReceiver<PositionSnapshot> receiverPositionSnapshot;
+    BufferingReceiver<PositionSnapshotMsg> receiverPositionSnapshot;
     Config config;
     boolean shuttingDown;
 

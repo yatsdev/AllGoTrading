@@ -17,6 +17,10 @@ public class AccountPosition extends Position {
         return productId +","+internalAccount;
     }
 
+    public static String getKey(String _productId, String _account) {
+        return _productId +","+_account;
+    }
+
     public AccountPosition add(AccountPosition other) {
         return new AccountPosition(productId, internalAccount, size.add(other.size));
     }

@@ -7,15 +7,15 @@ import org.yats.common.Tool;
 
 import java.io.IOException;
 
-public class PriceGeneratorMain {
+public class PriceGeneratorDemo {
 
     final Logger log = LoggerFactory.getLogger(ReceiptStorageMain.class);
 
     public void go() throws InterruptedException, IOException
     {
 
-        log.info("Starting PriceGeneratorMain...");
-        String configFilename = Tool.getPersonalConfigFilename("config/PriceGenerator");
+        log.info("Starting PriceGeneratorDemo...");
+        String configFilename = Tool.getPersonalConfigFilename("config/PriceGeneratorDemo");
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
         PriceGeneratorLogic logic = new PriceGeneratorLogic(prop);
 
@@ -34,15 +34,15 @@ public class PriceGeneratorMain {
 
         logic.close();
 
-        log.info("ReceiptStorageMain done.");
+        log.info("ReceiptStorageDemo done.");
         System.exit(0);
     }
 
-    public PriceGeneratorMain() {
+    public PriceGeneratorDemo() {
     }
 
     public static void main(String args[]) throws Exception {
-        PriceGeneratorMain q = new PriceGeneratorMain();
+        PriceGeneratorDemo q = new PriceGeneratorDemo();
 
         try {
             q.go();
