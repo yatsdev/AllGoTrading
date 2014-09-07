@@ -21,6 +21,7 @@ public class Scalper extends StrategyBase {
     {
         if(!isInitialised()) return;
         if(!priceData.hasProductId(tradeProductId)) return;
+        lastPrice=priceData;
         if(!startPrice.equals(PriceData.NULL)) return;
         if(shuttingDown) return;
         startPrice = priceData;
@@ -153,6 +154,14 @@ public class Scalper extends StrategyBase {
         sendNewOrder(order);
     }
 
+    private void cancelOrders(BookSide side) {
+        for(OrderNew order : orders.values()) {
+            if(!order.isForBookSide(side)) continue;
+            OrderCancel o = order.createCancelOrder();
+            sendOrderCancel(o);
+        }
+    }
+
     private void cancelOrders() {
         for(OrderNew order : orders.values()) {
             OrderCancel o = order.createCancelOrder();
@@ -170,6 +179,7 @@ public class Scalper extends StrategyBase {
     }
 
     private PriceData startPrice;
+    private PriceData lastPrice;
 
 
     private Decimal position;
