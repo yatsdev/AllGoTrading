@@ -1,10 +1,7 @@
 package org.yats.common;
 
 import java.io.*;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -13,11 +10,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PropertiesReader implements IProvideProperties {
 
     public PropertiesReader() {
-        properties = new Properties();
+//        properties = new Properties();
+        properties = new ConcurrentHashMap<String, String>();
     }
 
+    @Override
+    public int size() {
+        return properties.size();
+    }
 
-//    public void read(String filename) {
+    //    public void read(String filename) {
 //        try {
 //            File file = new File(filename);
 //            FileInputStream fileInput = new FileInputStream(file);
@@ -49,16 +51,42 @@ public class PropertiesReader implements IProvideProperties {
 
     public static PropertiesReader createFromConfigString(String config)
     {
-        try {
-            InputStream inputStream = new ByteArrayInputStream(config.getBytes());
-            PropertiesReader p = new PropertiesReader();
-            p.properties.load(inputStream);
-            inputStream.close();
-            return p;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+        String configOnlyNewlines = config.replace("\r\n","\n");
+        PropertiesReader p = new PropertiesReader();
+        List<String> list = toListFromLines(configOnlyNewlines);
+        for(String line : list) {
+            String lineNoBlanks = line.replace(" ","").replace("\t","");
+            if(lineNoBlanks.startsWith("#include=")) {
+                String[] keyValue = line.split("=");
+                String valueTrimmed = keyValue[1].trim();
+                p.add(createFromConfigFile(valueTrimmed));
+                continue;
+            }
+            else if(line.startsWith("#")) {
+                continue;
+            }
+            else if(!line.contains("="))
+            {
+                continue;
+            }
+            String[] keyValue = line.split("=");
+            String keyTrimmedNoBlanks = keyValue[0].replace(" ","").replace("\t","");
+            String valueTrimmed = keyValue[1].trim();
+            p.properties.put(keyTrimmedNoBlanks, valueTrimmed);
         }
+        return p;
+    }
+
+    public void add(PropertiesReader reader) {
+        for(String key : reader.getKeySet()) {
+            String value = reader.get(key);
+            properties.put(key, value);
+        }
+    }
+
+    private static List<String> toListFromLines(String lines) {
+        String[] keyValueArray = lines.split("\\n");
+        return Arrays.asList(keyValueArray);
     }
 
     public static PropertiesReader createFromStringKeyValue(String csv)
@@ -66,17 +94,17 @@ public class PropertiesReader implements IProvideProperties {
         PropertiesReader p = new PropertiesReader();
         String[] parts = csv.split(",");
         if(parts.length<2) return p;
-        for(int i=0; i<parts.length; i++) {
-            String[] keyvalue = parts[i].split("=");
-            p.properties.setProperty(keyvalue[0], keyvalue[1]);
+        for (String part : parts) {
+            String[] keyvalue = part.split("=");
+            p.properties.put(keyvalue[0], keyvalue[1]);
         }
         return p;
     }
 
     public ConcurrentHashMap<String,String> toMap() {
         ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
-        for(String key : properties.stringPropertyNames()) {
-            map.put(key, properties.getProperty(key));
+        for(String key : properties.keySet()) {
+            map.put(key, properties.get(key));
         }
         return map;
     }
@@ -91,7 +119,7 @@ public class PropertiesReader implements IProvideProperties {
 
     @Override
     public Set<String> getKeySet() {
-        return properties.stringPropertyNames();
+        return properties.keySet();
     }
 
     @Override
@@ -104,28 +132,28 @@ public class PropertiesReader implements IProvideProperties {
     public String get(String _key)
     {
         if(!exists(_key)) throw new CommonExceptions.KeyNotFoundException("Config file does not contain key: " + _key);
-        return properties.getProperty(_key);
+        return properties.get(_key);
     }
 
     @Override
     public String get(String _key, String _defaultValue)
     {
         if(!properties.containsKey(_key)) return _defaultValue;
-        return properties.getProperty(_key);
+        return properties.get(_key);
     }
 
     @Override
     public boolean getAsBoolean(String _key, boolean _defaultValue)
     {
         if(!properties.containsKey(_key)) return _defaultValue;
-        return fromBooleanString(properties.getProperty(_key));
+        return fromBooleanString(properties.get(_key));
     }
 
     @Override
     public boolean getAsBoolean(String _key)
     {
         if(!properties.containsKey(_key)) throw new CommonExceptions.FieldNotFoundException("No such key: " + _key);
-        return fromBooleanString(properties.getProperty(_key));
+        return fromBooleanString(properties.get(_key));
     }
 
     @Override
@@ -148,7 +176,7 @@ public class PropertiesReader implements IProvideProperties {
         boolean first = true;
         while (enuKeys.hasMoreElements()) {
             String key = (String) enuKeys.nextElement();
-            String value = properties.getProperty(key);
+            String value = properties.get(key);
             if(!first){b.append(","); first=false;}
             b.append(key).append("=").append(value);
         }
@@ -161,7 +189,7 @@ public class PropertiesReader implements IProvideProperties {
         boolean first = true;
         while (enuKeys.hasMoreElements()) {
             String key = (String) enuKeys.nextElement();
-            String value = properties.getProperty(key);
+            String value = properties.get(key);
             if(!first){b.append(","); first=false;}
             b.append(key).append("=").append(value);
         }
@@ -170,17 +198,17 @@ public class PropertiesReader implements IProvideProperties {
 
     @Override
     public void set(String key, boolean value) {
-        properties.setProperty(key, value ? "true" : "false");
+        properties.put(key, value ? "true" : "false");
     }
 
     @Override
     public void set(String key, Decimal value) {
-        properties.setProperty(key, value.toString());
+        properties.put(key, value.toString());
     }
 
     @Override
     public void set(String key, String value) {
-        properties.setProperty(key, value);
+        properties.put(key, value);
     }
 
 
@@ -195,12 +223,11 @@ public class PropertiesReader implements IProvideProperties {
         if(lowerCase.compareTo("yes")==0) return true;
         if(lowerCase.compareTo("y")==0) return true;
         if(lowerCase.compareTo("1")==0) return true;
-        if(lowerCase.compareTo("true")==0) return true;
-        return false;
+        return lowerCase.compareTo("true") == 0;
     }
 
 
     /////////////////////////////////////////////////////////////////////////////
-
-    Properties properties;
+    ConcurrentHashMap<String, String> properties;
+//    Properties properties;
 }

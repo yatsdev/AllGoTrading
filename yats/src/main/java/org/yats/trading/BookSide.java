@@ -31,6 +31,8 @@ public abstract class BookSide {
 
     public abstract String toBuySellString();
 
+    public abstract Decimal toSigned(Decimal size);
+
 
     public static class Ask extends BookSide {
         @Override
@@ -59,6 +61,12 @@ public abstract class BookSide {
         public String toBuySellString() {
             return "sell";
         }
+
+        @Override
+        public Decimal toSigned(Decimal size) {
+            return size.abs().negate();
+        }
+
     } // class Ask
 
     public static class Bid extends BookSide {
@@ -87,6 +95,12 @@ public abstract class BookSide {
         public String toBuySellString() {
             return "buy";
         }
+
+        @Override
+        public Decimal toSigned(Decimal size) {
+            return size.abs();
+        }
+
     } // class Ask
 
     private static class BookSideNULL extends BookSide {
@@ -115,6 +129,12 @@ public abstract class BookSide {
         public String toBuySellString() {
             return "";
         }
+
+        @Override
+        public Decimal toSigned(Decimal size) {
+            return Decimal.ZERO;
+        }
+
     }
 } // class
 

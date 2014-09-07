@@ -30,7 +30,12 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     public void onCallback() {
         while(receiver.hasMoreMessages()) {
             buffer.add(receiver.get());
-            if(buffer.size()>5) log.debug("buffer size "+buffer.size());
+            if(buffer.size()>alarmThreshold+alarmStep) {
+                log.debug("buffer size "+buffer.size());
+                alarmThreshold+=alarmStep;
+            } else {
+                if(buffer.size()<alarmThreshold-alarmStep) alarmThreshold=alarmStep;
+            }
         }
     }
 
@@ -85,6 +90,8 @@ public class BufferingReceiver<T> implements Runnable, IAmCalledBack {
     private Thread thread;
     private WaitingLinkedBlockingQueue<T> buffer;
     private boolean shutdown;
+    private int alarmThreshold=1000;
+    private int alarmStep=1000;
 
     private static class IamCalledBackDummy implements IAmCalledBack {
         @Override

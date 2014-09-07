@@ -3,9 +3,6 @@ package org.yats.trading;
 import org.joda.time.DateTime;
 import org.yats.common.Decimal;
 
-/**
- * Created by emiliano on 25/05/2014.
- */
 public class TargetPrice {
     private DateTime TPDateTime;
     private String issuer;

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
 import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.connectivity.fix.OrderConnection;
 import org.yats.connectivity.fix.PriceFeed;
 import org.yats.trader.StrategyRunner;
@@ -39,8 +40,11 @@ public class QuotingMainMonolith {
         PriceFeed priceFeed = PriceFeed.createFromConfigFile(configFIXPriceFilename);
         priceFeed.setProductProvider(products);
 
+        String configFilename = Tool.getPersonalConfigFilename("config/ReceiptStorage");
+        PropertiesReader propReceipts = PropertiesReader.createFromConfigFile(configFilename);
+
         MarketFollow strategy = new MarketFollow();
-        ReceiptStorageCSV receiptStorage = new ReceiptStorageCSV();
+        ReceiptStorageCSV receiptStorage = new ReceiptStorageCSV(propReceipts);
         PositionServer positionServer = new PositionServer();
 
         StrategyRunner strategyRunner = new StrategyRunner();

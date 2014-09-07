@@ -15,15 +15,7 @@ public class Product {
     public boolean isProductAsPairChainable(Product product)
     {
 
-        if(   product.hasUnderlyingId(underlyingId)
-           || product.hasUnderlyingId(unitId)
-           || product.hasUnitId(underlyingId)
-           || product.hasUnitId(unitId)
-           )
-        {
-            return (!product.hasProductId(productId));
-        }
-        return false;
+        return (product.hasUnderlyingId(underlyingId) || product.hasUnderlyingId(unitId) || product.hasUnitId(underlyingId) || product.hasUnitId(unitId)) && (!product.hasProductId(productId));
     }
 
     @Override

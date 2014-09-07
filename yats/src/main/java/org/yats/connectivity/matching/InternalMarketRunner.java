@@ -1,11 +1,10 @@
-package org.yats.trader.examples.server;
+package org.yats.connectivity.matching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
 import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
-import org.yats.connectivity.matching.InternalMarket;
 import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
@@ -14,23 +13,23 @@ import org.yats.trading.*;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAndReceipt, Runnable {
+public class InternalMarketRunner implements IAmCalledBack, IConsumePriceDataAndReceipt, Runnable {
 
     final Logger log = LoggerFactory.getLogger(InternalMarketRunner.class);
 
     @Override
-    public void onCallback() {
+    public synchronized void onCallback() {
         sendAllReceivedSubscriptionToMarket();
         sendAllReceivedOrderCancelToMarket();
         sendAllReceivedOrderNewToMarket();
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
         if(shuttingDown) return;
-        MarketDataMsg data = MarketDataMsg.createFrom(marketData);
-        log.info("Published: "+marketData);
-        senderMarketDataMsg.publish(data.getTopic(), data);
+        PriceDataMsg data = PriceDataMsg.createFrom(priceData);
+        log.info("Published: "+ priceData);
+        senderPriceDataMsg.publish(data.getTopic(), data);
     }
 
     @Override
@@ -92,7 +91,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
         receiverOrderCancel.close();
         receiverOrderNew.close();
         receiverSubscription.close();
-        senderMarketDataMsg.close();
+        senderPriceDataMsg.close();
         senderReceipt.close();
     }
 
@@ -115,7 +114,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
         thread.start();
 
 
-        senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
+        senderPriceDataMsg = new Sender<PriceDataMsg>(config.getExchangePriceData(), config.getServerIP());
         senderReceipt = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
 
         receiverSubscription = new BufferingReceiver<SubscriptionMsg>(SubscriptionMsg.class,
@@ -145,7 +144,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
     private void sendAllReceivedSubscriptionToMarket() {
         while(receiverSubscription.hasMoreMessages()) {
             SubscriptionMsg m = receiverSubscription.get();
-            if(!productList.isProductIdExisting(m.productId)) {
+            if(!productList.containsProductWith(m.productId)) {
                 log.debug("Attempt to subscribe for unknown product: "+m.productId);
                 continue;
             }
@@ -175,7 +174,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumeMarketDataAn
         }
     }
 
-    private Sender<MarketDataMsg> senderMarketDataMsg;
+    private Sender<PriceDataMsg> senderPriceDataMsg;
     private Sender<ReceiptMsg> senderReceipt;
     private BufferingReceiver<SubscriptionMsg> receiverSubscription;
     private BufferingReceiver<OrderNewMsg> receiverOrderNew;

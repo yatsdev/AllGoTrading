@@ -4,6 +4,7 @@ import java.util.Set;
 
 public interface IProvideProperties {
 
+    int size();
     boolean exists(String _key);
     String get(String _key);
     String get(String _key, String _defaultValue);

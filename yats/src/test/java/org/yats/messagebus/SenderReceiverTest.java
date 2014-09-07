@@ -6,10 +6,10 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
-import org.yats.messagebus.messages.MarketDataMsg;
+import org.yats.messagebus.messages.PriceDataMsg;
 import org.yats.messagebus.messages.PositionSnapshotMsg;
 import org.yats.trading.AccountPosition;
-import org.yats.trading.MarketData;
+import org.yats.trading.PriceData;
 import org.yats.trading.PositionSnapshot;
 
 
@@ -20,11 +20,11 @@ public class SenderReceiverTest {
 
 
     @Test
-    public void canSendAndReceiveMarketData()
+    public void canSendAndReceivePriceData()
     {
-        senderMarketData.publish(dataMsg.getTopic(), dataMsg);
-        MarketDataMsg newDataMsg = receiverMarketData.tryReceive(1000);
-        MarketData newData = newDataMsg.toMarketData();
+        senderPriceData.publish(dataMsg.getTopic(), dataMsg);
+        PriceDataMsg newDataMsg = receiverPriceData.tryReceive(1000);
+        PriceData newData = newDataMsg.toPriceData();
 
         assert (newDataMsg!=null);
         assert (newDataMsg.isSameAs(dataMsg));
@@ -48,16 +48,16 @@ public class SenderReceiverTest {
     @BeforeMethod
     public void setUp() {
         Config config = Config.DEFAULT_FOR_TESTS;
-        senderMarketData = new Sender<MarketDataMsg>(config.getExchangeMarketData(),config.getServerIP());
-        receiverMarketData = new Receiver<MarketDataMsg>(
-                MarketDataMsg.class,
-                config.getExchangeMarketData(),
+        senderPriceData = new Sender<PriceDataMsg>(config.getExchangePriceData(),config.getServerIP());
+        receiverPriceData = new Receiver<PriceDataMsg>(
+                PriceDataMsg.class,
+                config.getExchangePriceData(),
                 config.getTopicCatchAll(),
                 config.getServerIP());
-        data = new MarketData(new DateTime(DateTimeZone.UTC), "test",
+        data = new PriceData(new DateTime(DateTimeZone.UTC), "test",
                 Decimal.fromDouble(11), Decimal.fromDouble(12), Decimal.fromDouble(12),
                 Decimal.fromDouble(20), Decimal.fromDouble(30), Decimal.ONE );
-        dataMsg = MarketDataMsg.createFrom(data);
+        dataMsg = PriceDataMsg.createFrom(data);
 
         senderPositionSnapshot = new Sender<PositionSnapshotMsg>(config.getExchangePositionSnapshot(),config.getServerIP());
         receiverPositionSnapshot = new Receiver<PositionSnapshotMsg>(
@@ -74,16 +74,16 @@ public class SenderReceiverTest {
 
     @AfterMethod
     public void tearDown() {
-        senderMarketData.close();
+        senderPriceData.close();
         senderPositionSnapshot.close();
-        receiverMarketData.close();
+        receiverPriceData.close();
         receiverPositionSnapshot.close();
     }
 
-    private Sender<MarketDataMsg> senderMarketData;
-    private Receiver<MarketDataMsg> receiverMarketData;
-    private MarketData data;
-    private MarketDataMsg dataMsg;
+    private Sender<PriceDataMsg> senderPriceData;
+    private Receiver<PriceDataMsg> receiverPriceData;
+    private PriceData data;
+    private PriceDataMsg dataMsg;
 
     private PositionSnapshot positionSnapshot;
     private Sender<PositionSnapshotMsg> senderPositionSnapshot;

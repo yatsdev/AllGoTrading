@@ -8,13 +8,13 @@ import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, IConsumeSettings {
+public abstract class StrategyBase implements IConsumePriceDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
 
     @Override
-    public abstract void onMarketData(MarketData marketData);
+    public abstract void onPriceData(PriceData priceData);
 
     @Override
     public UniqueId getConsumerId() { return consumerId; }
@@ -85,7 +85,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     }
 
     public Product getProductForProductId(String productId) {
-        return productProvider.getProductForProductId(productId);
+        return productProvider.getProductWith(productId);
     }
 
     public Decimal getPositionForProduct(String productId)
@@ -104,10 +104,22 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         }
     }
 
-    public Position getValueForProduct(String targetProductId, String productId)
+    public Position getValueForProduct(String accountUnitProductId, String productId)
     {
         PositionRequest r = new PositionRequest(getInternalAccount(), productId);
-        return positionProvider.getValueForAccountProduct(targetProductId, r);
+        return positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+    }
+
+    public Position getValueForAccount(String account, String accountUnitProductId)
+    {
+        Position totalValue = new Position(accountUnitProductId, Decimal.ZERO);
+        IProvidePosition allPos = positionProvider.getAllPositionsForOneAccount(account);
+        for(AccountPosition pos : allPos.getAllPositions()) {
+            PositionRequest r = new PositionRequest(account, pos.getProductId());
+            Position v = positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+            totalValue = totalValue.add(v);
+        }
+        return totalValue;
     }
 
     public PropertiesReader getReports() {
@@ -161,6 +173,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         setName("unnamedStrategy");
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private String internalAccount;
 

@@ -14,16 +14,16 @@ public class Scalper extends StrategyBase {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
-    final Logger log = LoggerFactory.getLogger(MarketFollow.class);
+    final Logger log = LoggerFactory.getLogger(Scalper.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(!isInitialised()) return;
-        if(!marketData.hasProductId(tradeProductId)) return;
-        if(!startPrice.equals(MarketData.NULL)) return;
+        if(!priceData.hasProductId(tradeProductId)) return;
+        if(!startPrice.equals(PriceData.NULL)) return;
         if(shuttingDown) return;
-        startPrice = marketData;
+        startPrice = priceData;
 
         sendBidRelativeTo(startPrice.getBid());
         Decimal step = getStepSize(startPrice.getAsk());
@@ -42,17 +42,19 @@ public class Scalper extends StrategyBase {
             System.exit(-1);
         }
         if(!receipt.hasProductId(tradeProductId)){
-            log.error("Received receipt for unknown product: " + receipt);
+//            log.error("Received receipt for unknown product: " + receipt);
             return;
         }
 
-        position = receipt.getPositionChange().add(position);
+        position = receipt.getPositionChangeOfBase().add(position);
         log.info("position(strategy)="+position);
         log.info("position(server)="+getPositionForProduct(tradeProductId));
         try {
             if (isConversionAvailable(ProductList.USD_PID, tradeProductId))
                 log.info("positionValueUSD(server)=" + getValueForProduct(ProductList.USD_PID, tradeProductId));
             log.info("positionValueEUR(server)=" + getValueForProduct(ProductList.EUR_PID, tradeProductId));
+            log.info("accountValueEUR="+getValueForAccount(getInternalAccount(), ProductList.EUR_PID));
+            log.info("accountValueUSD="+getValueForAccount(getInternalAccount(), ProductList.USD_PID));
         } catch(TradingExceptions.RateConverterException e) {
             log.error("Can not calculate position value: "+e.getMessage());
         }
@@ -161,13 +163,13 @@ public class Scalper extends StrategyBase {
 
     public Scalper() {
         super();
-        startPrice = MarketData.NULL;
+        startPrice = PriceData.NULL;
         shuttingDown=false;
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
     }
 
-    private MarketData startPrice;
+    private PriceData startPrice;
 
 
     private Decimal position;

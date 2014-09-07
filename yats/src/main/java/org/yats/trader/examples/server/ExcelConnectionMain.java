@@ -11,7 +11,8 @@ public class ExcelConnectionMain {
 
     public static void main(String args[])  {
 
-        String configFilename = Tool.getPersonalConfigFilename("config/ExcelConnection");
+        final String className = ExcelConnectionMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
         ExcelConnection c = new ExcelConnection(prop);
         try {

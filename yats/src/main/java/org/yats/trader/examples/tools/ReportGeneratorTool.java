@@ -1,24 +1,59 @@
-package org.yats.trader.examples.server;
+package org.yats.trader.examples.tools;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.KeyValueMsg;
-import org.yats.trading.MarketData;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class ReportGeneratorLogic implements Runnable {
+public class ReportGeneratorTool implements Runnable {
 
-    final Logger log = LoggerFactory.getLogger(ReportGeneratorLogic.class);
+    public static void main(String args[]) throws Exception {
+
+        try {
+            final String className = ReportGeneratorTool.class.getSimpleName();
+            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+            ReportGeneratorTool logic = new ReportGeneratorTool(prop);
+            logic.log.info("Starting "+className);
+
+            Thread.sleep(1000);
+
+            logic.go();
+
+            System.out.println("\n===");
+            System.out.println("Initialization done.");
+            System.out.println("Press enter to exit.");
+            System.out.println("===\n");
+            System.in.read();
+            System.out.println("\nexiting...\n");
+
+            logic.close();
+
+            Thread.sleep(2500);
+
+            logic.log.info("Done with "+className);
+            System.exit(0);
+        } catch (RuntimeException r)
+        {
+            r.printStackTrace();
+            System.exit(-1);
+        }
+        System.exit(0);
+
+    }
+
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    final Logger log = LoggerFactory.getLogger(ReportGeneratorTool.class);
 
 
     @Override
@@ -50,7 +85,7 @@ public class ReportGeneratorLogic implements Runnable {
         senderReport.close();
     }
 
-    public ReportGeneratorLogic(IProvideProperties prop)
+    public ReportGeneratorTool(IProvideProperties prop)
     {
         interval = prop.getAsDecimal("interval").toInt();
 
