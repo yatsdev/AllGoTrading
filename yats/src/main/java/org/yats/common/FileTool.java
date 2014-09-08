@@ -51,6 +51,17 @@ public class FileTool {
         theFile.mkdirs();
     }
 
+    public static void moveToNewFilename(String filename, String filenameBackup) {
+        if(FileTool.exists(filenameBackup)) FileTool.deleteFile(filenameBackup);
+        if(FileTool.exists(filename)) FileTool.rename(filename, filenameBackup);
+    }
+
+    public static void rename(String oldname, String newName) {
+        File theFile = new File(oldname);
+        File newFile = new File(newName);
+        theFile.renameTo(newFile);
+    }
+
 
     public static String getTail( String filename, int lines) {
         if(!exists(filename)) throw new CommonExceptions.FileReadException("File not found: "+filename);
