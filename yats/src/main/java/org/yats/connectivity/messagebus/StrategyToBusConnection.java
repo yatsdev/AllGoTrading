@@ -61,6 +61,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     @Override
     public synchronized void onCallback() {
+        if(!initDone) return;
         sendAllReceivedPriceData();
         sendAllReceivedReceipts();
         sendAllReceivedSettings();
@@ -105,7 +106,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             reportsMap.put(strategyName, p);
         }
         for(IProvideProperties p : reportsMap.values()) {
-            reportsConsumer.onReport(p);
+            reportsConsumer.onReport(p,receiverReports.hasMoreMessages());
         }
         reportsMap.clear();
     }
@@ -153,6 +154,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     public StrategyToBusConnection(IProvideProperties p) {
         shuttingDown=false;
+        initDone=false;
 
         priceDataMap = new ConcurrentHashMap<String, PriceDataMsg>();
         reportsMap = new ConcurrentHashMap<String, IProvideProperties>();
@@ -219,6 +221,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
                 config.getServerIP());
         receiverReceipt.setObserver(this);
         receiverReceipt.start();
+        initDone=true;
     }
 
     Sender<SubscriptionMsg> senderSubscription;
@@ -242,6 +245,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     BufferingReceiver<PositionSnapshotMsg> receiverPositionSnapshot;
     Config config;
     boolean shuttingDown;
+    boolean initDone;
 
     private LinkedBlockingQueue<SubscriptionMsg> subscriptionQueue;
     private LinkedBlockingQueue<OrderNew> orderNewQueue;
@@ -280,7 +284,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     private static class ReportsConsumerDummy implements IConsumeReports {
         @Override
-        public void onReport(IProvideProperties p) {
+        public void onReport(IProvideProperties p, boolean hasMoreReports) {
         }
     }
 
