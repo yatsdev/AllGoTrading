@@ -7,6 +7,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
+import org.yats.common.Tool;
 import org.yats.trading.*;
 
 
@@ -109,6 +110,17 @@ public class StrategyRunnerTest {
     }
 
 
+    @Test
+    public void canCallbackOnTime()
+    {
+        strategy.init();
+        assert(!strategy.isCalledBackByTimer());
+        while(!strategy.isCalledBackByTimer()) {
+            System.out.println("waiting for callback... "+DateTime.now());
+            Tool.sleepFor(300);
+        }
+        assert(strategy.isCalledBackByTimer());
+    }
 
     @BeforeMethod
     public void setUp() {
@@ -127,6 +139,7 @@ public class StrategyRunnerTest {
         strategy = new StrategyMock();
         strategy.setInternalAccount(ACCOUNT);
         strategyRunner = new StrategyRunner();
+        strategy.setTimedCallbackProvider(strategyRunner);
         strategyRunner.setRateConverter(rateConverter);
         strategyRunner.addReceiptConsumer(positionServer);
         orderConnection = new OrderConnectionMock(strategyRunner);
@@ -158,7 +171,16 @@ public class StrategyRunnerTest {
 
     private static Product testProduct = new Product(TestPriceData.TEST_SAP_PID, TestPriceData.TEST_SAP_SYMBOL, "exchange");
 
-    private class StrategyMock extends StrategyBase {
+    private class StrategyMock extends StrategyBase implements IAmCalledBackInTime {
+
+        public boolean isCalledBackByTimer() {
+            return calledBackByTimer;
+        }
+
+        @Override
+        public void onTimerCallback() {
+            calledBackByTimer=true;
+        }
 
         public double getPosition() {
             return position;
@@ -213,6 +235,7 @@ public class StrategyRunnerTest {
         @Override
         public void init() {
             subscribe(testProduct.getProductId());
+            addTimedCallback(1, this);
         }
 
         @Override
@@ -222,12 +245,14 @@ public class StrategyRunnerTest {
             priceDataReceived =0;
             position = 0;
             lastReceipt = Receipt.NULL;
+            calledBackByTimer=false;
         }
 
         private double position;
         private int priceDataReceived;
         private int numberOfOrderInMarket;
         private Receipt lastReceipt;
+        private boolean calledBackByTimer;
 
     }
 

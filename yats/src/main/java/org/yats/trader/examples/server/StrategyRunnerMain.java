@@ -129,6 +129,7 @@ public class StrategyRunnerMain {
         strategy.setReportSender(strategyRunner);
         strategy.setName(strategyName);
         strategy.setConfig(strategyConfig);
+        strategy.setTimedCallbackProvider(strategyRunner);
         return strategy;
     }
 

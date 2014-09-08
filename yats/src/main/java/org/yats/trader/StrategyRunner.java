@@ -1,16 +1,27 @@
 package org.yats.trader;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
+import org.yats.common.WaitingLinkedBlockingQueue;
 import org.yats.trading.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
-public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePriceData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings {
+public class StrategyRunner implements IConsumeReceipt, ISendOrder,
+        IConsumePriceData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings,
+        IProvideTimedCallback
+
+{
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
@@ -135,14 +146,16 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePric
     }
 
 
+
+
     @Override
     public void run() {
         try {
             while (!shutdown) {
-                Thread.yield();
+                callWaitingStrategies();
+
                 String updatedProductId = updatedProductQueue.take();
 
-                //todo: receipts and settings should only be passed to the strategy that sent the corresponding order
 
                 while(settingsQueue.size()>0) {
                     for(IConsumeSettings c : settingsConsumers) { c.onSettings(settingsQueue.take()); }
@@ -174,6 +187,30 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePric
         }
     }
 
+    public void addTimedCallback(TimedCallback callback) {
+        callbackList.add(callback);
+    }
+
+    private void callWaitingStrategies() throws InterruptedException {
+        boolean itemArrived = false;
+        while(!itemArrived) {
+            Thread.yield();
+            itemArrived = updatedProductQueue.isWaitedTillArrival(1, TimeUnit.SECONDS);
+
+            DateTime now = DateTime.now();
+            List<TimedCallback> temp = new ArrayList<TimedCallback>(callbackList);
+            for (TimedCallback callback : temp)
+            {
+                if(callback.isTimeToCall(now)) {
+                    callback.call();
+                    callbackList.remove(callback);
+                }
+            }
+        }
+    }
+
+    private ArrayList<TimedCallback> callbackList;
+
     public void setProductProvider(IProvideProduct productProvider) {
         this.productProvider = productProvider;
     }
@@ -187,11 +224,12 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePric
         consumerId = UniqueId.create();
         priceFeed = new PriceFeedDummy();
         orderSender = new OrderSenderDummy();
+        callbackList =new ArrayList<TimedCallback>();
         orderMap = new ConcurrentHashMap<String, OrderNew>();
         priceDataMap = new ConcurrentHashMap<String, PriceData>();
 //        subscribedProducts = new ConcurrentHashMap<String, Product>();
         mapProductIdToConsumers = new ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumePriceData>>();
-        updatedProductQueue = new LinkedBlockingQueue<String>();
+        updatedProductQueue = new WaitingLinkedBlockingQueue<String>();
         receiptQueue = new LinkedBlockingQueue<Receipt>();
         settingsQueue = new LinkedBlockingQueue<IProvideProperties>();
         strategyThread = new Thread(this);
@@ -241,7 +279,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder, IConsumePric
     private ConcurrentHashMap<String, OrderNew> orderMap;
     private LinkedBlockingQueue<Receipt> receiptQueue;
     private LinkedBlockingQueue<IProvideProperties> settingsQueue;
-    private LinkedBlockingQueue<String> updatedProductQueue;
+    private WaitingLinkedBlockingQueue<String> updatedProductQueue;
     private ISendOrder orderSender;
     private ISendReports reportSender;
     private LinkedList<IConsumeReceipt> receiptConsumers;

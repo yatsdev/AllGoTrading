@@ -1,5 +1,6 @@
 package org.yats.trader;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
@@ -52,6 +53,10 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
 
     public void sendConfig() {
 
+    }
+
+    protected void addTimedCallback(int seconds, IAmCalledBackInTime callback) {
+        timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
     }
 
     public void init() {
@@ -126,6 +131,8 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         return reports;
     }
 
+
+
 //    public Decimal getProfitForProduct(String productId)
 //    {
 //        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
@@ -159,6 +166,10 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         this.productProvider = productProvider;
     }
 
+    public void setTimedCallbackProvider(IProvideTimedCallback timedCallbackProvider) {
+        this.timedCallbackProvider = timedCallbackProvider;
+    }
+
     public void setName(String name) {
         this.name = name;
         reports.set("strategyName", name);
@@ -183,6 +194,8 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
 
     private IProvidePosition positionProvider;
     private IProvideProduct productProvider;
+
+    private IProvideTimedCallback timedCallbackProvider;
 
     private final UniqueId consumerId;
 
