@@ -106,7 +106,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             reportsMap.put(strategyName, p);
         }
         for(IProvideProperties p : reportsMap.values()) {
-            reportsConsumer.onReport(p);
+            reportsConsumer.onReport(p,receiverReports.hasMoreMessages());
         }
         reportsMap.clear();
     }
@@ -284,7 +284,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     private static class ReportsConsumerDummy implements IConsumeReports {
         @Override
-        public void onReport(IProvideProperties p) {
+        public void onReport(IProvideProperties p, boolean hasMoreReports) {
         }
     }
 

@@ -104,7 +104,7 @@ public class ExcelConnection implements DDEClientEventListener,
 
 
     @Override
-    public synchronized void onReport(IProvideProperties p) {
+    public synchronized void onReport(IProvideProperties p,boolean hasMoreReports) {
 
 
         try {
