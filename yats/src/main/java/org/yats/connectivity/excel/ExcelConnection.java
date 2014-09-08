@@ -239,7 +239,6 @@ public class ExcelConnection implements DDEClientEventListener,
             close();
             System.exit(-1);
         }
-
         strategyToBusConnection.setPriceDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
         strategyToBusConnection.setReportsConsumer(this);
