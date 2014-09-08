@@ -218,7 +218,7 @@ public class ExcelConnection implements DDEClientEventListener,
     public void startDDE() {
         try {
             System.out.print("conversation.connect...");
-            conversation.setTimeout(50000);
+            conversation.setTimeout(3000);
             conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
             initConversationPositions();
             System.out.println("done.");
@@ -250,7 +250,7 @@ public class ExcelConnection implements DDEClientEventListener,
     public void startDDEReports() {
         try {
             System.out.print("conversationReports.connect...");
-            conversationReports.setTimeout(5000);
+            conversationReports.setTimeout(3000);
             conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
             System.out.println("done.");
             System.out.print("conversationReports.request...");
