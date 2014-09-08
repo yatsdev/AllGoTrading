@@ -372,7 +372,7 @@ public class ExcelConnection implements DDEClientEventListener,
     private void parseStrategyNames(String strategyNames) {
         String[] parts = strategyNames.split("\r\n");
         StrategyNames = new Vector<String>(Arrays.asList(parts));
-        StrategyNames.removeElementAt(0);//R1C1 is empty
+        if(StrategyNames.size()>0){StrategyNames.removeElementAt(0);}//R1C1 is empty
         positionStrategyName = StrategyNames.size() + 2;
     }
 
@@ -380,15 +380,16 @@ public class ExcelConnection implements DDEClientEventListener,
 
         String[] parts = keyValues.split("\t");
         KeyValues = new Vector<String>(Arrays.asList(parts));
-        KeyValues.removeElementAt(0);//R1C1 is empty
-        String lastElement = KeyValues.lastElement();
-        String lastElement2 = lastElement.replace("\r\n", "");
-        KeyValues.removeElementAt(KeyValues.size() - 1);
-        KeyValues.add(lastElement2);
+        if(KeyValues.size()>0&&!(KeyValues.elementAt(0).compareTo("\r\n")==0)) {
+            KeyValues.removeElementAt(0);}//R1C1 is empty
+            String lastElement = KeyValues.lastElement();
+            String lastElement2 = lastElement.replace("\r\n", "");
+            KeyValues.removeElementAt(KeyValues.size() - 1);
+            KeyValues.add(lastElement2);
 
-        if (KeyValues.lastElement().compareTo("") == 0) {
-            KeyValues.remove("");
-        }
+            if (KeyValues.lastElement().compareTo("") == 0) {
+                KeyValues.remove("");
+            }
 
         positionKeyValues = KeyValues.size() + 2;
     }
