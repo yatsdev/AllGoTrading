@@ -9,7 +9,6 @@ import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.KeyValueMsg;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -20,7 +19,7 @@ public class ReportGeneratorTool implements Runnable {
 
         try {
             final String className = ReportGeneratorTool.class.getSimpleName();
-            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            String configFilename = Tool.getPersonalConfigFilename("config",className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
             ReportGeneratorTool logic = new ReportGeneratorTool(prop);
             logic.log.info("Starting "+className);

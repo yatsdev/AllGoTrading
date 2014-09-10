@@ -18,7 +18,7 @@ public class InternalMarketMain {
 
         final String className = InternalMarketMain.class.getSimpleName();
         log.info("Starting "+className);
-        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         IProvideProperties prop = PropertiesReader.createFromConfigFile(configFilename);
         InternalMarketRunner logic = new InternalMarketRunner(prop);
 

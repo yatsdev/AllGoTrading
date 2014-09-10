@@ -58,7 +58,7 @@ public class StrategyRunnerMain {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
 
         final String className = StrategyRunnerMain.class.getSimpleName();
-        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile(configFilename);
 
         StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
@@ -118,7 +118,9 @@ public class StrategyRunnerMain {
     }
 
     private StrategyBase createStrategy(String strategyName) {
-        PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile("config/"+strategyName+".properties");
+
+        String configFilename = Tool.getPersonalConfigFilename("config",strategyName);
+        PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile(configFilename);
         String strategyClassName = strategyConfig.get("strategyClass");
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);

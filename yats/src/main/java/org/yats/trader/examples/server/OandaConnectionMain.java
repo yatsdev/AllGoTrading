@@ -17,7 +17,7 @@ import java.io.IOException;
 
 /*
   Use template in
-  config/OandaConnectionMain_template.properties
+  config/template/OandaConnectionMain.properties
   and create your personal config file.
  */
 
@@ -28,7 +28,7 @@ public class OandaConnectionMain implements IConsumePriceData {
     public void go() throws InterruptedException, IOException
     {
         final String className = OandaConnectionMain.class.getSimpleName();
-        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");

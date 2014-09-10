@@ -11,7 +11,7 @@ public class LastPriceServerMain {
     public static void main(String args[])  {
 
         final String className = LastPriceServerMain.class.getSimpleName();
-        String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
         LastPriceServer c = new LastPriceServer(prop);
         try {

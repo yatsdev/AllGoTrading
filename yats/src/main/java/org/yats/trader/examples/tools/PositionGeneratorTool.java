@@ -23,7 +23,7 @@ public class PositionGeneratorTool implements Runnable {
 
         try {
             final String className = PositionGeneratorTool.class.getSimpleName();
-            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            String configFilename = Tool.getPersonalConfigFilename("config",className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
             PositionGeneratorTool demo = new PositionGeneratorTool(prop);
 

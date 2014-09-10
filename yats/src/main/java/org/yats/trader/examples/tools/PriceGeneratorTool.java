@@ -9,7 +9,6 @@ import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.PriceDataMsg;
-import org.yats.trader.examples.server.ReceiptStorageMain;
 import org.yats.trading.PriceData;
 import org.yats.trading.ProductList;
 
@@ -24,7 +23,7 @@ public class PriceGeneratorTool implements Runnable {
 
         try {
             final String className = PriceGeneratorTool.class.getSimpleName();
-            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            String configFilename = Tool.getPersonalConfigFilename("config",className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
             PriceGeneratorTool pgen = new PriceGeneratorTool(prop);
             pgen.log.info("Starting "+className);

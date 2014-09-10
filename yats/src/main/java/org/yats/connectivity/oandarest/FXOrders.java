@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.*;
 import org.yats.messagebus.Deserializer;
 import org.yats.messagebus.Serializer;
-import org.yats.messagebus.messages.OrderNewMsg;
 import org.yats.messagebus.messages.ReceiptMsg;
 import org.yats.trading.*;
 
@@ -420,7 +419,8 @@ public class FXOrders implements ISendOrder, Runnable {
 
     public static void main(String[]args) throws IOException {
 
-        String configFilename = Tool.getPersonalConfigFilename("config/OandaConnection");
+
+        String configFilename = Tool.getPersonalConfigFilename("config","OandaConnection");
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         FXOrders fx = new FXOrders(prop);

@@ -16,7 +16,7 @@ import java.io.IOException;
 
 /*
   Use template in
-  config/MatchingMain_template.properties
+  config/template/MatchingMain.properties
   and create your personal config file.
  */
 
@@ -26,7 +26,8 @@ public class MatchingMain implements IConsumePriceData {
 
     public void go() throws InterruptedException, IOException
     {
-        String configFilename = Tool.getPersonalConfigFilename("config/MatchingMain");
+        final String className = MatchingMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");

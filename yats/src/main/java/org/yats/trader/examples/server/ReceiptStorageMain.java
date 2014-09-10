@@ -19,7 +19,7 @@ public class ReceiptStorageMain implements IAmCalledBack {
 
         try {
             final String className = ReceiptStorageMain.class.getSimpleName();
-            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            String configFilename = Tool.getPersonalConfigFilename("config",className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
             ReceiptStorageMain storage = new ReceiptStorageMain(prop);
             storage.log.info("Starting"+className);

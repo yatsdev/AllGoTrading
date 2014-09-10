@@ -47,6 +47,7 @@ public class FileTool {
     }
 
     public static void createDirectories(String path) {
+        if(exists(path)) return;
         File theFile = new File(path);
         theFile.mkdirs();
     }

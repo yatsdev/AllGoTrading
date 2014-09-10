@@ -19,7 +19,7 @@ public class PositionServerMain implements IAmCalledBack {
 
         try {
             final String className = PositionServerMain.class.getSimpleName();
-            String configFilename = Tool.getPersonalConfigFilename("config/"+className);
+            String configFilename = Tool.getPersonalConfigFilename("config",className);
             PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
             PositionServerMain positionServerLogic = new PositionServerMain(prop);
             positionServerLogic.log.info("Starting "+className);

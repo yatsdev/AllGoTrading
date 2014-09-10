@@ -21,10 +21,12 @@ public class Tool {
         return getOsName().startsWith("Windows");
     }
 
-    public static String getPersonalConfigFilename(String prefix)
+    public static String getPersonalConfigFilename(String pathBase, String className)
     {
         String username = System.getProperty("user.name").replace(" ","");
-        String userSpecificFIXFilename = prefix+"_"+username+".properties";
+        String path = pathBase+"/"+username;
+        FileTool.createDirectories(path);
+        String userSpecificFIXFilename = path+"/"+className+".properties";
         log.info("Trying to read config file: "+userSpecificFIXFilename);
         if(!FileTool.exists(userSpecificFIXFilename))
             throw new CommonExceptions.FileReadException(userSpecificFIXFilename+" not found!");
