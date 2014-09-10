@@ -1,8 +1,5 @@
 package org.yats.connectivity.excel;
 
-import com.pretty_tools.dde.DDEException;
-import com.pretty_tools.dde.DDEMLException;
-import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +14,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExcelConnection implements DDEClientEventListener,
+public class ExcelConnection implements DDELinkEventListener,
         IConsumePriceData, IConsumeReceipt, IConsumeReports, IConsumePositionSnapshot {
 
     final Logger log = LoggerFactory.getLogger(ExcelConnection.class);
@@ -83,10 +80,10 @@ public class ExcelConnection implements DDEClientEventListener,
 
 //                    log.info(marketDataString);
                     if (shutdown) return;
-                    conversation.poke("R" + j + "C2:R" + j + "C42", marketDataString);
+                    conversationPriceData.poke("R" + j + "C2:R" + j + "C42", marketDataString);
 
 
-                } catch (DDEException e) {
+                } catch (DDELink.ConversationException e) {
                     e.printStackTrace();
                     System.exit(-1);
                 }
@@ -152,7 +149,7 @@ public class ExcelConnection implements DDEClientEventListener,
                 }
             }
 
-        } catch (DDEException e) {
+        } catch (DDELink.ConversationException e) {
             e.printStackTrace();
         }
 
@@ -168,7 +165,7 @@ public class ExcelConnection implements DDEClientEventListener,
 
                 conversationReports.poke("R" + positionStrategyName + "C1", StrategyNameOfThisReport);
 
-            } catch (DDEException e) {
+            } catch (DDELink.ConversationException e) {
                 e.printStackTrace();
             }
             StrategyNames.add(StrategyNameOfThisReport);
@@ -186,7 +183,7 @@ public class ExcelConnection implements DDEClientEventListener,
 
                     conversationReports.poke("R1C" + positionKeyValues, currentKey);
 
-                } catch (DDEException e) {
+                } catch (DDELink.ConversationException e) {
                     e.printStackTrace();
                 }
                 KeyValues.add(currentKey);
@@ -218,23 +215,19 @@ public class ExcelConnection implements DDEClientEventListener,
     public void startDDE() {
         try {
             System.out.print("conversation.connect...");
-            conversation.setTimeout(3000);
-            conversation.connect("Excel", prop.get("DDEPathToExcelFile"));
+            conversationPriceData.setTimeout(3000);
+            conversationPriceData.connect("Excel", prop.get("DDEPathToExcelFile"));
             initConversationPositions();
             System.out.println("done.");
             System.out.print("conversation.request...");
-            String s = conversation.request("C1");
+            String s = conversationPriceData.request("C1");
             System.out.println("done.");
             parseProductIds(s);
             subscribeAllProductIds();
             System.out.print("conversation.startAdvice...");
-            conversation.startAdvice("C1");
+            conversationPriceData.startAdvice("C1");
             System.out.println("done.");
-        } catch (DDEMLException e) {
-            System.out.println("DDEMLException: 0x" + Integer.toHexString(e.getErrorCode()) + " " + e.getMessage());
-            close();
-            System.exit(-1);
-        } catch (DDEException e) {
+        } catch (DDELink.ConversationException e) {
             System.out.println("DDEException: " + e.getMessage());
             close();
             System.exit(-1);
@@ -262,12 +255,7 @@ public class ExcelConnection implements DDEClientEventListener,
           //  conversationReports.startAdvice("C1");
           //  conversationReports.startAdvice("R1");
             System.out.println("done.");
-        } catch (DDEMLException e) {
-            System.out.println("DDEMLException: 0x" + Integer.toHexString(e.getErrorCode())
-                    + " " + e.getMessage());
-            close();
-            System.exit(-1);
-        } catch (DDEException e) {
+        } catch (DDELink.ConversationException e) {
             System.out.println("DDEException: " + e.getMessage());
             close();
             System.exit(-1);
@@ -278,10 +266,10 @@ public class ExcelConnection implements DDEClientEventListener,
         try {
             shutdown = true;
             Tool.sleepFor(500);
-            conversation.stopAdvice("C1");//This means all elements in column 1
-            conversation.disconnect();
+            conversationPriceData.stopAdvice("C1");//This means all elements in column 1
+            conversationPriceData.disconnect();
             conversationPositions.disconnect();
-        } catch (DDEException e) {
+        } catch (DDELink.ConversationException e) {
             e.printStackTrace();
         }
     }
@@ -293,7 +281,7 @@ public class ExcelConnection implements DDEClientEventListener,
             conversationReports.stopAdvice("C1");
             conversationReports.stopAdvice("R1");
             conversationReports.disconnect();
-        } catch (DDEException e) {
+        } catch (DDELink.ConversationException e) {
             e.printStackTrace();
         }
     }
@@ -331,7 +319,13 @@ public class ExcelConnection implements DDEClientEventListener,
         System.exit(0);
     }
 
-    public ExcelConnection(IProvideProperties _prop) {
+    public ExcelConnection(IProvideProperties _prop,
+                           IProvideDDEConversation _priceConversation,
+                           IProvideDDEConversation _reportConversation,
+                           IProvideDDEConversation _positionConversation
+
+
+    ) {
         shutdown = false;
         prop = _prop;
         positionProducts = new ArrayList<String>();
@@ -339,23 +333,15 @@ public class ExcelConnection implements DDEClientEventListener,
         positionAccounts = new ArrayList<String>();
         positionAccountsMap = new ConcurrentHashMap<String, String>();
         productAccount2PositionMap = new ConcurrentHashMap<String, AccountPosition>();
-        if (Tool.isWindows()) {
-            try {
-                conversation = new DDEClientConversation();  // cant use this on Linux
-                conversation.setEventListener(this);
-                conversationReports = new DDEClientConversation();
-                conversationReports.setEventListener(this);
-                conversationPositions = new DDEClientConversation();
-                conversationPositions.setEventListener(new PositionConversationListener(this));
-            } catch (UnsatisfiedLinkError e) {
-                log.error(e.getMessage());
-                close();
-                System.exit(-1);
-            }
-        } else {
-            System.out.println("This is not Windows! DDEClient will not work!");
-//            System.exit(0);
+        if (!Tool.isWindows()) {
+            System.out.println("This is not Windows! DDELink will not work!");
         }
+        conversationPriceData = _priceConversation;
+        conversationPriceData.setEventListener(this);
+        conversationReports = _reportConversation;
+        conversationReports.setEventListener(this);
+        conversationPositions = _positionConversation;
+        conversationPositions.setEventListener(new PositionConversationListener(this));
         strategyToBusConnection = new StrategyToBusConnection(_prop);
     }
 
@@ -431,8 +417,8 @@ public class ExcelConnection implements DDEClientEventListener,
     private Vector<String> StrategyNames = new Vector<String>();
     private Vector<String> KeyValues = new Vector<String>();
     private StrategyToBusConnection strategyToBusConnection;
-    private DDEClientConversation conversation;
-    private DDEClientConversation conversationReports;
+    private IProvideDDEConversation conversationPriceData;
+    private IProvideDDEConversation conversationReports;
     private IProvideProperties prop;
     private boolean shutdown;
 
@@ -550,7 +536,7 @@ public class ExcelConnection implements DDEClientEventListener,
             try {
                 conversationPositions.poke(where, what);
                 return;
-            } catch (DDEException e) {
+            } catch (DDELink.ConversationException e) {
 //            e.printStackTrace();
                 System.out.println("Excel seems busy. waiting...");
                 Tool.sleepFor(3000);
@@ -578,7 +564,7 @@ public class ExcelConnection implements DDEClientEventListener,
         if (positionAccounts.size() > 0) positionAccounts.remove(0);
     }
 
-    private void initConversationPositions() throws DDEException {
+    private void initConversationPositions() throws DDELink.ConversationException {
         conversationPositions.setTimeout(2000);
         conversationPositions.connect("Excel", prop.get("DDEPathToExcelFileWPositions"));
         String positionProductsString = conversationPositions.request("C1");
@@ -593,11 +579,12 @@ public class ExcelConnection implements DDEClientEventListener,
     private ConcurrentHashMap<String, String> positionProductsMap;
     private ArrayList<String> positionAccounts;
     private ConcurrentHashMap<String, String> positionAccountsMap;
-    private DDEClientConversation conversationPositions;
+//    private DDEClientConversation conversationPositions;
+    private IProvideDDEConversation conversationPositions;
     private ConcurrentHashMap<String, AccountPosition> productAccount2PositionMap;
 
 
-    private static class PositionConversationListener implements DDEClientEventListener {
+    private static class PositionConversationListener implements DDELinkEventListener {
         @Override
         public void onDisconnect() {
         }
