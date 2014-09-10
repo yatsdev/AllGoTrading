@@ -171,7 +171,7 @@ public class StrategyRunnerTest {
 
     private static Product testProduct = new Product(TestPriceData.TEST_SAP_PID, TestPriceData.TEST_SAP_SYMBOL, "exchange");
 
-    private class StrategyMock extends StrategyBase implements IAmCalledBackInTime {
+    private class StrategyMock extends StrategyBase implements IAmCalledTimed {
 
         public boolean isCalledBackByTimer() {
             return calledBackByTimer;
