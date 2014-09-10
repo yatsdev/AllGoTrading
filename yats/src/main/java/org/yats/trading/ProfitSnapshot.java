@@ -2,7 +2,7 @@ package org.yats.trading;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-// todo: allow for multiple currencies. assumption so far: all trading happens in same currency as the accounting currency
+
 
 public class ProfitSnapshot {
 

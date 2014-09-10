@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
 import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
-import org.yats.trading.MarketData;
+import org.yats.trading.PriceData;
 import org.yats.trading.Receipt;
 
 public class PriceCheck extends StrategyBase {
@@ -19,28 +19,28 @@ public class PriceCheck extends StrategyBase {
 
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(shuttingDown) return;
         if(!isInitialised()) return;
-        if(!marketData.hasProductId(tradeProductId)) return;
-        if(lastPrice.equals(MarketData.NULL)) {
-            lastPrice = marketData;
+        if(!priceData.hasProductId(tradeProductId)) return;
+        if(lastPrice.equals(PriceData.NULL)) {
+            lastPrice = priceData;
             return;
         }
 
-        boolean hugeLastChangeUp = marketData.getLast().isGreaterThan(lastPrice.getLast().multiply(Decimal.fromString("1.01")));
-        boolean hugeBidChangeUp = marketData.getBid().isGreaterThan(lastPrice.getBid().multiply(Decimal.fromString("1.01")));
-        boolean hugeAskChangeUp = marketData.getAsk().isGreaterThan(lastPrice.getAsk().multiply(Decimal.fromString("1.01")));
-        boolean hugeLastChangeDown = marketData.getLast().isLessThan(lastPrice.getLast().multiply(Decimal.fromString("0.99")));
-        boolean hugeBidChangeDown = marketData.getBid().isLessThan(lastPrice.getBid().multiply(Decimal.fromString("0.99")));
-        boolean hugeAskChangeDown = marketData.getAsk().isLessThan(lastPrice.getAsk().multiply(Decimal.fromString("0.99")));
+        boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrice.getLast().multiply(Decimal.fromString("1.01")));
+        boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrice.getBid().multiply(Decimal.fromString("1.01")));
+        boolean hugeAskChangeUp = priceData.getAsk().isGreaterThan(lastPrice.getAsk().multiply(Decimal.fromString("1.01")));
+        boolean hugeLastChangeDown = priceData.getLast().isLessThan(lastPrice.getLast().multiply(Decimal.fromString("0.99")));
+        boolean hugeBidChangeDown = priceData.getBid().isLessThan(lastPrice.getBid().multiply(Decimal.fromString("0.99")));
+        boolean hugeAskChangeDown = priceData.getAsk().isLessThan(lastPrice.getAsk().multiply(Decimal.fromString("0.99")));
         boolean hugeChange =  (hugeLastChangeUp || hugeBidChangeUp || hugeAskChangeUp
                 || hugeLastChangeDown || hugeBidChangeDown || hugeAskChangeDown);
 
         if(hugeChange) {
             System.out.println("");
-            log.info("Huge change in price! " + marketData.toString() + " last:" + lastPrice);
+            log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrice);
         } else {
             dots++;
             if(dots>80) {
@@ -50,7 +50,7 @@ public class PriceCheck extends StrategyBase {
             System.out.print(".");
         }
 
-        lastPrice = marketData;
+        lastPrice = priceData;
     }
 
 
@@ -81,11 +81,11 @@ public class PriceCheck extends StrategyBase {
 
     public PriceCheck() {
         super();
-        lastPrice = MarketData.NULL;
+        lastPrice = PriceData.NULL;
         shuttingDown=false;
     }
 
-    private MarketData lastPrice;
+    private PriceData lastPrice;
 
 
     private boolean shuttingDown;

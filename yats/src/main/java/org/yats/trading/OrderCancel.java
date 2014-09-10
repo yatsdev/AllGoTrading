@@ -76,9 +76,8 @@ public class OrderCancel extends OrderBase {
 
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
-        if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
-        return true;
-    }
+         return bookSide.toDirection() == (data.bookSide.toDirection());
+     }
 
 
     private DateTime timestamp;

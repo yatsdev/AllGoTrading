@@ -27,20 +27,20 @@ public class StrategyRunnerTest {
     private static String ACCOUNT = "testAccount";
 
     @Test
-    public void canDoSubscriptionForMarketData()
+    public void canDoSubscriptionForPriceData()
     {
         strategy.init();
-        assert (strategyRunner.isProductSubscribed(TestMarketData.TEST_SAP_PID));
+        assert (strategyRunner.isProductSubscribed(TestPriceData.TEST_SAP_PID));
     }
 
     @Test
-    public void canReceiveMarketDataAndSendToStrategy()
+    public void canReceivePriceDataAndSendToStrategy()
     {
-        assert (strategy.marketDataReceived == 0);
+        assert (strategy.priceDataReceived == 0);
         strategy.init();
-        feed.sendMarketData();
+        feed.sendPriceData();
         strategyRunner.waitForProcessingQueues();
-        assert (strategy.marketDataReceived == 1);
+        assert (strategy.priceDataReceived == 1);
     }
 
     @Test
@@ -99,12 +99,12 @@ public class StrategyRunnerTest {
         strategyRunner.waitForProcessingQueues();
         orderConnection.partialFillOrder(2);
         strategyRunner.waitForProcessingQueues();
-        Decimal positionSize = strategy.getPositionForProduct(TestMarketData.TEST_SAP_PID);
+        Decimal positionSize = strategy.getPositionForProduct(TestPriceData.TEST_SAP_PID);
         assert (positionSize.isEqualTo(Decimal.fromString("2")));
-        Position positionValueUSD = strategy.getValueForProduct(TestMarketData.TEST_USD_PID, TestMarketData.TEST_SAP_PID);
+        Position positionValueUSD = strategy.getValueForProduct(TestPriceData.TEST_USD_PID, TestPriceData.TEST_SAP_PID);
         Decimal expected = Decimal.fromString("2")
                 .multiply(data1.getLast())
-                .multiply(TestMarketData.TEST_EURUSD_LAST);
+                .multiply(TestPriceData.TEST_EURUSD_LAST);
         assert (positionValueUSD.isSize(expected));
     }
 
@@ -112,15 +112,16 @@ public class StrategyRunnerTest {
 
     @BeforeMethod
     public void setUp() {
-        data1 = new MarketData(DateTime.now(DateTimeZone.UTC), TestMarketData.TEST_SAP_PID,
+        data1 = new PriceData(DateTime.now(DateTimeZone.UTC), TestPriceData.TEST_SAP_PID,
                 Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),
                 Decimal.ONE,Decimal.ONE,Decimal.ONE);
 
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         rateConverter = new RateConverter(productList);
-        rateConverter.onMarketData(TestMarketData.TEST_EURUSD);
-        rateConverter.onMarketData(data1);
+        rateConverter.onPriceData(TestPriceData.TEST_EURUSD);
+        rateConverter.onPriceData(data1);
         positionServer = new PositionServer();
+        positionServer.setProductList(productList);
         positionServer.setRateConverter(rateConverter);
         feed = new PriceFeedMock();
         strategy = new StrategyMock();
@@ -149,13 +150,13 @@ public class StrategyRunnerTest {
     private PriceFeedMock feed;
     private OrderConnectionMock orderConnection;
     private StrategyMock strategy;
-    private MarketData data1;
+    private PriceData data1;
     private PositionServer positionServer;
     private RateConverter rateConverter;
     private ProductList productList;
 
 
-    private static Product testProduct = new Product(TestMarketData.TEST_SAP_PID, TestMarketData.TEST_SAP_SYMBOL, "exchange");
+    private static Product testProduct = new Product(TestPriceData.TEST_SAP_PID, TestPriceData.TEST_SAP_SYMBOL, "exchange");
 
     private class StrategyMock extends StrategyBase {
 
@@ -191,8 +192,8 @@ public class StrategyRunnerTest {
 
 
         @Override
-        public void onMarketData(MarketData marketData) {
-            marketDataReceived++;
+        public void onPriceData(PriceData priceData) {
+            priceDataReceived++;
         }
 
         @Override
@@ -200,7 +201,7 @@ public class StrategyRunnerTest {
             if(!receipt.isForSameOrderAs(lastReceipt)) numberOfOrderInMarket++;
             if(receipt.isEndState()) numberOfOrderInMarket--;
 
-            position += receipt.getPositionChange().toInt();
+            position += receipt.getPositionChangeOfBase().toInt();
             lastReceipt=receipt;
         }
 
@@ -218,13 +219,13 @@ public class StrategyRunnerTest {
         public void shutdown() {}
 
         private StrategyMock() {
-            marketDataReceived=0;
+            priceDataReceived =0;
             position = 0;
             lastReceipt = Receipt.NULL;
         }
 
         private double position;
-        private int marketDataReceived;
+        private int priceDataReceived;
         private int numberOfOrderInMarket;
         private Receipt lastReceipt;
 
@@ -232,13 +233,13 @@ public class StrategyRunnerTest {
 
     private class PriceFeedMock implements IProvidePriceFeed {
         @Override
-        public void subscribe(String productId, IConsumeMarketData consumer) {
+        public void subscribe(String productId, IConsumePriceData consumer) {
             this.consumer=consumer;
         }
-        IConsumeMarketData consumer;
+        IConsumePriceData consumer;
 
-        public void sendMarketData() {
-            consumer.onMarketData(data1);
+        public void sendPriceData() {
+            consumer.onPriceData(data1);
         }
     }
 

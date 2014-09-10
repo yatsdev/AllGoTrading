@@ -39,7 +39,8 @@ public class QuotingMain {
 
         MarketFollow strategy = new MarketFollow();
         PositionServer positionServer = new PositionServer();
-        PositionServerLogic positionServerLogic = new PositionServerLogic(Config.createRealProperties());
+        positionServer.setProductList(products);
+        PositionServerMain positionServerLogic = new PositionServerMain(Config.createRealProperties());
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 

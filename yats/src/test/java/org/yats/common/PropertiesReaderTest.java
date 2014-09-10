@@ -9,13 +9,13 @@ public class PropertiesReaderTest {
     @Test
     public void canReadBoolean()
     {
-        assert (true == PropertiesReader.fromBooleanString("YES"));
-        assert (true == PropertiesReader.fromBooleanString("Y"));
-        assert (true == PropertiesReader.fromBooleanString("TRUE"));
-        assert (true == PropertiesReader.fromBooleanString("True"));
-        assert (true == PropertiesReader.fromBooleanString("1"));
-        assert (false == PropertiesReader.fromBooleanString("0"));
-        assert (false == PropertiesReader.fromBooleanString("dontknow"));
+        assert (PropertiesReader.fromBooleanString("YES"));
+        assert (PropertiesReader.fromBooleanString("Y"));
+        assert (PropertiesReader.fromBooleanString("TRUE"));
+        assert (PropertiesReader.fromBooleanString("True"));
+        assert (PropertiesReader.fromBooleanString("1"));
+        assert (!PropertiesReader.fromBooleanString("0"));
+        assert (!PropertiesReader.fromBooleanString("dontknow"));
     }
 
     @BeforeMethod

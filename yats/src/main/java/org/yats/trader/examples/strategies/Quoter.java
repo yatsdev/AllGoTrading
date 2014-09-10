@@ -19,33 +19,33 @@ public class Quoter extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(Quoter.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
-        if(marketData.hasProductId(tradeProductId)) onTPMarketData(marketData);
-        if(marketData.hasProductId(refProductId)) onRPMarketData(marketData);
+        if(priceData.hasProductId(tradeProductId)) onTPPriceData(priceData);
+        if(priceData.hasProductId(refProductId)) onRPPriceData(priceData);
     }
 
-    public void onTPMarketData(MarketData marketData) {
-        log.info("TradeProduct ticker: "+marketData);
-        log.info("TradeProduct depth: "+marketData.getOfferBookAsCSV());
+    public void onTPPriceData(PriceData priceData) {
+        log.info("TradeProduct ticker: "+ priceData);
+        log.info("TradeProduct depth: "+ priceData.getOfferBookAsCSV());
     }
 
-    public void onRPMarketData(MarketData marketData) {
-        log.info("RefProduct: "+marketData);
+    public void onRPPriceData(PriceData priceData) {
+        log.info("RefProduct: "+ priceData);
 
-        if(!marketData.isSameFrontRowBidAs(prevRefMarketData)) {
+        if(!priceData.isSameFrontRowBidAs(prevRefPriceData)) {
             cancelOrders(BookSide.BID);
-            sendBidRelativeTo(marketData.getBid());
+            sendBidRelativeTo(priceData.getBid());
         }
-        if(!marketData.isSameFrontRowAskAs(prevRefMarketData)) {
+        if(!priceData.isSameFrontRowAskAs(prevRefPriceData)) {
             cancelOrders(BookSide.ASK);
-            sendAskRelativeTo(marketData.getAsk());
+            sendAskRelativeTo(priceData.getAsk());
             sendReports(getReports());
         }
 
-        prevRefMarketData = marketData;
+        prevRefPriceData = priceData;
     }
 
 
@@ -75,7 +75,7 @@ public class Quoter extends StrategyBase {
 //            System.exit(-1);
         }
 
-        position = position.add(receipt.getPositionChange());
+        position = position.add(receipt.getPositionChangeOfBase());
         log.info("position="+position);
 
 
@@ -189,7 +189,7 @@ public class Quoter extends StrategyBase {
         position = Decimal.ZERO;
         orders = new HashMap<String, OrderNew>();
         cancelMap = new HashMap<String, OrderCancel>();
-        prevRefMarketData = MarketData.NULL;
+        prevRefPriceData = PriceData.NULL;
 
     }
 
@@ -199,7 +199,7 @@ public class Quoter extends StrategyBase {
     private String refProductId;
     private HashMap<String, OrderNew> orders;
     private HashMap<String, OrderCancel> cancelMap;
-    private MarketData prevRefMarketData;
+    private PriceData prevRefPriceData;
 
     private double stepFactor = 0.0;//0031;
     private Decimal tickSize = Decimal.ONE;

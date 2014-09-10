@@ -6,11 +6,7 @@ import org.yats.common.Decimal;
 public class AccountPosition extends Position {
 
     public String toStringCSV() {
-        return new StringBuilder()
-                .append(getProductId()).append(",")
-                .append(internalAccount).append(",")
-                .append(getSize().toString())
-                .toString();
+        return getProductId() + "," + internalAccount + "," + getSize().toString();
     }
 
     public String getInternalAccount() {
@@ -19,6 +15,10 @@ public class AccountPosition extends Position {
 
     public String getKey() {
         return productId +","+internalAccount;
+    }
+
+    public static String getKey(String _productId, String _account) {
+        return _productId +","+_account;
     }
 
     public AccountPosition add(AccountPosition other) {
@@ -36,8 +36,7 @@ public class AccountPosition extends Position {
     }
 
     public boolean isSameAs(AccountPosition other) {
-        if(internalAccount.compareTo(other.internalAccount)!=0) return false;
-        return super.isSameAs(other);
+        return internalAccount.compareTo(other.internalAccount) == 0 && super.isSameAs(other);
     }
 
     public boolean isForAccount(String _account) {

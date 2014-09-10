@@ -3,10 +3,7 @@ package org.yats.trading;
 import au.com.bytecode.opencsv.CSVReader;
 import org.yats.common.CommonExceptions;
 
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,24 +13,24 @@ public class ProductList implements IProvideProduct {
 
     public static final String EUR_PID = "CCY_EUR";
     public static final String USD_PID = "CCY_USD";
-    public static final String CHF_PID = "CCY_CHF";
-    public static final String GBP_PID = "CCY_GBP";
-    public static final String SGD_PID = "CCY_SGD";
-    public static final String HKD_PID = "CCY_HKD";
-    public static final String XAG_PID = "CCY_XAG";
-    public static final String NZD_PID = "CCY_NZD";
-    public static final String CAD_PID = "CCY_CAD";
-    public static final String XAU_PID = "CCY_XAU";
-    public static final String AUD_PID = "CCY_AUD";
+//    public static final String CHF_PID = "CCY_CHF";
+//    public static final String GBP_PID = "CCY_GBP";
+//    public static final String SGD_PID = "CCY_SGD";
+//    public static final String HKD_PID = "CCY_HKD";
+//    public static final String XAG_PID = "CCY_XAG";
+//    public static final String NZD_PID = "CCY_NZD";
+//    public static final String CAD_PID = "CCY_CAD";
+//    public static final String XAU_PID = "CCY_XAU";
+//    public static final String AUD_PID = "CCY_AUD";
 
     @Override
-    public boolean isProductIdExisting(String productId){
+    public boolean containsProductWith(String productId){
         return list.containsKey(productId);
     }
 
     @Override
-    public Product getProductForProductId(String productId) {
-        if(!isProductIdExisting(productId)) {
+    public Product getProductWith(String productId) {
+        if(!containsProductWith(productId)) {
             throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
         }
         return list.get(productId);
@@ -61,6 +58,14 @@ public class ProductList implements IProvideProduct {
     public Collection<Product> values()
     {
         return list.values();
+    }
+
+    public Product getUnitOfProductWithId(String productId) {
+        if(!containsProductWith(productId)) {
+            throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
+        }
+        Product p =  list.get(productId);
+        return list.get(p.getUnitId());
     }
 
     public Product findBySymbol(String symbol) {
@@ -111,7 +116,7 @@ public class ProductList implements IProvideProduct {
 
     public boolean isEveryUnitAvailableAsProduct() {
         for(Product p : list.values()) {
-            if(!isProductIdExisting(p.getUnitId())) {
+            if(!containsProductWith(p.getUnitId())) {
                 return false;
             }
         }
@@ -120,26 +125,26 @@ public class ProductList implements IProvideProduct {
 
     public boolean isEveryUnderlyingAvailableAsProduct() {
         for(Product p : list.values()) {
-            if(!isProductIdExisting(p.getUnderlyingId())) return false;
+            if(!containsProductWith(p.getUnderlyingId())) return false;
         }
         return true;
     }
 
-    public void writeWithAppend(String path, String appendToEachLine)
-    {
-        try {
-            BufferedWriter out = new BufferedWriter(new FileWriter(path));
-            for(Product p : list.values()) {
-                out.write(p.toStringCSV());
-                out.write(appendToEachLine);
-                out.newLine();
-            }
-            out.close();
-        } catch (IOException e)
-        {
-            throw new CommonExceptions.FileWriteException(e.getMessage());
-        }
-    }
+//    public void writeWithAppend(String path, String appendToEachLine)
+//    {
+//        try {
+//            BufferedWriter out = new BufferedWriter(new FileWriter(path));
+//            for(Product p : list.values()) {
+//                out.write(p.toStringCSV());
+//                out.write(appendToEachLine);
+//                out.newLine();
+//            }
+//            out.close();
+//        } catch (IOException e)
+//        {
+//            throw new CommonExceptions.FileWriteException(e.getMessage());
+//        }
+//    }
 
     public void add(Product p) {
         list.put(p.getProductId(), p);

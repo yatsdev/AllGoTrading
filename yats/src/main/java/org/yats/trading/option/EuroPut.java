@@ -9,6 +9,11 @@ public class EuroPut extends OptionBase {
         this.expiration = expiration;
     }
 
+    public boolean isCall() {
+        return false;
+    }
+
+
     public double getPrice(Parameter p)
     {
         double expTime = p.getTimeToExpirationAsFractionOfYear(expiration);
@@ -32,7 +37,7 @@ public class EuroPut extends OptionBase {
         double vega  = p.getSpotPrice() * time_sqrt * calcNormalDistribution(d1);
         double rho   = -strikePrice*expTime*Math.exp(-p.getInterestRate()*expTime) * calcNormalized(-d2);
         return new Greeks(delta,gamma,thetaPerYear,vega,rho);
-    };
+    }
 
     private double calcD1(Parameter p)
     {
@@ -40,9 +45,6 @@ public class EuroPut extends OptionBase {
         double d1 = (Math.log(p.getSpotPrice()/strikePrice)+p.getInterestRate()*p.getTimeToExpirationAsFractionOfYear(expiration))/(p.getSigma()*time_sqrt) + 0.5*p.getSigma()*time_sqrt;
         return d1;
     }
-
-    private double strikePrice;
-    private DateTime expiration;
 
 
 

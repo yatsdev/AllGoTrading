@@ -11,8 +11,7 @@ public class OrderNew extends OrderBase {
     public static OrderNew NULL = new OrderNewNull();
 
     public boolean isExecutingWith(Decimal frontRowPrice) {
-        if(bookSide.isMoreBehindThan(limit, frontRowPrice)) return false;
-        return true;
+        return !bookSide.isMoreBehindThan(limit, frontRowPrice);
     }
 
     public BookRow getAsRow() {
@@ -155,9 +154,8 @@ public class OrderNew extends OrderBase {
         if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
         if(!(size.isEqualTo(data.size))) return false;
         if(!(limit.isEqualTo(data.limit))) return false;
-        if(productId.compareTo(data.productId)!=0) return false;
+        return productId.compareTo(data.productId) == 0;
 
-        return true;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////

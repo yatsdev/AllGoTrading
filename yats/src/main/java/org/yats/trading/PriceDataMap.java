@@ -5,7 +5,7 @@ import org.yats.common.Decimal;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MarketDataMap {
+public class PriceDataMap {
 
     public boolean containsKey(String productId) {
         return rates.containsKey(productId);
@@ -15,20 +15,20 @@ public class MarketDataMap {
         return get(productId).getLast();
     }
 
-    public MarketData get(String productId) {
+    public PriceData get(String productId) {
         if(!containsKey(productId)) throw new CommonExceptions.KeyNotFoundException("Can not find key "+productId);
         return rates.get(productId);
     }
 
-    public void put(String productId, MarketData marketData) {
-        rates.put(productId, marketData);
+    public void put(String productId, PriceData priceData) {
+        rates.put(productId, priceData);
     }
 
-    public MarketDataMap() {
-        rates = new ConcurrentHashMap<String, MarketData>();
+    public PriceDataMap() {
+        rates = new ConcurrentHashMap<String, PriceData>();
     }
 
-    private ConcurrentHashMap<String, MarketData> rates;
+    private ConcurrentHashMap<String, PriceData> rates;
 
 
 } // class

@@ -4,9 +4,6 @@ import org.yats.common.Decimal;
 
 import java.util.Vector;
 
-/**
- * Created by emiliano on 25/05/2014.
- */
 public class ProductStaticData extends Product {
     private String productDescription;
     private String productType;

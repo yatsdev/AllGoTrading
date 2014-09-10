@@ -65,10 +65,9 @@ public class OrderNewMsg {
         if(exchange.compareTo(data.exchange)!=0) return false;
         if(!(bookSideDirection==data.bookSideDirection))return false;
         if(size.compareTo(data.size)!=0) return false;
-        if(limit.compareTo(data.limit)!=0) return false;
+      return limit.compareTo(data.limit) == 0;
 
-        return true;
-    }
+  }
 
     public String timestamp;
     public String orderId;

@@ -24,7 +24,7 @@ public class ProductStaticDataTest {
         productStaticData.setProductDescription("Wal-Mart Stores, Inc. operates discount stores, supercenters, and neighborhood markets. The Company's discount stores and supercenters offer merchandise such as apparel, housewares, small appliances, electronics, and hardware. Walmart's markets offer a full-line supermarket and a limited assortment of general merchandise. The Company operates nationally and internationally."); //Bloomberg description
         productStaticData.setProductType("Equity");
 
-        assert(productStaticData.isHasDerivatives()==false);
+        assert(!productStaticData.isHasDerivatives());
 
         productStaticData.setDerivative(productDerivative);
 
@@ -51,7 +51,7 @@ public class ProductStaticDataTest {
         productStaticData.setTP(TPVector);
 
         assert(!(productStaticData.getTP()==null));
-        assert(productStaticData.isHasDerivatives()==true);
+        assert(productStaticData.isHasDerivatives());
         assert(productStaticData.getProductType().equals("Equity"));
         assert(productStaticData.getAvarageTargetPrice().isEqualTo(Decimal.fromDouble(79)));
 

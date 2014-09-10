@@ -1,7 +1,5 @@
 package org.yats.trading;
 
-import org.yats.common.Decimal;
-
 import java.util.LinkedList;
 
 public class ReceiptStorageMem implements IConsumeReceipt {
@@ -27,8 +25,7 @@ public class ReceiptStorageMem implements IConsumeReceipt {
         String lineSeparator = System.getProperty( "line.separator" );
         String[] lines = csv.split(lineSeparator);
         ReceiptStorageMem storage = new ReceiptStorageMem();
-        for(int i = 0; i<lines.length; i++) {
-            String line = lines[i];
+        for (String line : lines) {
             Receipt r = Receipt.fromStringCSV(line);
             storage.onReceipt(r);
         }

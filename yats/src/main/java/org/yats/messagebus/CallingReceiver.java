@@ -5,8 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
 public class CallingReceiver<T> extends Receiver<T> implements Runnable {
 
     final Logger log = LoggerFactory.getLogger(CallingReceiver.class);

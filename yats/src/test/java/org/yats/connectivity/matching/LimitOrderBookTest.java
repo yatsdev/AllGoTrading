@@ -6,7 +6,7 @@ import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
+public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
 
     @Test
     public void canMatchIntoEmptyBookCreatingMakerReceipts()
@@ -68,23 +68,23 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
 
     @BeforeMethod
     public void setUp() {
-        book = new LimitOrderBook(ProductTest.PRODUCT1.getProductId(), this);
+        book = new LimitOrderBook(ProductTest.TEST_PRODUCT1_ID, this);
         bid100At10 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(10))
                 .withSize(Decimal.fromDouble(100));
         bid200At12 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(200));
         ask100At11 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(100));
         receiptCounter=0;
@@ -99,7 +99,7 @@ public class LimitOrderBookTest implements IConsumeMarketDataAndReceipt {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
 
     }
 

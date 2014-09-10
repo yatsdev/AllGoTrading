@@ -10,7 +10,7 @@ public class ReceiptTest {
 
     public final static Receipt RECEIPT1 = Receipt.create()
             .withOrderId(UniqueId.createFromString("1"))
-            .withProductId(ProductTest.PRODUCT1.getProductId())
+            .withProductId(ProductTest.TEST_PRODUCT1_ID)
             .withExternalAccount("1")
             .withInternalAccount(INTERNAL_ACCOUNT1)
             .withCurrentTradedSize(Decimal.ONE)
@@ -21,7 +21,7 @@ public class ReceiptTest {
             ;
     public final static Receipt RECEIPT2 = Receipt.create()
             .withOrderId(UniqueId.createFromString("2"))
-            .withProductId(ProductTest.PRODUCT1.getProductId())
+            .withProductId(ProductTest.TEST_PRODUCT1_ID)
             .withExternalAccount("1")
             .withInternalAccount(INTERNAL_ACCOUNT1)
             .withCurrentTradedSize(Decimal.ONE)
@@ -32,7 +32,7 @@ public class ReceiptTest {
             ;
     public final static Receipt RECEIPT3 = Receipt.create()
             .withOrderId(UniqueId.createFromString("2"))
-            .withProductId(ProductTest.PRODUCT1.getProductId())
+            .withProductId(ProductTest.TEST_PRODUCT1_ID)
             .withExternalAccount("1")
             .withInternalAccount(INTERNAL_ACCOUNT1)
             .withCurrentTradedSize(Decimal.ONE)
@@ -43,7 +43,7 @@ public class ReceiptTest {
             ;
     public final static Receipt RECEIPT4 = Receipt.create()
             .withOrderId(UniqueId.createFromString("4"))
-            .withProductId(ProductTest.PRODUCT1.getProductId())
+            .withProductId(ProductTest.TEST_PRODUCT1_ID)
             .withExternalAccount("1")
             .withInternalAccount(INTERNAL_ACCOUNT2)
             .withCurrentTradedSize(Decimal.fromDouble(9))
@@ -54,7 +54,7 @@ public class ReceiptTest {
             ;
     public final static Receipt RECEIPT5 = Receipt.create()
             .withOrderId(UniqueId.createFromString("5"))
-            .withProductId(ProductTest.PRODUCT1.getProductId())
+            .withProductId(ProductTest.TEST_PRODUCT1_ID)
             .withExternalAccount("1")
             .withInternalAccount(INTERNAL_ACCOUNT1)
             .withCurrentTradedSize(Decimal.fromDouble(2))
@@ -62,5 +62,38 @@ public class ReceiptTest {
             .withPrice(Decimal.fromDouble(48))
             .withResidualSize(Decimal.ZERO)
             .withBookSide(BookSide.ASK)
+            ;
+    public final static Receipt RECEIPT6 = Receipt.create()
+            .withOrderId(UniqueId.createFromString("5"))
+            .withProductId(ProductTest.TEST_LEVERAGED1_ID)
+            .withExternalAccount("1")
+            .withInternalAccount(INTERNAL_ACCOUNT1)
+            .withCurrentTradedSize(Decimal.fromDouble(2))
+            .withTotalTradedSize(Decimal.fromDouble(2))
+            .withPrice(Decimal.fromDouble(48))
+            .withResidualSize(Decimal.ZERO)
+            .withBookSide(BookSide.ASK)
+            ;
+    public final static Receipt RECEIPT7 = Receipt.create()
+            .withOrderId(UniqueId.createFromString("5"))
+            .withProductId(ProductTest.TEST_LEVERAGED1_ID)
+            .withExternalAccount("1")
+            .withInternalAccount(INTERNAL_ACCOUNT1)
+            .withCurrentTradedSize(Decimal.fromDouble(2))
+            .withTotalTradedSize(Decimal.fromDouble(2))
+            .withPrice(Decimal.fromDouble(45))
+            .withResidualSize(Decimal.ZERO)
+            .withBookSide(BookSide.BID)
+            ;
+    public final static Receipt RECEIPT8 = Receipt.create()
+            .withOrderId(UniqueId.createFromString("5"))
+            .withProductId(ProductTest.TEST_LEVERAGED1_ID)
+            .withExternalAccount("1")
+            .withInternalAccount(INTERNAL_ACCOUNT1)
+            .withCurrentTradedSize(Decimal.fromDouble(2))
+            .withTotalTradedSize(Decimal.fromDouble(2))
+            .withPrice(Decimal.fromDouble(50))
+            .withResidualSize(Decimal.ZERO)
+            .withBookSide(BookSide.BID)
             ;
 }

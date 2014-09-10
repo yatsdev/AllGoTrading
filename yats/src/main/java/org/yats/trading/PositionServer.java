@@ -11,16 +11,17 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
 
     final Logger log = LoggerFactory.getLogger(PositionServer.class);
 
-    public String getPositionSnapshotCSV() {
-        return positionSnapshot.toStringCSV();
-    }
-
     @Override
     public void onReceipt(Receipt receipt) {
         if (!receipt.isTrade()) return;
+        if(!productList.containsProductWith(receipt.getProductId()))
+            throw new TradingExceptions.UnknownIdException("Unknown product in receipt "+receipt);
         numberOfReceipts++;
-        AccountPosition positionChange = receipt.toAccountPosition();
-        positionSnapshot.add(positionChange);
+        AccountPosition positionChangeOfBase = receipt.getPositionChangeOfBaseAsAccountPosition();
+        positionSnapshot.add(positionChangeOfBase);
+
+        AccountPosition counterPosition = receipt.getPositionChangeOfCounterAsAccountPosition(productList);
+        positionSnapshot.add(counterPosition);
         log.info("new position snapshot: "+positionSnapshot.toStringCSV());
         positionStorage.store(positionSnapshot);
     }
@@ -72,10 +73,6 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
         return positionSnapshot;
     }
 
-    public boolean isEmpty() {
-        return positionSnapshot.size()==0;
-    }
-
     public void setPositionSnapshot(PositionSnapshot _positionSnapshot)
     {
         positionSnapshot = _positionSnapshot;
@@ -86,14 +83,23 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
         positionSnapshot.add(newPositionSnapshot);
     }
 
-    public void clearPositions() {
-        positionSnapshot = new PositionSnapshot();
+    public void setProductList(IProvideProduct productList) {
+        this.productList = productList;
     }
 
     public void setRateConverter(IConvertRate _rateConverter)
     {
         rateConverter = _rateConverter;
         positionSnapshot.setRateConverter(rateConverter);
+    }
+
+    public void setPositionStorage(IStorePositionSnapshots positionStorage) {
+        this.positionStorage = positionStorage;
+    }
+
+    public void initFromLastStoredPositionSnapshot() {
+        positionSnapshot = positionStorage.readLast();
+        log.info("PositionServer starting position: "+positionSnapshot.toStringCSV());
     }
 
     public PositionServer() {
@@ -109,19 +115,11 @@ public class PositionServer implements IConsumeReceipt, IProvidePosition {
                 throw new NotImplementedException();
             }
         };
+        productList = new ProductList();
 
     }
 
-    public void setPositionStorage(IStorePositionSnapshots positionStorage) {
-        this.positionStorage = positionStorage;
-    }
-
-    public void initFromLastStoredPositionSnapshot() {
-        positionSnapshot = positionStorage.readLast();
-        log.info("PositionServer starting position: "+positionSnapshot.toStringCSV());
-    }
-
-
+    private IProvideProduct productList;
     private int numberOfReceipts;
     private PositionSnapshot positionSnapshot;
     private IStorePositionSnapshots positionStorage;

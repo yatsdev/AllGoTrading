@@ -13,7 +13,7 @@ import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
-import org.yats.messagebus.messages.MarketDataMsg;
+import org.yats.messagebus.messages.PriceDataMsg;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
@@ -84,20 +84,20 @@ public class Connection {
         private String symbol;
         Future<Integer> orderJob;
         Future<Boolean> orderCloseJob;
-        Sender<MarketDataMsg> sender;
+        Sender<PriceDataMsg> sender;
 
         private MyTickListener(String _symbol) {
             this.symbol = _symbol;
             orderJob = null;
             orderCloseJob = null;
             Config c = Config.fromProperties(Config.createRealProperties());
-            sender = new Sender<MarketDataMsg>(c.getExchangeMarketData(), c.getServerIP());
+            sender = new Sender<PriceDataMsg>(c.getExchangePriceData(), c.getServerIP());
         }
 
         @Override
         public void onTick(final TickInfo tick, MT4 connection) {
 
-            MarketDataMsg data = new MarketDataMsg();
+            PriceDataMsg data = new PriceDataMsg();
 
             data.productId=symbol;
             data.bid= Decimal.fromDouble(tick.bid).toString();

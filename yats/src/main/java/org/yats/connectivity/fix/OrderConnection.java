@@ -141,7 +141,7 @@ public class OrderConnection implements ISendOrder {
 
     private boolean isCorrectRoute(String productId) {
         try {
-            Product p = productProvider.getProductForProductId(productId);
+            Product p = productProvider.getProductWith(productId);
             return p.isRoute(ROUTE);
         } catch(TradingExceptions.ItemNotFoundException e) {}
         return false;
@@ -155,7 +155,7 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new ClOrdID(UniqueId.create().toString()));
 //        fixOrder.set(new Account(orderCancel.getExternalAccount()));
         fixOrder.set(new Account(externalAccount));
-        Product p = productProvider.getProductForProductId(orderCancel.getProductId());
+        Product p = productProvider.getProductWith(orderCancel.getProductId());
         fixOrder.set(new Symbol(p.getSymbol()));
         if (orderCancel.getSide().toDirection()>0) {
             fixOrder.set(new Side(Side.BUY));
@@ -172,7 +172,7 @@ public class OrderConnection implements ISendOrder {
         fixOrder.set(new HandlInst('1'));
 //        fixOrder.set(new Account(order.getExternalAccount()));
         fixOrder.set(new Account(externalAccount));
-        Product p = productProvider.getProductForProductId(order.getProductId());
+        Product p = productProvider.getProductWith(order.getProductId());
         BookSide side = order.getBookSide();
         fixOrder.set(new Symbol(p.getSymbol()));
         fixOrder.set(new SecurityID(p.getProductId()));

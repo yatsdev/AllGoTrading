@@ -20,12 +20,10 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.*;
-import org.yats.messagebus.Config;
 import org.yats.messagebus.Deserializer;
-import org.yats.messagebus.Sender;
 import org.yats.messagebus.Serializer;
-import org.yats.messagebus.messages.MarketDataMsg;
 import org.yats.messagebus.messages.OrderNewMsg;
+import org.yats.messagebus.messages.ReceiptMsg;
 import org.yats.trading.*;
 
 import java.io.*;
@@ -83,7 +81,7 @@ public class FXOrders implements ISendOrder, Runnable {
             }
             String oandaOrderId = extractServerOrderId(response);
             log.debug("created Oanda order with orderId="+orderNew.getOrderId()+" oandaId=" + oandaOrderId);
-            oandaId2OrderMap.put(oandaOrderId, orderNew);
+            oandaId2Receipt.put(oandaOrderId, orderNew.createReceiptDefault().withExternalAccount(getOandaAccount()));
             orderId2OandaIdMap.put(orderNew.getOrderId().toString(), oandaOrderId);
             writeFileOandaId2OrderMap();
             writeFileOrderId2OandaIdMap();
@@ -105,7 +103,6 @@ public class FXOrders implements ISendOrder, Runnable {
                 e.printStackTrace();
             }
         }
-        return;
     }
 
     @Override
@@ -143,7 +140,6 @@ public class FXOrders implements ISendOrder, Runnable {
 //                receiptConsumer.onReceipt(r);
             }
             if(entity!=null) EntityUtils.consume(entity);
-            return;
         } catch (IOException e) {
             e.printStackTrace();
 
@@ -192,34 +188,32 @@ public class FXOrders implements ISendOrder, Runnable {
                             ? values.get("orderId").toString()
                             : values.get("id").toString();
                     String type = values.get("type").toString();
-                    if(!oandaId2OrderMap.containsKey(id)) {
+                    if(!oandaId2Receipt.containsKey(id)) {
                         log.error("OandaReceipt: got receipt for unknown order: "+msg);
                         continue;
                     }
-                    OrderNew o = oandaId2OrderMap.get(id);
-                    Receipt r = o.createReceiptDefault()
-                            .withExternalAccount(getOandaAccount())
-                            ;
+                    Receipt r  = oandaId2Receipt.get(id);
                     if(type.compareTo("LIMIT_ORDER_CREATE")==0){
                         log.info("OandaReceipt: LIMIT_ORDER_CREATE for "+id);
                     } else
                     if(type.compareTo("ORDER_CANCEL")==0) {
                         log.info("OandaReceipt: ORDER_CANCEL for "+id);
                         r=r.withEndState(true);
-                        oandaId2OrderMap.remove(id);
-                        orderId2OandaIdMap.remove(o.getOrderId().toString());
+                        oandaId2Receipt.remove(id);
+                        orderId2OandaIdMap.remove(r.getOrderId().toString());
                         writeFileOandaId2OrderMap();
                         writeFileOrderId2OandaIdMap();
                     } else
                     if(type.compareTo("ORDER_FILLED")==0) {
                         log.info("OandaReceipt: ORDER_FILLED for "+id);
-                        Decimal size = Decimal.fromString(values.get("units").toString());
-                        r=r.withEndState(true)
-                                .withCurrentTradedSize(size)
-                                .withTotalTradedSize(size)
-                        ;
-                        oandaId2OrderMap.remove(id);
-                        orderId2OandaIdMap.remove(o.getOrderId().toString());
+                        Decimal currentTradedSize = Decimal.fromString(values.get("units").toString());
+                        r.setCurrentTradedSize(currentTradedSize);
+                        r.setResidualSize(r.getResidualSize().subtract(currentTradedSize));
+                        r.setTotalTradedSize(r.getTotalTradedSize().add(currentTradedSize));
+                        if(r.isPartialFill()) log.info("Order filled partially: "+r.toString());
+                        r.setEndState(!r.isPartialFill());
+                        oandaId2Receipt.remove(id);
+                        orderId2OandaIdMap.remove(r.getOrderId().toString());
                         writeFileOandaId2OrderMap();
                         writeFileOrderId2OandaIdMap();
                     } else {
@@ -266,7 +260,7 @@ public class FXOrders implements ISendOrder, Runnable {
         prop=_prop;
         httpPoll = new DefaultHttpClient();
         httpStream = new DefaultHttpClient();
-        oandaId2OrderMap = new ConcurrentHashMap<String, OrderNew>();
+        oandaId2Receipt = new ConcurrentHashMap<String, Receipt>();
         orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
         oandaId2OrderMapFilename = "fxOrdersMap.txt";
         orderId2OandaIdMapFilename = "fxOandaIdMap.txt";
@@ -357,11 +351,11 @@ public class FXOrders implements ISendOrder, Runnable {
 
     private String oandaId2OrderMapToStringCSV() {
         StringBuilder b = new StringBuilder();
-        for(String key : oandaId2OrderMap.keySet()) {
-            OrderNew o = oandaId2OrderMap.get(key);
+        for(String key : oandaId2Receipt.keySet()) {
+            Receipt o = oandaId2Receipt.get(key);
             b.append(key); b.append(";");
-            Serializer<OrderNewMsg> serializer = new Serializer<OrderNewMsg>();
-            String s = serializer.convertToString(OrderNewMsg.createFromOrderNew(o));
+            Serializer<ReceiptMsg> serializer = new Serializer<ReceiptMsg>();
+            String s = serializer.convertToString(ReceiptMsg.fromReceipt(o));
             b.append(s);
             b.append(FileTool.getLineSeparator());
         }
@@ -394,13 +388,13 @@ public class FXOrders implements ISendOrder, Runnable {
 
     private void parseOandaId2OrderMap(String csv) {
         String[] lines = csv.split(FileTool.getLineSeparator());
-        Deserializer<OrderNewMsg> deserializer = new Deserializer<OrderNewMsg>(OrderNewMsg.class);
-        for(int i=0; i<lines.length; i++) {
-            String[] parts = lines[i].split(";");
-            if(parts.length<2) continue;
-            OrderNewMsg m = deserializer.convertFromString(parts[1]);
-            OrderNew o = m.toOrderNew();
-            oandaId2OrderMap.put(parts[0], o);
+        Deserializer<ReceiptMsg> deserializer = new Deserializer<ReceiptMsg>(ReceiptMsg.class);
+        for (String line : lines) {
+            String[] parts = line.split(";");
+            if (parts.length < 2) continue;
+            ReceiptMsg m = deserializer.convertFromString(parts[1]);
+            Receipt o = m.toReceipt();
+            oandaId2Receipt.put(parts[0], o);
         }
     }
 
@@ -415,7 +409,7 @@ public class FXOrders implements ISendOrder, Runnable {
     private IProvideProperties prop;
     private DefaultHttpClient httpPoll;
     private DefaultHttpClient httpStream;
-    private ConcurrentHashMap<String, OrderNew> oandaId2OrderMap;
+    private ConcurrentHashMap<String, Receipt> oandaId2Receipt;
     private ConcurrentHashMap<String, String> orderId2OandaIdMap;
     private String orderId2OandaIdMapFilename;
     private String oandaId2OrderMapFilename;
