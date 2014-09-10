@@ -259,6 +259,8 @@ public class ExcelConnection implements DDEClientEventListener,
             parseStrategyNames(data);
             parsekeyValues(data2);
             System.out.print("conversationReports.startAdvice...");
+          //  conversationReports.startAdvice("C1");
+          //  conversationReports.startAdvice("R1");
             System.out.println("done.");
         } catch (DDEMLException e) {
             System.out.println("DDEMLException: 0x" + Integer.toHexString(e.getErrorCode())
@@ -288,6 +290,8 @@ public class ExcelConnection implements DDEClientEventListener,
         try {
             shutdown = true;
             Tool.sleepFor(500);
+            conversationReports.stopAdvice("C1");
+            conversationReports.stopAdvice("R1");
             conversationReports.disconnect();
         } catch (DDEException e) {
             e.printStackTrace();
@@ -369,6 +373,7 @@ public class ExcelConnection implements DDEClientEventListener,
     }
 
     private void parseStrategyNames(String strategyNames) {
+
         String[] parts = strategyNames.split("\r\n");
         StrategyNames = new Vector<String>(Arrays.asList(parts));
         if(StrategyNames.size()>0){StrategyNames.removeElementAt(0);}//R1C1 is empty
@@ -376,6 +381,7 @@ public class ExcelConnection implements DDEClientEventListener,
     }
 
     private void parsekeyValues(String keyValues) {
+
 
         String[] parts = keyValues.split("\t");
         KeyValues = new Vector<String>(Arrays.asList(parts));
