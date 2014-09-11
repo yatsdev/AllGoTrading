@@ -11,20 +11,6 @@ import java.util.Vector;
 
 public class ExcelTest {
 
-    /*
-    Please leave Excel out of tests. Use mock objects to mimic the external connection.
-    @Test
-    public void canConvertR1StringtoVector()
-    {
-        Vector<String> R1=new Vector<String>();
-        String R1request=new String("\tlastStep\taverageOrderSize\r\n");//This will be improved later on by actually requesting the R1 column in the test Excel file
-        ExcelTools test=new ExcelTools(null);
-        R1.add("lastStep");
-        R1.add("averageOrderSize");
-        assert(test.R1ColumnParser(R1request).equals(R1));
-
-    }
-    */
 
     @Test
     public void canConnectWithDDEToReportsSheetAndRequestFirstRow() {
