@@ -3,8 +3,13 @@ package org.yats.connectivity.excel;
 import com.pretty_tools.dde.DDEException;
 import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DDELink implements IProvideDDEConversation {
+
+    final Logger log = LoggerFactory.getLogger(DDELink.class);
+
 
     public static class ConversationException extends RuntimeException {
         public ConversationException(String s) { super(s);
@@ -76,6 +81,7 @@ public class DDELink implements IProvideDDEConversation {
 
     @Override
     public void connect(String where, String what) {
+        log.info("Connecting with "+where+" to sheet "+what);
         try {
             c.connect(where, what);
         } catch (DDEException e) {

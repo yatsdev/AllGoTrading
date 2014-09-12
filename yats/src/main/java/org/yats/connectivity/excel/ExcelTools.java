@@ -16,8 +16,27 @@ public class ExcelTools implements DDELinkEventListener {
 
     @Override
     public void onItemChanged(String sheetId, String cellId, String data) {
-        if (cellId.compareTo("C1") == 0) parseFirstColumn(data);
-        if (cellId.compareTo("R1") == 0) parseFirstRow(data);
+        if (cellId.compareTo("C1") == 0) {
+            updateFirstColumn(data);
+        } else if (cellId.compareTo("R1") == 0) {
+            updateFirstRow(data);
+        }
+    }
+
+    private void updateFirstRow(String data) {
+        String currentFirstRowString = getColumnIdsString();
+        parseFirstRow(data);
+        String newFirstRowString = getColumnIdsString();
+        boolean firstRowChanged = currentFirstRowString.compareTo(newFirstRowString)!=0;
+        if(firstRowChanged) pokeFirstRow();
+    }
+
+    private void updateFirstColumn(String data) {
+        String currentFirstColumnString = getRowIdsString();
+        parseFirstColumn(data);
+        String newFirstColumnString = getRowIdsString();
+        boolean firstColumnChanged = currentFirstColumnString.compareTo(newFirstColumnString)!=0;
+        if(firstColumnChanged) pokeFirstColumn();
     }
 
 
@@ -44,11 +63,11 @@ public class ExcelTools implements DDELinkEventListener {
         updateCombiKey2ItemMap(itemList);
 
         for (String p : rowIdsToUpdate.keySet()) {
-            pokeRowForAllAccountsOfProduct(p);
+            pokeRowForRowIds(p);
         }
     }
 
-    private void pokeRowForAllAccountsOfProduct(String rowId) {
+    private void pokeRowForRowIds(String rowId) {
         String s = "";
         int index = rowIdList.indexOf(rowId);
         if (index < 0) return;
@@ -91,19 +110,19 @@ public class ExcelTools implements DDELinkEventListener {
     }
 
     private void updatePositionsAxis(List<MatrixItem> itemList) {
-        int countOfRowIds = rowIdList.size();
+        String firstRowStringOld = getColumnIdsString();
         for (MatrixItem p : itemList) {
             updateList(columnIdList, mapOfColumnIds, p.getColumnId());
         }
-        boolean updateRowIds = rowIdList.size() > countOfRowIds;
-        if (updateRowIds) pokeFirstColumn();
+        boolean updateFirstRow = firstRowStringOld.compareTo(getColumnIdsString()) != 0;
+        if (updateFirstRow) pokeFirstRow();
 
-        int countOfColumnIds = columnIdList.size();
+        String firstColumnStringOld = getRowIdsString();
         for (MatrixItem p : itemList) {
             updateList(rowIdList, mapOfRowIds, p.getRowId());
         }
-        boolean updateColumnIds = columnIdList.size() > countOfColumnIds;
-        if (updateColumnIds) pokeFirstRow();
+        boolean updateFirstColumn = firstColumnStringOld.compareTo(getRowIdsString()) != 0;
+        if (updateFirstColumn) pokeFirstColumn();
     }
 
     private void updateList(List<String> list, ConcurrentHashMap<String, String> map, String item) {
@@ -113,19 +132,27 @@ public class ExcelTools implements DDELinkEventListener {
     }
 
     private void pokeFirstColumn() {
+        pokePositions("C1", getRowIdsString());
+    }
+
+    private String getRowIdsString() {
         String data = "\r\n";
         for (String s : rowIdList) {
             data += s + "\r\n";
         }
-        pokePositions("C1", data);
+        return data;
     }
 
     private void pokeFirstRow() {
+        pokePositions("R1", getColumnIdsString());
+    }
+
+    private String getColumnIdsString() {
         String data = "\t";
         for (String s : columnIdList) {
             data += s + "\t";
         }
-        pokePositions("R1", data);
+        return data;
     }
 
     private void pokePositionsRow(int row, int count, String what) {

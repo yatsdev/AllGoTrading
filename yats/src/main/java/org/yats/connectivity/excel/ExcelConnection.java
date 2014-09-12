@@ -1,17 +1,18 @@
 package org.yats.connectivity.excel;
 
-import com.pretty_tools.dde.client.DDEClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
-import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.trading.*;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExcelConnection implements DDELinkEventListener,
@@ -104,93 +105,93 @@ public class ExcelConnection implements DDELinkEventListener,
     public synchronized void onReport(IProvideProperties p,boolean hasMoreReports) {
 
 
-        try {
-
-            String StrategyNameOfThisReport = null;
-            ConcurrentHashMap<String, String> hashmapKeyValue = new ConcurrentHashMap();
-
-            if (!p.exists("strategyName")) {
-                log.error("strategy without name found:" + p.toString());
-                return;
-            }
-            if (p.size() < 2) {
-                log.error("strategy without key/values found:" + p.toString());
-                return;
-            } else {
-
-
-                for (String key : p.getKeySet()) {
-
-                    if (!(key.compareTo("strategyName") == 0)) {
-                        String value = p.get(key);
-                        hashmapKeyValue.put(key, value);
-
-                    } else {
-
-                        StrategyNameOfThisReport = p.get("strategyName");
-                    }
-                }
-
-                theMatrix.put(StrategyNameOfThisReport, hashmapKeyValue);
-
-            }
-
-
-            addKeyValuesNotPresentInR1(StrategyNameOfThisReport);
-            addStrategyNamesNotPresentInC1(StrategyNameOfThisReport);
-
-            //Finally poking data from reports in a per row poke transaction fashion
-
-            int strategyIndex;
-            for (int q = 0; q < StrategyNames.size(); q++) {
-                strategyIndex = q + 2;
-                if (StrategyNames.elementAt(q).compareTo(p.get("strategyName")) == 0) {
-                    conversationReports.poke("R" + strategyIndex + "C2:R" + strategyIndex + "C" + positionKeyValues, generatePerRowPokeString(KeyValues, hashmapKeyValue));//RightMostCell
-                }
-            }
-
-        } catch (DDELink.ConversationException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("Strategy reports: " + PropertiesReader.toString(p));
-
-        //lets send the report back as settings to test the way back to the strategy
-//        strategyToBusConnection.sendSettings(p);
+//        try {
+//
+//            String StrategyNameOfThisReport = null;
+//            ConcurrentHashMap<String, String> hashmapKeyValue = new ConcurrentHashMap();
+//
+//            if (!p.exists("strategyName")) {
+//                log.error("strategy without name found:" + p.toString());
+//                return;
+//            }
+//            if (p.size() < 2) {
+//                log.error("strategy without key/values found:" + p.toString());
+//                return;
+//            } else {
+//
+//
+//                for (String key : p.getKeySet()) {
+//
+//                    if (!(key.compareTo("strategyName") == 0)) {
+//                        String value = p.get(key);
+//                        hashmapKeyValue.put(key, value);
+//
+//                    } else {
+//
+//                        StrategyNameOfThisReport = p.get("strategyName");
+//                    }
+//                }
+//
+//                theMatrix.put(StrategyNameOfThisReport, hashmapKeyValue);
+//
+//            }
+//
+//
+//            addKeyValuesNotPresentInR1(StrategyNameOfThisReport);
+//            addStrategyNamesNotPresentInC1(StrategyNameOfThisReport);
+//
+//            //Finally poking data from reports in a per row poke transaction fashion
+//
+//            int strategyIndex;
+//            for (int q = 0; q < StrategyNames.size(); q++) {
+//                strategyIndex = q + 2;
+//                if (StrategyNames.elementAt(q).compareTo(p.get("strategyName")) == 0) {
+//                    excelToolsReports.poke("R" + strategyIndex + "C2:R" + strategyIndex + "C" + positionKeyValues, generatePerRowPokeString(KeyValues, hashmapKeyValue));//RightMostCell
+//                }
+//            }
+//
+//        } catch (DDELink.ConversationException e) {
+//            e.printStackTrace();
+//        }
+//
+//        System.out.println("Strategy reports: " + PropertiesReader.toString(p));
+//
+//        //lets send the report back as settings to test the way back to the strategy
+////        strategyToBusConnection.sendSettings(p);
     }
 
-    private synchronized void addStrategyNamesNotPresentInC1(String StrategyNameOfThisReport) {
-        if (!StrategyNames.contains(StrategyNameOfThisReport)) {
-            try {
+//    private synchronized void addStrategyNamesNotPresentInC1(String StrategyNameOfThisReport) {
+//        if (!StrategyNames.contains(StrategyNameOfThisReport)) {
+//            try {
+//
+//                excelToolsReports.poke("R" + positionStrategyName + "C1", StrategyNameOfThisReport);
+//
+//            } catch (DDELink.ConversationException e) {
+//                e.printStackTrace();
+//            }
+//            StrategyNames.add(StrategyNameOfThisReport);
+//            positionStrategyName = StrategyNames.size() + 2;
+//        }
+//    }
 
-                conversationReports.poke("R" + positionStrategyName + "C1", StrategyNameOfThisReport);
 
-            } catch (DDELink.ConversationException e) {
-                e.printStackTrace();
-            }
-            StrategyNames.add(StrategyNameOfThisReport);
-            positionStrategyName = StrategyNames.size() + 2;
-        }
-    }
-
-
-    private synchronized void addKeyValuesNotPresentInR1(String nameOfThisStrategy) {
-        Enumeration<String> keys = theMatrix.get(nameOfThisStrategy).keys();
-        while (keys.hasMoreElements()) {
-            String currentKey = keys.nextElement();
-            if (!KeyValues.contains(currentKey)) {
-                try {
-
-                    conversationReports.poke("R1C" + positionKeyValues, currentKey);
-
-                } catch (DDELink.ConversationException e) {
-                    e.printStackTrace();
-                }
-                KeyValues.add(currentKey);
-                positionKeyValues = KeyValues.size() + 2;
-            }
-        }
-    }
+//    private synchronized void addKeyValuesNotPresentInR1(String nameOfThisStrategy) {
+//        Enumeration<String> keys = theMatrix.get(nameOfThisStrategy).keys();
+//        while (keys.hasMoreElements()) {
+//            String currentKey = keys.nextElement();
+//            if (!KeyValues.contains(currentKey)) {
+//                try {
+//
+//                    excelToolsReports.poke("R1C" + positionKeyValues, currentKey);
+//
+//                } catch (DDELink.ConversationException e) {
+//                    e.printStackTrace();
+//                }
+//                KeyValues.add(currentKey);
+//                positionKeyValues = KeyValues.size() + 2;
+//            }
+//        }
+//    }
 
     @Override
     public UniqueId getConsumerId() {
@@ -201,23 +202,13 @@ public class ExcelConnection implements DDELinkEventListener,
         strategyToBusConnection.subscribe(pid, this);
     }
 
-    public boolean isExcelRunning() {
-        return false;
-    }
-
-    public boolean isWorkbookOpenInExcel() {
-        return false;
-    }
-
-    public void startExcelWithWorkbook() {
-    }
-
     public void startDDE() {
         try {
             System.out.print("conversation.connect...");
             conversationPriceData.setTimeout(3000);
             conversationPriceData.connect("Excel", prop.get("DDEPathToExcelFile"));
             excelToolsPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
+            excelToolsPositions.init("Excel", prop.get("DDEPathToExcelFileWReports"));
             System.out.println("done.");
             System.out.print("conversation.request...");
             String s = conversationPriceData.request("C1");
@@ -239,29 +230,6 @@ public class ExcelConnection implements DDELinkEventListener,
 
     }
 
-    public void startDDEReports() {
-        try {
-            System.out.print("conversationReports.connect...");
-            conversationReports.setTimeout(3000);
-            conversationReports.connect("Excel", prop.get("DDEPathToExcelFileWReports"));
-            System.out.println("done.");
-            System.out.print("conversationReports.request...");
-            String data = conversationReports.request("C1");
-            String data2 = conversationReports.request("R1");
-            System.out.println("conversationReports done.");
-            parseStrategyNames(data);
-            parsekeyValues(data2);
-            System.out.print("conversationReports.startAdvice...");
-          //  conversationReports.startAdvice("C1");
-          //  conversationReports.startAdvice("R1");
-            System.out.println("done.");
-        } catch (DDELink.ConversationException e) {
-            System.out.println("DDEException: " + e.getMessage());
-            close();
-            System.exit(-1);
-        }
-    }
-
     public void stopDDE() {
         try {
             shutdown = true;
@@ -269,18 +237,7 @@ public class ExcelConnection implements DDELinkEventListener,
             conversationPriceData.stopAdvice("C1");//This means all elements in column 1
             conversationPriceData.disconnect();
             excelToolsPositions.disconnect();
-        } catch (DDELink.ConversationException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void stopDDEReports() {
-        try {
-            shutdown = true;
-            Tool.sleepFor(500);
-            conversationReports.stopAdvice("C1");
-            conversationReports.stopAdvice("R1");
-            conversationReports.disconnect();
+            excelToolsReports.disconnect();
         } catch (DDELink.ConversationException e) {
             e.printStackTrace();
         }
@@ -298,7 +255,6 @@ public class ExcelConnection implements DDELinkEventListener,
 
         if (Tool.isWindows()) {
             startDDE();
-            startDDEReports();
         }
         System.out.println("\n===");
         System.out.println("Initialization done.");
@@ -310,7 +266,6 @@ public class ExcelConnection implements DDELinkEventListener,
         close();
         if (Tool.isWindows()) {
             stopDDE();
-            stopDDEReports();
         }
         if (Tool.isWindows()) Thread.sleep(1000);
         if (!Tool.isWindows()) Thread.sleep(60000);
@@ -319,30 +274,6 @@ public class ExcelConnection implements DDELinkEventListener,
         System.exit(0);
     }
 
-    public ExcelConnection(IProvideProperties _prop,
-                           IProvideDDEConversation _priceConversation,
-                           IProvideDDEConversation _reportConversation,
-                           IProvideDDEConversation _positionConversation
-
-
-    ) {
-        shutdown = false;
-        prop = _prop;
-        positionProducts = new ArrayList<String>();
-        positionProductsMap = new ConcurrentHashMap<String, String>();
-        positionAccounts = new ArrayList<String>();
-        positionAccountsMap = new ConcurrentHashMap<String, String>();
-        productAccount2PositionMap = new ConcurrentHashMap<String, AccountPosition>();
-        if (!Tool.isWindows()) {
-            System.out.println("This is not Windows! DDELink will not work!");
-        }
-        conversationPriceData = _priceConversation;
-        conversationPriceData.setEventListener(this);
-        conversationReports = _reportConversation;
-        conversationReports.setEventListener(this);
-        excelToolsPositions = new ExcelTools(_positionConversation);
-        strategyToBusConnection = new StrategyToBusConnection(_prop);
-    }
 
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -366,8 +297,6 @@ public class ExcelConnection implements DDELinkEventListener,
     }
 
     private void parsekeyValues(String keyValues) {
-
-
         String[] parts = keyValues.split("\t");
         KeyValues = new Vector<String>(Arrays.asList(parts));
         if(KeyValues.size()>0&&!(KeyValues.elementAt(0).compareTo("\r\n")==0)) {
@@ -409,26 +338,7 @@ public class ExcelConnection implements DDELinkEventListener,
         return PerRowPokeString;
     }
 
-    private int positionStrategyName;
-    private int positionKeyValues;
-    private ConcurrentHashMap<String, ConcurrentHashMap> theMatrix = new ConcurrentHashMap();
-    private Vector<String> currentProductIDs = new Vector<String>();
-    private Vector<String> StrategyNames = new Vector<String>();
-    private Vector<String> KeyValues = new Vector<String>();
-    private StrategyToBusConnection strategyToBusConnection;
-    private IProvideDDEConversation conversationPriceData;
-    private IProvideDDEConversation conversationReports;
-    private IProvideProperties prop;
-    private boolean shutdown;
 
-
-
-    //////////////////////////////////////////////////////// POSITION SNAPSHOTS
-
-//    private synchronized void onPositionLayoutChanged(String sheetId, String observedCellId, String data) {
-//        if (observedCellId.compareTo("C1") == 0) parsePositionProducts(data);
-//        if (observedCellId.compareTo("R1") == 0) parsePositionAccounts(data);
-//    }
 
     @Override
     public synchronized void onPositionSnapshot(PositionSnapshot snapshot) {
@@ -439,149 +349,48 @@ public class ExcelConnection implements DDELinkEventListener,
         excelToolsPositions.updateMatrix(allSnapshotItems);
     }
 
-//    private void pokeRowForAllAccountsOfProduct(String p) {
-//        String s = "";
-//        int index = positionProducts.indexOf(p);
-//        if (index < 0) return;
-//        int row = 2 + index;
-//        int count = 1;
-//        for (String account : positionAccounts) {
-//            count++;
-//            String key = AccountPosition.getKey(p, account);
-//            if (productAccount2PositionMap.containsKey(key)) {
-//                AccountPosition ap = productAccount2PositionMap.get(key);
-//                s += ap.getSize().toString();
-//            } else s += "n/a";
-//            s += "\t";
-//        }
-//        pokePositionsRow(row, count, s);
-//    }
 
-//    private void updateProductAccount2PositionMap(PositionSnapshot snapshot) {
-//        for (AccountPosition pos : snapshot.getAllPositions()) {
-//            String key = pos.getKey();
-//            if (productAccount2PositionMap.containsKey(key)) {
-//                AccountPosition old = productAccount2PositionMap.get(key);
-//                if (pos.isSameAs(old)) continue;
-//            }
-//            productAccount2PositionMap.put(key, pos);
-//        }
-//    }
-
-//    private ConcurrentHashMap<String, String> getProductsToUpdate(PositionSnapshot snapshot) {
-//        ConcurrentHashMap<String, String> productsToUpdate = new ConcurrentHashMap<String, String>();
-//        for (AccountPosition pos : snapshot.getAllPositions()) {
-//            String key = pos.getKey();
-//            if (productAccount2PositionMap.containsKey(key)) {
-//                AccountPosition old = productAccount2PositionMap.get(key);
-//                if (pos.isSameAs(old)) continue;
-//            }
-//            productsToUpdate.put(pos.getProductId().toString(), pos.getProductId().toString());
-//        }
-//        return productsToUpdate;
-//    }
-
-//    private void updatePositionsAxis(PositionSnapshot snapshot) {
-//        int originalPositionProductsSize = positionProducts.size();
-//
-//        for (AccountPosition p : snapshot.getAllPositions()) {
-//            updateList(positionProducts, positionProductsMap, p.getProductId());
-//        }
-//        int originalPositionAccountsSize = positionAccounts.size();
-//        for (AccountPosition p : snapshot.getAllPositions()) {
-//            updateList(positionAccounts, positionAccountsMap, p.getInternalAccount());
-//        }
-//
-//        boolean updateProductsColumn = positionProducts.size() > originalPositionProductsSize;
-//        if (updateProductsColumn) pokePositionsProducts();
-//        boolean updateAccountsColumn = positionAccounts.size() > originalPositionAccountsSize;
-//        if (updateAccountsColumn) pokePositionsAccounts();
-//    }
-
-//    private void updateList(List<String> list, ConcurrentHashMap<String, String> map, String item) {
-//        if (map.containsKey(item)) return;
-//        list.add(item);
-//        map.put(item, item);
-//    }
-
-//    private void pokePositionsProducts() {
-//        String data = "\r\n";
-//        for (String s : positionProducts) {
-//            data += s + "\r\n";
-//        }
-//        pokePositions("C1", data);
-//    }
-
-//    private void pokePositionsAccounts() {
-//        String data = "\t";
-//        for (String s : positionAccounts) {
-//            data += s + "\t";
-//        }
-//        pokePositions("R1", data);
-//    }
-
-//    private void pokePositionsRow(int row, int count, String what) {
-//        if (row == 1) {
-//            System.out.println("Row 1 should never be poked to!");
-//            System.exit(-1);
-//        }
-//        pokePositions("R" + row + "C2:R" + row + "C" + count, what);
-//    }
-
-//    private void pokePositions(String where, String what) {
-//        while (true) {
-//            try {
-//                conversationPositions.poke(where, what);
-//                return;
-//            } catch (DDELink.ConversationException e) {
-////            e.printStackTrace();
-//                System.out.println("Excel seems busy. waiting...");
-//                Tool.sleepFor(3000);
-//            }
-//        }
-//    }
-
-//    private void parsePositionProducts(String data) {
-//        String productIdsString = data.replace("\r\n", "\t");
-//        String[] parts = productIdsString.split("\t");
-//        positionProducts.clear();
-//        positionProductsMap.clear();
-//        positionProducts.addAll(Arrays.asList(parts));
-//        for (String s : positionProducts) positionProductsMap.put(s, s);
-//        if (positionProducts.size() > 0) positionProducts.remove(0);
-//    }
+    public ExcelConnection(IProvideProperties _prop,
+                           IProvideDDEConversation _priceConversation,
+                           IProvideDDEConversation _reportConversation,
+                           IProvideDDEConversation _positionConversation
 
 
-//    private void parsePositionAccounts(String data) {
-//        String accountsString = data.replace("\r\n", "\t");
-//        String[] parts = accountsString.split("\t");
-//        positionAccounts.clear();
-//        positionAccountsMap.clear();
-//        positionAccounts.addAll(Arrays.asList(parts));
-//        for (String s : positionAccounts) positionAccountsMap.put(s, s);
-//        if (positionAccounts.size() > 0) positionAccounts.remove(0);
-//    }
+    ) {
+        shutdown = false;
+        prop = _prop;
+        if (!Tool.isWindows()) {
+            System.out.println("This is not Windows! DDELink will not work!");
+        }
+        conversationPriceData = _priceConversation;
+        conversationPriceData.setEventListener(this);
+        excelToolsPositions = new ExcelTools(_positionConversation);
+        excelToolsReports = new ExcelTools(_reportConversation);
 
-//    private void initConversationPositions() throws DDELink.ConversationException {
-//        conversationPositions.setTimeout(2000);
-//        conversationPositions.connect("Excel", prop.get("DDEPathToExcelFileWPositions"));
-//        String positionProductsString = conversationPositions.request("C1");
-//        parsePositionProducts(positionProductsString);
-//        String positionAccountsString = conversationPositions.request("R1");
-//        parsePositionAccounts(positionAccountsString);
-//        conversationPositions.startAdvice("C1");
-//        conversationPositions.startAdvice("R1");
-//    }
+        strategyToBusConnection = new StrategyToBusConnection(_prop);
+    }
 
-    private ArrayList<String> positionProducts;
-    private ConcurrentHashMap<String, String> positionProductsMap;
-    private ArrayList<String> positionAccounts;
-    private ConcurrentHashMap<String, String> positionAccountsMap;
-//    private DDEClientConversation conversationPositions;
-//    private IProvideDDEConversation conversationPositions;
-    private ConcurrentHashMap<String, AccountPosition> productAccount2PositionMap;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
     private ExcelTools excelToolsPositions;
+    private ExcelTools excelToolsReports;
+
+    private int positionStrategyName;
+    private int positionKeyValues;
+    private ConcurrentHashMap<String, ConcurrentHashMap> theMatrix = new ConcurrentHashMap();
+    private Vector<String> currentProductIDs = new Vector<String>();
+    private Vector<String> StrategyNames = new Vector<String>();
+    private Vector<String> KeyValues = new Vector<String>();
+    private StrategyToBusConnection strategyToBusConnection;
+    private IProvideDDEConversation conversationPriceData;
+
+    private IProvideProperties prop;
+    private boolean shutdown;
+
+
 
 } // class
 
