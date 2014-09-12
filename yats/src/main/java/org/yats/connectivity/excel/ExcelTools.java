@@ -2,8 +2,6 @@ package org.yats.connectivity.excel;
 
 
 import org.yats.common.Tool;
-import org.yats.trading.AccountPosition;
-import org.yats.trading.PositionSnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,24 +39,24 @@ public class ExcelTools implements DDELinkEventListener {
 
     public void updateMatrix(List<MatrixItem> itemList) {
         updatePositionsAxis(itemList);
-        combiKey2ItemMap.clear();
-        ConcurrentHashMap<String, String> productsToUpdate = getRowIdsToUpdate(itemList);
-        updateProductAccount2PositionMap(itemList);
+        if(snapShotMode) combiKey2ItemMap.clear();
+        ConcurrentHashMap<String, String> rowIdsToUpdate = getRowIdsToUpdate(itemList);
+        updateCombiKey2ItemMap(itemList);
 
-        for (String p : productsToUpdate.keySet()) {
+        for (String p : rowIdsToUpdate.keySet()) {
             pokeRowForAllAccountsOfProduct(p);
         }
     }
 
-    private void pokeRowForAllAccountsOfProduct(String p) {
+    private void pokeRowForAllAccountsOfProduct(String rowId) {
         String s = "";
-        int index = keysInFirstColumn.indexOf(p);
+        int index = rowIdList.indexOf(rowId);
         if (index < 0) return;
         int row = 2 + index;
         int count = 1;
-        for (String account : keysInFirstRow) {
+        for (String columnId : columnIdList) {
             count++;
-            String key = AccountPosition.getKey(p, account);
+            String key = MatrixItem.getKey(rowId, columnId);
             if (combiKey2ItemMap.containsKey(key)) {
                 MatrixItem ap = combiKey2ItemMap.get(key);
                 s += ap.getData();
@@ -68,7 +66,7 @@ public class ExcelTools implements DDELinkEventListener {
         pokePositionsRow(row, count, s);
     }
 
-    private void updateProductAccount2PositionMap(List<MatrixItem> list) {
+    private void updateCombiKey2ItemMap(List<MatrixItem> list) {
         for (MatrixItem pos : list) {
             String key = pos.getKey();
             if (combiKey2ItemMap.containsKey(key)) {
@@ -93,19 +91,19 @@ public class ExcelTools implements DDELinkEventListener {
     }
 
     private void updatePositionsAxis(List<MatrixItem> itemList) {
-        int originalPositionProductsSize = keysInFirstColumn.size();
+        int countOfRowIds = rowIdList.size();
+        for (MatrixItem p : itemList) {
+            updateList(columnIdList, mapOfColumnIds, p.getColumnId());
+        }
+        boolean updateRowIds = rowIdList.size() > countOfRowIds;
+        if (updateRowIds) pokeFirstColumn();
 
+        int countOfColumnIds = columnIdList.size();
         for (MatrixItem p : itemList) {
-            updateList(keysInFirstColumn, mapOfFirstColumnKeys, p.getColumnId());
+            updateList(rowIdList, mapOfRowIds, p.getRowId());
         }
-        int originalPositionAccountsSize = keysInFirstRow.size();
-        for (MatrixItem p : itemList) {
-            updateList(keysInFirstRow, mapOfFirstRowKeys, p.getRowId());
-        }
-        boolean updateProductsColumn = keysInFirstColumn.size() > originalPositionProductsSize;
-        if (updateProductsColumn) pokeFirstColumn();
-        boolean updateAccountsColumn = keysInFirstRow.size() > originalPositionAccountsSize;
-        if (updateAccountsColumn) pokeFirstRow();
+        boolean updateColumnIds = columnIdList.size() > countOfColumnIds;
+        if (updateColumnIds) pokeFirstRow();
     }
 
     private void updateList(List<String> list, ConcurrentHashMap<String, String> map, String item) {
@@ -116,7 +114,7 @@ public class ExcelTools implements DDELinkEventListener {
 
     private void pokeFirstColumn() {
         String data = "\r\n";
-        for (String s : keysInFirstColumn) {
+        for (String s : rowIdList) {
             data += s + "\r\n";
         }
         pokePositions("C1", data);
@@ -124,7 +122,7 @@ public class ExcelTools implements DDELinkEventListener {
 
     private void pokeFirstRow() {
         String data = "\t";
-        for (String s : keysInFirstRow) {
+        for (String s : columnIdList) {
             data += s + "\t";
         }
         pokePositions("R1", data);
@@ -164,27 +162,25 @@ public class ExcelTools implements DDELinkEventListener {
 
 
     private void parseFirstColumn(String data) {
-        String productIdsString = data.replace("\r\n", "\t");
-        String[] parts = productIdsString.split("\t");
-        keysInFirstColumn.clear();
-        mapOfFirstColumnKeys.clear();
-        keysInFirstColumn.addAll(Arrays.asList(parts));
-        for (String s : keysInFirstColumn) mapOfFirstColumnKeys.put(s, s);
-        if (keysInFirstColumn.size() > 0) keysInFirstColumn.remove(0);
+        String firstColumnString = data.replace("\r\n", "\t");
+        String[] parts = firstColumnString.split("\t");
+        rowIdList.clear();
+        mapOfRowIds.clear();
+        rowIdList.addAll(Arrays.asList(parts));
+        for (String s : rowIdList) mapOfRowIds.put(s, s);
+        if (rowIdList.size() > 0) rowIdList.remove(0);
     }
 
 
     private void parseFirstRow(String firstRow) {
-        String accountsString = firstRow.replace("\r\n", "\t");
-        String[] parts = accountsString.split("\t");
-        keysInFirstRow.clear();
-        mapOfFirstRowKeys.clear();
-        keysInFirstRow.addAll(Arrays.asList(parts));
-        for (String s : keysInFirstRow) mapOfFirstRowKeys.put(s, s);
-        if (keysInFirstRow.size() > 0) keysInFirstRow.remove(0);
+        String firstRowString = firstRow.replace("\r\n", "\t");
+        String[] parts = firstRowString.split("\t");
+        columnIdList.clear();
+        mapOfColumnIds.clear();
+        columnIdList.addAll(Arrays.asList(parts));
+        for (String s : columnIdList) mapOfColumnIds.put(s, s);
+        if (columnIdList.size() > 0) columnIdList.remove(0);
     }
-
-
 
     public void connect(String applicationname, String sheetname) {
         ddeLink.connect(applicationname, sheetname);
@@ -195,9 +191,22 @@ public class ExcelTools implements DDELinkEventListener {
         parseFirstRow(firstRow);
     }
 
+    public void readFirstColumnFromDDE() {
+        String firstColumn = ddeLink.request("C1");
+        parseFirstColumn(firstColumn);
+    }
+
     public int countKeysInFirstRow(){
         int count=0;
-        for(String s : keysInFirstRow) {
+        for(String s : columnIdList) {
+            count+= s.isEmpty() ? 0 : 1;
+        }
+        return count;
+    }
+
+    public int countKeysInFirstColumn(){
+        int count=0;
+        for(String s : rowIdList) {
             count+= s.isEmpty() ? 0 : 1;
         }
         return count;
@@ -234,22 +243,29 @@ public class ExcelTools implements DDELinkEventListener {
 
 //    private IProvideDDEConversation conversation;
 //    private ConcurrentHashMap<String, AccountPosition> productAccount2PositionMap;
-    private ConcurrentHashMap<String, MatrixItem> combiKey2ItemMap;
+
+
+    public void setSnapShotMode(boolean snapShotMode) {
+        this.snapShotMode = snapShotMode;
+    }
 
     public ExcelTools(IProvideDDEConversation _DDELink) {
         ddeLink = _DDELink;
         ddeLink.setEventListener(this);
-        keysInFirstRow = new ArrayList<String>();
-        mapOfFirstRowKeys = new ConcurrentHashMap<String, String>();
-        keysInFirstColumn = new ArrayList<String>();
-        mapOfFirstColumnKeys = new ConcurrentHashMap<String, String>();
+        columnIdList = new ArrayList<String>();
+        mapOfColumnIds = new ConcurrentHashMap<String, String>();
+        rowIdList = new ArrayList<String>();
+        mapOfRowIds = new ConcurrentHashMap<String, String>();
         combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
+        snapShotMode=true;
     }
 
-    private ArrayList<String> keysInFirstRow;
-    private ConcurrentHashMap<String,String> mapOfFirstRowKeys;
-    private ArrayList<String> keysInFirstColumn;
-    private ConcurrentHashMap<String,String> mapOfFirstColumnKeys;
+    private boolean snapShotMode;
+    private ConcurrentHashMap<String, MatrixItem> combiKey2ItemMap;
+    private ArrayList<String> columnIdList;
+    private ConcurrentHashMap<String,String> mapOfColumnIds;
+    private ArrayList<String> rowIdList;
+    private ConcurrentHashMap<String,String> mapOfRowIds;
     private final IProvideDDEConversation ddeLink;
 
 }

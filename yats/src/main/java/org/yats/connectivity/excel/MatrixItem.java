@@ -15,7 +15,11 @@ public class MatrixItem {
     }
 
     public String getKey() {
-        return rowId+";"+columnId;
+        return getKey(rowId,columnId);
+    }
+
+    public static String getKey(String r, String c) {
+        return r+";"+c;
     }
 
     public boolean isSameAs(MatrixItem old) {
