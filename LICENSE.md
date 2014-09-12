@@ -25,5 +25,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Donations shall be given to developers of this project as reward for contributing code. Unallocated donations shall be given to registered charities.
+
 ---
 HLa1WBVsOvKEUy+tgPoZ0o4MnuhDGNx20hKVNoSpfk04GU7iT3WLJHHW4JH8Pbf3WXcWtkMUC/vsQaT4Un4FRss=
