@@ -2,18 +2,17 @@ package org.yats.connectivity.matching;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMarketDataAndReceipt {
+public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumePriceDataAndReceipt {
 
     final Logger log = LoggerFactory.getLogger(InternalMarket.class);
 
     @Override
-    public void subscribe(String productId, IConsumeMarketData _consumer) {
+    public void subscribe(String productId, IConsumePriceData _consumer) {
         priceConsumer = _consumer;
         if(!isProductValid(productId)) return;
         createOrderBookForProductId(productId);
@@ -54,27 +53,17 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
         if(priceConsumer==null) {
             System.out.println("why null?");
         }
-        priceConsumer.onMarketData(marketData);
+        priceConsumer.onPriceData(priceData);
     }
 
     @Override
     public void onReceipt(Receipt receipt) {
         receipt.setExternalAccount(externalAccount);
         receiptConsumer.onReceipt(receipt);
-        if(receipt.getCurrentTradedSize().isGreaterThan(Decimal.ZERO)) {
-            produceUnitReceipt(receipt);
-        }
-    }
-
-    private void produceUnitReceipt(Receipt receipt) {
-        Product product = productProvider.getProductForProductId(receipt.getProductId());
-        Product unit = productProvider.getProductForProductId(product.getUnitId());
-        Receipt counterReceipt = receipt.createCounterReceipt(product, unit);
-        receiptConsumer.onReceipt(counterReceipt);
     }
 
     @Override
@@ -86,7 +75,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
         this.receiptConsumer = receiptConsumer;
     }
 
-    public void setPriceConsumer(IConsumeMarketData priceConsumer) {
+    public void setPriceConsumer(IConsumePriceData priceConsumer) {
         this.priceConsumer = priceConsumer;
     }
 
@@ -107,15 +96,9 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
     private boolean isProductValid(String productId) {
-        if(!productProvider.isProductIdExisting(productId)) return false;
-        Product p = productProvider.getProductForProductId(productId);
-        if(!p.hasExchange(marketName)) return false;
-        return true;
-    }
-
-    private void rejectUnknownCancelOrder(OrderCancel order) {
-        Receipt r = order.createReceiptDefault().withEndState(true).withRejectReason("Unknown order.");
-        onReceipt(r);
+        if(!productProvider.containsProductWith(productId)) return false;
+        Product p = productProvider.getProductWith(productId);
+        return p.hasExchange(marketName);
     }
 
     private void confirmAndStoreCancelForNotYetArrivedOrderNew(OrderCancel order) {
@@ -139,7 +122,7 @@ public class InternalMarket implements IProvidePriceFeed,ISendOrder,IConsumeMark
 
     private ConcurrentHashMap<String, OrderCancel> cancelOrderMap;
     private ConcurrentHashMap<String, LimitOrderBook> orderBooks;
-    private IConsumeMarketData priceConsumer;
+    private IConsumePriceData priceConsumer;
     private IConsumeReceipt receiptConsumer;
     private IProvideProduct productProvider;
     private String externalAccount;

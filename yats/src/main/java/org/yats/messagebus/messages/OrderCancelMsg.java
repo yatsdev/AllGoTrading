@@ -8,7 +8,7 @@ import org.yats.trading.OrderCancel;
 public class OrderCancelMsg {
 
     public String getTopic() {
-        return MarketDataMsg.class.getSimpleName()+"."+orderId;
+        return OrderCancelMsg.class.getSimpleName()+"."+orderId;
     }
 
 
@@ -48,8 +48,7 @@ public class OrderCancelMsg {
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(orderId.compareTo(data.orderId)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
-        if(!(bookSide.toDirection()==(data.bookSide.toDirection()))) return false;
-        return true;
+        return bookSide.toDirection() == (data.bookSide.toDirection());
     }
 
     public String timestamp;

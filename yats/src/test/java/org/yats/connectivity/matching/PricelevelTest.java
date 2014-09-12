@@ -44,31 +44,31 @@ public class PricelevelTest implements IConsumeReceipt {
         orderBid1 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(levelPrice)
                 .withSize(Decimal.fromDouble(100));
         orderAsk1 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(100));
         orderAsk2 = new OrderNew()
                 .withBookSide(BookSide.ASK)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(11))
                 .withSize(Decimal.fromDouble(200));
         orderBid2 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(100));
         orderBid3 = new OrderNew()
                 .withBookSide(BookSide.BID)
                 .withInternalAccount(ProductTest.ACCOUNT1)
-                .withProductId(ProductTest.PRODUCT1.getProductId())
+                .withProductId(ProductTest.TEST_PRODUCT1_ID)
                 .withLimit(Decimal.fromDouble(12))
                 .withSize(Decimal.fromDouble(150));
 

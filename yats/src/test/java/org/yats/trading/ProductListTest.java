@@ -26,7 +26,7 @@ public class ProductListTest {
     @Test
     public void canFindSAPByProductId()
     {
-        Product productSAP = list.getProductForProductId("4663789");
+        Product productSAP = list.getProductWith("4663789");
         assert (productSAP.getSymbol().compareTo("SAP")==0);
     }
 

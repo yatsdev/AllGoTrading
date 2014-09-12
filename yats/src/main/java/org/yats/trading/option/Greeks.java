@@ -2,6 +2,16 @@ package org.yats.trading.option;
 
 public class Greeks {
 
+    @Override
+    public String toString() {
+        return "Greeks{" +
+                "delta=" + delta +
+                ", gamma=" + gamma +
+                ", theta=" + getThetaPerDay365Year() +
+                ", thetaPerYear=" + thetaPerYear +
+                '}';
+    }
+
     public Greeks(double delta, double gamma, double thetaPerYear, double vega, double rho) {
         this.delta = delta;
         this.gamma = gamma;
@@ -22,18 +32,18 @@ public class Greeks {
         return thetaPerYear;
     }
 
-    double getThetaPerDay365Year()
+    public double getThetaPerDay365Year()
     {
         return thetaPerYear / 365;
     }
 
-    public double getVega() {
-        return vega;
-    }
+//    public double getVega() {         // probably wrong!
+//        return vega;
+//    }
 
-    public double getRho() {
-        return rho;
-    }
+//    public double getRho() {          // probably wrong!
+//        return rho;
+//    }
 
     double delta; //  partial wrt S
     double gamma; //  second prt wrt S

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
+import org.yats.connectivity.matching.InternalMarketRunner;
 
 import java.io.IOException;
 
@@ -15,8 +16,9 @@ public class InternalMarketMain {
     public void go() throws InterruptedException, IOException
     {
 
-        log.info("Starting InternalMarketMain...");
-        String configFilename = Tool.getPersonalConfigFilename("config/InternalMarketMain");
+        final String className = InternalMarketMain.class.getSimpleName();
+        log.info("Starting "+className);
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         IProvideProperties prop = PropertiesReader.createFromConfigFile(configFilename);
         InternalMarketRunner logic = new InternalMarketRunner(prop);
 
@@ -26,6 +28,7 @@ public class InternalMarketMain {
         System.out.println("Initialization done.");
         System.out.println("Press enter to exit.");
         System.out.println("===\n");
+        //noinspection ResultOfMethodCallIgnored
         System.in.read();
         System.out.println("\nexiting...\n");
 
@@ -33,7 +36,7 @@ public class InternalMarketMain {
 
         Thread.sleep(1000);
 
-        log.info("ReceiptStorageMain done.");
+        log.info("done with "+className);
         System.exit(0);
     }
 

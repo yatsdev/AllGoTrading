@@ -11,13 +11,14 @@ public class Config {
     public static final Config DEFAULT_FOR_TESTS = createTestConfig();
 
 
+    public boolean isPublishAllPositionSnapshots() { return properties.getAsBoolean("publishAllPositionSnapshots",false);}
 
     public String getServerIP() {
         return properties.get("serverIP");
     }
 
-    public String getExchangeMarketData() {
-        return properties.get("exchangeMarketData");
+    public String getExchangePriceData() {
+        return properties.get("exchangePriceData");
     }
 
     public String getExchangeReceipts() {
@@ -121,7 +122,7 @@ public class Config {
         String CR = FileTool.getLineSeparator();
         String configString =
         "serverIP = 127.0.0.1" + CR +
-        "exchangeMarketData = marketdata" + CR +
+        "exchangePriceData = pricedata" + CR +
         "exchangeReceipts = receipts" + CR +
         "exchangeSubscription = subscriptions" + CR +
         "exchangePositionRequest = positionrequests" + CR +
@@ -152,7 +153,7 @@ public class Config {
         String CR = FileTool.getLineSeparator();
         String configString =
         "serverIP = 127.0.0.1" + CR +
-        "exchangeMarketData = marketdataTest"+ CR +
+        "exchangePriceData = pricedataTest"+ CR +
         "exchangeReceipts = receiptsTest"+ CR +
         "exchangeSubscription = subscriptionsTest"+ CR +
         "exchangePositionRequest = positionrequestsTest"+ CR +

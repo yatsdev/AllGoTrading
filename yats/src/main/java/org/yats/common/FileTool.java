@@ -47,8 +47,20 @@ public class FileTool {
     }
 
     public static void createDirectories(String path) {
+        if(exists(path)) return;
         File theFile = new File(path);
         theFile.mkdirs();
+    }
+
+    public static void moveToNewFilename(String filename, String filenameBackup) {
+        if(FileTool.exists(filenameBackup)) FileTool.deleteFile(filenameBackup);
+        if(FileTool.exists(filename)) FileTool.rename(filename, filenameBackup);
+    }
+
+    public static void rename(String oldname, String newName) {
+        File theFile = new File(oldname);
+        File newFile = new File(newName);
+        theFile.renameTo(newFile);
     }
 
 

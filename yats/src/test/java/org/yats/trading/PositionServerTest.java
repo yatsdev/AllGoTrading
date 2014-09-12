@@ -15,16 +15,16 @@ public class PositionServerTest {
 
     @Test
     public void canCalculateCurrentPositionOverAllInternalAccounts() {
-        Position p = positionServer.getPositionForAllAccounts(ProductTest.PRODUCT1.getProductId());
+        Position p = positionServer.getPositionForAllAccounts(ProductTest.TEST_PRODUCT1_ID);
         assert (p.isSize(+1 +1 +1 +9 -2));
     }
 
     @Test
     public void canCalculatePositionForInternalAccount()
     {
-        Position positionAccount1 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId()));
+        Position positionAccount1 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.TEST_PRODUCT1_ID));
         assert (positionAccount1.isSize(+1 +1 +1 -2));
-        Position positionAccount2 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT2, ProductTest.PRODUCT1.getProductId()));
+        Position positionAccount2 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT2, ProductTest.TEST_PRODUCT1_ID));
         assert (positionAccount2.isSize(9));
     }
 
@@ -36,6 +36,57 @@ public class PositionServerTest {
     }
 
     @Test
+    public void canCalculateCounterPositionForLeveragedProduct() {
+
+        PositionServer positionServer = new PositionServer();
+        positionServer.setProductList(productList);
+        positionServer.onReceipt(ReceiptTest.RECEIPT6);
+        String pid = ReceiptTest.RECEIPT6.getProductId();
+        AccountPosition pos = positionServer.getAccountPosition(
+                new PositionRequest(ReceiptTest.RECEIPT6.getInternalAccount(), pid));
+        Decimal currentTradedSizeSigned = ReceiptTest.RECEIPT6.getCurrentTradedSizeSigned();
+        assert(currentTradedSizeSigned.isEqualTo(pos.getSize()));
+
+        Product p = productList.getProductWith(pid);
+        String pidUnit = productList.getUnitOfProductWithId(pid).getProductId();
+        Decimal price = ReceiptTest.RECEIPT6.getPrice();
+        AccountPosition posCounter = positionServer.getAccountPosition(
+                new PositionRequest(ReceiptTest.RECEIPT6.getInternalAccount(), pidUnit));
+        Decimal expectedCounterSize = currentTradedSizeSigned.negate().multiply(p.getContractSize()).multiply(price);
+        assert(expectedCounterSize.isEqualTo(posCounter.getSize()));
+    }
+
+    @Test
+    public void buyLowSellHighGivesProfit() {
+        PositionServer positionServer = new PositionServer();
+        positionServer.setProductList(productList);
+        positionServer.onReceipt(ReceiptTest.RECEIPT7);
+        positionServer.onReceipt(ReceiptTest.RECEIPT6);
+
+        String pid = ReceiptTest.RECEIPT6.getProductId();
+        String pidUnit = productList.getUnitOfProductWithId(pid).getProductId();
+        AccountPosition posCounter = positionServer.getAccountPosition(
+                new PositionRequest(ReceiptTest.RECEIPT6.getInternalAccount(), pidUnit));
+        Decimal expectedCounterSize = Decimal.fromDouble(3*2*10);
+        assert(expectedCounterSize.isEqualTo(posCounter.getSize()));
+    }
+
+    @Test
+    public void sellLowBuyHighGivesLoss() {
+        PositionServer positionServer = new PositionServer();
+        positionServer.setProductList(productList);
+        positionServer.onReceipt(ReceiptTest.RECEIPT6);
+        positionServer.onReceipt(ReceiptTest.RECEIPT8);
+        String pid = ReceiptTest.RECEIPT6.getProductId();
+        String pidUnit = productList.getUnitOfProductWithId(pid).getProductId();
+        AccountPosition posCounter = positionServer.getAccountPosition(
+                new PositionRequest(ReceiptTest.RECEIPT6.getInternalAccount(), pidUnit));
+        Decimal expectedCounterSize = Decimal.fromDouble(-2 * 2 * 10);
+        assert(expectedCounterSize.isEqualTo(posCounter.getSize()));
+    }
+
+
+    @Test
     public void canStorePositionSnapshot() {
         positionServer.onReceipt(ReceiptTest.RECEIPT1);
         assert(1==positionStorage.getSnapshotCount());
@@ -45,10 +96,11 @@ public class PositionServerTest {
     public void canInitialiseFromPositionSnapshot() {
         PositionServer originalServer = new PositionServer();
         originalServer.setPositionStorage(positionStorage);
+        originalServer.setProductList(productList);
         originalServer.onReceipt(ReceiptTest.RECEIPT1);
         originalServer.onReceipt(ReceiptTest.RECEIPT2);
         assert(2==positionStorage.getSnapshotCount());
-        PositionRequest pr = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId());
+        PositionRequest pr = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.TEST_PRODUCT1_ID);
         PositionServer newPositionServer = new PositionServer();
         newPositionServer.setPositionStorage(positionStorage);
         assert(newPositionServer.getAccountPosition(pr).isSize(0));
@@ -60,12 +112,14 @@ public class PositionServerTest {
     @BeforeMethod
     public void setUp() {
         positionServer = new PositionServer();
+        productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
+        positionServer.setProductList(productList);
         processReceipts();
         positionSnapshot = new PositionSnapshot();
         AccountPosition p;
-        p = new AccountPosition(ProductTest.PRODUCT1.getProductId(), ReceiptTest.INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
+        p = new AccountPosition(ProductTest.TEST_PRODUCT1_ID, ReceiptTest.INTERNAL_ACCOUNT1, Decimal.fromDouble(10));
         positionSnapshot.add(p);
-        positionRequest1 = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.PRODUCT1.getProductId());
+        positionRequest1 = new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.TEST_PRODUCT1_ID);
         positionStorage = new PositionSnapshotStorageMem();
         positionServer.setPositionStorage(positionStorage);
     }
@@ -79,6 +133,7 @@ public class PositionServerTest {
     }
 
 
+    private ProductList productList;
     private PositionServer positionServer;
     private PositionSnapshotStorageMem positionStorage;
 
@@ -104,6 +159,6 @@ public class PositionServerTest {
             positionSnapshots=new ArrayList<PositionSnapshot>();
         }
         ArrayList<PositionSnapshot> positionSnapshots;
-    };
+    }
 
 }

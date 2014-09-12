@@ -419,6 +419,23 @@ public class WaitingLinkedBlockingQueue<E> extends AbstractQueue<E>
         }
     }
 
+    public boolean isWaitedTillArrival(long timeout, TimeUnit unit) throws InterruptedException {
+        long nanos = unit.toNanos(timeout);
+        final AtomicInteger count = this.count;
+        final ReentrantLock takeLock = this.takeLock;
+        takeLock.lockInterruptibly();
+        try {
+            while (count.get() == 0) {
+                if (nanos <= 0)
+                    return false;
+                nanos = notEmpty.awaitNanos(nanos);
+            }
+        } finally {
+            takeLock.unlock();
+        }
+        return true;
+    }
+
     public E poll(long timeout, TimeUnit unit) throws InterruptedException {
         E x = null;
         int c = -1;

@@ -57,7 +57,8 @@ public class StrategyRunnerMain {
     {
         productList = ProductList.createFromFile("config/CFDProductList.csv");
 
-        String configFilename = Tool.getPersonalConfigFilename("config/StrategyRunner");
+        final String className = StrategyRunnerMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader strategyRunnerProperties = PropertiesReader.createFromConfigFile(configFilename);
 
         StrategyToBusConnection strategyToBusConnection = new StrategyToBusConnection(strategyRunnerProperties);
@@ -66,7 +67,8 @@ public class StrategyRunnerMain {
 
         positionServer = new PositionServer();
         positionServer.setRateConverter(rateConverter);
-        PositionServerLogic positionServerLogic = new PositionServerLogic(strategyRunnerProperties);
+        positionServer.setProductList(productList);
+        PositionServerMain positionServerLogic = new PositionServerMain(strategyRunnerProperties);
         positionServerLogic.setPositionServer(positionServer);
         positionServerLogic.startSnapshotListener();
 
@@ -79,7 +81,7 @@ public class StrategyRunnerMain {
         strategyRunner.setRateConverter(rateConverter);
         strategyToBusConnection.setReceiptConsumer(strategyRunner);
         strategyToBusConnection.setSettingsConsumer(strategyRunner);
-        strategyToBusConnection.setMarketDataConsumer(strategyRunner);
+        strategyToBusConnection.setPriceDataConsumer(strategyRunner);
 
         String strategyNamesString = strategyRunnerProperties.get("strategyNames");
         String[] strategyNames = strategyNamesString.split(",");
@@ -116,7 +118,9 @@ public class StrategyRunnerMain {
     }
 
     private StrategyBase createStrategy(String strategyName) {
-        PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile("config/"+strategyName+".properties");
+
+        String configFilename = Tool.getPersonalConfigFilename("config",strategyName);
+        PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile(configFilename);
         String strategyClassName = strategyConfig.get("strategyClass");
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);
@@ -127,6 +131,7 @@ public class StrategyRunnerMain {
         strategy.setReportSender(strategyRunner);
         strategy.setName(strategyName);
         strategy.setConfig(strategyConfig);
+        strategy.setTimedCallbackProvider(strategyRunner);
         return strategy;
     }
 

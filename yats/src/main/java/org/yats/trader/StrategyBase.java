@@ -1,5 +1,6 @@
 package org.yats.trader;
 
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
@@ -8,13 +9,13 @@ import org.yats.common.PropertiesReader;
 import org.yats.common.UniqueId;
 import org.yats.trading.*;
 
-public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, IConsumeSettings {
+public abstract class StrategyBase implements IConsumePriceDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
 
     @Override
-    public abstract void onMarketData(MarketData marketData);
+    public abstract void onPriceData(PriceData priceData);
 
     @Override
     public UniqueId getConsumerId() { return consumerId; }
@@ -54,6 +55,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
 
     }
 
+    protected void addTimedCallback(int seconds, IAmCalledBackInTime callback) {
+        timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
+    }
+
     public void init() {
         initialised = true;
     }
@@ -85,7 +90,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
     }
 
     public Product getProductForProductId(String productId) {
-        return productProvider.getProductForProductId(productId);
+        return productProvider.getProductWith(productId);
     }
 
     public Decimal getPositionForProduct(String productId)
@@ -104,15 +109,29 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         }
     }
 
-    public Position getValueForProduct(String targetProductId, String productId)
+    public Position getValueForProduct(String accountUnitProductId, String productId)
     {
         PositionRequest r = new PositionRequest(getInternalAccount(), productId);
-        return positionProvider.getValueForAccountProduct(targetProductId, r);
+        return positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+    }
+
+    public Position getValueForAccount(String account, String accountUnitProductId)
+    {
+        Position totalValue = new Position(accountUnitProductId, Decimal.ZERO);
+        IProvidePosition allPos = positionProvider.getAllPositionsForOneAccount(account);
+        for(AccountPosition pos : allPos.getAllPositions()) {
+            PositionRequest r = new PositionRequest(account, pos.getProductId());
+            Position v = positionProvider.getValueForAccountProduct(accountUnitProductId, r);
+            totalValue = totalValue.add(v);
+        }
+        return totalValue;
     }
 
     public PropertiesReader getReports() {
         return reports;
     }
+
+
 
 //    public Decimal getProfitForProduct(String productId)
 //    {
@@ -147,6 +166,10 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         this.productProvider = productProvider;
     }
 
+    public void setTimedCallbackProvider(IProvideTimedCallback timedCallbackProvider) {
+        this.timedCallbackProvider = timedCallbackProvider;
+    }
+
     public void setName(String name) {
         this.name = name;
         reports.set("strategyName", name);
@@ -161,6 +184,7 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
         setName("unnamedStrategy");
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     private String internalAccount;
 
@@ -170,6 +194,8 @@ public abstract class StrategyBase implements IConsumeMarketDataAndReceipt, ICon
 
     private IProvidePosition positionProvider;
     private IProvideProduct productProvider;
+
+    private IProvideTimedCallback timedCallbackProvider;
 
     private final UniqueId consumerId;
 

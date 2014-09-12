@@ -30,11 +30,7 @@ public class OfferBook {
     }
 
     public String toStringCSV() {
-        StringBuilder b = new StringBuilder();
-        b.append(bookSides[0].toStringCSV());
-        b.append(CSV_SEPARATOR);
-        b.append((bookSides[1].toStringCSV()));
-        return b.toString();
+        return bookSides[0].toStringCSV() + CSV_SEPARATOR + (bookSides[1].toStringCSV());
     }
 
     public static OfferBook fromStringCSV(String csv) {

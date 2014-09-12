@@ -20,12 +20,12 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     final Logger log = LoggerFactory.getLogger(MarketToBusConnection.class);
 
     @Override
-    public void onMarketData(MarketData marketData)
+    public void onPriceData(PriceData priceData)
     {
         if(shuttingDown) return;
-        MarketDataMsg data = MarketDataMsg.createFrom(marketData);
-        log.info("Published: "+marketData);
-        senderMarketDataMsg.publish(data.getTopic(), data);
+        PriceDataMsg data = PriceDataMsg.createFrom(priceData);
+        log.info("Published: "+ priceData);
+        senderPriceDataMsg.publish(data.getTopic(), data);
     }
 
     @Override
@@ -55,17 +55,17 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         receiverOrderCancel.close();
         receiverOrderNew.close();
         receiverSubscription.close();
-        senderMarketDataMsg.close();
+        senderPriceDataMsg.close();
         senderReceipt.close();
     }
 
-    public void onCallback() {
+    public synchronized void onCallback() {
         sendAllReceivedSubscription();
         sendAllReceivedOrderNew();
         sendAllReceivedOrderCancel();
     }
 
-    private void sendAllReceivedSubscription() {
+    private void sendAllReceivedSubscription()  {
         while(receiverSubscription.hasMoreMessages()) {
             SubscriptionMsg m = receiverSubscription.get();
             try {
@@ -100,7 +100,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         shuttingDown=false;
 
         Config config =  Config.fromProperties(prop);
-        senderMarketDataMsg = new Sender<MarketDataMsg>(config.getExchangeMarketData(), config.getServerIP());
+        senderPriceDataMsg = new Sender<PriceDataMsg>(config.getExchangePriceData(), config.getServerIP());
         senderReceipt = new Sender<ReceiptMsg>(config.getExchangeReceipts(), config.getServerIP());
 
         receiverSubscription = new BufferingReceiver<SubscriptionMsg>(SubscriptionMsg.class,
@@ -125,7 +125,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
         receiverOrderCancel.start();
     }
 
-    Sender<MarketDataMsg> senderMarketDataMsg;
+    Sender<PriceDataMsg> senderPriceDataMsg;
     Sender<ReceiptMsg> senderReceipt;
     BufferingReceiver<SubscriptionMsg> receiverSubscription;
     BufferingReceiver<OrderNewMsg> receiverOrderNew;

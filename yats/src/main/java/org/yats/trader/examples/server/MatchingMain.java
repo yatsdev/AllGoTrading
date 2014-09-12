@@ -8,25 +8,26 @@ import org.yats.common.UniqueId;
 import org.yats.connectivity.matching.InternalMarket;
 import org.yats.connectivity.messagebus.MarketToBusConnection;
 import org.yats.trader.StrategyRunner;
-import org.yats.trading.IConsumeMarketData;
-import org.yats.trading.MarketData;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.PriceData;
 import org.yats.trading.ProductList;
 
 import java.io.IOException;
 
 /*
   Use template in
-  config/MatchingMain_template.properties
+  config/template/MatchingMain.properties
   and create your personal config file.
  */
 
-public class MatchingMain implements IConsumeMarketData {
+public class MatchingMain implements IConsumePriceData {
 
     final Logger log = LoggerFactory.getLogger(MatchingMain.class);
 
     public void go() throws InterruptedException, IOException
     {
-        String configFilename = Tool.getPersonalConfigFilename("config/MatchingMain");
+        final String className = MatchingMain.class.getSimpleName();
+        String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
 
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
@@ -86,7 +87,7 @@ public class MatchingMain implements IConsumeMarketData {
     }
 
     @Override
-    public void onMarketData(MarketData marketData) {
+    public void onPriceData(PriceData priceData) {
     }
 
     @Override
