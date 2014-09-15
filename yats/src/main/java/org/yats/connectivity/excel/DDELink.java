@@ -22,7 +22,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
             c.stopAdvice(s);
         } catch (DDEException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }
@@ -32,7 +32,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
             c.disconnect();
         } catch (DDEException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }
@@ -42,7 +42,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
             c.poke(where,what);
         } catch (DDEException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }
@@ -52,7 +52,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
             return c.request(what);
         } catch (DDEException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }
@@ -62,7 +62,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
             c.startAdvice(s);
         } catch (DDEException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }

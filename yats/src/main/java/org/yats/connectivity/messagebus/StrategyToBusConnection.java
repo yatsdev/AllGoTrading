@@ -105,8 +105,10 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
             if(p.exists("strategyName")) strategyName = p.get("strategyName");
             reportsMap.put(strategyName, p);
         }
+        int i=0;
         for(IProvideProperties p : reportsMap.values()) {
-            reportsConsumer.onReport(p,receiverReports.hasMoreMessages());
+            reportsConsumer.onReport(p,i<reportsMap.size()-1);
+            i++;
         }
         reportsMap.clear();
     }
