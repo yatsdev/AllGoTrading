@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.common.Tool;
-import org.yats.common.UniqueId;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.trading.*;
 
@@ -13,13 +12,52 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ExcelConnection implements
-        IConsumePriceData, IConsumeReceipt, IConsumeReports, IConsumePositionSnapshot {
+        IConsumeBulkPriceData, IConsumeReceipt, IConsumeReports, IConsumePositionSnapshot, IConsumeAxisChanges,
+        ISendBulkSettings {
 
     final Logger log = LoggerFactory.getLogger(ExcelConnection.class);
 
+    // for prices
     @Override
-    public void onPriceData(PriceData marketData) {
+    public void onFirstRowChange(Collection<String> firstRow) {
+    }
 
+    // for prices
+    @Override
+    public void onFirstColumnChange(Collection<String> firstColumn) {
+        int oldKnownProductsSize = knownProducts.size();
+        updateKnownProducts(firstColumn);
+        int newProducts = knownProducts.size() - oldKnownProductsSize;
+        if(newProducts>0) log.info("newProducts: "+newProducts);
+    }
+
+    @Override
+    public void sendBulkSettings(Collection<IProvideProperties> all) {
+        for(IProvideProperties p : all) strategyToBusConnection.sendSettings(p);
+    }
+
+    private void updateKnownProducts(Collection<String> firstColumn) {
+        for(String pid : firstColumn) {
+            if(!knownProducts.containsKey(pid)) {
+                if(productList.containsProductWith(pid)) {
+                    subscribe(pid);
+                    knownProducts.put(pid,pid);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onBulkPriceData(Collection<? extends PriceData> dataList) {
+        List<MatrixItem> all = new ArrayList<MatrixItem>();
+        for(PriceData data : dataList) {
+            String pid = data.getProductId();
+            MatrixItem timestamp = new MatrixItem(pid, "timestamp", data.getTimestamp().toString());
+            all.add(timestamp);
+            all.addAll(getBookSideAsMatrixItems(data, BookSide.BID));
+            all.addAll(getBookSideAsMatrixItems(data, BookSide.ASK));
+        }
+        sheetAccessPrices.updateMatrix(all);
     }
 
     @Override
@@ -33,7 +71,7 @@ public class ExcelConnection implements
         for (AccountPosition p : snapshot.getAllPositions()) {
             allSnapshotItems.add(new MatrixItem(p.getProductId(), p.getInternalAccount(), p.getSize().toString()));
         }
-        excelToolsPositions.updateMatrix(allSnapshotItems);
+        sheetAccessPositions.updateMatrix(allSnapshotItems);
     }
 
     @Override
@@ -44,7 +82,7 @@ public class ExcelConnection implements
         }
         populateReportsMap(p);
         if (hasMoreReports) return;
-        excelToolsReports.updateMatrix(reportsMap.values());
+        sheetAccessReports.updateMatrix(reportsMap.values());
         reportsMap.clear();
     }
 
@@ -58,45 +96,43 @@ public class ExcelConnection implements
         }
     }
 
-    @Override
-    public UniqueId getConsumerId() {
-        return null;
-    }
-
     public void subscribe(String pid) {
-        strategyToBusConnection.subscribe(pid, this);
+        strategyToBusConnection.subscribeBulk(pid, this);
     }
 
-    // todo: need callback whenever user changes first row for prices
     public void startDDE() {
         try {
             System.out.print("conversation.connect...");
-            excelToolsPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
-            excelToolsReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
-            excelToolsPrices.init("Excel", prop.get("DDEPathToExcelFileWPrices"));
+            sheetAccessPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
+            sheetAccessReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
+            sheetAccessPrices.init("Excel", prop.get("DDEPathToExcelFileWPrices"));
+            sheetAccessSettings.init("Excel", prop.get("DDEPathToExcelFileWSettings"));
             System.out.println("done.");
             System.out.print("conversation.request...");
-            Collection<String> pidList = excelToolsPrices.getRowIdList();
+            Collection<String> pidList = sheetAccessPrices.getRowIdList();
             subscribeAllProductIds(pidList);
+//            excelToolsSettings.readSettingsRows();
+//            Collection<IProvideProperties> all = excelToolsSettings.parseSettingsRows();
+//            sendBulkSettings(all);
         } catch (DDELink.ConversationException e) {
             System.out.println("DDEException: " + e.getMessage());
             close();
             System.exit(-1);
         }
-        strategyToBusConnection.setPriceDataConsumer(this);
+        strategyToBusConnection.setBulkPriceDataConsumer(this);
         strategyToBusConnection.setReceiptConsumer(this);
         strategyToBusConnection.setReportsConsumer(this);
         strategyToBusConnection.setPositionSnapshotConsumer(this);
-
+        sheetAccessSettings.start();
     }
+
 
     public void stopDDE() {
         try {
-            shutdown = true;
             Tool.sleepFor(500);
-            excelToolsPositions.disconnect();
-            excelToolsReports.disconnect();
-            excelToolsPrices.disconnect();
+            sheetAccessPositions.disconnect();
+            sheetAccessReports.disconnect();
+            sheetAccessPrices.disconnect();
         } catch (DDELink.ConversationException e) {
             e.printStackTrace();
         }
@@ -108,9 +144,6 @@ public class ExcelConnection implements
 
     public void go() throws InterruptedException, IOException {
         log.info("Starting ExcelConnection...");
-
-//        thread = new Thread(this);
-//        thread.start();
 
         if (Tool.isWindows()) {
             startDDE();
@@ -143,34 +176,29 @@ public class ExcelConnection implements
         }
     }
 
-    private void parseProductIds(String data) {
-        String[] parts = data.split("\r\n");
-        currentProductIDs = new Vector<String>(Arrays.asList(parts));
-    }
-
-
-
-
     public ExcelConnection(IProvideProperties _prop,
                            IProvideProduct _products,
                            IProvideDDEConversation _priceConversation,
                            IProvideDDEConversation _reportConversation,
-                           IProvideDDEConversation _positionConversation
+                           IProvideDDEConversation _positionConversation,
+                           IProvideDDEConversation _settingsConversation
 
 
     ) {
-        shutdown = false;
         prop = _prop;
         productList=_products;
         if (!Tool.isWindows()) System.out.println("This is not Windows! DDELink will not work!");
         reportsMap = new ConcurrentHashMap<String, MatrixItem>();
-        pricesMap = new ConcurrentHashMap<String, MatrixItem>();
-        excelToolsPositions = new ExcelTools(_positionConversation);
-        excelToolsReports = new ExcelTools(_reportConversation);
-        excelToolsReports.setSnapShotMode(false);
-        excelToolsReports.setNaString("");
-        excelToolsPrices = new ExcelTools(_priceConversation);
-        excelToolsPrices.setNaString("");
+        sheetAccessPositions = new SheetAccess(_positionConversation);
+        sheetAccessReports = new SheetAccess(_reportConversation);
+        sheetAccessReports.setSnapShotMode(false);
+        sheetAccessReports.setNaString("");
+        sheetAccessPrices = new SheetAccess(_priceConversation);
+        sheetAccessPrices.setNaString("");
+        sheetAccessPrices.setFirstRowListener(this);
+        knownProducts = new ConcurrentHashMap<String, String>();
+        sheetAccessSettings =new SheetAccess(_settingsConversation);
+        sheetAccessSettings.setSettingsSender(this);
 
         strategyToBusConnection = new StrategyToBusConnection(_prop);
 
@@ -179,23 +207,31 @@ public class ExcelConnection implements
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private Collection<? extends MatrixItem> getBookSideAsMatrixItems(PriceData data, BookSide side) {
+        OfferBook book = data.getBook();
+        List<MatrixItem> all = new ArrayList<MatrixItem>();
+        for(int i=0; i<book.getDepth(side); i++) {
+            BookRow r = book.getBookRow(side,i);
+            MatrixItem size = new MatrixItem(data.getProductId(), "size"+side.toString()+i, r.getSize().toString());
+            all.add(size);
+            MatrixItem price = new MatrixItem(data.getProductId(), "price"+side.toString()+i, r.getPrice().toString());
+            all.add(price);
+        }
+        return all;
+    }
+
 
     private static String STRATEGYNAME = "strategyName";
 
-    private ExcelTools excelToolsPositions;
-    private ExcelTools excelToolsReports;
-    private ExcelTools excelToolsPrices;
-
-    private Vector<String> currentProductIDs = new Vector<String>();
+    private SheetAccess sheetAccessSettings;
+    private SheetAccess sheetAccessPositions;
+    private SheetAccess sheetAccessReports;
+    private SheetAccess sheetAccessPrices;
     private StrategyToBusConnection strategyToBusConnection;
-
     private IProvideProperties prop;
     private IProvideProduct productList;
-    private boolean shutdown;
-
     private ConcurrentHashMap<String, MatrixItem> reportsMap;
-    private ConcurrentHashMap<String, MatrixItem> pricesMap;
-
+    private ConcurrentHashMap<String, String> knownProducts;
 
 } // class
 

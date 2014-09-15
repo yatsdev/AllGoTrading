@@ -17,7 +17,7 @@ public class ExcelConnectionMain {
         String configFilename = Tool.getPersonalConfigFilename("config",className);
         PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
-        ExcelConnection c = new ExcelConnection(prop, products, new DDELink(), new DDELink(), new DDELink());
+        ExcelConnection c = new ExcelConnection(prop, products, new DDELink(), new DDELink(), new DDELink(), new DDELink());
         try {
             c.go();
         } catch (RuntimeException r)

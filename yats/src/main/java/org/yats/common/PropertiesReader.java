@@ -1,6 +1,7 @@
 package org.yats.common;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -177,8 +178,9 @@ public class PropertiesReader implements IProvideProperties {
         while (enuKeys.hasMoreElements()) {
             String key = (String) enuKeys.nextElement();
             String value = properties.get(key);
-            if(!first){b.append(","); first=false;}
-            b.append(key).append("=").append(value);
+            if(!first){b=b.append(",");}
+            first=false;
+            b=b.append(key).append("=").append(value);
         }
             return "PropertiesReader: "+b.toString();
     }

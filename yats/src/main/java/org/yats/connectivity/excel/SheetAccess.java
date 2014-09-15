@@ -1,7 +1,12 @@
 package org.yats.connectivity.excel;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yats.common.IProvideProperties;
+import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
+import org.yats.trading.ISendBulkSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +14,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExcelTools implements DDELinkEventListener {
+public class SheetAccess implements DDELinkEventListener, Runnable {
+
+    final Logger log = LoggerFactory.getLogger(SheetAccess.class);
+
+    private boolean shutdown;
+    private ISendBulkSettings settingsSender;
 
     @Override
     public void onDisconnect() {
@@ -24,40 +34,91 @@ public class ExcelTools implements DDELinkEventListener {
         }
     }
 
+    // time based sending of settings
+    @Override
+    public void run() {
+        while(!shutdown) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                log.info("settingsThread shutting down.");
+            }
+            if(shutdown) return;
+            ConcurrentHashMap<String,String> oldSettingsRows = settingsRows;
+            ConcurrentHashMap<String,String> change = new ConcurrentHashMap<String, String>();
+            readSettingsRows();
+            for(String rowString : settingsRows.values()) {
+                if(oldSettingsRows.containsKey(rowString)) continue;
+                change.put(rowString, rowString);
+            }
+            Collection<IProvideProperties> all = parseSettingsRows(change);
+            settingsSender.sendBulkSettings(all);
+        }
+    }
+
+    public synchronized void readSettingsRows() {
+        settingsRows = new ConcurrentHashMap<String, String>();
+        for(int rowIndex=0; rowIndex < rowIdList.size(); rowIndex++) {
+            String rowString = readRow(rowIndex+2);
+            settingsRows.put(rowString, rowString);
+        }
+    }
+
+    private String readRow(int rowNumber) {
+        while(true) {
+            try {
+                String rowString = ddeLink.request("R"+rowNumber);
+                return rowString;
+            } catch(DDELink.ConversationException e) {
+                log.debug("Excel seems busy during read. waiting... (caught Exception: '"+e.getMessage()+"')");
+                Tool.sleepFor(3000);
+            }
+        }
+    }
+
+    public Collection<IProvideProperties> parseSettingsRows() {
+        return parseSettingsRows(settingsRows);
+    }
+
+    public Collection<IProvideProperties> parseSettingsRows(ConcurrentHashMap<String, String> _map) {
+        Collection<IProvideProperties> all = new ArrayList<IProvideProperties>();
+        for(String rowString : _map.values()) {
+            String tabbedRowString = rowString.replace(NL, TAB);
+            String[] parts = tabbedRowString.split(TAB);
+            if(parts.length<2) continue;
+            IProvideProperties p = new PropertiesReader();
+            String strategyName = parts[0];
+            p.set("strategyName", strategyName);
+            if(strategyName.length()<1) continue;
+            for(int i=1; i<parts.length; i++) {
+                String value = parts[i];
+                if(i>columnIdList.size()) break;
+                String key = columnIdList.get(i-1);
+                p.set(key, value);
+            }
+            all.add(p);
+        }
+        return all;
+    }
+
     public synchronized Collection<String> getRowIdList() {
         return rowIdList;
     }
 
     private void updateFirstRow(String data) {
-//        String currentFirstRowString = getColumnIdsString();
         parseFirstRow(data);
-//        String newFirstRowString = getColumnIdsString();
-//        boolean firstRowChanged = currentFirstRowString.compareTo(newFirstRowString)!=0;
-//        if(firstRowChanged) pokeFirstRow();
+        listenerAxisChange.onFirstRowChange(columnIdList);
     }
 
     private void updateFirstColumn(String data) {
-//        String currentFirstColumnString = getRowIdsString();
         parseFirstColumn(data);
-//        String newFirstColumnString = getRowIdsString();
-//        boolean firstColumnChanged = currentFirstColumnString.compareTo(newFirstColumnString)!=0;
-//        if(firstColumnChanged) pokeFirstColumn();
+        listenerAxisChange.onFirstColumnChange(rowIdList);
     }
 
 
-//    @Override
-//    public synchronized void onPositionSnapshot(PositionSnapshot snapshot) {
-//        updatePositionsAxis(snapshot);
-//        productAccount2PositionMap.clear();
-//        ConcurrentHashMap<String, String> productsToUpdate = getProductsToUpdate(snapshot);
-//        updateProductAccount2PositionMap(snapshot);
-//
-//        for (String p : productsToUpdate.keySet()) {
-//            pokeRowForAllAccountsOfProduct(p);
-//        }
-//    }
-
     public void disconnect() {
+        shutdown=true;
+        settingsThread.interrupt();
         ddeLink.disconnect();
     }
 
@@ -120,14 +181,20 @@ public class ExcelTools implements DDELinkEventListener {
             updateList(columnIdList, mapOfColumnIds, p.getColumnId());
         }
         boolean updateFirstRow = firstRowStringOld.compareTo(getColumnIdsString()) != 0;
-        if (updateFirstRow) pokeFirstRow();
+        if (updateFirstRow) {
+            pokeFirstRow();
+            listenerAxisChange.onFirstRowChange(columnIdList);
+        }
 
         String firstColumnStringOld = getRowIdsString();
         for (MatrixItem p : itemList) {
             updateList(rowIdList, mapOfRowIds, p.getRowId());
         }
         boolean updateFirstColumn = firstColumnStringOld.compareTo(getRowIdsString()) != 0;
-        if (updateFirstColumn) pokeFirstColumn();
+        if (updateFirstColumn) {
+            pokeFirstColumn();
+            listenerAxisChange.onFirstColumnChange(rowIdList);
+        }
     }
 
     private void updateList(List<String> list, ConcurrentHashMap<String, String> map, String item) {
@@ -175,7 +242,7 @@ public class ExcelTools implements DDELinkEventListener {
                 return;
             } catch (DDELink.ConversationException e) {
 //            e.printStackTrace();
-                System.out.println("Excel seems busy. waiting... (caught Exception: '"+e.getMessage()+"')");
+                log.debug("Excel seems busy during write. waiting... (caught Exception: '" + e.getMessage() + "')");
                 Tool.sleepFor(3000);
             }
         }
@@ -244,39 +311,6 @@ public class ExcelTools implements DDELinkEventListener {
         return count;
     }
 
-
-
-//    private void parsePositionAccounts(String data) {
-//        String accountsString = data.replace("\r\n", "\t");
-//        String[] parts = accountsString.split("\t");
-//        positionAccounts.clear();
-//        positionAccountsMap.clear();
-//        positionAccounts.addAll(Arrays.asList(parts));
-//        for (String s : positionAccounts) positionAccountsMap.put(s, s);
-//        if (positionAccounts.size() > 0) positionAccounts.remove(0);
-//    }
-
-
-    //    private void parseFirstRow(String data) {
-//        String accountsString = data.replace("\r\n", "\t");
-//        String[] parts = accountsString.split("\t");
-//        positionAccounts.clear();
-//        positionAccountsMap.clear();
-//        positionAccounts.addAll(Arrays.asList(parts));
-//        for (String s : positionAccounts) positionAccountsMap.put(s, s);
-//        if (positionAccounts.size() > 0) positionAccounts.remove(0);
-//    }
-
-//    private ArrayList<String> positionProducts;
-//    private ConcurrentHashMap<String, String> positionProductsMap;
-//    private ArrayList<String> positionAccounts;
-//    private ConcurrentHashMap<String, String> positionAccountsMap;
-    //    private DDEClientConversation conversationPositions;
-
-//    private IProvideDDEConversation conversation;
-//    private ConcurrentHashMap<String, AccountPosition> productAccount2PositionMap;
-
-
     public void setSnapShotMode(boolean snapShotMode) {
         this.snapShotMode = snapShotMode;
     }
@@ -285,7 +319,20 @@ public class ExcelTools implements DDELinkEventListener {
         this.naString = naString;
     }
 
-    public ExcelTools(IProvideDDEConversation _DDELink) {
+    public void setFirstRowListener(IConsumeAxisChanges _listenerAxisChange) {
+        listenerAxisChange=_listenerAxisChange;
+    }
+
+    public void setSettingsSender(ISendBulkSettings settingsSender) {
+        this.settingsSender = settingsSender;
+    }
+
+    public void start() {
+        settingsThread.start();
+    }
+
+    public SheetAccess(IProvideDDEConversation _DDELink) {
+        shutdown=false;
         ddeLink = _DDELink;
         ddeLink.setEventListener(this);
         columnIdList = new ArrayList<String>();
@@ -293,10 +340,29 @@ public class ExcelTools implements DDELinkEventListener {
         rowIdList = new ArrayList<String>();
         mapOfRowIds = new ConcurrentHashMap<String, String>();
         combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
+        settingsRows = new ConcurrentHashMap<String, String>();
         snapShotMode=true;
         naString="n/a";
+        listenerAxisChange=new IConsumeAxisChanges() {
+            @Override
+            public void onFirstRowChange(Collection<String> changes) {}
+            @Override
+            public void onFirstColumnChange(Collection<String> changes) {}
+        };
+        settingsThread = new Thread(this);
+        settingsSender = new ISendBulkSettings() {
+            @Override
+            public void sendBulkSettings(Collection<IProvideProperties> all) {}
+        };
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static String NA = "n/a";
+    private static String TAB = "\t";
+    private static String NL = "\r\n";
+
+    private ConcurrentHashMap<String,String> settingsRows;
     private boolean snapShotMode;
     private ConcurrentHashMap<String, MatrixItem> combiKey2ItemMap;
     private ArrayList<String> columnIdList;
@@ -305,5 +371,8 @@ public class ExcelTools implements DDELinkEventListener {
     private ConcurrentHashMap<String,String> mapOfRowIds;
     private final IProvideDDEConversation ddeLink;
     private String naString;
+    private IConsumeAxisChanges listenerAxisChange;
+    private Thread settingsThread;
+
 
 }

@@ -61,7 +61,7 @@ public class PriceCheck extends StrategyBase {
 
     @Override
     public void onSettings(IProvideProperties p) {
-
+        log.info(p.toString());
     }
 
     @Override
