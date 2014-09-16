@@ -1,16 +1,14 @@
 package org.yats.trader;
 
 import org.joda.time.DateTime;
-import org.joda.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.common.UniqueId;
 import org.yats.common.WaitingLinkedBlockingQueue;
 import org.yats.trading.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +26,9 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
-
     @Override
     public void subscribe(String productId, IConsumePriceData consumer)
     {
-//        Product p = productProvider.getProductWith(productId);
         priceFeed.subscribe(productId, this);
         addConsumerForProductId(productId, consumer);
     }
@@ -64,16 +60,6 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         updatedProductQueue.add(receipt.getProductId());
     }
 
-    private void fillReceiptWithOrderData(Receipt receipt) {
-        if(!orderMap.containsKey(receipt.getOrderId().toString())) {
-            log.debug("received receipt for unknown order: {}", receipt);
-            return;
-        }
-        String key = receipt.getOrderId().toString();
-        OrderNew order = orderMap.get(key);
-        receipt.setInternalAccount(order.getInternalAccount());
-        if(receipt.isEndState()) orderMap.remove(key);
-    }
 
     @Override
     public void sendOrderNew(OrderNew orderNew) {
@@ -130,23 +116,22 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         this.priceFeed = priceFeed;
     }
 
-    // todo: extend to support more than one trader in parallel
+
+    public void execute(String strategyName) {
+        StrategyBase strategy = factory.createStrategy(strategyName);
+        addStrategy(strategy);
+        strategy.init();
+    }
+
     public void addStrategy(StrategyBase strategy) {
         addReceiptConsumer(strategy);
         settingsConsumers.add(strategy);
-//        addMarketDataConsumer(strategy);
+        strategyList.add(strategy);
     }
-
-//    public void addMarketDataConsumer(IConsumeMarketData mdc) {
-//        marketDataConsumers.add(mdc);
-//    }
 
     public void addReceiptConsumer(IConsumeReceipt rc) {
         receiptConsumers.add(rc);
     }
-
-
-
 
     @Override
     public void run() {
@@ -191,25 +176,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         callbackList.add(callback);
     }
 
-    private void callWaitingStrategies() throws InterruptedException {
-        boolean itemArrived = false;
-        while(!itemArrived) {
-            Thread.yield();
-            itemArrived = updatedProductQueue.isWaitedTillArrival(1, TimeUnit.SECONDS);
 
-            DateTime now = DateTime.now();
-            List<TimedCallback> temp = new ArrayList<TimedCallback>(callbackList);
-            for (TimedCallback callback : temp)
-            {
-                if(callback.isTimeToCall(now)) {
-                    callback.call();
-                    callbackList.remove(callback);
-                }
-            }
-        }
-    }
-
-    private ArrayList<TimedCallback> callbackList;
 
     public void setProductProvider(IProvideProduct productProvider) {
         this.productProvider = productProvider;
@@ -217,10 +184,19 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
 
     public void setRateConverter(RateConverter rateConverter) {
         this.rateConverter = rateConverter;
+    }
 
+    public void shutdownAllStrategies() {
+        for(StrategyBase strategy : strategyList) strategy.shutdown();
+    }
+
+    public void setFactory(StrategyFactory _factory) {
+        this.factory = _factory;
     }
 
     public StrategyRunner() {
+
+        strategyList = new ArrayList<StrategyBase>();
         consumerId = UniqueId.create();
         priceFeed = new PriceFeedDummy();
         orderSender = new OrderSenderDummy();
@@ -239,6 +215,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
 //        marketDataConsumers = new LinkedList<IConsumeMarketData>();
         shutdown = false;
         rateConverter = new RateConverter(new ProductList());
+        factory=null;
     }
 
 
@@ -250,6 +227,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                 ? mapProductIdToConsumers.get(productId)
                 : new ConcurrentHashMap<String, IConsumePriceData>();
     }
+
 
     private class PriceFeedDummy implements IProvidePriceFeed {
         @Override
@@ -270,10 +248,37 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         }
     }
 
+    private void callWaitingStrategies() throws InterruptedException {
+        boolean itemArrived = false;
+        while(!itemArrived) {
+            Thread.yield();
+            itemArrived = updatedProductQueue.isWaitedTillArrival(1, TimeUnit.SECONDS);
+
+            DateTime now = DateTime.now();
+            List<TimedCallback> temp = new ArrayList<TimedCallback>(callbackList);
+            for (TimedCallback callback : temp)
+            {
+                if(callback.isTimeToCall(now)) {
+                    callback.call();
+                    callbackList.remove(callback);
+                }
+            }
+        }
+    }
+
+    private void fillReceiptWithOrderData(Receipt receipt) {
+        if(!orderMap.containsKey(receipt.getOrderId().toString())) {
+            log.debug("received receipt for unknown order: {}", receipt);
+            return;
+        }
+        String key = receipt.getOrderId().toString();
+        OrderNew order = orderMap.get(key);
+        receipt.setInternalAccount(order.getInternalAccount());
+        if(receipt.isEndState()) orderMap.remove(key);
+    }
 
     private Thread strategyThread;
     private IProvidePriceFeed priceFeed;
-    //    private ConcurrentHashMap<String, Product> subscribedProducts;
     private ConcurrentHashMap<String, ConcurrentHashMap<String, IConsumePriceData>> mapProductIdToConsumers;
     private ConcurrentHashMap<String, PriceData> priceDataMap;
     private ConcurrentHashMap<String, OrderNew> orderMap;
@@ -284,10 +289,11 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     private ISendReports reportSender;
     private LinkedList<IConsumeReceipt> receiptConsumers;
     private LinkedList<IConsumeSettings> settingsConsumers;
-    //    private LinkedList<IConsumeMarketData> marketDataConsumers;
     private IProvideProduct productProvider;
     private boolean shutdown;
     private UniqueId consumerId;
     private RateConverter rateConverter;
-
+    private ArrayList<StrategyBase> strategyList;
+    private ArrayList<TimedCallback> callbackList;
+    private StrategyFactory factory;
 } // class
