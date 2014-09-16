@@ -26,11 +26,23 @@ public class Tool {
         String username = System.getProperty("user.name").replace(" ","");
         String path = pathBase+"/"+username;
         FileTool.createDirectories(path);
-        String userSpecificFIXFilename = path+"/"+className+".properties";
-        log.info("Trying to read config file: "+userSpecificFIXFilename);
-        if(!FileTool.exists(userSpecificFIXFilename))
-            throw new CommonExceptions.FileReadException(userSpecificFIXFilename+" not found!");
-        return userSpecificFIXFilename;
+        String userSpecificFilename = path+"/"+className+".properties";
+        log.info("Trying to read config file: "+userSpecificFilename);
+        if(!FileTool.exists(userSpecificFilename))
+            throw new CommonExceptions.FileReadException(userSpecificFilename+" not found!");
+        return userSpecificFilename;
+    }
+
+    public static String getPersonalSubdirConfigFilename(String pathBase, String subDir, String className)
+    {
+        String username = System.getProperty("user.name").replace(" ","");
+        String path = pathBase+"/"+username+"/"+subDir;
+        FileTool.createDirectories(path);
+        String userSpecificFilename = path+"/"+className+".properties";
+        log.info("Trying to read config file: "+userSpecificFilename);
+        if(!FileTool.exists(userSpecificFilename))
+            throw new CommonExceptions.FileReadException(userSpecificFilename+" not found!");
+        return userSpecificFilename;
     }
 
 

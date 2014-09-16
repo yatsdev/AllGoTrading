@@ -119,7 +119,7 @@ public class StrategyRunnerMain {
 
     private StrategyBase createStrategy(String strategyName) {
 
-        String configFilename = Tool.getPersonalConfigFilename("config",strategyName);
+        String configFilename = Tool.getPersonalSubdirConfigFilename("config","strategy", strategyName);
         PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile(configFilename);
         String strategyClassName = strategyConfig.get("strategyClass");
         StrategyBase strategy = instantiateStrategy(strategyClassName);
