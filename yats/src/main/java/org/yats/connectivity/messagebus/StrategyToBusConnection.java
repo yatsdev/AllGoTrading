@@ -56,14 +56,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
     public void sendSettings(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderSettings.publish(m.getTopic(), m);
-        log.debug("Published setting properties: "+(p.getKeySet().size()-1));
+//        log.debug("Published setting properties: "+(p.getKeySet().size()-1));
     }
 
     @Override
     public void sendReports(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderReports.publish(m.getTopic(), m);
-        log.debug("Published report properties: "+p.getKeySet().size());
+//        log.debug("Published report properties: "+p.getKeySet().size());
     }
 
     @Override

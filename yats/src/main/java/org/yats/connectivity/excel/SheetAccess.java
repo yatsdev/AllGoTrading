@@ -18,9 +18,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
 
     final Logger log = LoggerFactory.getLogger(SheetAccess.class);
 
-    private boolean shutdown;
-    private ISendBulkSettings settingsSender;
-
     @Override
     public void onDisconnect() {
     }
@@ -44,6 +41,10 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
                 log.info("settingsThread shutting down.");
             }
             if(shutdown) return;
+            if(resendSettings) {
+                settingsRows.clear();
+                resendSettings=false;
+            }
             ConcurrentHashMap<String,String> oldSettingsRows = settingsRows;
             ConcurrentHashMap<String,String> change = new ConcurrentHashMap<String, String>();
             readSettingsRows();
@@ -56,6 +57,11 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         }
     }
 
+    public void initiateResendOfSettings() {
+        resendSettings=true;
+    }
+
+
     public synchronized void readSettingsRows() {
         settingsRows = new ConcurrentHashMap<String, String>();
         for(int rowIndex=0; rowIndex < rowIdList.size(); rowIndex++) {
@@ -63,19 +69,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
             settingsRows.put(rowString, rowString);
         }
     }
-
-    private String readRow(int rowNumber) {
-        while(true) {
-            try {
-                String rowString = ddeLink.request("R"+rowNumber);
-                return rowString;
-            } catch(DDELink.ConversationException e) {
-                log.debug("Excel seems busy during read. waiting... (caught Exception: '"+e.getMessage()+"')");
-                Tool.sleepFor(3000);
-            }
-        }
-    }
-
     public Collection<IProvideProperties> parseSettingsRows() {
         return parseSettingsRows(settingsRows);
     }
@@ -105,17 +98,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         return rowIdList;
     }
 
-    private void updateFirstRow(String data) {
-        parseFirstRow(data);
-        listenerAxisChange.onFirstRowChange(columnIdList);
-    }
-
-    private void updateFirstColumn(String data) {
-        parseFirstColumn(data);
-        listenerAxisChange.onFirstColumnChange(rowIdList);
-    }
-
-
     public void disconnect() {
         shutdown=true;
         settingsThread.interrupt();
@@ -131,6 +113,105 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         for (String p : rowIdsToUpdate.keySet()) {
             pokeRowForRowIds(p);
         }
+    }
+
+    public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
+        ddeLink.setTimeout(2000);
+        ddeLink.connect(applicationName, sheetName);
+        String firstColumnString = ddeLink.request("C1");
+        parseFirstColumn(firstColumnString);
+        String firstRowString = ddeLink.request("R1");
+        parseFirstRow(firstRowString);
+        ddeLink.startAdvice("C1");
+        ddeLink.startAdvice("R1");
+    }
+
+    public void connect(String applicationname, String sheetname) {
+        ddeLink.connect(applicationname, sheetname);
+    }
+
+    public void readFirstRowFromDDE() {
+        String firstRow = ddeLink.request("R1");
+        parseFirstRow(firstRow);
+    }
+
+    public void readFirstColumnFromDDE() {
+        String firstColumn = ddeLink.request("C1");
+        parseFirstColumn(firstColumn);
+    }
+
+    public int countKeysInFirstRow(){
+        int count=0;
+        for(String s : columnIdList) {
+            count+= s.isEmpty() ? 0 : 1;
+        }
+        return count;
+    }
+
+    public int countKeysInFirstColumn(){
+        int count=0;
+        for(String s : rowIdList) {
+            count+= s.isEmpty() ? 0 : 1;
+        }
+        return count;
+    }
+
+    public void setSnapShotMode(boolean snapShotMode) {
+        this.snapShotMode = snapShotMode;
+    }
+
+    public void setNaString(String naString) {
+        this.naString = naString;
+    }
+
+    public void setFirstRowListener(IConsumeAxisChanges _listenerAxisChange) {
+        listenerAxisChange=_listenerAxisChange;
+    }
+
+    public void setSettingsSender(ISendBulkSettings settingsSender) {
+        this.settingsSender = settingsSender;
+    }
+
+    public void start() {
+        settingsThread.start();
+    }
+
+    public SheetAccess(IProvideDDEConversation _DDELink) {
+        shutdown=false;
+        ddeLink = _DDELink;
+        ddeLink.setEventListener(this);
+        columnIdList = new ArrayList<String>();
+        mapOfColumnIds = new ConcurrentHashMap<String, String>();
+        rowIdList = new ArrayList<String>();
+        mapOfRowIds = new ConcurrentHashMap<String, String>();
+        combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
+        settingsRows = new ConcurrentHashMap<String, String>();
+        snapShotMode=true;
+        naString="n/a";
+        listenerAxisChange=new IConsumeAxisChanges() {
+            @Override
+            public void onFirstRowChange(Collection<String> changes) {}
+            @Override
+            public void onFirstColumnChange(Collection<String> changes) {}
+        };
+        settingsThread = new Thread(this);
+        settingsSender = new ISendBulkSettings() {
+            @Override
+            public void sendBulkSettings(Collection<IProvideProperties> all) {}
+        };
+        resendSettings=false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private void updateFirstRow(String data) {
+        parseFirstRow(data);
+        listenerAxisChange.onFirstRowChange(columnIdList);
+    }
+
+    private void updateFirstColumn(String data) {
+        parseFirstColumn(data);
+        listenerAxisChange.onFirstColumnChange(rowIdList);
     }
 
     private void pokeRowForRowIds(String rowId) {
@@ -248,18 +329,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         }
     }
 
-    public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
-        ddeLink.setTimeout(2000);
-        ddeLink.connect(applicationName, sheetName);
-        String firstColumnString = ddeLink.request("C1");
-        parseFirstColumn(firstColumnString);
-        String firstRowString = ddeLink.request("R1");
-        parseFirstRow(firstRowString);
-        ddeLink.startAdvice("C1");
-        ddeLink.startAdvice("R1");
-    }
-
-
     private void parseFirstColumn(String data) {
         String firstColumnString = data.replace("\r\n", "\t");
         String[] parts = firstColumnString.split("\t");
@@ -281,82 +350,18 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         if (columnIdList.size() > 0) columnIdList.remove(0);
     }
 
-    public void connect(String applicationname, String sheetname) {
-        ddeLink.connect(applicationname, sheetname);
-    }
-
-    public void readFirstRowFromDDE() {
-        String firstRow = ddeLink.request("R1");
-        parseFirstRow(firstRow);
-    }
-
-    public void readFirstColumnFromDDE() {
-        String firstColumn = ddeLink.request("C1");
-        parseFirstColumn(firstColumn);
-    }
-
-    public int countKeysInFirstRow(){
-        int count=0;
-        for(String s : columnIdList) {
-            count+= s.isEmpty() ? 0 : 1;
+    private String readRow(int rowNumber) {
+        while(true) {
+            try {
+                String rowString = ddeLink.request("R"+rowNumber);
+                return rowString;
+            } catch(DDELink.ConversationException e) {
+                log.debug("Excel seems busy during read. waiting... (caught Exception: '"+e.getMessage()+"')");
+                Tool.sleepFor(3000);
+            }
         }
-        return count;
     }
 
-    public int countKeysInFirstColumn(){
-        int count=0;
-        for(String s : rowIdList) {
-            count+= s.isEmpty() ? 0 : 1;
-        }
-        return count;
-    }
-
-    public void setSnapShotMode(boolean snapShotMode) {
-        this.snapShotMode = snapShotMode;
-    }
-
-    public void setNaString(String naString) {
-        this.naString = naString;
-    }
-
-    public void setFirstRowListener(IConsumeAxisChanges _listenerAxisChange) {
-        listenerAxisChange=_listenerAxisChange;
-    }
-
-    public void setSettingsSender(ISendBulkSettings settingsSender) {
-        this.settingsSender = settingsSender;
-    }
-
-    public void start() {
-        settingsThread.start();
-    }
-
-    public SheetAccess(IProvideDDEConversation _DDELink) {
-        shutdown=false;
-        ddeLink = _DDELink;
-        ddeLink.setEventListener(this);
-        columnIdList = new ArrayList<String>();
-        mapOfColumnIds = new ConcurrentHashMap<String, String>();
-        rowIdList = new ArrayList<String>();
-        mapOfRowIds = new ConcurrentHashMap<String, String>();
-        combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
-        settingsRows = new ConcurrentHashMap<String, String>();
-        snapShotMode=true;
-        naString="n/a";
-        listenerAxisChange=new IConsumeAxisChanges() {
-            @Override
-            public void onFirstRowChange(Collection<String> changes) {}
-            @Override
-            public void onFirstColumnChange(Collection<String> changes) {}
-        };
-        settingsThread = new Thread(this);
-        settingsSender = new ISendBulkSettings() {
-            @Override
-            public void sendBulkSettings(Collection<IProvideProperties> all) {}
-        };
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static String NA = "n/a";
     private static String TAB = "\t";
@@ -373,6 +378,9 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     private String naString;
     private IConsumeAxisChanges listenerAxisChange;
     private Thread settingsThread;
+    private boolean shutdown;
+    private ISendBulkSettings settingsSender;
 
 
+    private boolean resendSettings;
 }

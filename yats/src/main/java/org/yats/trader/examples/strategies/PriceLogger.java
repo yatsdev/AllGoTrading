@@ -32,6 +32,10 @@ public class PriceLogger extends StrategyBase implements IAmCalledBackInTime {
 
         log.info("Received price #"+counter+":" + priceData);
         counter++;
+
+        setReport("lastPrice", priceData.toString());
+        setReport("counter", Integer.toString(counter));
+        sendReports();
     }
 
 
@@ -55,10 +59,10 @@ public class PriceLogger extends StrategyBase implements IAmCalledBackInTime {
     @Override
     public void onInitStrategy()
     {
-        setInternalAccount(getConfig("internalAccount"));
+        setInternalAccount(getConfig("internalAccount",getName()));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
-        addTimedCallback(3, this);
+//        addTimedCallback(3, this);
     }
 
     @Override

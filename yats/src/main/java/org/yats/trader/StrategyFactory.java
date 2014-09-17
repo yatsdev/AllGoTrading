@@ -16,7 +16,7 @@ public class StrategyFactory {
         this.productList = productList;
     }
 
-    public StrategyBase createStrategy(String strategyName, IProvideProperties prop) {
+    public StrategyBase createStrategy(IProvideProperties prop) {
         String strategyClassName = prop.get("strategyClass","noStrategyClassDefinedInProperties");
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);

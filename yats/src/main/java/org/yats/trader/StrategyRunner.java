@@ -120,12 +120,14 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         IProvideProperties prop = PropertiesReader.createFromTwoProviders(fileProperties, settingsProperties);
         log.info("trying to create strategy: "+strategyName);
         try {
-            StrategyBase strategy = factory.createStrategy(strategyName, prop);
-            addStrategy(strategy);
+            StrategyBase strategy = factory.createStrategy(prop);
             strategy.init();
             strategy.onSettings(prop);
+            addStrategy(strategy);
         } catch(CommonExceptions.CouldNotInstantiateClassException e) {
-            log.error("could not create strategy '"+strategyName+"' with properties "+prop.toString() );
+            log.error("Exception: '"+e.getMessage()+"'. Could not create strategy '"+strategyName+"' with properties "+prop.toString() );
+        } catch(CommonExceptions.KeyNotFoundException e) {
+            log.error("Exception: '"+e.getMessage()+"'. Could not initialize strategy '"+strategyName+"' with properties "+prop.toString() );
         }
     }
 

@@ -22,6 +22,7 @@ public class StrategyRunnerMain {
 
         try {
             q.createAllStrategies();
+            q.requestSettings();
             q.waitForShutdown();
             q.shutdown();
         } catch (RuntimeException r)
@@ -32,6 +33,7 @@ public class StrategyRunnerMain {
         System.exit(0);
 
     }
+
 
     public StrategyRunnerMain() {
 
@@ -73,14 +75,21 @@ public class StrategyRunnerMain {
 
     private void createAllStrategies() throws InterruptedException, IOException
     {
-        String strategyNamesString = strategyRunnerProperties.get("strategyNames");
+        String strategyNamesString = strategyRunnerProperties.get("strategyNames","");
         String[] strategyNames = strategyNamesString.split(",");
 
         for(String strategyName : strategyNames) {
+            if(strategyName.length()==0) continue;
             IProvideProperties prop = new PropertiesReader();
             prop.set(StrategyBase.SETTING_STRATEGYNAME, strategyName);
             strategyRunner.createNewStrategy(prop);
         }
+    }
+
+    private void requestSettings() {
+        IProvideProperties p = new PropertiesReader();
+        p.set("sendAllSettings","sendAllSettings");
+        strategyToBusConnection.sendReports(p);
     }
 
     private void waitForShutdown() throws InterruptedException, IOException {

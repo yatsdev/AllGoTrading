@@ -53,9 +53,10 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     @Override
     public void onSettings(IProvideProperties p) {
         boolean previouslyRunning = isStarted();
-        config = p;
+        config = PropertiesReader.createFromTwoProviders(config, p);
         onSettingsForStrategy(p);
         callStartOrStopCallback(previouslyRunning);
+        sendReports();  // todo: seems immediate sending when receiving causes sometimes an internal crash of messagebus. no more messages are transmitted. investigate.
     }
 
     public void stopStrategy() {
@@ -70,12 +71,15 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         callStartOrStopCallback(previouslyRunning);
     }
 
-    public void sendReports(IProvideProperties p) {
-        reportSender.sendReports(p);
-    }
+//    public void sendReports(IProvideProperties p) {
+//        reportSender.sendReports(p);
+//    }
 
     public void sendReports() {
         reports.set(SETTING_STRATEGYNAME, getName());
+        reports.set(SETTING_LOCKED, isLocked());
+        reports.set(SETTING_STARTED, isStarted());
+        log.info("report:"+reports.toString());
         reportSender.sendReports(reports);
     }
 
@@ -189,16 +193,13 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         return totalValue;
     }
 
-    public PropertiesReader getReports() {
-        return reports;
+    public void setReport(String key, String value) {
+        reports.set(key,value);
     }
 
-
-
-//    public Decimal getProfitForProduct(String productId)
-//    {
-//        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
-//    }
+    public void addReports(IProvideProperties p) {
+        reports.add(p);
+    }
 
     public void setPriceProvider(IProvidePriceFeed priceProvider) {
         this.priceProvider = priceProvider;

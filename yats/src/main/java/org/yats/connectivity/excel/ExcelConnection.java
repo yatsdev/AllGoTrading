@@ -76,6 +76,10 @@ public class ExcelConnection implements
 
     @Override
     public void onReport(IProvideProperties p, boolean hasMoreReports) {
+        if(p.exists("sendAllSettings")) {
+            sheetAccessSettings.initiateResendOfSettings();
+            return;
+        }
         if (!p.exists(STRATEGYNAME)) {
             log.error("strategy report without strategyName found: " + p.toString());
             return;

@@ -46,7 +46,7 @@ public class PriceCheck extends StrategyBase {
             log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrices.get(key).toString());
             lastBigChange = priceData.toString();
 
-            getReports().set("lastBigChange", lastBigChange);
+            setReport("lastBigChange", lastBigChange);
             sendReports();
 
         } else {
@@ -76,10 +76,12 @@ public class PriceCheck extends StrategyBase {
 
     @Override
     public void onSettingsForStrategy(IProvideProperties p) {
-        getReports().add(p);
-        getReports().set("lastBigChange", lastBigChange);
+        addReports(p);
+        setReport("lastBigChange", lastBigChange);
         sendReports();
     }
+
+
 
     @Override
     public void onInitStrategy()

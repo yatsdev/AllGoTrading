@@ -42,7 +42,7 @@ public class Quoter extends StrategyBase {
         if(!priceData.isSameFrontRowAskAs(prevRefPriceData)) {
             cancelOrders(BookSide.ASK);
             sendAskRelativeTo(priceData.getAsk());
-            sendReports(getReports());
+            sendReports();
         }
 
         prevRefPriceData = priceData;
@@ -127,7 +127,7 @@ public class Quoter extends StrategyBase {
             double step = i;
             Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-step*stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.BID, bidPrice);
-            getReports().set("bidPrice"+i, bidPrice);
+            setReport("bidPrice"+i, bidPrice.toString());
         }
     }
 
@@ -137,7 +137,7 @@ public class Quoter extends StrategyBase {
             double step = i;
             Decimal askPrice = Decimal.fromDouble(askMarket * (1.0 + step * stepFactor) + tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.ASK, askPrice);
-            getReports().set("askPrice" + i, askPrice);
+            setReport("askPrice" + i, askPrice.toString());
         }
     }
 
