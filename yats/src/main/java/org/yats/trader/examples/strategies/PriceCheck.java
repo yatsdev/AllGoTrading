@@ -31,30 +31,31 @@ public class PriceCheck extends StrategyBase {
           for ( String key : lastPrices.keySet() ) {
           if(priceData.getProductId().compareTo(key)==0) {
 
-        boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrices.get(key).getLast().multiply(upMove));
-        boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrices.get(key).getBid().multiply(upMove));
-        boolean hugeAskChangeUp = priceData.getAsk().isGreaterThan(lastPrices.get(key).getAsk().multiply(upMove));
-        boolean hugeLastChangeDown = priceData.getLast().isLessThan(lastPrices.get(key).getLast().multiply(downMove));
-        boolean hugeBidChangeDown = priceData.getBid().isLessThan(lastPrices.get(key).getBid().multiply(downMove));
-        boolean hugeAskChangeDown = priceData.getAsk().isLessThan(lastPrices.get(key).getAsk().multiply(downMove));
-        boolean hugeChange =  (hugeLastChangeUp || hugeBidChangeUp || hugeAskChangeUp
-                || hugeLastChangeDown || hugeBidChangeDown || hugeAskChangeDown);
+            if(isFirstIteration==false) {
+                boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrices.get(key).getLast().multiply(upMove));
+                boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrices.get(key).getBid().multiply(upMove));
+                boolean hugeAskChangeUp = priceData.getAsk().isGreaterThan(lastPrices.get(key).getAsk().multiply(upMove));
+                boolean hugeLastChangeDown = priceData.getLast().isLessThan(lastPrices.get(key).getLast().multiply(downMove));
+                boolean hugeBidChangeDown = priceData.getBid().isLessThan(lastPrices.get(key).getBid().multiply(downMove));
+                boolean hugeAskChangeDown = priceData.getAsk().isLessThan(lastPrices.get(key).getAsk().multiply(downMove));
+                boolean hugeChange = (hugeLastChangeUp || hugeBidChangeUp || hugeAskChangeUp
+                        || hugeLastChangeDown || hugeBidChangeDown || hugeAskChangeDown);
 
 
-        if(hugeChange) {
-            System.out.println("");
-            log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrices.get(key).toString());
-        } else {
-            dots++;
-            if(dots>80) {
-                System.out.println("");
-                dots=0;
+                if (hugeChange) {
+                    System.out.println("");
+                    log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrices.get(key).toString());
+                } else {
+                    dots++;
+                    if (dots > 80) {
+                        System.out.println("");
+                        dots = 0;
+                    }
+                    System.out.print(".");
+                }
             }
-            System.out.print(".");
-        }
-
         lastPrices.put(key,priceData);
-
+isFirstIteration=false;
          }
          }
 
@@ -111,6 +112,7 @@ public class PriceCheck extends StrategyBase {
     private static int dots = 0;
     private List<String> tradeProductIdsNameList;
 
+    boolean isFirstIteration=true;
     private Decimal upMove;
     private Decimal downMove;
 } // class
