@@ -24,7 +24,7 @@ public class PriceLogger extends StrategyBase implements IAmCalledBackInTime {
     }
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(shuttingDown) return;
         if(!isInitialised()) return;
@@ -36,19 +36,25 @@ public class PriceLogger extends StrategyBase implements IAmCalledBackInTime {
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
-
+    public void onStopStrategy() {
     }
 
     @Override
-    public void init()
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
+    }
+
+    @Override
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
@@ -56,7 +62,7 @@ public class PriceLogger extends StrategyBase implements IAmCalledBackInTime {
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
     }

@@ -5,9 +5,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.IProvideProperties;
 import org.yats.connectivity.excel.DDELinkEventListener;
-import org.yats.connectivity.excel.SheetAccess;
 import org.yats.connectivity.excel.IProvideDDEConversation;
 import org.yats.connectivity.excel.MatrixItem;
+import org.yats.connectivity.excel.SheetAccess;
+import org.yats.trader.StrategyBase;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,13 +38,13 @@ public class ExcelTest {
         Collection<IProvideProperties> sheet = sheetAccessSettings.parseSettingsRows();
         assert(sheet.size()==2);
         IProvideProperties first = (IProvideProperties) sheet.toArray()[0];
-        if(first.get("strategyName").compareTo("testStrategy1")==0)
+        if(first.get(StrategyBase.SETTING_STRATEGYNAME).compareTo("testStrategy1")==0)
             assert(first.get("testParam1").compareTo("11.11")==0);
         else
             assert(first.get("testParam2").compareTo("22.22")==0);
 
         IProvideProperties second = (IProvideProperties) sheet.toArray()[1];
-        if(second.get("strategyName").compareTo("testStrategy2")==0)
+        if(second.get(StrategyBase.SETTING_STRATEGYNAME).compareTo("testStrategy2")==0)
             assert(second.get("testParam2").compareTo("22.22")==0);
         else
             assert(second.get("testParam1").compareTo("11.11")==0);

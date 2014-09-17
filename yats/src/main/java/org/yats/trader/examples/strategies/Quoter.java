@@ -19,7 +19,7 @@ public class Quoter extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(Quoter.class);
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
@@ -50,7 +50,7 @@ public class Quoter extends StrategyBase {
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
@@ -85,14 +85,21 @@ public class Quoter extends StrategyBase {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
+    public void onStopStrategy() {
+    }
+
+    @Override
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
         System.out.println("Strategy settings: "+PropertiesReader.toString(p));
     }
 
     @Override
-    public void init()
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         refProductId = getConfig("referenceProductId");
@@ -108,7 +115,7 @@ public class Quoter extends StrategyBase {
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
         cancelAllOrders();

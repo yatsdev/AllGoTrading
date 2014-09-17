@@ -9,6 +9,7 @@ import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
+import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
 import java.util.ArrayList;
@@ -235,7 +236,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
             KeyValueMsg m = receiverReports.get();
             String strategyName="unknown";
             IProvideProperties p = m.toProperties();
-            if(p.exists("strategyName")) strategyName = p.get("strategyName");
+            if(p.exists(StrategyBase.SETTING_STRATEGYNAME)) strategyName = p.get(StrategyBase.SETTING_STRATEGYNAME);
             reportsMap.put(strategyName, p);
         }
         int i=0;

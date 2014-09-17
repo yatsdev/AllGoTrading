@@ -17,7 +17,7 @@ public class Scalper extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(Scalper.class);
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(!isInitialised()) return;
         if(!priceData.hasProductId(tradeProductId)) return;
@@ -33,7 +33,7 @@ public class Scalper extends StrategyBase {
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
@@ -72,14 +72,20 @@ public class Scalper extends StrategyBase {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
-
+    public void onStopStrategy() {
     }
 
     @Override
-    public void init()
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
+    }
+
+    @Override
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
@@ -95,7 +101,7 @@ public class Scalper extends StrategyBase {
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
         cancelOrders();

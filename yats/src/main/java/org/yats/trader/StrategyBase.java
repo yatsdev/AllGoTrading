@@ -13,23 +13,86 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
+    public static final String SETTING_LOCKED = "lockStrategy";
+    public static final String SETTING_STARTED = "startStrategy";
+    public static final String SETTING_STRATEGYNAME = "strategyName";
 
     @Override
-    public abstract void onPriceData(PriceData priceData);
+    public void onPriceData(PriceData priceData) {
+        onPriceDataForStrategy(priceData);
+    }
+
+    @Override
+    public void onReceipt(Receipt receipt) {
+        onReceiptForStrategy(receipt);
+    }
+
+    public void shutdown() {
+        onShutdown();
+    }
+
+    public abstract void onShutdown();
+    public abstract void onPriceDataForStrategy(PriceData priceData);
+    public abstract void onReceiptForStrategy(Receipt receipt);
+    public abstract void onInitStrategy();
+    public abstract void onStopStrategy();
+    public abstract void onStartStrategy();
+    public abstract void onSettingsForStrategy(IProvideProperties p);
+
+    public void init() {
+        initialised = true;
+        config.set(SETTING_LOCKED, isLocked());
+        config.set(SETTING_STARTED, isStarted());
+        onInitStrategy();
+    }
 
     @Override
     public UniqueId getConsumerId() { return consumerId; }
 
-    @Override
-    public abstract void onReceipt(Receipt receipt);
 
     @Override
-    public abstract void onSettings(IProvideProperties p);
+    public void onSettings(IProvideProperties p) {
+        boolean previouslyRunning = isStarted();
+        config = p;
+        onSettingsForStrategy(p);
+        callStartOrStopCallback(previouslyRunning);
+    }
 
+    public void stopStrategy() {
+        boolean previouslyRunning = isStarted();
+        config.set(SETTING_STARTED, "false");
+        callStartOrStopCallback(previouslyRunning);
+    }
+
+    public void startStrategy() {
+        boolean previouslyRunning = isStarted();
+        if(!isLocked()) config.set(SETTING_STARTED, "true");
+        callStartOrStopCallback(previouslyRunning);
+    }
+
+    public void sendReports(IProvideProperties p) {
+        reportSender.sendReports(p);
+    }
+
+    public void sendReports() {
+        reports.set(SETTING_STRATEGYNAME, getName());
+        reportSender.sendReports(reports);
+    }
+
+    public boolean isStarted() {
+        return isLocked() ? false : config.getAsBoolean(SETTING_STARTED, false);
+    }
+
+    public boolean isLocked() {
+        return config.getAsBoolean(SETTING_LOCKED, false);
+    }
 
     protected boolean isConfigExists(String key) { return config.exists(key); }
     protected String getConfig(String key) {
         return config.get(key);
+    }
+    protected String getConfig(String key, String defaultValue) {
+        return isConfigExists(key) ? config.get(key) : defaultValue;
     }
 
     protected double getConfigAsDouble(String key) {
@@ -51,33 +114,35 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         config.set(key, value);
     }
 
-    public void sendConfig() {
-
-    }
 
     protected void addTimedCallback(int seconds, IAmCalledBackInTime callback) {
         timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
     }
 
-    public void init() {
-        initialised = true;
-    }
 
     public boolean isInitialised() {
         return initialised;
     }
 
-    public abstract void shutdown();
+
 
     public void subscribe(String productId)
     {
-        log.info("Subscription sent for "+productId+ " by "+this.getClass().getSimpleName());
+        log.info("Subscription sent for "+productId+ " by "+getName());
         priceProvider.subscribe(productId, this);
     }
 
     public void sendNewOrder(OrderNew order)
     {
+        if(!isStarted()) {
+            log.error("NOT_STARTED! "+ getName() + " tried to send OrderNew although not started: "+order);
+            return;
+        }
         orderSender.sendOrderNew(order);
+    }
+
+    public String getName() {
+        return config.get(SETTING_STRATEGYNAME);
     }
 
     public void sendOrderCancel(OrderCancel order)
@@ -85,9 +150,6 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         orderSender.sendOrderCancel(order);
     }
 
-    public void sendReports(IProvideProperties p) {
-        reportSender.sendReports(p);
-    }
 
     public Product getProductForProductId(String productId) {
         return productProvider.getProductWith(productId);
@@ -170,39 +232,35 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         this.timedCallbackProvider = timedCallbackProvider;
     }
 
-    public void setName(String name) {
-        this.name = name;
-        reports.set("strategyName", name);
-    }
-
-
     public StrategyBase() {
         consumerId = UniqueId.create();
         initialised = false;
         converter = new RateConverter(new ProductList());
         reports = new PropertiesReader();
-        setName("unnamedStrategy");
+        config = new PropertiesReader();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private String internalAccount;
+    private void callStartOrStopCallback(boolean previouslyRunning) {
+        if(!previouslyRunning && isStarted())
+            onStartStrategy();
+        else if(previouslyRunning && !isStarted())
+            onStopStrategy();
+    }
 
+
+    private String internalAccount;
     private IProvidePriceFeed priceProvider;
     private ISendOrder orderSender;
     private ISendReports reportSender;
-
     private IProvidePosition positionProvider;
     private IProvideProduct productProvider;
-
     private IProvideTimedCallback timedCallbackProvider;
-
     private final UniqueId consumerId;
-
-    private IProvideProperties config;
     private boolean initialised;
     private RateConverter converter;
 
+    private IProvideProperties config;
     PropertiesReader reports;
-    private String name;
 }

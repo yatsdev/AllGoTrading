@@ -21,15 +21,16 @@ public class PriceCheck extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(PriceCheck.class);
 
 
+    String lastBigChange="";
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(shuttingDown) return;
         if(!isInitialised()) return;
+        if(!lastPrices.containsKey(priceData.getProductId())) return;
 
-          for ( String key : lastPrices.keySet() ) {
-          if(priceData.getProductId().compareTo(key)==0) {
+        String key = priceData.getProductId();
 
         boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrices.get(key).getLast().multiply(upMove));
         boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrices.get(key).getBid().multiply(upMove));
@@ -40,10 +41,14 @@ public class PriceCheck extends StrategyBase {
         boolean hugeChange =  (hugeLastChangeUp || hugeBidChangeUp || hugeAskChangeUp
                 || hugeLastChangeDown || hugeBidChangeDown || hugeAskChangeDown);
 
-
         if(hugeChange) {
             System.out.println("");
             log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrices.get(key).toString());
+            lastBigChange = priceData.toString();
+
+            getReports().set("lastBigChange", lastBigChange);
+            sendReports();
+
         } else {
             dots++;
             if(dots>80) {
@@ -52,29 +57,33 @@ public class PriceCheck extends StrategyBase {
             }
             System.out.print(".");
         }
-
-        lastPrices.put(key,priceData);
-
-         }
-         }
-
+        lastPrices.put(key, priceData);
     }
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
-        log.info(p.toString());
+    public void onStopStrategy() {
     }
 
     @Override
-    public void init()
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
+        getReports().add(p);
+        getReports().set("lastBigChange", lastBigChange);
+        sendReports();
+    }
+
+    @Override
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
         tradeProductIds = getConfig("tradeProductIds");
         String[] parts = tradeProductIds.split(",");
@@ -85,13 +94,13 @@ public class PriceCheck extends StrategyBase {
             lastPrices.put(tradeProductIdsNameList.get(i),PriceData.createFromLast(tradeProductIdsNameList.get(i),Decimal.ZERO));
         }
 
-        upMove = Decimal.fromString(getConfig("upMove"));
-        downMove = Decimal.fromString(getConfig("downMove"));
+        upMove = Decimal.fromString(getConfig("upMove","1.000001"));
+        downMove = Decimal.fromString(getConfig("downMove","0.999999"));
 
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
     }

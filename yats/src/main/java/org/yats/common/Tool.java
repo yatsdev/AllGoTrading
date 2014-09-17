@@ -39,9 +39,6 @@ public class Tool {
         String path = pathBase+"/"+username+"/"+subDir;
         FileTool.createDirectories(path);
         String userSpecificFilename = path+"/"+className+".properties";
-        log.info("Trying to read config file: "+userSpecificFilename);
-        if(!FileTool.exists(userSpecificFilename))
-            throw new CommonExceptions.FileReadException(userSpecificFilename+" not found!");
         return userSpecificFilename;
     }
 

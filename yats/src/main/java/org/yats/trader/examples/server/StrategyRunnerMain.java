@@ -1,8 +1,10 @@
 package org.yats.trader.examples.server;
 
+import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
+import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyFactory;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
@@ -75,7 +77,9 @@ public class StrategyRunnerMain {
         String[] strategyNames = strategyNamesString.split(",");
 
         for(String strategyName : strategyNames) {
-            strategyRunner.execute(strategyName);
+            IProvideProperties prop = new PropertiesReader();
+            prop.set(StrategyBase.SETTING_STRATEGYNAME, strategyName);
+            strategyRunner.createNewStrategy(prop);
         }
     }
 

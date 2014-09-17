@@ -102,18 +102,14 @@ public class ExcelConnection implements
 
     public void startDDE() {
         try {
-            System.out.print("conversation.connect...");
+            System.out.println("connecting to Excel sheets...");
             sheetAccessPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
             sheetAccessReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
             sheetAccessPrices.init("Excel", prop.get("DDEPathToExcelFileWPrices"));
             sheetAccessSettings.init("Excel", prop.get("DDEPathToExcelFileWSettings"));
             System.out.println("done.");
-            System.out.print("conversation.request...");
             Collection<String> pidList = sheetAccessPrices.getRowIdList();
             subscribeAllProductIds(pidList);
-//            excelToolsSettings.readSettingsRows();
-//            Collection<IProvideProperties> all = excelToolsSettings.parseSettingsRows();
-//            sendBulkSettings(all);
         } catch (DDELink.ConversationException e) {
             System.out.println("DDEException: " + e.getMessage());
             close();
