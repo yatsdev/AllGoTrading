@@ -16,6 +16,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     public static final String SETTING_LOCKED = "lockStrategy";
     public static final String SETTING_STARTED = "startStrategy";
     public static final String SETTING_STRATEGYNAME = "strategyName";
+    public static final String SETTING_STRATEGYREMOVED = "strategyRemoved";
 
     @Override
     public void onPriceData(PriceData priceData) {
@@ -79,6 +80,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         reports.set(SETTING_STRATEGYNAME, getName());
         reports.set(SETTING_LOCKED, isLocked());
         reports.set(SETTING_STARTED, isStarted());
+        reports.set(SETTING_STRATEGYREMOVED, false);
         log.info("report:"+reports.toString());
         reportSender.sendReports(reports);
     }

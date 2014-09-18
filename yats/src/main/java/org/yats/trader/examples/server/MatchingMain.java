@@ -40,7 +40,7 @@ public class MatchingMain implements IConsumePriceData {
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(internalMarket);
         strategyRunner.addStrategy(marketToBusConnection);
-        strategyRunner.setProductProvider(products);
+//        strategyRunner.setProductProvider(products);
 
         marketToBusConnection.setPriceProvider(strategyRunner);
         marketToBusConnection.setProductProvider(products);

@@ -85,9 +85,30 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         log.info("Received settings: {}", p);
         if(!p.exists(StrategyBase.SETTING_STRATEGYNAME)) return;
         String strategyName = p.get(StrategyBase.SETTING_STRATEGYNAME);
+        if(p.exists(StrategyBase.SETTING_STRATEGYREMOVED)) {
+            removeStrategy(strategyName);
+            return;
+        }
         if(!strategyList.containsKey(strategyName))
             createNewStrategy(p);
         settingsQueue.add(p);
+    }
+
+    private void removeStrategy(String strategyName) {
+        if(!strategyList.containsKey(strategyName)) return;
+        log.info("removing strategy "+strategyName);
+        StrategyBase s = strategyList.get(strategyName);
+        s.stopStrategy();
+        s.shutdown();
+        receiptConsumers.remove(s);
+        settingsConsumers.remove(s);
+        strategyList.remove(strategyName);
+        for(String pid : mapProductIdToConsumers.keySet()) mapProductIdToConsumers.remove(pid, s);
+        log.info("done. removed strategy "+strategyName);
+        IProvideProperties p = new PropertiesReader();
+        p.set(StrategyBase.SETTING_STRATEGYNAME, strategyName);
+        p.set(StrategyBase.SETTING_STRATEGYREMOVED, "TRUE");
+        sendReports(p);
     }
 
     public boolean isProductSubscribed(String productId) {
@@ -137,6 +158,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         strategyList.put(strategy.getName(), strategy);
     }
 
+
     public void addReceiptConsumer(IConsumeReceipt rc) {
         receiptConsumers.add(rc);
     }
@@ -184,9 +206,9 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         callbackList.add(callback);
     }
 
-    public void setProductProvider(IProvideProduct productProvider) {
-        this.productProvider = productProvider;
-    }
+//    public void setProductProvider(IProvideProduct productProvider) {
+//        this.productProvider = productProvider;
+//    }
 
     public void setRateConverter(RateConverter rateConverter) {
         this.rateConverter = rateConverter;
@@ -302,7 +324,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     private ISendReports reportSender;
     private ConcurrentLinkedQueue<IConsumeReceipt> receiptConsumers;
     private ConcurrentLinkedQueue<IConsumeSettings> settingsConsumers;
-    private IProvideProduct productProvider;
+//    private IProvideProduct productProvider;
     private boolean shutdown;
     private UniqueId consumerId;
     private RateConverter rateConverter;

@@ -57,7 +57,7 @@ public class StrategyRunnerMain {
         strategyRunner.setFactory(factory);
         strategyRunner.setPriceFeed(strategyToBusConnection);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(productList);
+//        strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(strategyToBusConnection);
         strategyRunner.setReportSender(strategyToBusConnection);
         strategyRunner.setRateConverter(rateConverter);

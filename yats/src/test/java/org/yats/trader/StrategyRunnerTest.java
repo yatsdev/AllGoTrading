@@ -149,7 +149,7 @@ public class StrategyRunnerTest {
         strategyRunner.setOrderSender(orderConnection);
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
-        strategyRunner.setProductProvider(productList);
+//        strategyRunner.setProductProvider(productList);
 
         strategy.setPositionProvider(positionServer);
 
@@ -167,7 +167,7 @@ public class StrategyRunnerTest {
     private PriceData data1;
     private PositionServer positionServer;
     private RateConverter rateConverter;
-    private ProductList productList;
+//    private ProductList productList;
 
 
     private static Product testProduct = new Product(TestPriceData.TEST_SAP_PID, TestPriceData.TEST_SAP_SYMBOL, "exchange");

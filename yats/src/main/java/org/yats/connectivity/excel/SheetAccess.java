@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
+import org.yats.trader.StrategyBase;
 import org.yats.trading.ISendBulkSettings;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SheetAccess implements DDELinkEventListener, Runnable {
 
@@ -53,7 +55,15 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
                 change.put(rowString, rowString);
             }
             Collection<IProvideProperties> all = parseSettingsRows(change);
+            while(!removedIdList.isEmpty()) {
+                String removedId = removedIdList.poll();
+                IProvideProperties p = new PropertiesReader();
+                p.set(StrategyBase.SETTING_STRATEGYNAME, removedId);
+                p.set(StrategyBase.SETTING_STRATEGYREMOVED, "true");
+                all.add(p);
+            }
             settingsSender.sendBulkSettings(all);
+
         }
     }
 
@@ -180,6 +190,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         shutdown=false;
         ddeLink = _DDELink;
         ddeLink.setEventListener(this);
+        removedIdList = new ConcurrentLinkedQueue<String>();
         columnIdList = new ArrayList<String>();
         mapOfColumnIds = new ConcurrentHashMap<String, String>();
         rowIdList = new ArrayList<String>();
@@ -329,14 +340,34 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         }
     }
 
+
     private void parseFirstColumn(String data) {
         String firstColumnString = data.replace("\r\n", "\t");
         String[] parts = firstColumnString.split("\t");
-        rowIdList.clear();
+        ArrayList<String> oldRowIdList = rowIdList;
+        rowIdList = new ArrayList<String>();
         mapOfRowIds.clear();
         rowIdList.addAll(Arrays.asList(parts));
         for (String s : rowIdList) mapOfRowIds.put(s, s);
         if (rowIdList.size() > 0) rowIdList.remove(0);
+
+        if(settingsThread.isAlive()) recordChangedRowIds(oldRowIdList);
+    }
+
+    private void recordChangedRowIds(ArrayList<String> oldRowIdList) {
+        for(int i=0; i<oldRowIdList.size(); i++) {
+            String oldId = oldRowIdList.get(i);
+            boolean removedId = i>=rowIdList.size();
+            if(removedId) {
+                removedIdList.add(oldId);
+                continue;
+            }
+            String newId = rowIdList.get(i);
+            boolean changedId = (newId.compareTo(oldId)!=0);
+            if(changedId) {
+                removedIdList.add(oldId);
+            }
+        }
     }
 
 
@@ -380,7 +411,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     private Thread settingsThread;
     private boolean shutdown;
     private ISendBulkSettings settingsSender;
-
+    private ConcurrentLinkedQueue<String> removedIdList;
 
     private boolean resendSettings;
 }
