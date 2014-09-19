@@ -22,6 +22,12 @@ public class PropertiesReader implements IProvideProperties {
         return p;
     }
 
+    public static PropertiesReader createFromProvider(IProvideProperties prop) {
+        PropertiesReader p = new PropertiesReader();
+        p.add(prop);
+        return p;
+    }
+
     @Override
     public int size() {
         return properties.size();
@@ -204,6 +210,20 @@ public class PropertiesReader implements IProvideProperties {
             if(!first){b.append(","); first=false;}
             b.append(key).append("=").append(value);
         }
+        return b.toString();
+    }
+
+    public String toStringKeyValueFile() {
+        StringBuilder b = new StringBuilder();
+        Enumeration enuKeys = properties.keys();
+        boolean first = true;
+        while (enuKeys.hasMoreElements()) {
+            String key = (String) enuKeys.nextElement();
+            String value = properties.get(key);
+            if(!first){b.append("\n"); first=false;}
+            b.append(key).append("=").append(value);
+        }
+        b.append("\n");
         return b.toString();
     }
 

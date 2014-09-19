@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         IConsumePriceData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings,
-        IProvideTimedCallback
+        IProvideTimedCallback, ISaveProperties
 
 {
 
@@ -24,7 +24,12 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
-
+    @Override
+    public void saveProperties(IProvideProperties p, String name) {
+        String path = factory.getConfigName(name);
+        String stringToWrite = PropertiesReader.createFromProvider(p).toStringKeyValueFile();
+        FileTool.writeToTextFile(path, stringToWrite, false);
+    }
 
     @Override
     public void subscribe(String productId, IConsumePriceData consumer)
@@ -43,6 +48,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     @Override
     public void onPriceData(PriceData priceData)
     {
+//        log.info("new price "+priceData);
         priceDataMap.put(priceData.getProductId(), priceData);
         updatedProductQueue.add(priceData.getProductId());
     }
@@ -167,15 +173,19 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     public void run() {
         try {
             while (!shutdown) {
+                log.info("waiting...");
                 callWaitingStrategies();
 
                 String updatedProductId = updatedProductQueue.take();
 
 
+                log.info("settings...");
                 while(settingsQueue.size()>0) {
-                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(settingsQueue.take()); }
+                    IProvideProperties p = settingsQueue.take();
+                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(p); }
                 }
 
+                log.info("receipts...");
                 while(receiptQueue.size()>0){
                     Receipt r = receiptQueue.take();
                     for(IConsumeReceipt c : receiptConsumers) {
@@ -187,6 +197,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                     }
                 }
 
+                log.info("prices...");
                 PriceData newData = priceDataMap.remove(updatedProductId);
                 if(newData!=null) {
                     rateConverter.onPriceData(newData);
@@ -195,6 +206,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                         md.onPriceData(newData);
                     }
                 }
+                log.info("done.");
             }
         }catch(InterruptedException e) {
             log.error(e.getMessage());

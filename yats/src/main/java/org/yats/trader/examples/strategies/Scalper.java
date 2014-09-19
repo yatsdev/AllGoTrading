@@ -20,6 +20,7 @@ public class Scalper extends StrategyBase {
     public void onPriceDataForStrategy(PriceData priceData)
     {
         if(!isInitialised()) return;
+        if(!isStarted()) return;
         if(!priceData.hasProductId(tradeProductId)) return;
         lastPrice=priceData;
         if(!startPrice.equals(PriceData.NULL)) return;

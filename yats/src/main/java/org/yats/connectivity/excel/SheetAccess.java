@@ -342,7 +342,8 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
 
 
     private void parseFirstColumn(String data) {
-        String firstColumnString = data.replace("\r\n", "\t");
+        String firstColumnString = data.replace("\r\n", "\t").replace(" ","");
+        log.info("firstColumnString="+firstColumnString.replace("\t",":"));
         String[] parts = firstColumnString.split("\t");
         ArrayList<String> oldRowIdList = rowIdList;
         rowIdList = new ArrayList<String>();

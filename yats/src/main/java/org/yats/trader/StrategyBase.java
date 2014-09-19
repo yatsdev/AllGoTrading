@@ -3,10 +3,7 @@ package org.yats.trader;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
-import org.yats.common.IProvideProperties;
-import org.yats.common.PropertiesReader;
-import org.yats.common.UniqueId;
+import org.yats.common.*;
 import org.yats.trading.*;
 
 public abstract class StrategyBase implements IConsumePriceDataAndReceipt, IConsumeSettings {
@@ -17,6 +14,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     public static final String SETTING_STARTED = "startStrategy";
     public static final String SETTING_STRATEGYNAME = "strategyName";
     public static final String SETTING_STRATEGYREMOVED = "strategyRemoved";
+
 
     @Override
     public void onPriceData(PriceData priceData) {
@@ -41,10 +39,10 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     public abstract void onSettingsForStrategy(IProvideProperties p);
 
     public void init() {
-        initialised = true;
         config.set(SETTING_LOCKED, isLocked());
         config.set(SETTING_STARTED, isStarted());
         onInitStrategy();
+        initialised = true;
     }
 
     @Override
@@ -57,7 +55,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         config = PropertiesReader.createFromTwoProviders(config, p);
         onSettingsForStrategy(p);
         callStartOrStopCallback(previouslyRunning);
-        sendReports();  // todo: seems immediate sending when receiving causes sometimes an internal crash of messagebus. no more messages are transmitted. investigate.
+        sendReports();
     }
 
     public void stopStrategy() {
@@ -120,6 +118,9 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         config.set(key, value);
     }
 
+    public void saveConfig() {
+
+    }
 
     protected void addTimedCallback(int seconds, IAmCalledBackInTime callback) {
         timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
@@ -234,6 +235,9 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     public void setTimedCallbackProvider(IProvideTimedCallback timedCallbackProvider) {
         this.timedCallbackProvider = timedCallbackProvider;
     }
+    public void setPropertiesSaver(ISaveProperties _propSaver) {
+        propSaver = _propSaver;
+    }
 
     public StrategyBase() {
         consumerId = UniqueId.create();
@@ -241,6 +245,10 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         converter = new RateConverter(new ProductList());
         reports = new PropertiesReader();
         config = new PropertiesReader();
+        propSaver = new ISaveProperties() {
+            @Override
+            public void saveProperties(IProvideProperties p, String name) {}
+        };
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -265,5 +273,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     private RateConverter converter;
 
     private IProvideProperties config;
+    private ISaveProperties propSaver;
     PropertiesReader reports;
+
 }

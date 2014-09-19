@@ -25,6 +25,7 @@ public class StrategyFactory {
         strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
         strategy.setReportSender(strategyRunner);
+        strategy.setPropertiesSaver(strategyRunner);
         strategy.setConfig(prop);
         strategy.setTimedCallbackProvider(strategyRunner);
         return strategy;
@@ -33,13 +34,19 @@ public class StrategyFactory {
     final Logger log = LoggerFactory.getLogger(StrategyFactory.class);
 
     public IProvideProperties loadProperties(String strategyName) {
-        String configFilename = Tool.getPersonalSubdirConfigFilename("config", "strategy", strategyName);
+        String configFilename = getConfigName(strategyName);
         log.info("trying to read config file: "+configFilename);
         if(!FileTool.exists(configFilename)) log.info("file not found: '"+configFilename+"'");
         return PropertiesReader.createFromConfigFile(configFilename);
     }
 
+    public String getConfigName(String strategyName) {
+        return Tool.getPersonalSubdirConfigFilename("config", "strategy", strategyName);
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
     private StrategyBase instantiateStrategy(String strategyName) {
