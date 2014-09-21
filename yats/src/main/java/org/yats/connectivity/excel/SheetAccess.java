@@ -24,11 +24,12 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     public void onDisconnect() {
     }
 
+
     @Override
     public synchronized void onItemChanged(String sheetId, String cellId, String data) {
-        if (cellId.compareTo("C1") == 0) {
+        if (cellId.compareTo(firstColumnExcelArray) == 0) {
             updateFirstColumn(data);
-        } else if (cellId.compareTo("R1") == 0) {
+        } else if (cellId.compareTo(firstRowExcelArray) == 0) {
             updateFirstRow(data);
         }
     }
@@ -132,9 +133,10 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         parseFirstColumn(firstColumnString);
         String firstRowString = ddeLink.request("R1");
         parseFirstRow(firstRowString);
-        ddeLink.startAdvice("C1");
-        ddeLink.startAdvice("R1");
+        ddeLink.startAdvice(firstColumnExcelArray);
+        ddeLink.startAdvice(firstRowExcelArray);
     }
+
 
     public void connect(String applicationname, String sheetname) {
         ddeLink.connect(applicationname, sheetname);
@@ -340,10 +342,12 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         }
     }
 
+    //todo: dont read and parse the full row but only the used part! depend on first row to find number of elements in lower rows
 
     private void parseFirstColumn(String data) {
         String firstColumnString = data.replace("\r\n", "\t").replace(" ","");
-        log.info("firstColumnString="+firstColumnString.replace("\t",":"));
+        log.info("dataLength:"+data.length());
+//        log.info("firstColumnString="+firstColumnString.replace("\t",":"));
         String[] parts = firstColumnString.split("\t");
         ArrayList<String> oldRowIdList = rowIdList;
         rowIdList = new ArrayList<String>();
@@ -413,6 +417,8 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     private boolean shutdown;
     private ISendBulkSettings settingsSender;
     private ConcurrentLinkedQueue<String> removedIdList;
-
     private boolean resendSettings;
+    private String firstColumnExcelArray = "R2C1:R1000C1";
+    private String firstRowExcelArray = "R1C2:R1C1000";
+
 }

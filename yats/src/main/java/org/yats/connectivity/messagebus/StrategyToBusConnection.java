@@ -1,5 +1,7 @@
 package org.yats.connectivity.messagebus;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
@@ -199,6 +201,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
     }
 
     private void sendAllReceivedPriceData() {
+        DateTime start = DateTime.now();
         while(receiverPriceData.hasMoreMessages()) {
             PriceDataMsg m = receiverPriceData.get();
             priceDataMap.put(m.productId, m);
@@ -212,6 +215,9 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
             priceDataConsumer.onPriceData(m);
         }
         priceDataMap.clear();
+
+        Duration d = new Duration(start,DateTime.now());
+        log.info("sendAllReceivedPriceData: " + d.getMillis());
     }
 
     private void sendAllReceivedReceipts() {
