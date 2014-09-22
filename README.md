@@ -17,7 +17,7 @@ A simple example strategy shows how to receive market data, send new orders and 
 
 
 
-This project was made possible with friendly support by
+This project was made possible with friendly support of
 
 * [Degiro](https://www.degiro.nl/)
 * ej-Technologie's [Java Profiler](http://www.ej-technologies.com/products/jprofiler/overview.html)
