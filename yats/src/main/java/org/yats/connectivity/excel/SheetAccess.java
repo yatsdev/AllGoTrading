@@ -1,6 +1,8 @@
 package org.yats.connectivity.excel;
 
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
@@ -121,9 +123,14 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         ConcurrentHashMap<String, String> rowIdsToUpdate = getRowIdsToUpdate(itemList);
         updateCombiKey2ItemMap(itemList);
 
+        DateTime startSheet = DateTime.now();
+        int i=0;
         for (String p : rowIdsToUpdate.keySet()) {
             pokeRowForRowIds(p);
+            i++;
         }
+        Duration d = new Duration(startSheet, DateTime.now());
+        log.info("updateMatrix: " + d.getMillis() + " for rows:"+i);
     }
 
     public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
