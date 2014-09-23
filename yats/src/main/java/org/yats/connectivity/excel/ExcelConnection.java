@@ -61,12 +61,12 @@ public class ExcelConnection implements
             all.addAll(getBookSideAsMatrixItems(data, BookSide.ASK));
         }
         Duration dCopy = new Duration(startCopy, DateTime.now());
-        log.info("bulkCopy: " + dCopy.getMillis());
+//        log.info("bulkCopy: " + dCopy.getMillis());
 
-        DateTime startSheet = DateTime.now();
+//        DateTime startSheet = DateTime.now();
         sheetAccessPrices.updateMatrix(all);
-        Duration d = new Duration(startSheet, DateTime.now());
-        log.info("sheetAccessPrices: " + d.getMillis());
+//        Duration d = new Duration(startSheet, DateTime.now());
+//        log.info("sheetAccessPrices: " + d.getMillis());
 
     }
 

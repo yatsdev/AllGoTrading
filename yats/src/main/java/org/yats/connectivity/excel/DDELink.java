@@ -3,8 +3,6 @@ package org.yats.connectivity.excel;
 import com.pretty_tools.dde.DDEException;
 import com.pretty_tools.dde.client.DDEClientConversation;
 import com.pretty_tools.dde.client.DDEClientEventListener;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +40,11 @@ public class DDELink implements IProvideDDEConversation {
     @Override
     public void poke(String where, String what)  {
         try {
-            DateTime startSheet = DateTime.now();
+//            DateTime startSheet = DateTime.now();
             c.poke(where,what);
-            Duration d = new Duration(startSheet, DateTime.now());
-            total+=d.getMillis();
-            System.out.println("poke: total="+total + " thistime="+d.getMillis() + " for size:"+what.length());
+//            Duration d = new Duration(startSheet, DateTime.now());
+//            total+=d.getMillis();
+//            System.out.println("poke: total="+total + " thistime="+d.getMillis() + " for size:"+what.length());
 
         } catch (DDEException e) {
 //            e.printStackTrace();

@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.CommonExceptions;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
@@ -26,9 +27,10 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     public void onDisconnect() {
     }
 
-
+    static int changedCounter=0;
     @Override
     public synchronized void onItemChanged(String sheetId, String cellId, String data) {
+        System.out.println("onItemChanged:"+changedCounter++);
         if (cellId.compareTo(firstColumnExcelArray) == 0) {
             updateFirstColumn(data);
         } else if (cellId.compareTo(firstRowExcelArray) == 0) {
@@ -120,9 +122,12 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     public synchronized void updateMatrix(Collection<MatrixItem> itemList) {
         updateAxis(itemList);
         if(snapShotMode) combiKey2ItemMap.clear();
-        ConcurrentHashMap<String, String> rowIdsToUpdate = getRowIdsToUpdate(itemList);
+        ConcurrentHashMap<String, String> rowIdsWithChangedData = getRowIdsToUpdate(itemList);
         updateCombiKey2ItemMap(itemList);
+        updateChangedRows(rowIdsWithChangedData);
+    }
 
+    private void updateChangedRows(ConcurrentHashMap<String, String> rowIdsToUpdate) {
         DateTime startSheet = DateTime.now();
         int i=0;
         for (String p : rowIdsToUpdate.keySet()) {
@@ -235,31 +240,39 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     }
 
     private void pokeRowForRowIds(String rowId) {
+        String s = getRowDataString(rowId);
+        int row = getRowIndex(rowId);
+        pokePositionsRow(row, columnIdList.size()+1, s);
+    }
+
+    private String getRowDataString(String rowId) {
         String s = "";
-        int index = rowIdList.indexOf(rowId);
-        if (index < 0) return;
-        int row = 2 + index;
-        int count = 1;
         for (String columnId : columnIdList) {
-            count++;
             String key = MatrixItem.getKey(rowId, columnId);
             if (combiKey2ItemMap.containsKey(key)) {
                 MatrixItem ap = combiKey2ItemMap.get(key);
                 s += ap.getData();
             } else s += naString;
-            s += "\t";
+            s += TAB;
         }
-        pokePositionsRow(row, count, s);
+        return s;
+    }
+
+    private int getRowIndex(String rowId) {
+        int index = rowIdList.indexOf(rowId);
+        if (index < 0) throw new CommonExceptions.KeyNotFoundException("Can not find rowId: "+rowId);
+        int row = 2 + index;
+        return row;
     }
 
     private void updateCombiKey2ItemMap(Collection<MatrixItem> list) {
-        for (MatrixItem pos : list) {
-            String key = pos.getKey();
+        for (MatrixItem item : list) {
+            String key = item.getKey();
             if (combiKey2ItemMap.containsKey(key)) {
-                MatrixItem old = combiKey2ItemMap.get(key);
-                if (pos.isSameAs(old)) continue;
+                MatrixItem oldItem = combiKey2ItemMap.get(key);
+                if (item.isSameAs(oldItem)) continue;
             }
-            combiKey2ItemMap.put(key, pos);
+            combiKey2ItemMap.put(key, item);
         }
     }
 

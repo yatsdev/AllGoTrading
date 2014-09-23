@@ -217,7 +217,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
         priceDataMap.clear();
 
         Duration d = new Duration(start,DateTime.now());
-        log.info("sendAllReceivedPriceData: " + d.getMillis());
+//        log.info("sendAllReceivedPriceData: " + d.getMillis());
     }
 
     private void sendAllReceivedReceipts() {
