@@ -32,9 +32,13 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     public synchronized void onItemChanged(String sheetId, String cellId, String data) {
         System.out.println("onItemChanged:"+changedCounter++);
         if (cellId.compareTo(firstColumnExcelArray) == 0) {
-            updateFirstColumn(data);
+            String firstColumnString = ddeLink.request(firstColumnExcelArray);
+            parseFirstColumn(firstColumnString);
+//            updateFirstColumn(data);
         } else if (cellId.compareTo(firstRowExcelArray) == 0) {
-            updateFirstRow(data);
+            String firstRowString = ddeLink.request(firstRowExcelArray);
+            parseFirstRow(firstRowString);
+//            updateFirstRow(data);
         }
     }
 
@@ -135,32 +139,47 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
             i++;
         }
         Duration d = new Duration(startSheet, DateTime.now());
-        log.info("updateMatrix: " + d.getMillis() + " for rows:"+i);
+        log.info("updateMatrix: " + d.getMillis() + " for rows:" + i);
     }
 
     public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
         ddeLink.setTimeout(2000);
         ddeLink.connect(applicationName, sheetName);
-        String firstColumnString = ddeLink.request("C1");
+        String firstColumnString = ddeLink.request(firstColumnExcelArray);
         parseFirstColumn(firstColumnString);
-        String firstRowString = ddeLink.request("R1");
+        String firstRowString = ddeLink.request(firstRowExcelArray);
         parseFirstRow(firstRowString);
+        enableFirstColumnListener();
+        enableFirstRowListener();
+    }
+
+    private void enableFirstColumnListener() {
         ddeLink.startAdvice(firstColumnExcelArray);
+    }
+
+    private void disableFirstColumnListener() {
+        ddeLink.stopAdvice(firstColumnExcelArray);
+    }
+
+    private void enableFirstRowListener() {
         ddeLink.startAdvice(firstRowExcelArray);
     }
 
+    private void disableFirstRowListener() {
+        ddeLink.stopAdvice(firstRowExcelArray);
+    }
 
     public void connect(String applicationname, String sheetname) {
         ddeLink.connect(applicationname, sheetname);
     }
 
     public void readFirstRowFromDDE() {
-        String firstRow = ddeLink.request("R1");
+        String firstRow = ddeLink.request(firstRowExcelArray);
         parseFirstRow(firstRow);
     }
 
     public void readFirstColumnFromDDE() {
-        String firstColumn = ddeLink.request("C1");
+        String firstColumn = ddeLink.request(firstColumnExcelArray);
         parseFirstColumn(firstColumn);
     }
 
@@ -242,7 +261,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     private void pokeRowForRowIds(String rowId) {
         String s = getRowDataString(rowId);
         int row = getRowIndex(rowId);
-        pokePositionsRow(row, columnIdList.size()+1, s);
+        pokeRow(row, columnIdList.size() + 1, s);
     }
 
     private String getRowDataString(String rowId) {
@@ -260,7 +279,9 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
 
     private int getRowIndex(String rowId) {
         int index = rowIdList.indexOf(rowId);
-        if (index < 0) throw new CommonExceptions.KeyNotFoundException("Can not find rowId: "+rowId);
+        if (index < 0) {
+            throw new CommonExceptions.KeyNotFoundException("Can not find rowId: "+rowId);
+        }
         int row = 2 + index;
         return row;
     }
@@ -318,38 +339,46 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     }
 
     private void pokeFirstColumn() {
-        pokePositions("C1", getRowIdsString());
+        String where = "R2C1:R"+(rowIdList.size()+1)+"C1";
+        String what = getRowIdsString();
+        disableFirstColumnListener();
+        poke(where, what);
+        enableFirstColumnListener();
     }
 
     private String getRowIdsString() {
-        String data =  "\r\n";
+        String data = "";
         for (String s : rowIdList) {
-            data += s + "\r\n";
+            data += s + NL;
         }
         return data;
     }
 
     private void pokeFirstRow() {
-        pokePositions("R1", getColumnIdsString());
+        String where = "R1C2:R1C"+(columnIdList.size()+1);
+        String what = getColumnIdsString();
+        disableFirstRowListener();
+        poke(where, what);
+        enableFirstRowListener();
     }
 
     private String getColumnIdsString() {
-        String data = "\t";
+        String data="";
         for (String s : columnIdList) {
-            data += s + "\t";
+            data += s + TAB;
         }
         return data;
     }
 
-    private void pokePositionsRow(int row, int count, String what) {
+    private void pokeRow(int row, int count, String what) {
         if (row == 1) {
             System.out.println("Row 1 should never be poked to!");
             System.exit(-1);
         }
-        pokePositions("R" + row + "C2:R" + row + "C" + count, what);
+        poke("R" + row + "C2:R" + row + "C" + count, what);
     }
 
-    private void pokePositions(String where, String what) {
+    private void poke(String where, String what) {
         while (true) {
             try {
                 ddeLink.poke(where, what);
@@ -363,7 +392,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     }
 
     //todo: dont read and parse the full row but only the used part! depend on first row to find number of elements in lower rows
-
     private void parseFirstColumn(String data) {
         String firstColumnString = data.replace("\r\n", "\t").replace(" ","");
         log.info("dataLength:"+data.length());
@@ -374,7 +402,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         mapOfRowIds.clear();
         rowIdList.addAll(Arrays.asList(parts));
         for (String s : rowIdList) mapOfRowIds.put(s, s);
-        if (rowIdList.size() > 0) rowIdList.remove(0);
+//        if (rowIdList.size() > 0) rowIdList.remove(0);
 
         if(settingsThread.isAlive()) recordChangedRowIds(oldRowIdList);
     }
@@ -403,7 +431,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         mapOfColumnIds.clear();
         columnIdList.addAll(Arrays.asList(parts));
         for (String s : columnIdList) mapOfColumnIds.put(s, s);
-        if (columnIdList.size() > 0) columnIdList.remove(0);
+//        if (columnIdList.size() > 0) columnIdList.remove(0);
     }
 
     private String readRow(int rowNumber) {
