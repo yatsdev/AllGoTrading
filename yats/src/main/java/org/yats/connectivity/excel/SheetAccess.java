@@ -128,14 +128,24 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         if(snapShotMode) combiKey2ItemMap.clear();
         ConcurrentHashMap<String, String> rowIdsWithChangedData = getRowIdsToUpdate(itemList);
         updateCombiKey2ItemMap(itemList);
-        updateChangedRows(rowIdsWithChangedData);
+//        updateChangedRows(rowIdsWithChangedData);
+        String allRows = "";
+        for(String rowId : rowIdList) {
+            String rowString = getRowDataString(rowId);
+            allRows = allRows +rowString+ NL;
+
+        }
+        int rows = rowIdList.size() +1;
+        int cols = columnIdList.size() +1;
+        poke("R2C2:R"+rows+"C"+cols, allRows);
+
     }
 
     private void updateChangedRows(ConcurrentHashMap<String, String> rowIdsToUpdate) {
         DateTime startSheet = DateTime.now();
         int i=0;
         for (String p : rowIdsToUpdate.keySet()) {
-            pokeRowForRowIds(p);
+            pokeRowForRowId(p);
             i++;
         }
         Duration d = new Duration(startSheet, DateTime.now());
@@ -258,7 +268,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         listenerAxisChange.onFirstColumnChange(rowIdList);
     }
 
-    private void pokeRowForRowIds(String rowId) {
+    private void pokeRowForRowId(String rowId) {
         String s = getRowDataString(rowId);
         int row = getRowIndex(rowId);
         pokeRow(row, columnIdList.size() + 1, s);

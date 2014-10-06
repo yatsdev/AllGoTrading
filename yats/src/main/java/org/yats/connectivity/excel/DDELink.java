@@ -42,6 +42,7 @@ public class DDELink implements IProvideDDEConversation {
         try {
 //            DateTime startSheet = DateTime.now();
             c.poke(where,what);
+//            System.out.print("what:"+what.length());
 //            Duration d = new Duration(startSheet, DateTime.now());
 //            total+=d.getMillis();
 //            System.out.println("poke: total="+total + " thistime="+d.getMillis() + " for size:"+what.length());
