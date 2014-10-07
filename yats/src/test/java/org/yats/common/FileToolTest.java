@@ -8,7 +8,10 @@ public class FileToolTest {
     @Test
     public void canGetLineSeparator() {
         String newline = FileTool.getLineSeparator();
-        assert(newline.equals("\n"));
+        if(Tool.isWindows())
+            assert(newline.equals("\r\n"));
+        else
+            assert(newline.equals("\n"));
     }
 
 
