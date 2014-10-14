@@ -20,7 +20,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     final Logger log = LoggerFactory.getLogger(MarketToBusConnection.class);
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(shuttingDown) return;
         PriceDataMsg data = PriceDataMsg.createFrom(priceData);
@@ -29,7 +29,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     }
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
         if(shuttingDown) return;
         ReceiptMsg m = ReceiptMsg.fromReceipt(receipt);
@@ -38,18 +38,26 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
+    public void onSettingsForStrategy(IProvideProperties p) {
+
+    }
+
+    public void onStartStrategy(){
+
+    }
+
+    public void onStopStrategy(){
 
     }
 
     @Override
-    public void init()
+    public void onInitStrategy()
     {
         setInternalAccount("marketToBusConnection");
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
         receiverOrderCancel.close();
@@ -123,6 +131,11 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
                 config.getServerIP());
         receiverOrderCancel.setObserver(this);
         receiverOrderCancel.start();
+    }
+
+    @Override
+    public String getName() {
+        return "marketToBusConnection";
     }
 
     Sender<PriceDataMsg> senderPriceDataMsg;

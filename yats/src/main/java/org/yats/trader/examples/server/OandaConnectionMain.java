@@ -40,7 +40,7 @@ public class OandaConnectionMain implements IConsumePriceData {
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(oandaFeed);
         strategyRunner.addStrategy(marketToBusConnection);
-        strategyRunner.setProductProvider(products);
+//        strategyRunner.setProductProvider(products);
         oandaFeed.logon();
 
         marketToBusConnection.setPriceProvider(strategyRunner);

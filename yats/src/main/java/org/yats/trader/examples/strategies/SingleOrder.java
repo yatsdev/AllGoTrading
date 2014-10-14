@@ -17,7 +17,7 @@ public class SingleOrder extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(MarketFollow.class);
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(!priceData.hasProductId(tradeProductId)) return;
         if(!startPrice.equals(PriceData.NULL)) return;
@@ -30,7 +30,7 @@ public class SingleOrder extends StrategyBase {
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
         if(shuttingDown) return;
         if(receipt.getRejectReason().length()>0) {
@@ -54,12 +54,19 @@ public class SingleOrder extends StrategyBase {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
-
+    public void onStopStrategy() {
     }
 
     @Override
-    public void init()
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
+    }
+
+    @Override
+    public void onInitStrategy()
     {
         setInternalAccount(this.getClass().getSimpleName());
         tradeProductId = getConfig("tradeProductId");
@@ -68,7 +75,7 @@ public class SingleOrder extends StrategyBase {
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
         cancelOrders();

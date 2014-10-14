@@ -71,9 +71,21 @@ public class PriceGeneratorTool implements Runnable {
                 Decimal last = lastData.get(pid).getLast();
                 Decimal lastRounded = last.roundToDigits(0);
                 boolean aboveBasePrice = (last.isGreaterThan(lastRounded));
-                Decimal change = aboveBasePrice
+                /*Decimal change = aboveBasePrice
                         ? Decimal.CENT.multiply(Decimal.MINUSONE).multiply(Decimal.fromString("20"))
-                        : Decimal.CENT;
+                        : Decimal.CENT;*/
+                Decimal change;
+                int move = 1+ rnd.nextInt(20);
+                if(move >= 5){
+                    change = Decimal.CENT.multiply(Decimal.MINUSONE).multiply(Decimal.fromDouble(move*1.0));
+                }
+                else{
+                    change = Decimal.CENT.multiply(Decimal.ONE).multiply(Decimal.fromDouble(move*1.0));
+                }
+
+                if(last.toDouble() + change.toDouble() <= 0.0){
+                    change = Decimal.CENT.multiply(Decimal.TWO); //if random price is below zero, reset to 2 cents
+                }
 
                 int bidDepth = 1+rnd.nextInt(10);
                 int askDepth = 1+rnd.nextInt(10);

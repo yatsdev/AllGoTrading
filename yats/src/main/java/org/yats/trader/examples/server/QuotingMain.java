@@ -4,7 +4,7 @@ import org.yats.common.PropertiesReader;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
 import org.yats.messagebus.Config;
 import org.yats.trader.StrategyRunner;
-import org.yats.trader.examples.strategies.MarketFollow;
+import org.yats.trader.examples.strategies.BollingerBands;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 
@@ -37,7 +37,7 @@ public class QuotingMain {
         ProductList products = ProductList.createFromFile("config/CFDProductList.csv");
         StrategyToBusConnection priceAndOrderConnection = new StrategyToBusConnection(Config.createRealProperties());
 
-        MarketFollow strategy = new MarketFollow();
+        BollingerBands strategy = new BollingerBands();
         PositionServer positionServer = new PositionServer();
         positionServer.setProductList(products);
         PositionServerMain positionServerLogic = new PositionServerMain(Config.createRealProperties());
@@ -48,7 +48,7 @@ public class QuotingMain {
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addStrategy(strategy);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(products);
+//        strategyRunner.setProductProvider(products);
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);

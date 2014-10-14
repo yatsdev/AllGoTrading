@@ -40,12 +40,20 @@ public class DDELink implements IProvideDDEConversation {
     @Override
     public void poke(String where, String what)  {
         try {
+//            DateTime startSheet = DateTime.now();
             c.poke(where,what);
+//            System.out.print("what:"+what.length());
+//            Duration d = new Duration(startSheet, DateTime.now());
+//            total+=d.getMillis();
+//            System.out.println("poke: total="+total + " thistime="+d.getMillis() + " for size:"+what.length());
+
         } catch (DDEException e) {
 //            e.printStackTrace();
             throw new ConversationException(e.getMessage());
         }
     }
+
+    static long total = 0;
 
     @Override
     public String request(String what) {

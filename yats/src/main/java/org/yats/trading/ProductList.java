@@ -24,13 +24,13 @@ public class ProductList implements IProvideProduct {
 //    public static final String AUD_PID = "CCY_AUD";
 
     @Override
-    public boolean containsProductWith(String productId){
+    public boolean containsProductWith(String productId) {
         return list.containsKey(productId);
     }
 
     @Override
     public Product getProductWith(String productId) {
-        if(!containsProductWith(productId)) {
+        if (!containsProductWith(productId)) {
             throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
         }
         return list.get(productId);
@@ -39,8 +39,8 @@ public class ProductList implements IProvideProduct {
     @Override
     public IProvideProduct getProductsWithUnit(String productId) {
         ProductList newList = new ProductList();
-        for(Product p : this.list.values()) {
-            if(p.hasUnitId(productId)) newList.add(p);
+        for (Product p : this.list.values()) {
+            if (p.hasUnitId(productId)) newList.add(p);
         }
         return newList;
     }
@@ -48,29 +48,28 @@ public class ProductList implements IProvideProduct {
     @Override
     public IProvideProduct getProductsWithUnderlying(String productId) {
         ProductList newList = new ProductList();
-        for(Product p : this.list.values()) {
-            if(p.hasUnderlyingId(productId)) newList.add(p);
+        for (Product p : this.list.values()) {
+            if (p.hasUnderlyingId(productId)) newList.add(p);
         }
         return newList;
     }
 
     @Override
-    public Collection<Product> values()
-    {
+    public Collection<Product> values() {
         return list.values();
     }
 
     public Product getUnitOfProductWithId(String productId) {
-        if(!containsProductWith(productId)) {
+        if (!containsProductWith(productId)) {
             throw new TradingExceptions.ItemNotFoundException("productId not found: " + productId);
         }
-        Product p =  list.get(productId);
+        Product p = list.get(productId);
         return list.get(p.getUnitId());
     }
 
     public Product findBySymbol(String symbol) {
-        for(Product p:list.values()) {
-            if(p.getSymbol().compareTo(symbol)==0) {
+        for (Product p : list.values()) {
+            if (p.getSymbol().compareTo(symbol) == 0) {
                 return p;
             }
         }
@@ -86,11 +85,13 @@ public class ProductList implements IProvideProduct {
     public void read(String path) {
         try {
             CSVReader reader = new CSVReader(new FileReader(path));
+            //CSVWriter writer = new CSVWriter(new FileWriter(path));
             String[] nextLine;
             reader.readNext();
-            int lineNumber=0;
+            int lineNumber = 0;
             while ((nextLine = reader.readNext()) != null) {
-                if(nextLine.length<12) throw new CommonExceptions.FieldNotFoundException("too few fields! line #"+lineNumber);
+                if (nextLine.length < 12)
+                    throw new CommonExceptions.FieldNotFoundException("too few fields! line #" + lineNumber);
                 Product p = new Product()
                         .withProductId(checkForNull(nextLine[0].trim()))
                         .withSymbol(checkForNull(nextLine[1].trim()))
@@ -103,8 +104,7 @@ public class ProductList implements IProvideProduct {
                         .withContractType(checkForNull(nextLine[8].trim()))
                         .withContractSize(checkForNull(nextLine[9].trim()))
                         .withTickSize(checkForNull(nextLine[10].trim()))
-                        .withLotSize(checkForNull(nextLine[11].trim()))
-                        ;
+                        .withLotSize(checkForNull(nextLine[11].trim()));
                 add(p);
                 lineNumber++;
             }
@@ -115,8 +115,8 @@ public class ProductList implements IProvideProduct {
     }
 
     public boolean isEveryUnitAvailableAsProduct() {
-        for(Product p : list.values()) {
-            if(!containsProductWith(p.getUnitId())) {
+        for (Product p : list.values()) {
+            if (!containsProductWith(p.getUnitId())) {
                 return false;
             }
         }
@@ -124,8 +124,8 @@ public class ProductList implements IProvideProduct {
     }
 
     public boolean isEveryUnderlyingAvailableAsProduct() {
-        for(Product p : list.values()) {
-            if(!containsProductWith(p.getUnderlyingId())) return false;
+        for (Product p : list.values()) {
+            if (!containsProductWith(p.getUnderlyingId())) return false;
         }
         return true;
     }
@@ -160,7 +160,7 @@ public class ProductList implements IProvideProduct {
 
 
     private String checkForNull(String text) {
-        if(text==null) throw new TradingExceptions.FieldIsNullException("");
+        if (text == null) throw new TradingExceptions.FieldIsNullException("");
         return text;
     }
 
