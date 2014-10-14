@@ -1,0 +1,56 @@
+20141014 16:31:06,631 Tool [INFO] Trying to read config file: config/macbook52/FIXOrder.properties
+20141014 16:31:06,633 Tool [INFO] Trying to read config file: config/macbook52/FIXPrice.properties
+20141014 16:31:06,633 Tool [INFO] Trying to read config file: config/macbook52/FixClientMain.properties
+20141014 16:31:10,173 SessionSchedule [INFO] [FIX.4.2:AB1013425_PRICE->HIQFIX] daily, 00:00:00-UTC - 00:00:00-UTC
+20141014 16:31:10,210 NetworkingOptions [INFO] Socket option: SocketTcpNoDelay=true
+20141014 16:31:10,210 NetworkingOptions [INFO] Socket option: SocketSynchronousWrites=false
+20141014 16:31:10,210 NetworkingOptions [INFO] Socket option: SocketSynchronousWriteTimeout=30000
+20141014 16:31:10,272 IoSessionInitiator [INFO] [FIX.4.2:AB1013425_PRICE->HIQFIX] [/46.244.8.46:5001]
+20141014 16:31:10,273 SocketInitiator [INFO] SessionTimer started
+20141014 16:31:10,354 SessionSchedule [INFO] [FIX.4.2:AB1013425_ORDER->HIQFIX] daily, 00:00:00-UTC - 00:00:00-UTC
+20141014 16:31:10,431 NetworkingOptions [INFO] Socket option: SocketTcpNoDelay=true
+20141014 16:31:10,432 NetworkingOptions [INFO] Socket option: SocketSynchronousWrites=false
+20141014 16:31:10,432 NetworkingOptions [INFO] Socket option: SocketSynchronousWriteTimeout=30000
+20141014 16:31:10,433 IoSessionInitiator [INFO] [FIX.4.2:AB1013425_ORDER->HIQFIX] [/46.244.8.46:5001]
+20141014 16:31:10,433 SocketInitiator [INFO] SessionTimer started
+20141014 16:31:10,634 InitiatorIoHandler [INFO] MINA session created for FIX.4.2:AB1013425_PRICE->HIQFIX: local=/10.212.134.54:52636, class org.apache.mina.transport.socket.nio.SocketSessionImpl, remote=/46.244.8.46:5001
+20141014 16:31:10,939 InitiatorIoHandler [INFO] MINA session created for FIX.4.2:AB1013425_ORDER->HIQFIX: local=/10.212.134.54:52637, class org.apache.mina.transport.socket.nio.SocketSessionImpl, remote=/46.244.8.46:5001
+20141014 16:31:32,221 Tool [INFO] Trying to read config file: config/macbook52/StrategyRunnerMain.properties
+20141014 16:31:33,479 StrategyFactory [INFO] trying to read config file: config/macbook52/strategy/PriceLogger.properties
+20141014 16:31:33,481 StrategyRunner [INFO] trying to create strategy: PriceLogger
+20141014 16:31:33,488 StrategyBase [INFO] Subscription sent for 4665696 by PriceLogger
+20141014 16:31:33,492 StrategyToBusConnection [DEBUG] Published SubscriptionMsg{productId=4665696}
+20141014 16:31:33,494 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false
+20141014 16:31:33,524 StrategyBase [INFO] Subscription sent for 4665696 by marketToBusConnection
+20141014 16:31:33,825 MarketToBusConnection [INFO] Published: 4665696, 1@1.2676 | 1@1.2678  20141014T143133.822Z
+20141014 16:31:33,916 PriceLogger [INFO] Received price #0:4665696, 1@1.2676 | 1@1.2678  20141014T143133.822Z
+20141014 16:31:33,917 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=1,lastPrice=4665696, 1@1.2676 | 1@1.2678  20141014T143133.822Z
+20141014 16:31:34,228 MarketToBusConnection [INFO] Published: 4665696, 1@1.2676 | 1@1.2678  20141014T143134.228Z
+20141014 16:31:34,234 PriceLogger [INFO] Received price #1:4665696, 1@1.2676 | 1@1.2678  20141014T143134.228Z
+20141014 16:31:34,234 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=2,lastPrice=4665696, 1@1.2676 | 1@1.2678  20141014T143134.228Z
+20141014 16:31:35,010 MarketToBusConnection [INFO] Published: 4665696, 1@1.2676 | 1@1.2679  20141014T143135.009Z
+20141014 16:31:35,020 PriceLogger [INFO] Received price #2:4665696, 1@1.2676 | 1@1.2679  20141014T143135.009Z
+20141014 16:31:35,020 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=3,lastPrice=4665696, 1@1.2676 | 1@1.2679  20141014T143135.009Z
+20141014 16:31:35,989 MarketToBusConnection [INFO] Published: 4665696, 1@1.2676 | 1@1.2679  20141014T143135.988Z
+20141014 16:31:35,993 PriceLogger [INFO] Received price #3:4665696, 1@1.2676 | 1@1.2679  20141014T143135.988Z
+20141014 16:31:35,994 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=4,lastPrice=4665696, 1@1.2676 | 1@1.2679  20141014T143135.988Z
+20141014 16:31:36,871 MarketToBusConnection [INFO] Published: 4665696, 1@1.2676 | 1@1.268  20141014T143136.865Z
+20141014 16:31:36,876 PriceLogger [INFO] Received price #4:4665696, 1@1.2676 | 1@1.268  20141014T143136.865Z
+20141014 16:31:36,877 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=5,lastPrice=4665696, 1@1.2676 | 1@1.268  20141014T143136.865Z
+20141014 16:31:37,993 MarketToBusConnection [INFO] Published: 4665696, 1@1.2677 | 1@1.268  20141014T143137.991Z
+20141014 16:31:37,997 PriceLogger [INFO] Received price #5:4665696, 1@1.2677 | 1@1.268  20141014T143137.991Z
+20141014 16:31:37,997 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=6,lastPrice=4665696, 1@1.2677 | 1@1.268  20141014T143137.991Z
+20141014 16:31:38,916 MarketToBusConnection [INFO] Published: 4665696, 1@1.2677 | 1@1.268  20141014T143138.912Z
+20141014 16:31:38,921 PriceLogger [INFO] Received price #6:4665696, 1@1.2677 | 1@1.268  20141014T143138.912Z
+20141014 16:31:38,922 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=7,lastPrice=4665696, 1@1.2677 | 1@1.268  20141014T143138.912Z
+20141014 16:31:40,442 MarketToBusConnection [INFO] Published: 4665696, 1@1.2678 | 1@1.268  20141014T143140.441Z
+20141014 16:31:40,447 PriceLogger [INFO] Received price #7:4665696, 1@1.2678 | 1@1.268  20141014T143140.441Z
+20141014 16:31:40,447 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=8,lastPrice=4665696, 1@1.2678 | 1@1.268  20141014T143140.441Z
+20141014 16:31:42,632 MarketToBusConnection [INFO] Published: 4665696, 1@1.2677 | 1@1.2679  20141014T143142.631Z
+20141014 16:31:42,636 PriceLogger [INFO] Received price #8:4665696, 1@1.2677 | 1@1.2679  20141014T143142.631Z
+20141014 16:31:42,636 StrategyBase [INFO] report:PropertiesReader: strategyName=PriceLogger,startStrategy=false,lockStrategy=false,strategyRemoved=false,counter=9,lastPrice=4665696, 1@1.2677 | 1@1.2679  20141014T143142.631Z
+20141014 16:31:45,469 CallingReceiver [DEBUG] closed connection
+20141014 16:31:45,526 CallingReceiver [DEBUG] closed connection
+20141014 16:31:45,532 CallingReceiver [DEBUG] closed connection
+20141014 16:31:45,554 Sender [DEBUG] closed connection of sender.
+20141014 16:31:45,557 Sender [DEBUG] closed connection of sender.
