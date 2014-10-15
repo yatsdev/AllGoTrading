@@ -5,7 +5,7 @@ import org.joda.time.DateTimeZone;
 import org.yats.common.FileTool;
 
 /**
- * Created by macbook52 on 14/10/14.
+ * Created by abbanerjee on 14/10/14.
  */
 public class StorePriceCSV implements IStorePrice {
 
@@ -31,11 +31,12 @@ public class StorePriceCSV implements IStorePrice {
     }
 
 
-    public StorePriceCSV(String productId) {
+    public StorePriceCSV(String baseLocation, String productId) {
         this.productId = productId;
         String username = System.getProperty("user.name").replace(" ", "");
-        String path = "config/" + username;
-        this.filename = path + "/" + productId + ".csv";
+        String path = username + "/" + baseLocation;
+        FileTool.createDirectories(path);
+        this.filename = baseLocation + "/" + productId + ".csv";
     }
 
     String filename;

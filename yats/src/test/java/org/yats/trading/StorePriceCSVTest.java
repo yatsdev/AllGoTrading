@@ -12,12 +12,13 @@ import org.yats.common.FileTool;
  */
 public class StorePriceCSVTest {
     private static String filename = "StorePriceCSVTest.csv";
+    private static String baseLocation = "data";
     final Logger log = LoggerFactory.getLogger(StorePriceCSVTest.class);
 
     @Test
     public void canWriteAndReadLastCSV() {
         FileTool.deleteFile(filename);
-        StorePriceCSV storage = new StorePriceCSV(filename);
+        StorePriceCSV storage = new StorePriceCSV(baseLocation,filename);
         PriceData p1 = PriceData.createFromLast(ProductTest.TEST_PRODUCT1_ID, Decimal.ONE);
         storage.store(p1);
         PriceData p2 = PriceData.createFromLast(ProductTest.TEST_PRODUCT1_ID, Decimal.TWO);

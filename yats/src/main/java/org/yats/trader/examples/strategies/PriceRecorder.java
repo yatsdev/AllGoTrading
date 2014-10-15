@@ -10,6 +10,10 @@ import org.yats.trading.PriceData;
 import org.yats.trading.Receipt;
 import org.yats.trading.StorePriceCSV;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PriceRecorder extends StrategyBase implements IAmCalledBackInTime {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
@@ -27,10 +31,16 @@ public class PriceRecorder extends StrategyBase implements IAmCalledBackInTime {
     public void onPriceDataForStrategy(PriceData priceData) {
         if (shuttingDown) return;
         if (!isInitialised()) return;
-        if (!priceData.hasProductId(tradeProductId)) return;
+        hasPriceData = false;
+        for(String tradeProductId : pidList) {
+            if (priceData.hasProductId(tradeProductId)) {
+                hasPriceData = true;
+            }
+        }
+        if(!hasPriceData) return;
 
         log.info("Received price #" + counter + ":" + priceData.toString());
-        priceStore.store(priceData);
+        priceStoreMap.get(priceData.getProductId()).store(priceData);
         counter++;
 
         setReport("lastPrice", priceData.toString());
@@ -58,9 +68,17 @@ public class PriceRecorder extends StrategyBase implements IAmCalledBackInTime {
     @Override
     public void onInitStrategy() {
         setInternalAccount(getConfig("internalAccount", getName()));
-        tradeProductId = getConfig("tradeProductId");
-        subscribe(tradeProductId);
-        priceStore = new StorePriceCSV(tradeProductId);
+        tradeProductList = getConfig("tradeProductId");
+        baseLocation = getConfig("baseLocation");
+        String[] parts = tradeProductList.split(",");
+        pidList = Arrays.asList(parts);
+        priceStoreMap = new ConcurrentHashMap<String, StorePriceCSV>();
+        for(String tradeProductId : pidList) {
+            subscribe(tradeProductId);
+            StorePriceCSV csvStore = new StorePriceCSV(baseLocation,tradeProductId);
+            priceStoreMap.put(tradeProductId,csvStore);
+
+        }
 //        addTimedCallback(3, this);
     }
 
@@ -77,9 +95,12 @@ public class PriceRecorder extends StrategyBase implements IAmCalledBackInTime {
 
 
     private boolean shuttingDown;
-    private String tradeProductId;
+    private String tradeProductList;
+    private String baseLocation;
     private int counter;
-    private StorePriceCSV priceStore;
+    private ConcurrentHashMap<String,StorePriceCSV> priceStoreMap;
+    private  List<String> pidList;
+    private boolean hasPriceData;
 
 } // class
 

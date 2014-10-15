@@ -101,102 +101,25 @@ public class BollingerBands extends StrategyBase {
             log.info("[" + dataPoints + "] midPrice " + midPrice);
 
             if (dataPoints > _N_period) {
+
+                if(midPrice >= upperBand){
+                    closeShortPosition(ask.toDouble());
+                    openShortPosition(bid.toDouble());
+                }
+
+                if(midPrice <= lowerBand){
+                    closeLongPosition(bid.toDouble());
+                    openLongPosition(ask.toDouble());
+                }
+
                 if (movingAverage >= bid.toDouble()) {
-                         /* Signal to SELL a short position
-                        Here
-                        1. There is already an existing open long position and this short position
-                           will simply close that long by selling at bid and initiate a new position
-                           at bid
-                        2. The trade went sour and the signal is to establish a new short position at possibly
-                           a higher price than before. Hence book loss by covering the existing short position
-                           at ask and establishing a new short position at ask.
-                         */
-
-                    //Short Trade
-                    log.info("Short: at " + bid.toString());
-                    if (openLong) {
-                        if ((bid.toDouble() - longOpenPrice) > 0) {
-                            openLong = false;
-                            tradeProfit = bid.toDouble() - longOpenPrice;
-                            cumProfit += tradeProfit;
-                            log.info("(++) Closing previously open Long position at [longOpenPrice]: " + longOpenPrice);
-                            log.info("(++) Closing previously open Long position at [bid]: " + bid.toDouble());
-                            log.info("(++) Closing previously open Long position at [tradeProfit]: " + tradeProfit);
-                            log.info("(++) Closing previously open Long position at [cumProfit]: " + cumProfit);
-                        }
-
-                    }
-                        /*if (openShort) {
-                            //coverShort (loss)
-                            if((bid.toDouble() - shortOpenPrice ) > (ask.toDouble() - shortOpenPrice)) {//
-                                tradeProfit = shortOpenPrice - ask.toDouble();
-                                cumProfit += tradeProfit;
-                                openShort = false;
-                                log.info("(--) Closing previously open SHORT position at [shortOpenPrice]: " + shortOpenPrice);
-                                log.info("(--) Closing previously open SHORT position at [ask]: " + ask.toDouble());
-                                log.info("(--) Closing previously open SHORT position at [tradeProfit]: " + tradeProfit);
-                                log.info("(--) Closing previously open SHORT position at [cumProfit]: " + cumProfit);
-                            }
-                        }
-
-                        openShort = true;
-                        shortOpenPrice = bid.toDouble();
-                        //log.info("tradeProfit " + tradeProfit);
-                        //log.info("cumProfit " + cumProfit);
-                        */
-                    if (!openShort) {
-                        openShort = true;
-                        shortOpenPrice = bid.toDouble();
-                    }
+                    closeLongPosition(bid.toDouble());
                 }
 
                 //Long trade
-                if (movingAverage <= ask.toDouble()) {
-                    log.info("Long: at " + ask.toString());
-                        /* Signal to BUY a long position
-                        Here
-                        1. There is already an existing open short position and this long position
-                           will simply close that short by buying at ask and initiate a new position
-                           at ask
-                        2. The trade went sour and the signal is to establish a new long position at possibly
-                           a lower price than before. Hence book loss by selling the existing long position
-                           at bid and establishing a new long position at bid.
-                         */
-                    if (openShort) {
-                        if ((shortOpenPrice - ask.toDouble()) > 0) {
-                            openShort = false;
-                            tradeProfit = shortOpenPrice - ask.toDouble(); //Buy to close short
-                            cumProfit += tradeProfit;
-                            log.info("(++) Closing previously open Short position at [shortOpenPrice]: " + shortOpenPrice);
-                            log.info("(++) Closing previously open Short position at [ask]: " + ask.toDouble());
-                            log.info("(++) Closing previously open Short position at [tradeProfit]: " + tradeProfit);
-                            log.info("(++) Closing previously open Short position at [cumProfit]: " + cumProfit);
-                        }
+                    if (movingAverage <= ask.toDouble()) {
 
-                    }
-                        /*if (openLong) {
-                            //longClose (loss)
-                            if((ask.toDouble() - longOpenPrice ) > (bid.toDouble() - longOpenPrice)) {
-                                tradeProfit = bid.toDouble() - longOpenPrice;
-                                cumProfit += tradeProfit;
-                                openLong = false;
-                                log.info("(--) Closing previously open LONG position at [longOpenPrice]: " + longOpenPrice);
-                                log.info("(--) Closing previously open LONG position at [bid]: " + bid.toDouble());
-                                log.info("(--) Closing previously open LONG position at [tradeProfit]: " + tradeProfit);
-                                log.info("(--) Closing previously open LONG position at [cumProfit]: " + cumProfit);
-                            }
-
-                        }
-
-                        openLong = true;
-                        longOpenPrice = ask.toDouble();
-                        //log.info("tradeProfit " + tradeProfit);
-                        //log.info("cumProfit " + cumProfit);
-                        */
-                    if (!openLong) {
-                        openLong = true;
-                        longOpenPrice = ask.toDouble();
-                    }
+                    closeShortPosition(ask.toDouble());
 
                 }
 
@@ -213,13 +136,13 @@ public class BollingerBands extends StrategyBase {
                 //upperBand = (Decimal.fromDouble(upperBand)).roundToDigits(2).toDouble();
                 //lowerBand = (Decimal.fromDouble(lowerBand)).roundToDigits(2).toDouble();
 
-                    /*log.info("movingAverage: " + movingAverage);
-                    log.info("_k_stdDev : " + _k_stdDev );
-                    log.info("stdDev: " +   pointStat.getStdDev());
-                    log.info("_k_stdDev * stdDev: " + _k_stdDev * pointStat.getStdDev());
+                    log.info("movingAverage: " + movingAverage);
+                    //log.info("_k_stdDev : " + _k_stdDev );
+                    //log.info("stdDev: " +   pointStat.getStdDev());
+                    //log.info("_k_stdDev * stdDev: " + _k_stdDev * pointStat.getStdDev());
 
                     log.info("upperBand: " + upperBand);
-                    log.info("lowerBand: " + lowerBand);*/
+                    log.info("lowerBand: " + lowerBand);
             }
         }
 
@@ -263,6 +186,73 @@ public class BollingerBands extends StrategyBase {
 
     private boolean isInMarketBidSide() {
         return lastBidOrder != OrderNew.NULL;
+    }
+
+    private void openLongPosition(double askPrice){
+        if (!openLong) {
+            openLong = true;
+            longOpenPrice = askPrice;
+            log.info("(++) Open Long position at  [longOpenPrice]: " + longOpenPrice);
+        }
+
+    }
+
+    private void closeLongPosition(double bidPrice){
+    /* Signal to close any open long position
+            Here
+            1. There is already an existing open long position and this short position
+               will simply close that long by selling at bid and initiate a new position
+               at bid
+    */
+
+
+        if (openLong) {
+            if ((bidPrice - longOpenPrice) > 0) {
+                openLong = false;
+                double tradeProfit = bidPrice - longOpenPrice;
+                cumProfit += tradeProfit;
+                log.info("(++) Closing previously open Long position at [longOpenPrice]: " + longOpenPrice);
+                log.info("(++) Closing previously open Long position at [bid]: " + bidPrice);
+                log.info("(++) Closing previously open Long position at [tradeProfit]: " + tradeProfit);
+                log.info("(++) Closing previously open Long position at [cumProfit]: " + cumProfit);
+            }
+
+        }
+
+
+
+    }
+
+    private void openShortPosition(double bidPrice){
+        if (!openShort) {
+            openShort = true;
+            shortOpenPrice = bidPrice;
+
+            log.info("(++) Open Short position at  [shortOpenPrice]: " + shortOpenPrice);
+        }
+
+    }
+
+    private void closeShortPosition(double askPrice){
+    /* Signal close any existing short position for profit
+    Here
+    1. There is already an existing open short position and this long position
+       will simply close that short by buying at ask and initiate a new position
+       at ask
+
+     */
+        if (openShort) {
+            if ((shortOpenPrice - askPrice) > 0) {
+                openShort = false;
+                double tradeProfit = shortOpenPrice - askPrice; //Buy to close short
+                cumProfit += tradeProfit;
+                log.info("(++) Closing previously open Short position at [shortOpenPrice]: " + shortOpenPrice);
+                log.info("(++) Closing previously open Short position at [ask]: " + askPrice);
+                log.info("(++) Closing previously open Short position at [tradeProfit]: " + tradeProfit);
+                log.info("(++) Closing previously open Short position at [cumProfit]: " + cumProfit);
+            }
+
+        }
     }
 
 
