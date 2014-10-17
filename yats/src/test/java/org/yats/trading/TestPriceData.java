@@ -50,6 +50,7 @@ public class TestPriceData {
     public static final String TEST_SGDHKD_PID = "TEST_SGDHKD";
     public static final Decimal TEST_SGDHKD_LAST = Decimal.fromString("6.20477");
 
+    public static final String TEST_IBM_PID ="TEST_IBM";
     public static final String TEST_SAP_PID ="TEST_SAP";
     public static final Decimal TEST_SAP_LAST = Decimal.fromString("85");
     public static final String TEST_SAP_SYMBOL ="SAP";
