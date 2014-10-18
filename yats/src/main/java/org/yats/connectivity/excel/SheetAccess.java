@@ -128,16 +128,15 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         if(snapShotMode) combiKey2ItemMap.clear();
         ConcurrentHashMap<String, String> rowIdsWithChangedData = getRowIdsToUpdate(itemList);
         updateCombiKey2ItemMap(itemList);
-//        updateChangedRows(rowIdsWithChangedData);
-        String allRows = "";
-        for(String rowId : rowIdList) {
-            String rowString = getRowDataString(rowId);
-            allRows = allRows +rowString+ NL;
-
-        }
+        updateChangedRows(rowIdsWithChangedData);
+//        String allRows = "";
+//        for(String rowId : rowIdList) {
+//            String rowString = getRowDataString(rowId);
+//            allRows = allRows +rowString+ NL;
+//        }
         int rows = rowIdList.size() +1;
         int cols = columnIdList.size() +1;
-        poke("R2C2:R"+rows+"C"+cols, allRows);
+//        poke("R2C2:R"+rows+"C"+cols, allRows);
 
     }
 

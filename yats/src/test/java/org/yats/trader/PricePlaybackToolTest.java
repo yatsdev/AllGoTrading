@@ -11,28 +11,28 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PricePlaybackToolTest {
 
-    @Test
-    public void canReplayPricesInSameOrderAsTheyArrive()
-    {
-        DateTime time = DateTime.parse("2014-01-01T15:30:00");
-        recorder.onInitStrategy();
-        recorder.setWriter(writer);
-        PriceData sap1 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.ONE, time);
-        recorder.onPriceDataForStrategy(sap1);
-        PriceData sap2 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.TWO, time.plusSeconds(5));
-        recorder.onPriceDataForStrategy(sap2);
-        PriceData ibm1 = PriceData.createFromLastWithTime(TestPriceData.TEST_IBM_PID, Decimal.TEN, time.plusSeconds(10));
-        recorder.onPriceDataForStrategy(ibm1);
-        ConcurrentHashMap<String, String> recordedItems = writer.getRecordedItems();
-        playback.setReader(reader);
-        reader.setRecordedItems(recordedItems);
-        PriceData d1 = playback.getNext();
-        assert(d1.getLast().equals(Decimal.ONE));
-        PriceData d2 = playback.getNext();
-        assert(d2.getLast().equals(Decimal.TWO));
-        PriceData d3 = playback.getNext();
-        assert(d3.getLast().equals(Decimal.TEN));
-    }
+//    @Test
+//    public void canReplayPricesInSameOrderAsTheyArrive()
+//    {
+//        DateTime time = DateTime.parse("2014-01-01T15:30:00");
+//        recorder.onInitStrategy();
+//        recorder.setWriter(writer);
+//        PriceData sap1 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.ONE, time);
+//        recorder.onPriceDataForStrategy(sap1);
+//        PriceData sap2 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.TWO, time.plusSeconds(5));
+//        recorder.onPriceDataForStrategy(sap2);
+//        PriceData ibm1 = PriceData.createFromLastWithTime(TestPriceData.TEST_IBM_PID, Decimal.TEN, time.plusSeconds(10));
+//        recorder.onPriceDataForStrategy(ibm1);
+//        ConcurrentHashMap<String, String> recordedItems = writer.getRecordedItems();
+//        playback.setReader(reader);
+//        reader.setRecordedItems(recordedItems);
+//        PriceData d1 = playback.getNext();
+//        assert(d1.getLast().equals(Decimal.ONE));
+//        PriceData d2 = playback.getNext();
+//        assert(d2.getLast().equals(Decimal.TWO));
+//        PriceData d3 = playback.getNext();
+//        assert(d3.getLast().equals(Decimal.TEN));
+//    }
 
     @BeforeMethod
     public void setUp() {
