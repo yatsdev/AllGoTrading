@@ -50,7 +50,7 @@ public class FixClientMain {
         StrategyRunner strategyRunner = new StrategyRunner();
         strategyRunner.setPriceFeed(priceFeed);
         strategyRunner.addStrategy(marketToBusConnection);
-        strategyRunner.setProductProvider(products);
+//        strategyRunner.setProductProvider(products);
         priceFeed.logon();
 
         marketToBusConnection.setPriceProvider(strategyRunner);

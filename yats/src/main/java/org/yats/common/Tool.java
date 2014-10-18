@@ -39,12 +39,17 @@ public class Tool {
         String path = pathBase+"/"+username+"/"+subDir;
         FileTool.createDirectories(path);
         String userSpecificFilename = path+"/"+className+".properties";
-        log.info("Trying to read config file: "+userSpecificFilename);
-        if(!FileTool.exists(userSpecificFilename))
-            throw new CommonExceptions.FileReadException(userSpecificFilename+" not found!");
         return userSpecificFilename;
     }
-
+    public static String getPriceStoreFilename(String pathBase, String productId)
+    {
+        String username = System.getProperty("user.name").replace(" ","");
+        String path = pathBase+"/"+username;
+        String userSpecificFilename = path+"/"+productId+".csv";
+        /*if(!FileTool.exists(userSpecificFilename))
+            throw new CommonExceptions.FileReadException(userSpecificFilename+" not found!");*/
+        return userSpecificFilename;
+    }
 
     public static void sleepABit() {
         sleepFor(200);

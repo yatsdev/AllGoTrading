@@ -121,12 +121,14 @@ public class Config {
     private static String getInitRealDefaultString() {
         String CR = FileTool.getLineSeparator();
         String configString =
-        "serverIP = 127.0.0.1" + CR +
+        "serverIP = 127.0.0.1" + CR + //127.0.0.1
         "exchangePriceData = pricedata" + CR +
         "exchangeReceipts = receipts" + CR +
         "exchangeSubscription = subscriptions" + CR +
         "exchangePositionRequest = positionrequests" + CR +
         "exchangePositionSnapshot = positionsnapshots" + CR +
+        "exchangeKeyValueToStrategy = BBANDS_SAP" + CR +
+        "exchangeKeyValueFromStrategy = BBANDS_SAP" + CR +
         "exchangeOrderNew = orderNew" + CR +
         "exchangeOrderCancel = orderCancel" + CR +
         "topicSubscriptions = subscriptions" + CR +
@@ -160,6 +162,8 @@ public class Config {
         "exchangePositionSnapshot = positionsnapshotsTest"+ CR +
         "exchangeOrderNew = orderNewTest"+ CR +
         "exchangeOrderCancel = orderCancelTest"+ CR +
+        "exchangeKeyValueToStrategy = BBANDS_SAP" + CR +
+        "exchangeKeyValueFromStrategy = BBANDS_SAP" + CR +
         "topicSubscriptions = subscriptionsTest"+ CR +
         "topicPositionSnapshot = topicPositionSnapshotTest"+ CR +
         "listeningForReceipts = false"+ CR +

@@ -1,5 +1,7 @@
 package org.yats.connectivity.messagebus;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
@@ -9,6 +11,7 @@ import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
+import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
 import java.util.ArrayList;
@@ -55,14 +58,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
     public void sendSettings(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderSettings.publish(m.getTopic(), m);
-        log.debug("Published setting properties: "+(p.getKeySet().size()-1));
+//        log.debug("Published setting properties: "+(p.getKeySet().size()-1));
     }
 
     @Override
     public void sendReports(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderReports.publish(m.getTopic(), m);
-        log.debug("Published report properties: "+p.getKeySet().size());
+//        log.debug("Published report properties: "+p.getKeySet().size());
     }
 
     @Override
@@ -198,6 +201,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
     }
 
     private void sendAllReceivedPriceData() {
+        DateTime start = DateTime.now();
         while(receiverPriceData.hasMoreMessages()) {
             PriceDataMsg m = receiverPriceData.get();
             priceDataMap.put(m.productId, m);
@@ -211,6 +215,9 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
             priceDataConsumer.onPriceData(m);
         }
         priceDataMap.clear();
+
+        Duration d = new Duration(start,DateTime.now());
+//        log.info("sendAllReceivedPriceData: " + d.getMillis());
     }
 
     private void sendAllReceivedReceipts() {
@@ -235,7 +242,7 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
             KeyValueMsg m = receiverReports.get();
             String strategyName="unknown";
             IProvideProperties p = m.toProperties();
-            if(p.exists("strategyName")) strategyName = p.get("strategyName");
+            if(p.exists(StrategyBase.SETTING_STRATEGYNAME)) strategyName = p.get(StrategyBase.SETTING_STRATEGYNAME);
             reportsMap.put(strategyName, p);
         }
         int i=0;
