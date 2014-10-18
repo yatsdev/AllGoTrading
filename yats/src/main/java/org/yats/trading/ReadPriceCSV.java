@@ -2,7 +2,6 @@ package org.yats.trading;
 
 import au.com.bytecode.opencsv.CSVReader;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
@@ -18,6 +17,7 @@ public class ReadPriceCSV implements IReadPrice {
 
     final Logger log = LoggerFactory.getLogger(ReadPriceCSV.class);
     public static final String CSV_SEPARATOR = "|";
+    public static final String CSV_TIME_SEPARATOR = "@";
 
     @Override
     public PriceData read(){
@@ -32,9 +32,12 @@ public class ReadPriceCSV implements IReadPrice {
             }
 
 
-            OfferBook offerbook = OfferBook.fromStringCSV(stringCSV);
+            String priceParts[] = stringCSV.split(CSV_TIME_SEPARATOR);
+            String timeStampString = priceParts[0];
+            String priceDataCSV = priceParts[1];
 
-            return new PriceData(DateTime.now(DateTimeZone.UTC),
+            OfferBook offerbook = OfferBook.fromStringCSV(priceDataCSV);
+            return new PriceData(DateTime.parse(timeStampString),
                     productId,
                     offerbook.getBookRow(BookSide.BID, 0).getPrice(), //bid
                     offerbook.getBookRow(BookSide.ASK, 0).getPrice(), //ask
@@ -49,8 +52,10 @@ public class ReadPriceCSV implements IReadPrice {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new CommonExceptions.FileReadException(e.getMessage());
+
+            //e.printStackTrace();
+            //throw new CommonExceptions.FileReadException(e.getMessage());
+            return PriceData.NULL;
         }
 
 
