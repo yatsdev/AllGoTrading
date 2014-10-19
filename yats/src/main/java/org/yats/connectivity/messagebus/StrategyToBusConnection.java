@@ -1,5 +1,7 @@
 package org.yats.connectivity.messagebus;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IAmCalledBack;
@@ -9,12 +11,16 @@ import org.yats.messagebus.BufferingReceiver;
 import org.yats.messagebus.Config;
 import org.yats.messagebus.Sender;
 import org.yats.messagebus.messages.*;
+import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
+public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkPriceFeed, ISendOrder, IAmCalledBack, ISendSettings, ISendReports {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
@@ -25,10 +31,13 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     @Override
     public void subscribe(String productId, IConsumePriceData consumer) {
         setPriceDataConsumer(consumer);
-        SubscriptionMsg m = SubscriptionMsg.fromProductId(productId);
-//        Config config = Config.DEFAULT;
-        senderSubscription.publish(config.getTopicSubscriptions(), m);
-        log.debug("Published "+m);
+        subscribe(productId);
+    }
+
+    @Override
+    public void subscribeBulk(String productId, IConsumeBulkPriceData consumer) {
+        setBulkPriceDataConsumer(consumer);
+        subscribe(productId);
     }
 
     @Override
@@ -49,14 +58,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
     public void sendSettings(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderSettings.publish(m.getTopic(), m);
-        log.debug("Published setting properties: "+p.getKeySet().size());
+//        log.debug("Published setting properties: "+(p.getKeySet().size()-1));
     }
 
     @Override
     public void sendReports(IProvideProperties p) {
         KeyValueMsg m = KeyValueMsg.fromProperties(p);
         senderReports.publish(m.getTopic(), m);
-        log.debug("Published report properties: "+p.getKeySet().size());
+//        log.debug("Published report properties: "+p.getKeySet().size());
     }
 
     @Override
@@ -67,60 +76,6 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         sendAllReceivedSettings();
         sendAllReceivedReports();
         sendAllReceivedPositionSnapshots();
-    }
-
-    private void sendAllReceivedPriceData() {
-        while(receiverPriceData.hasMoreMessages()) {
-            PriceDataMsg m = receiverPriceData.get();
-            priceDataMap.put(m.productId, m);
-        }
-        for(PriceDataMsg m : priceDataMap.values()) {
-            priceDataConsumer.onPriceData(m.toPriceData());
-        }
-        priceDataMap.clear();
-    }
-
-    private void sendAllReceivedReceipts() {
-        while(receiverReceipt.hasMoreMessages()) {
-            Receipt r = receiverReceipt.get().toReceipt();
-//            log.debug("Received receipt (StrategyToBusConnection): "+r);
-            receiptConsumer.onReceipt(r);
-        }
-    }
-
-    private void sendAllReceivedSettings() {
-        if(receiverSettings==null) return;
-        while(receiverSettings.hasMoreMessages()) {
-            IProvideProperties p = receiverSettings.get().toProperties();
-            settingsConsumer.onSettings(p);
-        }
-    }
-
-    private void sendAllReceivedReports() {
-        if(receiverReports==null) return;
-        while(receiverReports.hasMoreMessages()) {
-            KeyValueMsg m = receiverReports.get();
-            String strategyName="unknown";
-            IProvideProperties p = m.toProperties();
-            if(p.exists("strategyName")) strategyName = p.get("strategyName");
-            reportsMap.put(strategyName, p);
-        }
-        for(IProvideProperties p : reportsMap.values()) {
-            reportsConsumer.onReport(p,receiverReports.hasMoreMessages());
-        }
-        reportsMap.clear();
-    }
-
-    private void sendAllReceivedPositionSnapshots() {
-        while(receiverPositionSnapshot.hasMoreMessages()) {
-            PositionSnapshotMsg m = receiverPositionSnapshot.get();
-            if(receiverPositionSnapshot.hasMoreMessages()) continue;
-            positionSnapshotConsumer.onPositionSnapshot(m.toPositionSnapshot());
-        }
-    }
-
-    public void setPriceDataConsumer(IConsumePriceData priceDataConsumer) {
-        this.priceDataConsumer = priceDataConsumer;
     }
 
     public void setSettingsConsumer(IConsumeSettings settingsConsumer) {
@@ -137,6 +92,14 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
     public void setPositionSnapshotConsumer(IConsumePositionSnapshot positionSnapshotConsumer) {
         this.positionSnapshotConsumer = positionSnapshotConsumer;
+    }
+
+    public void setPriceDataConsumer(IConsumePriceData priceDataConsumer) {
+        this.priceDataConsumer = priceDataConsumer;
+    }
+
+    public void setBulkPriceDataConsumer(IConsumeBulkPriceData bulkPriceDataConsumer) {
+        this.bulkPriceDataConsumer = bulkPriceDataConsumer;
     }
 
     public void close() {
@@ -165,6 +128,11 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
 
 
         priceDataConsumer =new PriceDataConsumerDummy();
+        bulkPriceDataConsumer = new IConsumeBulkPriceData() {
+            @Override
+            public void onBulkPriceData(Collection<? extends PriceData> data) {}
+        };
+
         receiptConsumer=new ReceiptConsumerDummy();
         settingsConsumer =new SettingsConsumerDummy();
         reportsConsumer=new ReportsConsumerDummy();
@@ -224,34 +192,103 @@ public class StrategyToBusConnection implements IProvidePriceFeed, ISendOrder, I
         initDone=true;
     }
 
-    Sender<SubscriptionMsg> senderSubscription;
-    Sender<OrderNewMsg> senderOrderNew;
-    Sender<OrderCancelMsg> senderOrderCancel;
-    Sender<KeyValueMsg> senderSettings;
-    Sender<KeyValueMsg> senderReports;
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    IConsumePriceData priceDataConsumer;
-    IConsumeReceipt receiptConsumer;
-    IConsumeSettings settingsConsumer;
-    IConsumeReports reportsConsumer;
-    IConsumePositionSnapshot positionSnapshotConsumer;
+    private void subscribe(String productId) {
+        SubscriptionMsg m = SubscriptionMsg.fromProductId(productId);
+        senderSubscription.publish(config.getTopicSubscriptions(), m);
+        log.debug("Published " + m);
+    }
 
-    BufferingReceiver<PriceDataMsg> receiverPriceData;
-    ConcurrentHashMap<String, PriceDataMsg> priceDataMap;
-    ConcurrentHashMap<String, IProvideProperties> reportsMap;
-    BufferingReceiver<ReceiptMsg> receiverReceipt;
-    BufferingReceiver<KeyValueMsg> receiverSettings;
-    BufferingReceiver<KeyValueMsg> receiverReports;
-    BufferingReceiver<PositionSnapshotMsg> receiverPositionSnapshot;
-    Config config;
-    boolean shuttingDown;
-    boolean initDone;
+    private void sendAllReceivedPriceData() {
+        DateTime start = DateTime.now();
+        while(receiverPriceData.hasMoreMessages()) {
+            PriceDataMsg m = receiverPriceData.get();
+            priceDataMap.put(m.productId, m);
+        }
+        List<PriceData> list = new ArrayList<PriceData>();
+        for(PriceDataMsg m : priceDataMap.values()) {
+            list.add(m.toPriceData());
+        }
+        bulkPriceDataConsumer.onBulkPriceData(list);
+        for(PriceData m : list) {
+            priceDataConsumer.onPriceData(m);
+        }
+        priceDataMap.clear();
+
+        Duration d = new Duration(start,DateTime.now());
+//        log.info("sendAllReceivedPriceData: " + d.getMillis());
+    }
+
+    private void sendAllReceivedReceipts() {
+        while(receiverReceipt.hasMoreMessages()) {
+            Receipt r = receiverReceipt.get().toReceipt();
+//            log.debug("Received receipt (StrategyToBusConnection): "+r);
+            receiptConsumer.onReceipt(r);
+        }
+    }
+
+    private void sendAllReceivedSettings() {
+        if(receiverSettings==null) return;
+        while(receiverSettings.hasMoreMessages()) {
+            IProvideProperties p = receiverSettings.get().toProperties();
+            settingsConsumer.onSettings(p);
+        }
+    }
+
+    private void sendAllReceivedReports() {
+        if(receiverReports==null) return;
+        while(receiverReports.hasMoreMessages()) {
+            KeyValueMsg m = receiverReports.get();
+            String strategyName="unknown";
+            IProvideProperties p = m.toProperties();
+            if(p.exists(StrategyBase.SETTING_STRATEGYNAME)) strategyName = p.get(StrategyBase.SETTING_STRATEGYNAME);
+            reportsMap.put(strategyName, p);
+        }
+        int i=0;
+        for(IProvideProperties p : reportsMap.values()) {
+            reportsConsumer.onReport(p,i<reportsMap.size()-1);
+            i++;
+        }
+        reportsMap.clear();
+    }
+
+    private void sendAllReceivedPositionSnapshots() {
+        while(receiverPositionSnapshot.hasMoreMessages()) {
+            PositionSnapshotMsg m = receiverPositionSnapshot.get();
+            if(receiverPositionSnapshot.hasMoreMessages()) continue;
+            positionSnapshotConsumer.onPositionSnapshot(m.toPositionSnapshot());
+        }
+    }
+
+    private Sender<SubscriptionMsg> senderSubscription;
+    private Sender<OrderNewMsg> senderOrderNew;
+    private Sender<OrderCancelMsg> senderOrderCancel;
+    private Sender<KeyValueMsg> senderSettings;
+    private Sender<KeyValueMsg> senderReports;
+
+    private IConsumePriceData priceDataConsumer;
+    private IConsumeBulkPriceData bulkPriceDataConsumer;
+    private IConsumeReceipt receiptConsumer;
+    private IConsumeSettings settingsConsumer;
+    private IConsumeReports reportsConsumer;
+    private IConsumePositionSnapshot positionSnapshotConsumer;
+
+    private BufferingReceiver<PriceDataMsg> receiverPriceData;
+    private ConcurrentHashMap<String, PriceDataMsg> priceDataMap;
+    private ConcurrentHashMap<String, IProvideProperties> reportsMap;
+    private BufferingReceiver<ReceiptMsg> receiverReceipt;
+    private BufferingReceiver<KeyValueMsg> receiverSettings;
+    private BufferingReceiver<KeyValueMsg> receiverReports;
+    private BufferingReceiver<PositionSnapshotMsg> receiverPositionSnapshot;
+    private Config config;
+    private boolean shuttingDown;
+    private boolean initDone;
 
     private LinkedBlockingQueue<SubscriptionMsg> subscriptionQueue;
     private LinkedBlockingQueue<OrderNew> orderNewQueue;
     private LinkedBlockingQueue<OrderCancel> orderCancelQueue;
     private LinkedBlockingQueue<String> updatedProductQueue;
-
 
 
     private static class PriceDataConsumerDummy implements IConsumePriceData {

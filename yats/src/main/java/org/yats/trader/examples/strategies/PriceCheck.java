@@ -9,6 +9,10 @@ import org.yats.trader.StrategyBase;
 import org.yats.trading.PriceData;
 import org.yats.trading.Receipt;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class PriceCheck extends StrategyBase {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
@@ -17,30 +21,34 @@ public class PriceCheck extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(PriceCheck.class);
 
 
+    String lastBigChange="";
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(shuttingDown) return;
         if(!isInitialised()) return;
-        if(!priceData.hasProductId(tradeProductId)) return;
-        if(lastPrice.equals(PriceData.NULL)) {
-            lastPrice = priceData;
-            return;
-        }
+        if(!lastPrices.containsKey(priceData.getProductId())) return;
 
-        boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrice.getLast().multiply(Decimal.fromString("1.01")));
-        boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrice.getBid().multiply(Decimal.fromString("1.01")));
-        boolean hugeAskChangeUp = priceData.getAsk().isGreaterThan(lastPrice.getAsk().multiply(Decimal.fromString("1.01")));
-        boolean hugeLastChangeDown = priceData.getLast().isLessThan(lastPrice.getLast().multiply(Decimal.fromString("0.99")));
-        boolean hugeBidChangeDown = priceData.getBid().isLessThan(lastPrice.getBid().multiply(Decimal.fromString("0.99")));
-        boolean hugeAskChangeDown = priceData.getAsk().isLessThan(lastPrice.getAsk().multiply(Decimal.fromString("0.99")));
+        String key = priceData.getProductId();
+
+        boolean hugeLastChangeUp = priceData.getLast().isGreaterThan(lastPrices.get(key).getLast().multiply(upMove));
+        boolean hugeBidChangeUp = priceData.getBid().isGreaterThan(lastPrices.get(key).getBid().multiply(upMove));
+        boolean hugeAskChangeUp = priceData.getAsk().isGreaterThan(lastPrices.get(key).getAsk().multiply(upMove));
+        boolean hugeLastChangeDown = priceData.getLast().isLessThan(lastPrices.get(key).getLast().multiply(downMove));
+        boolean hugeBidChangeDown = priceData.getBid().isLessThan(lastPrices.get(key).getBid().multiply(downMove));
+        boolean hugeAskChangeDown = priceData.getAsk().isLessThan(lastPrices.get(key).getAsk().multiply(downMove));
         boolean hugeChange =  (hugeLastChangeUp || hugeBidChangeUp || hugeAskChangeUp
                 || hugeLastChangeDown || hugeBidChangeDown || hugeAskChangeDown);
 
         if(hugeChange) {
             System.out.println("");
-            log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrice);
+            log.info("Huge change in price! " + priceData.toString() + " last:" + lastPrices.get(key).toString());
+            lastBigChange = priceData.toString();
+
+            setReport("lastBigChange", lastBigChange);
+            sendReports();
+
         } else {
             dots++;
             if(dots>80) {
@@ -49,32 +57,52 @@ public class PriceCheck extends StrategyBase {
             }
             System.out.print(".");
         }
-
-        lastPrice = priceData;
+        lastPrices.put(key, priceData);
     }
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
-
+    public void onStopStrategy() {
     }
 
     @Override
-    public void init()
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
+        addReports(p);
+        setReport("lastBigChange", lastBigChange);
+        sendReports();
+    }
+
+
+
+    @Override
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
-        tradeProductId = getConfig("tradeProductId");
-        subscribe(tradeProductId);
+        tradeProductIds = getConfig("tradeProductIds");
+        String[] parts = tradeProductIds.split(",");
+        tradeProductIdsNameList = Arrays.asList(parts);
+
+        for(int i=0;i<tradeProductIdsNameList.size();i++){
+            subscribe(tradeProductIdsNameList.get(i));
+            lastPrices.put(tradeProductIdsNameList.get(i),PriceData.createFromLast(tradeProductIdsNameList.get(i),Decimal.ZERO));
+        }
+
+        upMove = Decimal.fromString(getConfig("upMove","1.000001"));
+        downMove = Decimal.fromString(getConfig("downMove","0.999999"));
+
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
     }
@@ -88,8 +116,12 @@ public class PriceCheck extends StrategyBase {
     private PriceData lastPrice;
 
 
+    private ConcurrentHashMap<String,PriceData> lastPrices=new ConcurrentHashMap();
     private boolean shuttingDown;
-    private String tradeProductId;
+    private String tradeProductIds;
     private static int dots = 0;
+    private List<String> tradeProductIdsNameList;
 
+    private Decimal upMove;
+    private Decimal downMove;
 } // class

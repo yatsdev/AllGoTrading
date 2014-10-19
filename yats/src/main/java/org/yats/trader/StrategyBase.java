@@ -3,33 +3,100 @@ package org.yats.trader;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.Decimal;
-import org.yats.common.IProvideProperties;
-import org.yats.common.PropertiesReader;
-import org.yats.common.UniqueId;
+import org.yats.common.*;
 import org.yats.trading.*;
 
 public abstract class StrategyBase implements IConsumePriceDataAndReceipt, IConsumeSettings {
 
     final Logger log = LoggerFactory.getLogger(StrategyBase.class);
 
+    public static final String SETTING_LOCKED = "lockStrategy";
+    public static final String SETTING_STARTED = "startStrategy";
+    public static final String SETTING_STRATEGYNAME = "strategyName";
+    public static final String SETTING_STRATEGYREMOVED = "strategyRemoved";
+
 
     @Override
-    public abstract void onPriceData(PriceData priceData);
+    public void onPriceData(PriceData priceData) {
+        onPriceDataForStrategy(priceData);
+    }
+
+    @Override
+    public void onReceipt(Receipt receipt) {
+        onReceiptForStrategy(receipt);
+    }
+
+    public void shutdown() {
+        onShutdown();
+    }
+
+    public abstract void onShutdown();
+    public abstract void onPriceDataForStrategy(PriceData priceData);
+    public abstract void onReceiptForStrategy(Receipt receipt);
+    public abstract void onInitStrategy();
+    public abstract void onStopStrategy();
+    public abstract void onStartStrategy();
+    public abstract void onSettingsForStrategy(IProvideProperties p);
+
+    public void init() {
+        config.set(SETTING_LOCKED, isLocked());
+        config.set(SETTING_STARTED, isStarted());
+        onInitStrategy();
+        initialised = true;
+    }
 
     @Override
     public UniqueId getConsumerId() { return consumerId; }
 
-    @Override
-    public abstract void onReceipt(Receipt receipt);
 
     @Override
-    public abstract void onSettings(IProvideProperties p);
+    public void onSettings(IProvideProperties p) {
+        boolean previouslyRunning = isStarted();
+        config = PropertiesReader.createFromTwoProviders(config, p);
+        onSettingsForStrategy(p);
+        callStartOrStopCallback(previouslyRunning);
+        sendReports();
+    }
 
+    public void stopStrategy() {
+        boolean previouslyRunning = isStarted();
+        config.set(SETTING_STARTED, "false");
+        callStartOrStopCallback(previouslyRunning);
+    }
+
+    public void startStrategy() {
+        boolean previouslyRunning = isStarted();
+        if(!isLocked()) config.set(SETTING_STARTED, "true");
+        callStartOrStopCallback(previouslyRunning);
+    }
+
+//    public void sendReports(IProvideProperties p) {
+//        reportSender.sendReports(p);
+//    }
+
+    public void sendReports() {
+        reports.set(SETTING_STRATEGYNAME, getName());
+        reports.set(SETTING_LOCKED, isLocked());
+        reports.set(SETTING_STARTED, isStarted());
+        reports.set(SETTING_STRATEGYREMOVED, false);
+        log.info("report:"+reports.toString());
+        reportSender.sendReports(reports);
+    }
+
+    public boolean isStarted() {
+        return isLocked() ? false : config.getAsBoolean(SETTING_STARTED, false);
+    }
+
+    public boolean isLocked() {
+        return config.getAsBoolean(SETTING_LOCKED, false);
+    }
 
     protected boolean isConfigExists(String key) { return config.exists(key); }
     protected String getConfig(String key) {
         return config.get(key);
+    }
+    protected String getConfig(String key, String defaultValue) {
+        return isConfigExists(key) ? config.get(key) : defaultValue;
     }
 
     protected double getConfigAsDouble(String key) {
@@ -51,7 +118,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         config.set(key, value);
     }
 
-    public void sendConfig() {
+    public void saveConfig() {
 
     }
 
@@ -59,25 +126,30 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
     }
 
-    public void init() {
-        initialised = true;
-    }
 
     public boolean isInitialised() {
         return initialised;
     }
 
-    public abstract void shutdown();
+
 
     public void subscribe(String productId)
     {
-        log.info("Subscription sent for "+productId+ " by "+this.getClass().getSimpleName());
+        log.info("Subscription sent for "+productId+ " by "+getName());
         priceProvider.subscribe(productId, this);
     }
 
     public void sendNewOrder(OrderNew order)
     {
+        if(!isStarted()) {
+            log.error("NOT_STARTED! "+ getName() + " tried to send OrderNew although not started: "+order);
+            return;
+        }
         orderSender.sendOrderNew(order);
+    }
+
+    public String getName() {
+        return config.get(SETTING_STRATEGYNAME);
     }
 
     public void sendOrderCancel(OrderCancel order)
@@ -85,9 +157,6 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         orderSender.sendOrderCancel(order);
     }
 
-    public void sendReports(IProvideProperties p) {
-        reportSender.sendReports(p);
-    }
 
     public Product getProductForProductId(String productId) {
         return productProvider.getProductWith(productId);
@@ -127,16 +196,13 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
         return totalValue;
     }
 
-    public PropertiesReader getReports() {
-        return reports;
+    public void setReport(String key, String value) {
+        reports.set(key,value);
     }
 
-
-
-//    public Decimal getProfitForProduct(String productId)
-//    {
-//        return positionProvider.getValueForAccountProduct(converter, new PositionRequest(getInternalAccount(), productId));
-//    }
+    public void addReports(IProvideProperties p) {
+        reports.add(p);
+    }
 
     public void setPriceProvider(IProvidePriceFeed priceProvider) {
         this.priceProvider = priceProvider;
@@ -169,40 +235,45 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
     public void setTimedCallbackProvider(IProvideTimedCallback timedCallbackProvider) {
         this.timedCallbackProvider = timedCallbackProvider;
     }
-
-    public void setName(String name) {
-        this.name = name;
-        reports.set("strategyName", name);
+    public void setPropertiesSaver(ISaveProperties _propSaver) {
+        propSaver = _propSaver;
     }
-
 
     public StrategyBase() {
         consumerId = UniqueId.create();
         initialised = false;
         converter = new RateConverter(new ProductList());
         reports = new PropertiesReader();
-        setName("unnamedStrategy");
+        config = new PropertiesReader();
+        propSaver = new ISaveProperties() {
+            @Override
+            public void saveProperties(IProvideProperties p, String name) {}
+        };
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private String internalAccount;
+    private void callStartOrStopCallback(boolean previouslyRunning) {
+        if(!previouslyRunning && isStarted())
+            onStartStrategy();
+        else if(previouslyRunning && !isStarted())
+            onStopStrategy();
+    }
 
+
+    private String internalAccount;
     private IProvidePriceFeed priceProvider;
     private ISendOrder orderSender;
     private ISendReports reportSender;
-
     private IProvidePosition positionProvider;
     private IProvideProduct productProvider;
-
     private IProvideTimedCallback timedCallbackProvider;
-
     private final UniqueId consumerId;
-
-    private IProvideProperties config;
     private boolean initialised;
     private RateConverter converter;
 
+    private IProvideProperties config;
+    private ISaveProperties propSaver;
     PropertiesReader reports;
-    private String name;
+
 }

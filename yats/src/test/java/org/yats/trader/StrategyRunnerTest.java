@@ -137,6 +137,7 @@ public class StrategyRunnerTest {
         positionServer.setRateConverter(rateConverter);
         feed = new PriceFeedMock();
         strategy = new StrategyMock();
+        strategy.startStrategy();
         strategy.setInternalAccount(ACCOUNT);
         strategyRunner = new StrategyRunner();
         strategy.setTimedCallbackProvider(strategyRunner);
@@ -148,7 +149,7 @@ public class StrategyRunnerTest {
         strategyRunner.setOrderSender(orderConnection);
         strategyRunner.setPriceFeed(feed);
         strategyRunner.addStrategy(strategy);
-        strategyRunner.setProductProvider(productList);
+//        strategyRunner.setProductProvider(productList);
 
         strategy.setPositionProvider(positionServer);
 
@@ -166,7 +167,7 @@ public class StrategyRunnerTest {
     private PriceData data1;
     private PositionServer positionServer;
     private RateConverter rateConverter;
-    private ProductList productList;
+//    private ProductList productList;
 
 
     private static Product testProduct = new Product(TestPriceData.TEST_SAP_PID, TestPriceData.TEST_SAP_SYMBOL, "exchange");
@@ -214,12 +215,12 @@ public class StrategyRunnerTest {
 
 
         @Override
-        public void onPriceData(PriceData priceData) {
+        public void onPriceDataForStrategy(PriceData priceData) {
             priceDataReceived++;
         }
 
         @Override
-        public void onReceipt(Receipt receipt) {
+        public void onReceiptForStrategy(Receipt receipt) {
             if(!receipt.isForSameOrderAs(lastReceipt)) numberOfOrderInMarket++;
             if(receipt.isEndState()) numberOfOrderInMarket--;
 
@@ -228,24 +229,37 @@ public class StrategyRunnerTest {
         }
 
         @Override
-        public void onSettings(IProvideProperties p) {
+        public void onSettingsForStrategy(IProvideProperties p) {
 
         }
 
         @Override
-        public void init() {
+        public void onInitStrategy() {
             subscribe(testProduct.getProductId());
             addTimedCallback(1, this);
         }
 
         @Override
-        public void shutdown() {}
+        public void onStopStrategy() {
+        }
+
+        @Override
+        public void onStartStrategy() {
+        }
+
+        @Override
+        public void onShutdown() {}
 
         private StrategyMock() {
             priceDataReceived =0;
             position = 0;
             lastReceipt = Receipt.NULL;
             calledBackByTimer=false;
+        }
+
+        @Override
+        public String getName() {
+            return "mock";
         }
 
         private double position;

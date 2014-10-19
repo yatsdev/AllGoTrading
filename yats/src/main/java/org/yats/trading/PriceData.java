@@ -136,6 +136,12 @@ public class PriceData
     }
 
 
+    public static PriceData createFromLastWithTime(String productId, Decimal last, DateTime time) {
+        return new PriceData(time, productId,
+                last.subtract(Decimal.CENT), last.add(Decimal.CENT), last,
+                Decimal.ONE, Decimal.ONE, Decimal.ONE);
+    }
+
     public static PriceData createFromLast(String productId, Decimal last) {
         return new PriceData(DateTime.now(DateTimeZone.UTC), productId,
                 last.subtract(Decimal.CENT), last.add(Decimal.CENT), last,

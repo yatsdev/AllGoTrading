@@ -1,6 +1,7 @@
 package org.yats.common;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,6 +13,19 @@ public class PropertiesReader implements IProvideProperties {
     public PropertiesReader() {
 //        properties = new Properties();
         properties = new ConcurrentHashMap<String, String>();
+    }
+
+    public static PropertiesReader createFromTwoProviders(IProvideProperties prop1, IProvideProperties prop2) {
+        PropertiesReader p = new PropertiesReader();
+        p.add(prop1);
+        p.add(prop2);
+        return p;
+    }
+
+    public static PropertiesReader createFromProvider(IProvideProperties prop) {
+        PropertiesReader p = new PropertiesReader();
+        p.add(prop);
+        return p;
     }
 
     @Override
@@ -38,14 +52,16 @@ public class PropertiesReader implements IProvideProperties {
         return createFromConfigString(configStringDefault);
     }
 
+
     public static PropertiesReader createFromConfigFile(String pathToConfigFile)
     {
+        if(!FileTool.exists(pathToConfigFile)) return new PropertiesReader();
         try {
             String configAsString = new Scanner(new File(pathToConfigFile)).useDelimiter("\\Z").next();
             return createFromConfigString(configAsString);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
+            throw new CommonExceptions.FieldNotFoundException(e.getMessage());
         }
     }
 
@@ -77,7 +93,7 @@ public class PropertiesReader implements IProvideProperties {
         return p;
     }
 
-    public void add(PropertiesReader reader) {
+    public void add(IProvideProperties reader) {
         for(String key : reader.getKeySet()) {
             String value = reader.get(key);
             properties.put(key, value);
@@ -177,8 +193,9 @@ public class PropertiesReader implements IProvideProperties {
         while (enuKeys.hasMoreElements()) {
             String key = (String) enuKeys.nextElement();
             String value = properties.get(key);
-            if(!first){b.append(","); first=false;}
-            b.append(key).append("=").append(value);
+            if(!first){b=b.append(",");}
+            first=false;
+            b=b.append(key).append("=").append(value);
         }
             return "PropertiesReader: "+b.toString();
     }
@@ -193,6 +210,20 @@ public class PropertiesReader implements IProvideProperties {
             if(!first){b.append(","); first=false;}
             b.append(key).append("=").append(value);
         }
+        return b.toString();
+    }
+
+    public String toStringKeyValueFile() {
+        StringBuilder b = new StringBuilder();
+        Enumeration enuKeys = properties.keys();
+        boolean first = true;
+        while (enuKeys.hasMoreElements()) {
+            String key = (String) enuKeys.nextElement();
+            String value = properties.get(key);
+            if(!first){b.append("\n"); first=false;}
+            b.append(key).append("=").append(value);
+        }
+        b.append("\n");
         return b.toString();
     }
 
@@ -229,5 +260,6 @@ public class PropertiesReader implements IProvideProperties {
 
     /////////////////////////////////////////////////////////////////////////////
     ConcurrentHashMap<String, String> properties;
+
 //    Properties properties;
 }

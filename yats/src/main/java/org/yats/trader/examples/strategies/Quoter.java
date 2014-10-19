@@ -19,7 +19,7 @@ public class Quoter extends StrategyBase {
     final Logger log = LoggerFactory.getLogger(Quoter.class);
 
     @Override
-    public void onPriceData(PriceData priceData)
+    public void onPriceDataForStrategy(PriceData priceData)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
@@ -42,7 +42,7 @@ public class Quoter extends StrategyBase {
         if(!priceData.isSameFrontRowAskAs(prevRefPriceData)) {
             cancelOrders(BookSide.ASK);
             sendAskRelativeTo(priceData.getAsk());
-            sendReports(getReports());
+            sendReports();
         }
 
         prevRefPriceData = priceData;
@@ -50,7 +50,7 @@ public class Quoter extends StrategyBase {
 
 
     @Override
-    public void onReceipt(Receipt receipt)
+    public void onReceiptForStrategy(Receipt receipt)
     {
         if(!isInitialised()) return;
         if(shuttingDown) return;
@@ -85,14 +85,21 @@ public class Quoter extends StrategyBase {
     }
 
     @Override
-    public void onSettings(IProvideProperties p) {
+    public void onStopStrategy() {
+    }
+
+    @Override
+    public void onStartStrategy() {
+    }
+
+    @Override
+    public void onSettingsForStrategy(IProvideProperties p) {
         System.out.println("Strategy settings: "+PropertiesReader.toString(p));
     }
 
     @Override
-    public void init()
+    public void onInitStrategy()
     {
-        super.init();
         setInternalAccount(getConfig("internalAccount"));
         tradeProductId = getConfig("tradeProductId");
         refProductId = getConfig("referenceProductId");
@@ -108,7 +115,7 @@ public class Quoter extends StrategyBase {
     }
 
     @Override
-    public void shutdown()
+    public void onShutdown()
     {
         shuttingDown=true;
         cancelAllOrders();
@@ -120,7 +127,7 @@ public class Quoter extends StrategyBase {
             double step = i;
             Decimal bidPrice = Decimal.fromDouble(bidMarket*(1.0-step*stepFactor)- tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.BID, bidPrice);
-            getReports().set("bidPrice"+i, bidPrice);
+            setReport("bidPrice"+i, bidPrice.toString());
         }
     }
 
@@ -130,7 +137,7 @@ public class Quoter extends StrategyBase {
             double step = i;
             Decimal askPrice = Decimal.fromDouble(askMarket * (1.0 + step * stepFactor) + tickSize.toDouble()).roundToTickSize(tickSize);
             sendOrderIfNotExisting(BookSide.ASK, askPrice);
-            getReports().set("askPrice" + i, askPrice);
+            setReport("askPrice" + i, askPrice.toString());
         }
     }
 

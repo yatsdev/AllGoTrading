@@ -48,7 +48,7 @@ public class QuotingMain {
         strategyRunner.setPriceFeed(priceAndOrderConnection);
         strategyRunner.addStrategy(strategy);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(products);
+//        strategyRunner.setProductProvider(products);
 
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
