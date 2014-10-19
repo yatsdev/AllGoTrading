@@ -8,7 +8,7 @@ public class TimedCallback {
         return now.isAfter(time) || now.isEqual(time);
     }
 
-    public TimedCallback(DateTime time, IAmCalledBackInTime callback) {
+    public TimedCallback(DateTime time, IAmCalledTimed callback) {
         this.time = time;
         this.callback = callback;
     }
@@ -19,5 +19,5 @@ public class TimedCallback {
     }
 
     private DateTime time;
-    private IAmCalledBackInTime callback;
+    private IAmCalledTimed callback;
 }

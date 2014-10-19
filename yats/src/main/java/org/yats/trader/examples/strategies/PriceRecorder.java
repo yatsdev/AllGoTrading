@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
-import org.yats.trading.IAmCalledBackInTime;
+import org.yats.trading.IAmCalledTimed;
 import org.yats.trading.PriceData;
 import org.yats.trading.Receipt;
 import org.yats.trading.StorePriceCSV;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PriceRecorder extends StrategyBase implements IAmCalledBackInTime {
+public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.

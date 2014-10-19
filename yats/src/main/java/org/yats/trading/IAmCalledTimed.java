@@ -1,5 +1,5 @@
 package org.yats.trading;
 
-public interface IAmCalledBackInTime {
+public interface IAmCalledTimed {
     void onTimerCallback() ;
 }

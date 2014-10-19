@@ -122,7 +122,7 @@ public abstract class StrategyBase implements IConsumePriceDataAndReceipt, ICons
 
     }
 
-    protected void addTimedCallback(int seconds, IAmCalledBackInTime callback) {
+    protected void addTimedCallback(int seconds, IAmCalledTimed callback) {
         timedCallbackProvider.addTimedCallback(new TimedCallback(DateTime.now().plusSeconds(seconds), callback));
     }
 
