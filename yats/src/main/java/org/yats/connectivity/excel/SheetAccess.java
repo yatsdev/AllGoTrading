@@ -148,7 +148,7 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
             i++;
         }
         Duration d = new Duration(startSheet, DateTime.now());
-        log.info("updateMatrix: " + d.getMillis() + " for rows:" + i);
+//        log.info("updateMatrix: " + d.getMillis() + " for rows:" + i);
     }
 
     public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
