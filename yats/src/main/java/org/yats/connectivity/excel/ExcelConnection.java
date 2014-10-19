@@ -117,10 +117,10 @@ public class ExcelConnection implements
     public void startDDE() {
         try {
             System.out.println("connecting to Excel sheets...");
-//            sheetAccessPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
-//            sheetAccessReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
+            sheetAccessPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
+            sheetAccessReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
             sheetAccessPrices.init("Excel", prop.get("DDEPathToExcelFileWPrices"));
-//            sheetAccessSettings.init("Excel", prop.get("DDEPathToExcelFileWSettings"));
+            sheetAccessSettings.init("Excel", prop.get("DDEPathToExcelFileWSettings"));
             System.out.println("done.");
             Collection<String> pidList = sheetAccessPrices.getRowIdList();
             subscribeAllProductIds(pidList);
@@ -199,16 +199,16 @@ public class ExcelConnection implements
         productList=_products;
         if (!Tool.isWindows()) System.out.println("This is not Windows! DDELink will not work!");
         reportsMap = new ConcurrentHashMap<String, MatrixItem>();
-//        sheetAccessPositions = new SheetAccess(_positionConversation);
-//        sheetAccessReports = new SheetAccess(_reportConversation);
-//        sheetAccessReports.setSnapShotMode(false);
-//        sheetAccessReports.setNaString("");
+        sheetAccessPositions = new SheetAccess(_positionConversation);
+        sheetAccessReports = new SheetAccess(_reportConversation);
+        sheetAccessReports.setSnapShotMode(false);
+        sheetAccessReports.setNaString("");
         sheetAccessPrices = new SheetAccess(_priceConversation);
         sheetAccessPrices.setNaString("");
         sheetAccessPrices.setFirstRowListener(this);
         knownProducts = new ConcurrentHashMap<String, String>();
-//        sheetAccessSettings =new SheetAccess(_settingsConversation);
-//        sheetAccessSettings.setSettingsSender(this);
+        sheetAccessSettings =new SheetAccess(_settingsConversation);
+        sheetAccessSettings.setSettingsSender(this);
 
         strategyToBusConnection = new StrategyToBusConnection(_prop);
 
