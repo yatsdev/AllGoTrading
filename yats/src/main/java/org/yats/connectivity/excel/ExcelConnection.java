@@ -1,5 +1,7 @@
 package org.yats.connectivity.excel;
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
@@ -49,6 +51,7 @@ public class ExcelConnection implements
 
     @Override
     public void onBulkPriceData(Collection<? extends PriceData> dataList) {
+        DateTime startCopy = DateTime.now();
         List<MatrixItem> all = new ArrayList<MatrixItem>();
         for(PriceData data : dataList) {
             String pid = data.getProductId();
@@ -57,7 +60,14 @@ public class ExcelConnection implements
             all.addAll(getBookSideAsMatrixItems(data, BookSide.BID));
             all.addAll(getBookSideAsMatrixItems(data, BookSide.ASK));
         }
+        Duration dCopy = new Duration(startCopy, DateTime.now());
+//        log.info("bulkCopy: " + dCopy.getMillis());
+
+//        DateTime startSheet = DateTime.now();
         sheetAccessPrices.updateMatrix(all);
+//        Duration d = new Duration(startSheet, DateTime.now());
+//        log.info("sheetAccessPrices: " + d.getMillis());
+
     }
 
     @Override
@@ -76,6 +86,10 @@ public class ExcelConnection implements
 
     @Override
     public void onReport(IProvideProperties p, boolean hasMoreReports) {
+        if(p.exists("sendAllSettings")) {
+            sheetAccessSettings.initiateResendOfSettings();
+            return;
+        }
         if (!p.exists(STRATEGYNAME)) {
             log.error("strategy report without strategyName found: " + p.toString());
             return;
@@ -102,18 +116,14 @@ public class ExcelConnection implements
 
     public void startDDE() {
         try {
-            System.out.print("conversation.connect...");
+            System.out.println("connecting to Excel sheets...");
             sheetAccessPositions.init("Excel", prop.get("DDEPathToExcelFileWPositions"));
             sheetAccessReports.init("Excel", prop.get("DDEPathToExcelFileWReports"));
             sheetAccessPrices.init("Excel", prop.get("DDEPathToExcelFileWPrices"));
             sheetAccessSettings.init("Excel", prop.get("DDEPathToExcelFileWSettings"));
             System.out.println("done.");
-            System.out.print("conversation.request...");
             Collection<String> pidList = sheetAccessPrices.getRowIdList();
             subscribeAllProductIds(pidList);
-//            excelToolsSettings.readSettingsRows();
-//            Collection<IProvideProperties> all = excelToolsSettings.parseSettingsRows();
-//            sendBulkSettings(all);
         } catch (DDELink.ConversationException e) {
             System.out.println("DDEException: " + e.getMessage());
             close();
@@ -123,7 +133,7 @@ public class ExcelConnection implements
         strategyToBusConnection.setReceiptConsumer(this);
         strategyToBusConnection.setReportsConsumer(this);
         strategyToBusConnection.setPositionSnapshotConsumer(this);
-        sheetAccessSettings.start();
+//        sheetAccessSettings.start();
     }
 
 

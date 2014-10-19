@@ -1,11 +1,15 @@
 package org.yats.connectivity.excel;
 
 
+import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yats.common.CommonExceptions;
 import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
+import org.yats.trader.StrategyBase;
 import org.yats.trading.ISendBulkSettings;
 
 import java.util.ArrayList;
@@ -13,24 +17,28 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class SheetAccess implements DDELinkEventListener, Runnable {
 
     final Logger log = LoggerFactory.getLogger(SheetAccess.class);
 
-    private boolean shutdown;
-    private ISendBulkSettings settingsSender;
-
     @Override
     public void onDisconnect() {
     }
 
+    static int changedCounter=0;
     @Override
     public synchronized void onItemChanged(String sheetId, String cellId, String data) {
-        if (cellId.compareTo("C1") == 0) {
-            updateFirstColumn(data);
-        } else if (cellId.compareTo("R1") == 0) {
-            updateFirstRow(data);
+        System.out.println("onItemChanged:"+changedCounter++);
+        if (cellId.compareTo(firstColumnExcelArray) == 0) {
+            String firstColumnString = ddeLink.request(firstColumnExcelArray);
+            parseFirstColumn(firstColumnString);
+//            updateFirstColumn(data);
+        } else if (cellId.compareTo(firstRowExcelArray) == 0) {
+            String firstRowString = ddeLink.request(firstRowExcelArray);
+            parseFirstRow(firstRowString);
+//            updateFirstRow(data);
         }
     }
 
@@ -44,6 +52,10 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
                 log.info("settingsThread shutting down.");
             }
             if(shutdown) return;
+            if(resendSettings) {
+                settingsRows.clear();
+                resendSettings=false;
+            }
             ConcurrentHashMap<String,String> oldSettingsRows = settingsRows;
             ConcurrentHashMap<String,String> change = new ConcurrentHashMap<String, String>();
             readSettingsRows();
@@ -52,9 +64,22 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
                 change.put(rowString, rowString);
             }
             Collection<IProvideProperties> all = parseSettingsRows(change);
+            while(!removedIdList.isEmpty()) {
+                String removedId = removedIdList.poll();
+                IProvideProperties p = new PropertiesReader();
+                p.set(StrategyBase.SETTING_STRATEGYNAME, removedId);
+                p.set(StrategyBase.SETTING_STRATEGYREMOVED, "true");
+                all.add(p);
+            }
             settingsSender.sendBulkSettings(all);
+
         }
     }
+
+    public void initiateResendOfSettings() {
+        resendSettings=true;
+    }
+
 
     public synchronized void readSettingsRows() {
         settingsRows = new ConcurrentHashMap<String, String>();
@@ -63,19 +88,6 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
             settingsRows.put(rowString, rowString);
         }
     }
-
-    private String readRow(int rowNumber) {
-        while(true) {
-            try {
-                String rowString = ddeLink.request("R"+rowNumber);
-                return rowString;
-            } catch(DDELink.ConversationException e) {
-                log.debug("Excel seems busy during read. waiting... (caught Exception: '"+e.getMessage()+"')");
-                Tool.sleepFor(3000);
-            }
-        }
-    }
-
     public Collection<IProvideProperties> parseSettingsRows() {
         return parseSettingsRows(settingsRows);
     }
@@ -105,6 +117,146 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         return rowIdList;
     }
 
+    public void disconnect() {
+        shutdown=true;
+        settingsThread.interrupt();
+        ddeLink.disconnect();
+    }
+
+    public synchronized void updateMatrix(Collection<MatrixItem> itemList) {
+        updateAxis(itemList);
+        if(snapShotMode) combiKey2ItemMap.clear();
+        ConcurrentHashMap<String, String> rowIdsWithChangedData = getRowIdsToUpdate(itemList);
+        updateCombiKey2ItemMap(itemList);
+        updateChangedRows(rowIdsWithChangedData);
+//        String allRows = "";
+//        for(String rowId : rowIdList) {
+//            String rowString = getRowDataString(rowId);
+//            allRows = allRows +rowString+ NL;
+//        }
+        int rows = rowIdList.size() +1;
+        int cols = columnIdList.size() +1;
+//        poke("R2C2:R"+rows+"C"+cols, allRows);
+
+    }
+
+    private void updateChangedRows(ConcurrentHashMap<String, String> rowIdsToUpdate) {
+        DateTime startSheet = DateTime.now();
+        int i=0;
+        for (String p : rowIdsToUpdate.keySet()) {
+            pokeRowForRowId(p);
+            i++;
+        }
+        Duration d = new Duration(startSheet, DateTime.now());
+//        log.info("updateMatrix: " + d.getMillis() + " for rows:" + i);
+    }
+
+    public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
+        ddeLink.setTimeout(2000);
+        ddeLink.connect(applicationName, sheetName);
+        String firstColumnString = ddeLink.request(firstColumnExcelArray);
+        parseFirstColumn(firstColumnString);
+        String firstRowString = ddeLink.request(firstRowExcelArray);
+        parseFirstRow(firstRowString);
+        enableFirstColumnListener();
+        enableFirstRowListener();
+    }
+
+    private void enableFirstColumnListener() {
+        ddeLink.startAdvice(firstColumnExcelArray);
+    }
+
+    private void disableFirstColumnListener() {
+        ddeLink.stopAdvice(firstColumnExcelArray);
+    }
+
+    private void enableFirstRowListener() {
+        ddeLink.startAdvice(firstRowExcelArray);
+    }
+
+    private void disableFirstRowListener() {
+        ddeLink.stopAdvice(firstRowExcelArray);
+    }
+
+    public void connect(String applicationname, String sheetname) {
+        ddeLink.connect(applicationname, sheetname);
+    }
+
+    public void readFirstRowFromDDE() {
+        String firstRow = ddeLink.request(firstRowExcelArray);
+        parseFirstRow(firstRow);
+    }
+
+    public void readFirstColumnFromDDE() {
+        String firstColumn = ddeLink.request(firstColumnExcelArray);
+        parseFirstColumn(firstColumn);
+    }
+
+    public int countKeysInFirstRow(){
+        int count=0;
+        for(String s : columnIdList) {
+            count+= s.isEmpty() ? 0 : 1;
+        }
+        return count;
+    }
+
+    public int countKeysInFirstColumn(){
+        int count=0;
+        for(String s : rowIdList) {
+            count+= s.isEmpty() ? 0 : 1;
+        }
+        return count;
+    }
+
+    public void setSnapShotMode(boolean snapShotMode) {
+        this.snapShotMode = snapShotMode;
+    }
+
+    public void setNaString(String naString) {
+        this.naString = naString;
+    }
+
+    public void setFirstRowListener(IConsumeAxisChanges _listenerAxisChange) {
+        listenerAxisChange=_listenerAxisChange;
+    }
+
+    public void setSettingsSender(ISendBulkSettings settingsSender) {
+        this.settingsSender = settingsSender;
+    }
+
+    public void start() {
+        settingsThread.start();
+    }
+
+    public SheetAccess(IProvideDDEConversation _DDELink) {
+        shutdown=false;
+        ddeLink = _DDELink;
+        ddeLink.setEventListener(this);
+        removedIdList = new ConcurrentLinkedQueue<String>();
+        columnIdList = new ArrayList<String>();
+        mapOfColumnIds = new ConcurrentHashMap<String, String>();
+        rowIdList = new ArrayList<String>();
+        mapOfRowIds = new ConcurrentHashMap<String, String>();
+        combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
+        settingsRows = new ConcurrentHashMap<String, String>();
+        snapShotMode=true;
+        naString="n/a";
+        listenerAxisChange=new IConsumeAxisChanges() {
+            @Override
+            public void onFirstRowChange(Collection<String> changes) {}
+            @Override
+            public void onFirstColumnChange(Collection<String> changes) {}
+        };
+        settingsThread = new Thread(this);
+        settingsSender = new ISendBulkSettings() {
+            @Override
+            public void sendBulkSettings(Collection<IProvideProperties> all) {}
+        };
+        resendSettings=false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private void updateFirstRow(String data) {
         parseFirstRow(data);
         listenerAxisChange.onFirstRowChange(columnIdList);
@@ -115,50 +267,42 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         listenerAxisChange.onFirstColumnChange(rowIdList);
     }
 
-
-    public void disconnect() {
-        shutdown=true;
-        settingsThread.interrupt();
-        ddeLink.disconnect();
+    private void pokeRowForRowId(String rowId) {
+        String s = getRowDataString(rowId);
+        int row = getRowIndex(rowId);
+        pokeRow(row, columnIdList.size() + 1, s);
     }
 
-    public synchronized void updateMatrix(Collection<MatrixItem> itemList) {
-        updateAxis(itemList);
-        if(snapShotMode) combiKey2ItemMap.clear();
-        ConcurrentHashMap<String, String> rowIdsToUpdate = getRowIdsToUpdate(itemList);
-        updateCombiKey2ItemMap(itemList);
-
-        for (String p : rowIdsToUpdate.keySet()) {
-            pokeRowForRowIds(p);
-        }
-    }
-
-    private void pokeRowForRowIds(String rowId) {
+    private String getRowDataString(String rowId) {
         String s = "";
-        int index = rowIdList.indexOf(rowId);
-        if (index < 0) return;
-        int row = 2 + index;
-        int count = 1;
         for (String columnId : columnIdList) {
-            count++;
             String key = MatrixItem.getKey(rowId, columnId);
             if (combiKey2ItemMap.containsKey(key)) {
                 MatrixItem ap = combiKey2ItemMap.get(key);
                 s += ap.getData();
             } else s += naString;
-            s += "\t";
+            s += TAB;
         }
-        pokePositionsRow(row, count, s);
+        return s;
+    }
+
+    private int getRowIndex(String rowId) {
+        int index = rowIdList.indexOf(rowId);
+        if (index < 0) {
+            throw new CommonExceptions.KeyNotFoundException("Can not find rowId: "+rowId);
+        }
+        int row = 2 + index;
+        return row;
     }
 
     private void updateCombiKey2ItemMap(Collection<MatrixItem> list) {
-        for (MatrixItem pos : list) {
-            String key = pos.getKey();
+        for (MatrixItem item : list) {
+            String key = item.getKey();
             if (combiKey2ItemMap.containsKey(key)) {
-                MatrixItem old = combiKey2ItemMap.get(key);
-                if (pos.isSameAs(old)) continue;
+                MatrixItem oldItem = combiKey2ItemMap.get(key);
+                if (item.isSameAs(oldItem)) continue;
             }
-            combiKey2ItemMap.put(key, pos);
+            combiKey2ItemMap.put(key, item);
         }
     }
 
@@ -204,38 +348,46 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     }
 
     private void pokeFirstColumn() {
-        pokePositions("C1", getRowIdsString());
+        String where = "R2C1:R"+(rowIdList.size()+1)+"C1";
+        String what = getRowIdsString();
+        disableFirstColumnListener();
+        poke(where, what);
+        enableFirstColumnListener();
     }
 
     private String getRowIdsString() {
-        String data =  "\r\n";
+        String data = "";
         for (String s : rowIdList) {
-            data += s + "\r\n";
+            data += s + NL;
         }
         return data;
     }
 
     private void pokeFirstRow() {
-        pokePositions("R1", getColumnIdsString());
+        String where = "R1C2:R1C"+(columnIdList.size()+1);
+        String what = getColumnIdsString();
+        disableFirstRowListener();
+        poke(where, what);
+        enableFirstRowListener();
     }
 
     private String getColumnIdsString() {
-        String data = "\t";
+        String data="";
         for (String s : columnIdList) {
-            data += s + "\t";
+            data += s + TAB;
         }
         return data;
     }
 
-    private void pokePositionsRow(int row, int count, String what) {
+    private void pokeRow(int row, int count, String what) {
         if (row == 1) {
             System.out.println("Row 1 should never be poked to!");
             System.exit(-1);
         }
-        pokePositions("R" + row + "C2:R" + row + "C" + count, what);
+        poke("R" + row + "C2:R" + row + "C" + count, what);
     }
 
-    private void pokePositions(String where, String what) {
+    private void poke(String where, String what) {
         while (true) {
             try {
                 ddeLink.poke(where, what);
@@ -248,26 +400,36 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         }
     }
 
-    public void init(String applicationName, String sheetName) throws DDELink.ConversationException {
-        ddeLink.setTimeout(2000);
-        ddeLink.connect(applicationName, sheetName);
-        String firstColumnString = ddeLink.request("C1");
-        parseFirstColumn(firstColumnString);
-        String firstRowString = ddeLink.request("R1");
-        parseFirstRow(firstRowString);
-        ddeLink.startAdvice("C1");
-        ddeLink.startAdvice("R1");
-    }
-
-
+    //todo: dont read and parse the full row but only the used part! depend on first row to find number of elements in lower rows
     private void parseFirstColumn(String data) {
-        String firstColumnString = data.replace("\r\n", "\t");
+        String firstColumnString = data.replace("\r\n", "\t").replace(" ","");
+        log.info("dataLength:"+data.length());
+//        log.info("firstColumnString="+firstColumnString.replace("\t",":"));
         String[] parts = firstColumnString.split("\t");
-        rowIdList.clear();
+        ArrayList<String> oldRowIdList = rowIdList;
+        rowIdList = new ArrayList<String>();
         mapOfRowIds.clear();
         rowIdList.addAll(Arrays.asList(parts));
         for (String s : rowIdList) mapOfRowIds.put(s, s);
-        if (rowIdList.size() > 0) rowIdList.remove(0);
+//        if (rowIdList.size() > 0) rowIdList.remove(0);
+
+        if(settingsThread.isAlive()) recordChangedRowIds(oldRowIdList);
+    }
+
+    private void recordChangedRowIds(ArrayList<String> oldRowIdList) {
+        for(int i=0; i<oldRowIdList.size(); i++) {
+            String oldId = oldRowIdList.get(i);
+            boolean removedId = i>=rowIdList.size();
+            if(removedId) {
+                removedIdList.add(oldId);
+                continue;
+            }
+            String newId = rowIdList.get(i);
+            boolean changedId = (newId.compareTo(oldId)!=0);
+            if(changedId) {
+                removedIdList.add(oldId);
+            }
+        }
     }
 
 
@@ -278,85 +440,21 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
         mapOfColumnIds.clear();
         columnIdList.addAll(Arrays.asList(parts));
         for (String s : columnIdList) mapOfColumnIds.put(s, s);
-        if (columnIdList.size() > 0) columnIdList.remove(0);
+//        if (columnIdList.size() > 0) columnIdList.remove(0);
     }
 
-    public void connect(String applicationname, String sheetname) {
-        ddeLink.connect(applicationname, sheetname);
-    }
-
-    public void readFirstRowFromDDE() {
-        String firstRow = ddeLink.request("R1");
-        parseFirstRow(firstRow);
-    }
-
-    public void readFirstColumnFromDDE() {
-        String firstColumn = ddeLink.request("C1");
-        parseFirstColumn(firstColumn);
-    }
-
-    public int countKeysInFirstRow(){
-        int count=0;
-        for(String s : columnIdList) {
-            count+= s.isEmpty() ? 0 : 1;
+    private String readRow(int rowNumber) {
+        while(true) {
+            try {
+                String rowString = ddeLink.request("R"+rowNumber);
+                return rowString;
+            } catch(DDELink.ConversationException e) {
+                log.debug("Excel seems busy during read. waiting... (caught Exception: '"+e.getMessage()+"')");
+                Tool.sleepFor(3000);
+            }
         }
-        return count;
     }
 
-    public int countKeysInFirstColumn(){
-        int count=0;
-        for(String s : rowIdList) {
-            count+= s.isEmpty() ? 0 : 1;
-        }
-        return count;
-    }
-
-    public void setSnapShotMode(boolean snapShotMode) {
-        this.snapShotMode = snapShotMode;
-    }
-
-    public void setNaString(String naString) {
-        this.naString = naString;
-    }
-
-    public void setFirstRowListener(IConsumeAxisChanges _listenerAxisChange) {
-        listenerAxisChange=_listenerAxisChange;
-    }
-
-    public void setSettingsSender(ISendBulkSettings settingsSender) {
-        this.settingsSender = settingsSender;
-    }
-
-    public void start() {
-        settingsThread.start();
-    }
-
-    public SheetAccess(IProvideDDEConversation _DDELink) {
-        shutdown=false;
-        ddeLink = _DDELink;
-        ddeLink.setEventListener(this);
-        columnIdList = new ArrayList<String>();
-        mapOfColumnIds = new ConcurrentHashMap<String, String>();
-        rowIdList = new ArrayList<String>();
-        mapOfRowIds = new ConcurrentHashMap<String, String>();
-        combiKey2ItemMap = new ConcurrentHashMap<String, MatrixItem>();
-        settingsRows = new ConcurrentHashMap<String, String>();
-        snapShotMode=true;
-        naString="n/a";
-        listenerAxisChange=new IConsumeAxisChanges() {
-            @Override
-            public void onFirstRowChange(Collection<String> changes) {}
-            @Override
-            public void onFirstColumnChange(Collection<String> changes) {}
-        };
-        settingsThread = new Thread(this);
-        settingsSender = new ISendBulkSettings() {
-            @Override
-            public void sendBulkSettings(Collection<IProvideProperties> all) {}
-        };
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static String NA = "n/a";
     private static String TAB = "\t";
@@ -373,6 +471,11 @@ public class SheetAccess implements DDELinkEventListener, Runnable {
     private String naString;
     private IConsumeAxisChanges listenerAxisChange;
     private Thread settingsThread;
-
+    private boolean shutdown;
+    private ISendBulkSettings settingsSender;
+    private ConcurrentLinkedQueue<String> removedIdList;
+    private boolean resendSettings;
+    private String firstColumnExcelArray = "R2C1:R1000C1";
+    private String firstRowExcelArray = "R1C2:R1C1000";
 
 }

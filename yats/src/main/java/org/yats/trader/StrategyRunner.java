@@ -3,21 +3,19 @@ package org.yats.trader;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yats.common.IProvideProperties;
-import org.yats.common.UniqueId;
-import org.yats.common.WaitingLinkedBlockingQueue;
+import org.yats.common.*;
 import org.yats.trading.*;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         IConsumePriceData, IProvidePriceFeed, Runnable, ISendReports, IConsumeSettings,
-        IProvideTimedCallback
+        IProvideTimedCallback, ISaveProperties
 
 {
 
@@ -25,6 +23,13 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
+
+    @Override
+    public void saveProperties(IProvideProperties p, String name) {
+        String path = factory.getConfigName(name);
+        String stringToWrite = PropertiesReader.createFromProvider(p).toStringKeyValueFile();
+        FileTool.writeToTextFile(path, stringToWrite, false);
+    }
 
     @Override
     public void subscribe(String productId, IConsumePriceData consumer)
@@ -43,6 +48,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     @Override
     public void onPriceData(PriceData priceData)
     {
+//        log.info("new price "+priceData);
         priceDataMap.put(priceData.getProductId(), priceData);
         updatedProductQueue.add(priceData.getProductId());
     }
@@ -79,10 +85,36 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         reportSender.sendReports(p);
     }
 
+
     @Override
     public void onSettings(IProvideProperties p) {
         log.info("Received settings: {}", p);
+        if(!p.exists(StrategyBase.SETTING_STRATEGYNAME)) return;
+        String strategyName = p.get(StrategyBase.SETTING_STRATEGYNAME);
+        if(p.exists(StrategyBase.SETTING_STRATEGYREMOVED)) {
+            removeStrategy(strategyName);
+            return;
+        }
+        if(!strategyList.containsKey(strategyName))
+            createNewStrategy(p);
         settingsQueue.add(p);
+    }
+
+    private void removeStrategy(String strategyName) {
+        if(!strategyList.containsKey(strategyName)) return;
+        log.info("removing strategy "+strategyName);
+        StrategyBase s = strategyList.get(strategyName);
+        s.stopStrategy();
+        s.shutdown();
+        receiptConsumers.remove(s);
+        settingsConsumers.remove(s);
+        strategyList.remove(strategyName);
+        for(String pid : mapProductIdToConsumers.keySet()) mapProductIdToConsumers.remove(pid, s);
+        log.info("done. removed strategy "+strategyName);
+        IProvideProperties p = new PropertiesReader();
+        p.set(StrategyBase.SETTING_STRATEGYNAME, strategyName);
+        p.set(StrategyBase.SETTING_STRATEGYREMOVED, "TRUE");
+        sendReports(p);
     }
 
     public boolean isProductSubscribed(String productId) {
@@ -94,16 +126,10 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
             while(!updatedProductQueue.isEmpty()) Thread.sleep(200);
         } catch (InterruptedException e) {
             e.printStackTrace();
-            throw new RuntimeException(e.getMessage()); // todo: inherit class to throw
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    public void stop()
-    {
-        shutdown=true;
-        strategyThread.isAlive();
-//        strategyThread.interrupt();
-    }
 
     public void setOrderSender(ISendOrder orderSender) { this.orderSender = orderSender; }
 
@@ -111,23 +137,33 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         this.reportSender = reportSender;
     }
 
-
     public void setPriceFeed(IProvidePriceFeed priceFeed) {
         this.priceFeed = priceFeed;
     }
 
-
-    public void execute(String strategyName) {
-        StrategyBase strategy = factory.createStrategy(strategyName);
-        addStrategy(strategy);
-        strategy.init();
+    public void createNewStrategy(IProvideProperties settingsProperties) {
+        String strategyName = settingsProperties.get(StrategyBase.SETTING_STRATEGYNAME);
+        IProvideProperties fileProperties = factory.loadProperties(strategyName);
+        IProvideProperties prop = PropertiesReader.createFromTwoProviders(fileProperties, settingsProperties);
+        log.info("trying to create strategy: "+strategyName);
+        try {
+            StrategyBase strategy = factory.createStrategy(prop);
+            strategy.init();
+            strategy.onSettings(prop);
+            addStrategy(strategy);
+        } catch(CommonExceptions.CouldNotInstantiateClassException e) {
+            log.error("Exception: '"+e.getMessage()+"'. Could not create strategy '"+strategyName+"' with properties "+prop.toString() );
+        } catch(CommonExceptions.KeyNotFoundException e) {
+            log.error("Exception: '"+e.getMessage()+"'. Could not initialize strategy '"+strategyName+"' with properties "+prop.toString() );
+        }
     }
 
     public void addStrategy(StrategyBase strategy) {
         addReceiptConsumer(strategy);
         settingsConsumers.add(strategy);
-        strategyList.add(strategy);
+        strategyList.put(strategy.getName(), strategy);
     }
+
 
     public void addReceiptConsumer(IConsumeReceipt rc) {
         receiptConsumers.add(rc);
@@ -137,15 +173,19 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     public void run() {
         try {
             while (!shutdown) {
+                log.info("waiting...");
                 callWaitingStrategies();
 
                 String updatedProductId = updatedProductQueue.take();
 
 
+                log.info("settings...");
                 while(settingsQueue.size()>0) {
-                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(settingsQueue.take()); }
+                    IProvideProperties p = settingsQueue.take();
+                    for(IConsumeSettings c : settingsConsumers) { c.onSettings(p); }
                 }
 
+                log.info("receipts...");
                 while(receiptQueue.size()>0){
                     Receipt r = receiptQueue.take();
                     for(IConsumeReceipt c : receiptConsumers) {
@@ -157,6 +197,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                     }
                 }
 
+                log.info("prices...");
                 PriceData newData = priceDataMap.remove(updatedProductId);
                 if(newData!=null) {
                     rateConverter.onPriceData(newData);
@@ -165,6 +206,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                         md.onPriceData(newData);
                     }
                 }
+                log.info("done.");
             }
         }catch(InterruptedException e) {
             log.error(e.getMessage());
@@ -176,18 +218,23 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         callbackList.add(callback);
     }
 
-
-
-    public void setProductProvider(IProvideProduct productProvider) {
-        this.productProvider = productProvider;
-    }
+//    public void setProductProvider(IProvideProduct productProvider) {
+//        this.productProvider = productProvider;
+//    }
 
     public void setRateConverter(RateConverter rateConverter) {
         this.rateConverter = rateConverter;
     }
 
     public void shutdownAllStrategies() {
-        for(StrategyBase strategy : strategyList) strategy.shutdown();
+        for(StrategyBase strategy : strategyList.values()) strategy.shutdown();
+    }
+
+    public void stop()
+    {
+        shutdown=true;
+        strategyThread.isAlive();
+//        strategyThread.interrupt();
     }
 
     public void setFactory(StrategyFactory _factory) {
@@ -196,7 +243,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
 
     public StrategyRunner() {
 
-        strategyList = new ArrayList<StrategyBase>();
+        strategyList = new ConcurrentHashMap<String, StrategyBase>();
         consumerId = UniqueId.create();
         priceFeed = new PriceFeedDummy();
         orderSender = new OrderSenderDummy();
@@ -210,8 +257,8 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         settingsQueue = new LinkedBlockingQueue<IProvideProperties>();
         strategyThread = new Thread(this);
         strategyThread.start();
-        receiptConsumers = new LinkedList<IConsumeReceipt>();
-        settingsConsumers = new LinkedList<IConsumeSettings>();
+        receiptConsumers = new ConcurrentLinkedQueue<IConsumeReceipt>();
+        settingsConsumers = new ConcurrentLinkedQueue<IConsumeSettings>();
 //        marketDataConsumers = new LinkedList<IConsumeMarketData>();
         shutdown = false;
         rateConverter = new RateConverter(new ProductList());
@@ -287,13 +334,13 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     private WaitingLinkedBlockingQueue<String> updatedProductQueue;
     private ISendOrder orderSender;
     private ISendReports reportSender;
-    private LinkedList<IConsumeReceipt> receiptConsumers;
-    private LinkedList<IConsumeSettings> settingsConsumers;
-    private IProvideProduct productProvider;
+    private ConcurrentLinkedQueue<IConsumeReceipt> receiptConsumers;
+    private ConcurrentLinkedQueue<IConsumeSettings> settingsConsumers;
+//    private IProvideProduct productProvider;
     private boolean shutdown;
     private UniqueId consumerId;
     private RateConverter rateConverter;
-    private ArrayList<StrategyBase> strategyList;
+    private ConcurrentHashMap<String, StrategyBase> strategyList;
     private ArrayList<TimedCallback> callbackList;
     private StrategyFactory factory;
 } // class

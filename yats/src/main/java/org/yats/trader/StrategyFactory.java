@@ -1,8 +1,8 @@
 package org.yats.trader;
 
-import org.yats.common.CommonExceptions;
-import org.yats.common.PropertiesReader;
-import org.yats.common.Tool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yats.common.*;
 import org.yats.trading.PositionServer;
 import org.yats.trading.ProductList;
 
@@ -16,11 +16,8 @@ public class StrategyFactory {
         this.productList = productList;
     }
 
-    public StrategyBase createStrategy(String strategyName) {
-
-        String configFilename = Tool.getPersonalSubdirConfigFilename("config", "strategy", strategyName);
-        PropertiesReader strategyConfig = PropertiesReader.createFromConfigFile(configFilename);
-        String strategyClassName = strategyConfig.get("strategyClass");
+    public StrategyBase createStrategy(IProvideProperties prop) {
+        String strategyClassName = prop.get("strategyClass","noStrategyClassDefinedInProperties");
         StrategyBase strategy = instantiateStrategy(strategyClassName);
         strategy.setPriceProvider(strategyRunner);
         strategy.setPositionProvider(positionServer);
@@ -28,14 +25,28 @@ public class StrategyFactory {
         strategy.setProductProvider(productList);
         strategy.setOrderSender(strategyRunner);
         strategy.setReportSender(strategyRunner);
-        strategy.setName(strategyName);
-        strategy.setConfig(strategyConfig);
+        strategy.setPropertiesSaver(strategyRunner);
+        strategy.setConfig(prop);
         strategy.setTimedCallbackProvider(strategyRunner);
         return strategy;
     }
 
+    final Logger log = LoggerFactory.getLogger(StrategyFactory.class);
+
+    public IProvideProperties loadProperties(String strategyName) {
+        String configFilename = getConfigName(strategyName);
+        log.info("trying to read config file: "+configFilename);
+        if(!FileTool.exists(configFilename)) log.info("file not found: '"+configFilename+"'");
+        return PropertiesReader.createFromConfigFile(configFilename);
+    }
+
+    public String getConfigName(String strategyName) {
+        return Tool.getPersonalSubdirConfigFilename("config", "strategy", strategyName);
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
     private StrategyBase instantiateStrategy(String strategyName) {

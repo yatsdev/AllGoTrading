@@ -1,8 +1,10 @@
 package org.yats.trader.examples.server;
 
+import org.yats.common.IProvideProperties;
 import org.yats.common.PropertiesReader;
 import org.yats.common.Tool;
 import org.yats.connectivity.messagebus.StrategyToBusConnection;
+import org.yats.trader.StrategyBase;
 import org.yats.trader.StrategyFactory;
 import org.yats.trader.StrategyRunner;
 import org.yats.trading.PositionServer;
@@ -20,6 +22,7 @@ public class StrategyRunnerMain {
 
         try {
             q.createAllStrategies();
+            q.requestSettings();
             q.waitForShutdown();
             q.shutdown();
         } catch (RuntimeException r)
@@ -30,6 +33,7 @@ public class StrategyRunnerMain {
         System.exit(0);
 
     }
+
 
     public StrategyRunnerMain() {
 
@@ -53,7 +57,7 @@ public class StrategyRunnerMain {
         strategyRunner.setFactory(factory);
         strategyRunner.setPriceFeed(strategyToBusConnection);
         strategyRunner.addReceiptConsumer(positionServer);
-        strategyRunner.setProductProvider(productList);
+//        strategyRunner.setProductProvider(productList);
         strategyRunner.setOrderSender(strategyToBusConnection);
         strategyRunner.setReportSender(strategyToBusConnection);
         strategyRunner.setRateConverter(rateConverter);
@@ -71,12 +75,21 @@ public class StrategyRunnerMain {
 
     private void createAllStrategies() throws InterruptedException, IOException
     {
-        String strategyNamesString = strategyRunnerProperties.get("strategyNames");
+        String strategyNamesString = strategyRunnerProperties.get("strategyNames","");
         String[] strategyNames = strategyNamesString.split(",");
 
         for(String strategyName : strategyNames) {
-            strategyRunner.execute(strategyName);
+            if(strategyName.length()==0) continue;
+            IProvideProperties prop = new PropertiesReader();
+            prop.set(StrategyBase.SETTING_STRATEGYNAME, strategyName);
+            strategyRunner.createNewStrategy(prop);
         }
+    }
+
+    private void requestSettings() {
+        IProvideProperties p = new PropertiesReader();
+        p.set("sendAllSettings","sendAllSettings");
+        strategyToBusConnection.sendReports(p);
     }
 
     private void waitForShutdown() throws InterruptedException, IOException {
