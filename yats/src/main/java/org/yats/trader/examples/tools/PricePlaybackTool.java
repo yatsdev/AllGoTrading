@@ -123,11 +123,11 @@ public class PricePlaybackTool implements Runnable {
     }
 
     private void publishPriceData(PriceData latestPriceData) {
-        PriceData newPriceData = new PriceData(DateTime.now(DateTimeZone.UTC),
-                latestPriceData.getProductId(),latestPriceData.getBid(),latestPriceData.getAsk(),latestPriceData.getLast(),
-                latestPriceData.getBidSize(), latestPriceData.getAskSize(),latestPriceData.getLastSize());
+//        PriceData newPriceData = new PriceData(DateTime.now(DateTimeZone.UTC),
+//                latestPriceData.getProductId(),latestPriceData.getBid(),latestPriceData.getAsk(),latestPriceData.getLast(),
+//                latestPriceData.getBidSize(), latestPriceData.getAskSize(),latestPriceData.getLastSize());
 
-        PriceDataMsg m = PriceDataMsg.createFrom(newPriceData);
+        PriceDataMsg m = PriceDataMsg.createFrom(latestPriceData);
         senderPriceDataMsg.publish(m.getTopic(), m);
         log.info("Published["+productPublishedCount+"] " + latestPriceData.toString() );
     }
