@@ -5,10 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.IProvideProperties;
 import org.yats.trader.StrategyBase;
-import org.yats.trading.IAmCalledTimed;
-import org.yats.trading.PriceData;
-import org.yats.trading.Receipt;
-import org.yats.trading.StorePriceCSV;
+import org.yats.trading.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,9 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
 
-    // the configuration file log4j.properties for Log4J has to be provided in the working directory
-    // an example of such a file is at config/log4j.properties.
-    // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(PriceRecorder.class);
 
     @Override
@@ -42,12 +36,7 @@ public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
         log.info("Received price #" + counter + ":" + priceData.toString());
         priceStoreMap.get(priceData.getProductId()).store(priceData);
         counter++;
-
-        setReport("lastPrice", priceData.toString());
-        setReport("counter", Integer.toString(counter));
-        sendReports();
     }
-
 
     @Override
     public void onReceiptForStrategy(Receipt receipt) {
@@ -68,7 +57,7 @@ public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
     @Override
     public void onInitStrategy() {
         setInternalAccount(getConfig("internalAccount", getName()));
-        tradeProductList = getConfig("tradeProductId");
+        tradeProductList = getConfig("productIdList");
         baseLocation = getConfig("baseLocation");
         String[] parts = tradeProductList.split(",");
         pidList = Arrays.asList(parts);
@@ -79,7 +68,6 @@ public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
             priceStoreMap.put(tradeProductId,csvStore);
 
         }
-//        addTimedCallback(3, this);
     }
 
     @Override

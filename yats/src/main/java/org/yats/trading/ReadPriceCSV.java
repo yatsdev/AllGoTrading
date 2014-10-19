@@ -5,77 +5,65 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
+import org.yats.common.FileTool;
+import org.yats.messagebus.Deserializer;
+import org.yats.messagebus.messages.PriceDataMsg;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 
-/**
- * Created by abbanerjee on 15/10/14.
- */
 public class ReadPriceCSV implements IReadPrice {
 
     final Logger log = LoggerFactory.getLogger(ReadPriceCSV.class);
-    public static final String CSV_SEPARATOR = "|";
-    public static final String CSV_TIME_SEPARATOR = "@";
 
     @Override
     public PriceData read(){
-
+        if(reader==null) createReader();
         try {
-
-            String nextLine[] = reader.readNext();
-            String stringCSV;
-            stringCSV = nextLine[0];
-            for(int i=1;i< nextLine.length;i++){
-                stringCSV = stringCSV + "," + nextLine[i];
-            }
-
-
-            String priceParts[] = stringCSV.split(CSV_TIME_SEPARATOR);
-            String timeStampString = priceParts[0];
-            String priceDataCSV = priceParts[1];
-
-            OfferBook offerbook = OfferBook.fromStringCSV(priceDataCSV);
-            return new PriceData(DateTime.parse(timeStampString),
-                    productId,
-                    offerbook.getBookRow(BookSide.BID, 0).getPrice(), //bid
-                    offerbook.getBookRow(BookSide.ASK, 0).getPrice(), //ask
-                    offerbook.getBookRow(BookSide.BID, 0).getPrice(), //last
-                    offerbook.getBookRow(BookSide.BID, 0).getSize(),
-                    offerbook.getBookRow(BookSide.ASK, 0).getSize(),
-                    offerbook.getBookRow(BookSide.BID, 0).getSize()
-            );
-
-
-
-
-
+            PriceData price = readAndParse();
+            if(price==PriceData.NULL) close();
+            return price;
         } catch (Exception e) {
-
-            //e.printStackTrace();
-            //throw new CommonExceptions.FileReadException(e.getMessage());
             return PriceData.NULL;
         }
+    }
 
-
+    public void close() {
+        try {
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ReadPriceCSV(String baseLocation, String productId){
-        this.productId = productId;
         this.path = baseLocation + "/" + productId + ".csv";
+        reader=null;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private PriceData readAndParse() throws Exception {
+        String nextLine;
+        nextLine = reader.readLine();
+        if(nextLine==null) return PriceData.NULL;
+        Deserializer<PriceDataMsg> deserializer = new Deserializer<PriceDataMsg>(PriceDataMsg.class);
+        PriceDataMsg m = deserializer.convertFromString(nextLine);
+        return m.toPriceData();
+    }
+
+    private void createReader() {
         try {
-             reader = new CSVReader(new FileReader(this.path));
+            reader = new BufferedReader(new FileReader(path));
         } catch (Exception e) {
             e.printStackTrace();
             throw new CommonExceptions.FileReadException(e.getMessage());
+        }
     }
 
-    }
-    private String baseLocation;
-    private String productId;
-    private List<String> offerBookCSVList;
     private String path;
-    private BigInteger listLength;
-    CSVReader reader;
+    private BufferedReader reader;
 }
