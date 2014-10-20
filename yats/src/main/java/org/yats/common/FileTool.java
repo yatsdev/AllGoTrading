@@ -1,5 +1,7 @@
 package org.yats.common;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.*;
 
 public class FileTool {
@@ -39,6 +41,18 @@ public class FileTool {
     public static void deleteFile(String filename) {
         File f = new File(filename);
         f.delete();
+    }
+
+    public static void deleteDirectory(String directoryName) {
+        File f = new File(directoryName);
+        if(FileTool.exists(directoryName)) {
+            try {
+                FileUtils.cleanDirectory(f);
+                FileUtils.deleteDirectory(f);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static boolean exists(String filename) {
