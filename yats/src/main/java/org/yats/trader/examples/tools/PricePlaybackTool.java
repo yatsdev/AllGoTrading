@@ -94,6 +94,11 @@ public class PricePlaybackTool implements Runnable {
         }
     }
 
+    public double getSpeedFactor(){
+        return speedFactor;
+    }
+
+
     public void createOrderedPriceList() {
         while(true) {
             populateProductPriceMap();
@@ -120,6 +125,10 @@ public class PricePlaybackTool implements Runnable {
         double originalMillis = duration.getMillis();
         long sleepTimeMillis = (int)(originalMillis * speedFactor);
         Tool.sleepFor((int) sleepTimeMillis);
+    }
+
+    public void sleepBetweenPrices(PriceData prevPriceData, PriceData latestPriceData){
+        sleepBeforePublishingLatestPrice(prevPriceData, latestPriceData);
     }
 
     private void publishPriceData(PriceData latestPriceData) {
