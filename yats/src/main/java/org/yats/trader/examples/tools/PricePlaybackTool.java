@@ -1,7 +1,5 @@
 package org.yats.trader.examples.tools;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.slf4j.Logger;
@@ -81,23 +79,21 @@ public class PricePlaybackTool implements Runnable {
     @Override
     public void run() {
         createOrderedPriceList();
-        while(!shutdownThread) {
-            priceDataIndex=0;
-            PriceData previousPrice=null;
-            while(hasMorePriceData()) {
-                PriceData latestPrice = getPriceData();
-                sleepBeforePublishingLatestPrice(previousPrice, latestPrice);
-                publishPriceData(latestPrice);
-                previousPrice=latestPrice;
-                nextPriceData();
-            }
+        priceDataIndex=0;
+        PriceData previousPrice=null;
+        while(!shutdownThread && hasMorePriceData()) {
+            PriceData latestPrice = getPriceDataDelayed(previousPrice);
+            publishPriceData(latestPrice);
+            previousPrice=latestPrice;
+            nextPriceData();
         }
     }
 
-    public double getSpeedFactor(){
-        return speedFactor;
+    public PriceData getPriceDataDelayed(PriceData prevPriceData) {
+        PriceData newestPrice = getPriceData();
+        sleepBetweenPrices(prevPriceData, newestPrice);
+        return newestPrice;
     }
-
 
     public void createOrderedPriceList() {
         while(true) {
@@ -106,48 +102,6 @@ public class PricePlaybackTool implements Runnable {
             if(oldest==null) break;
             productPriceMap.remove(oldest.getProductId());
             orderedPriceList.add(oldest);
-        }
-    }
-
-    private PriceData getOldestPriceFromProductPriceMap() {
-        PriceData found = null;
-        for(PriceData p : productPriceMap.values()) {
-            if(found==null) {found=p; continue; }
-            if(found.getTimestamp().isAfter(p.getTimestamp())) found=p;
-        }
-        return found;
-    }
-
-    private void sleepBeforePublishingLatestPrice(PriceData prevPriceData, PriceData latestPriceData) {
-        if(prevPriceData==null) return;
-        Interval interval = new Interval(prevPriceData.getTimestamp(), latestPriceData.getTimestamp());
-        Duration duration = interval.toDuration();
-        double originalMillis = duration.getMillis();
-        long sleepTimeMillis = (int)(originalMillis * speedFactor);
-        Tool.sleepFor((int) sleepTimeMillis);
-    }
-
-    public void sleepBetweenPrices(PriceData prevPriceData, PriceData latestPriceData){
-        sleepBeforePublishingLatestPrice(prevPriceData, latestPriceData);
-    }
-
-    private void publishPriceData(PriceData latestPriceData) {
-//        PriceData newPriceData = new PriceData(DateTime.now(DateTimeZone.UTC),
-//                latestPriceData.getProductId(),latestPriceData.getBid(),latestPriceData.getAsk(),latestPriceData.getLast(),
-//                latestPriceData.getBidSize(), latestPriceData.getAskSize(),latestPriceData.getLastSize());
-
-        PriceDataMsg m = PriceDataMsg.createFrom(latestPriceData);
-        senderPriceDataMsg.publish(m.getTopic(), m);
-        log.info("Published["+productPublishedCount+"] " + latestPriceData.toString() );
-    }
-
-    private void populateProductPriceMap() {
-        for (String inPid : pidList)
-        {
-            if(productPriceMap.containsKey(inPid)) continue;
-            PriceData newData = readerMap.get(inPid).read();
-            if(newData.equals(PriceData.NULL)) continue;
-            productPriceMap.put(inPid, newData);
         }
     }
 
@@ -186,7 +140,41 @@ public class PricePlaybackTool implements Runnable {
         priceDataIndex=0;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private PriceData getOldestPriceFromProductPriceMap() {
+        PriceData found = null;
+        for(PriceData p : productPriceMap.values()) {
+            if(found==null) {found=p; continue; }
+            if(found.getTimestamp().isAfter(p.getTimestamp())) found=p;
+        }
+        return found;
+    }
+
+    private void sleepBetweenPrices(PriceData prevPriceData, PriceData latestPriceData) {
+        if(prevPriceData==null) return;
+        Interval interval = new Interval(prevPriceData.getTimestamp(), latestPriceData.getTimestamp());
+        Duration duration = interval.toDuration();
+        double originalMillis = duration.getMillis();
+        long sleepTimeMillis = (int)(originalMillis / speedFactor);
+        Tool.sleepFor((int) sleepTimeMillis);
+    }
+
+    private void publishPriceData(PriceData latestPriceData) {
+        PriceDataMsg m = PriceDataMsg.createFrom(latestPriceData);
+        senderPriceDataMsg.publish(m.getTopic(), m);
+        log.info("Published["+productPublishedCount+"] " + latestPriceData.toString() );
+    }
+
+    private void populateProductPriceMap() {
+        for (String inPid : pidList)
+        {
+            if(productPriceMap.containsKey(inPid)) continue;
+            PriceData newData = readerMap.get(inPid).read();
+            if(newData.equals(PriceData.NULL)) continue;
+            productPriceMap.put(inPid, newData);
+        }
+    }
 
     private Sender<PriceDataMsg> senderPriceDataMsg;
     private boolean shutdownThread,publishedOnce;
