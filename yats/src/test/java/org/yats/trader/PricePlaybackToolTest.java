@@ -1,33 +1,26 @@
 package org.yats.trader;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Stopwatch;
 import org.yats.trader.examples.strategies.PriceRecorder;
 import org.yats.trader.examples.tools.PricePlaybackTool;
-import org.yats.trading.IConsumePriceData;
-import org.yats.trading.IProvidePriceFeed;
-import org.yats.trading.PriceData;
-import org.yats.trading.TestPriceData;
+import org.yats.trading.*;
+
+import java.lang.reflect.Method;
 
 public class PricePlaybackToolTest {
 
     @Test
     public void canReplayPricesInSameOrderAsTheyArrive()
     {
-        DateTime time = DateTime.parse("2014-01-01T15:30:00");
-        recorder.init();
-        PriceData sap1 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.ONE, time);
-        recorder.onPriceDataForStrategy(sap1);
-        PriceData sap2 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.TWO, time.plusSeconds(5));
-        recorder.onPriceDataForStrategy(sap2);
-        PriceData ibm1 = PriceData.createFromLastWithTime(TestPriceData.TEST_IBM_PID, Decimal.TEN, time.plusSeconds(10));
-        recorder.onPriceDataForStrategy(ibm1);
-
         playback.createOrderedPriceList();
         assert(playback.hasMorePriceData());
         PriceData d1 = playback.getPriceData();
@@ -48,42 +41,83 @@ public class PricePlaybackToolTest {
     }
 
     @Test
-    public void canReplayPricesWithSameSpeedAsTheyWereRecorded()
+    public void canReplayPricesWithDifferentSpeedFactors()
     {
+        checkArrivalDelaysWithSpeedFactor(1);
+        checkArrivalDelaysWithSpeedFactor(3);
+        checkArrivalDelaysWithSpeedFactor(7);
+        checkArrivalDelaysWithSpeedFactor(0.3);
     }
 
-    @Test
-    public void canReplayPricesWithFasterSpeedThanTheyWereRecorded()
-    {
+    private void checkArrivalDelaysWithSpeedFactor(double speedIncreaseFactor) {
+        prop.set(speedFactorKey,Decimal.fromDouble(speedIncreaseFactor));
+        playback = new PricePlaybackTool(prop);
+
+        playback.createOrderedPriceList();
+        Stopwatch stopwatch = Stopwatch.start();
+
+        PriceData d1 = playback.getPriceData();
+        assert(d1.getLast().isEqualTo(Decimal.ONE));
+
+        playback.nextPriceData();
+        assert(playback.hasMorePriceData());
+        PriceData d2 = playback.getPriceDataDelayed(d1);
+
+        Duration expectedArrivalDurationD2 = Duration.millis(Math.round(((double) shortIntervalMillis) / speedIncreaseFactor)-5);
+        Duration elapsedTimeD2 = stopwatch.getElapsedTime();
+        assert (elapsedTimeD2.isLongerThan(expectedArrivalDurationD2));
+        Assert.assertTrue(elapsedTimeD2.isShorterThan(expectedArrivalDurationD2.plus(acceptableDelayMillis)),
+                "expected="+expectedArrivalDurationD2+" elapsed="+elapsedTimeD2);
+
+        playback.nextPriceData();
+        PriceData d3 = playback.getPriceDataDelayed(d2);
+        Duration expectedArrivalDurationD3 = Duration.millis(Math.round(((double) longerIntervalMillis) / speedIncreaseFactor)-5);
+        Duration elapsedTimeD3 = stopwatch.getElapsedTime();
+        Assert.assertTrue(elapsedTimeD3.isLongerThan(expectedArrivalDurationD3),
+                "expected="+expectedArrivalDurationD3+" elapsed="+elapsedTimeD3);
+        assert (elapsedTimeD3.isShorterThan(expectedArrivalDurationD3.plus(acceptableDelayMillis)));
     }
 
     @BeforeMethod
-    public void setUp() {
+    public void setUp(Method method) {
+        String testDir = method.getName();
         FileTool.deleteDirectory(testDir);
         FileTool.createDirectories(testDir);
-        PropertiesReader p = new PropertiesReader();
-        p.set("strategyName","testStrategy");
-        p.set("internalAccount","test");
-        p.set("productIdList",TestPriceData.TEST_SAP_PID+","+TestPriceData.TEST_IBM_PID);
-        p.set("baseLocation",testDir);
-        p.set("playbackSpeedFactor",Decimal.fromDouble(0.1));
-        p.set("exchangePriceData","exchangePriceData");
-        p.set("serverIP","127.0.0.1");
+        prop = new PropertiesReader();
+        prop.set("strategyName", "testStrategy");
+        prop.set("internalAccount", "test");
+        prop.set("productIdList", TestPriceData.TEST_SAP_PID + "," + TestPriceData.TEST_IBM_PID);
+        prop.set("baseLocation", testDir);
+        prop.set(speedFactorKey, Decimal.fromDouble(1));
+        prop.set("exchangePriceData", "exchangePriceData");
+        prop.set("serverIP", "127.0.0.1");
         recorder = new PriceRecorder();
         recorder.setPriceProvider(new PriceProviderDummy());
-        recorder.setConfig(p);
+        recorder.setConfig(prop);
 
-        playback = new PricePlaybackTool(p);
+        DateTime startTime = DateTime.parse("2014-01-01T15:30:00");
+        recorder.init();
+        PriceData sap1 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.ONE, startTime);
+        recorder.onPriceDataForStrategy(sap1);
+        PriceData sap2 = PriceData.createFromLastWithTime(TestPriceData.TEST_SAP_PID, Decimal.TWO, startTime.plusMillis(shortIntervalMillis));
+        recorder.onPriceDataForStrategy(sap2);
+        PriceData ibm1 = PriceData.createFromLastWithTime(TestPriceData.TEST_IBM_PID, Decimal.TEN, startTime.plusMillis(longerIntervalMillis));
+        recorder.onPriceDataForStrategy(ibm1);
 
+        playback = new PricePlaybackTool(prop);
     }
 
     @AfterMethod
-    public void tearDown() {
-
-        FileTool.deleteDirectory(testDir);
+    public void tearDown(Method method) {
+        FileTool.deleteDirectory(method.getName());
     }
 
-    String testDir = "PricePlaybackToolTest";
+    private final static int shortIntervalMillis = 400;
+    private final static int longerIntervalMillis = 600;
+    private final static int acceptableDelayMillis = 40;
+    private final static String speedFactorKey = "playbackSpeedFactor";
+
+    private PropertiesReader prop;
     private PriceRecorder recorder;
     private PricePlaybackTool playback;
 
@@ -93,44 +127,5 @@ public class PricePlaybackToolTest {
 
         }
     }
-
-//    private class MapWriter implements IWritePrices {
-//
-//        public ConcurrentHashMap<String, String> getRecordedItems() {
-//            return recordedItems;
-//        }
-//
-//        @Override
-//        public void store(PriceData p) {
-//            String last = recordedItems.contains(p.getProductId())
-//                    ? recordedItems.get(p.getProductId())+"|"
-//                    : "";
-//            if(recordedItems.contains(p.getProductId())) last = recordedItems.get(p.getProductId());
-//            PriceDataMsg m = PriceDataMsg.createFrom(p);
-//            Serializer<PriceDataMsg> s = new Serializer<PriceDataMsg>();
-//            String serial = s.convertToString(m);
-//            String appended=last+serial;
-//            recordedItems.put(p.getProductId(), appended);
-//        }
-//
-//        private MapWriter() {
-//            recordedItems = new ConcurrentHashMap<String, String>();
-//        }
-//
-//        ConcurrentHashMap<String, String> recordedItems;
-//    }
-//
-//    private class MapReader implements IReadPrices {
-//
-//        public void setRecordedItems(ConcurrentHashMap<String, String> recordedItems) {
-//            this.recordedItems = recordedItems;
-//        }
-//
-//        private MapReader() {
-//            recordedItems = new ConcurrentHashMap<String, String>();
-//        }
-//
-//        ConcurrentHashMap<String, String> recordedItems;
-//    }
 
 } // class
