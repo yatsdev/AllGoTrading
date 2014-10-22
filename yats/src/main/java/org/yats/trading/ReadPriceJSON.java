@@ -1,23 +1,19 @@
 package org.yats.trading;
 
-import au.com.bytecode.opencsv.CSVReader;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.CommonExceptions;
-import org.yats.common.FileTool;
 import org.yats.messagebus.Deserializer;
 import org.yats.messagebus.messages.PriceDataMsg;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
-public class ReadPriceCSV implements IReadPrice {
+public class ReadPriceJSON implements IReadPrice {
 
-    final Logger log = LoggerFactory.getLogger(ReadPriceCSV.class);
+    final Logger log = LoggerFactory.getLogger(ReadPriceJSON.class);
+    public static final String SUFFIX = ".json";
 
     @Override
     public PriceData read(){
@@ -39,8 +35,8 @@ public class ReadPriceCSV implements IReadPrice {
         }
     }
 
-    public ReadPriceCSV(String baseLocation, String productId){
-        this.path = baseLocation + "/" + productId + ".csv";
+    public ReadPriceJSON(String baseLocation, String productId){
+        this.path = baseLocation + "/" + productId + SUFFIX;
         reader=null;
     }
 

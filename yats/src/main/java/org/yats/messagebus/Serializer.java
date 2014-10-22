@@ -1,12 +1,12 @@
 package org.yats.messagebus;
 
-import flexjson.JSONSerializer;
+import com.google.gson.Gson;
 
 public class Serializer<T> {
 
     public String convertToString(T data) {
-        JSONSerializer serializer = new JSONSerializer();
-        String msgString = serializer.serialize(data);
+        Gson serializer = new Gson();
+        String msgString = serializer.toJson(data);
         return msgString;
     }
 

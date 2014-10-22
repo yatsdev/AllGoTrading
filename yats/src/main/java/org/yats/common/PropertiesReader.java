@@ -87,7 +87,7 @@ public class PropertiesReader implements IProvideProperties {
             }
             String[] keyValue = line.split("=");
             String keyTrimmedNoBlanks = keyValue[0].replace(" ","").replace("\t","");
-            String valueTrimmed = keyValue[1].trim();
+            String valueTrimmed = keyValue.length<2 ? "" : keyValue[1].trim();
             p.properties.put(keyTrimmedNoBlanks, valueTrimmed);
         }
         return p;

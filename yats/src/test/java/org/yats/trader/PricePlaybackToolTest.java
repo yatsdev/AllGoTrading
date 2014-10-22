@@ -1,6 +1,5 @@
 package org.yats.trader;
 
-import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -8,15 +7,12 @@ import org.testng.annotations.Test;
 import org.yats.common.Decimal;
 import org.yats.common.FileTool;
 import org.yats.common.PropertiesReader;
-import org.yats.messagebus.Serializer;
-import org.yats.messagebus.messages.PriceDataMsg;
 import org.yats.trader.examples.strategies.PriceRecorder;
 import org.yats.trader.examples.tools.PricePlaybackTool;
-import org.yats.trading.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+import org.yats.trading.IConsumePriceData;
+import org.yats.trading.IProvidePriceFeed;
+import org.yats.trading.PriceData;
+import org.yats.trading.TestPriceData;
 
 public class PricePlaybackToolTest {
 
@@ -83,6 +79,7 @@ public class PricePlaybackToolTest {
 
     @AfterMethod
     public void tearDown() {
+
         FileTool.deleteDirectory(testDir);
     }
 

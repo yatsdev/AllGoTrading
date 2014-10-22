@@ -18,7 +18,6 @@
     <orderEntry type="library" name="org.apache.directory.studio:org.slf4j.log4j12:1.7.2" level="project" />
     <orderEntry type="library" name="org.testng:testng:6.8.1" level="project" />
     <orderEntry type="library" name="net.sf.opencsv:opencsv:2.3" level="project" />
-    <orderEntry type="library" name="flexjson-2.1" level="project" />
     <orderEntry type="library" name="rabbitmq-client" level="project" />
     <orderEntry type="library" name="quickfixj-all-1.5.3-bd" level="project" />
     <orderEntry type="library" name="org.glassfish.grizzly:grizzly-framework:2.1.6" level="project" />
@@ -28,9 +27,7 @@
     <orderEntry type="library" name="org.apache.httpcomponents:httpcore:4.2.3" level="project" />
     <orderEntry type="library" name="com.googlecode.json-simple:json-simple:1.1.1" level="project" />
     <orderEntry type="library" name="pretty-tools-JDDE-2.0.3" level="project" />
-    <orderEntry type="library" name="com.xeiam.xchange:xchange-core:2.0.01" level="project" />
-    <orderEntry type="library" name="com.xeiam.xchange:xchange-btce:2.0.01" level="project" />
-    <orderEntry type="library" name="com.xeiam.xchange:xchange-bitfinex:2.0.01" level="project" />
+    <orderEntry type="library" name="com.google.code.gson:gson:2.3" level="project" />
   </component>
 </module>
 

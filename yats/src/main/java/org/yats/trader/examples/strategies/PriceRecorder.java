@@ -61,10 +61,10 @@ public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
         baseLocation = getConfig("baseLocation");
         String[] parts = tradeProductList.split(",");
         pidList = Arrays.asList(parts);
-        priceStoreMap = new ConcurrentHashMap<String, StorePriceCSV>();
+        priceStoreMap = new ConcurrentHashMap<String, StorePriceJson>();
         for(String tradeProductId : pidList) {
             subscribe(tradeProductId);
-            StorePriceCSV csvStore = new StorePriceCSV(baseLocation,tradeProductId);
+            StorePriceJson csvStore = new StorePriceJson(baseLocation,tradeProductId);
             priceStoreMap.put(tradeProductId,csvStore);
 
         }
@@ -86,7 +86,7 @@ public class PriceRecorder extends StrategyBase implements IAmCalledTimed {
     private String tradeProductList;
     private String baseLocation;
     private int counter;
-    private ConcurrentHashMap<String,StorePriceCSV> priceStoreMap;
+    private ConcurrentHashMap<String,StorePriceJson> priceStoreMap;
     private  List<String> pidList;
     private boolean hasPriceData;
 
