@@ -24,6 +24,7 @@ public class InternalMarketRunner implements IAmCalledBack, IConsumePriceDataAnd
         sendAllReceivedOrderNewToMarket();
     }
 
+
     @Override
     public void onPriceData(PriceData priceData) {
         if(shuttingDown) return;
