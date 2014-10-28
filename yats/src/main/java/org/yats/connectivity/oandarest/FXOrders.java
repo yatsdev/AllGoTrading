@@ -32,6 +32,50 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FXOrders implements ISendOrder, Runnable {
 
+    public static void main(String[]args) throws IOException {
+
+        String configFilename = Tool.getPersonalConfigFilename("config","OandaConnection");
+        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
+
+        FXOrders fx = new FXOrders(prop);
+
+        fx.logon();
+
+        System.out.println("Init completed. Press enter to continue");
+        System.in.read();
+
+        OrderNew order = OrderNew.create()
+                .withBookSide(BookSide.ASK)
+                .withInternalAccount("test")
+                .withSize(Decimal.TWO)
+                .withLimit(Decimal.fromString("1.3160"))
+                .withProductId("OANDA_EURUSD")
+                ;
+        fx.sendOrderNew(order);
+
+        System.out.println("First order sent. Press enter to continue");
+        System.in.read();
+
+        fx.sendOrderNew(order);
+
+        System.out.println("Second order sent. Press enter to continue");
+        System.in.read();
+
+        fx.sendOrderCancel(order.createCancelOrder());
+
+        System.out.println("Order canceled. Press enter to continue");
+        System.in.read();
+
+
+        fx.getAccounts();
+        fx.getOrders();
+
+        fx.shutdown();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     final Logger log = LoggerFactory.getLogger(FXOrders.class);
 
 
@@ -417,46 +461,5 @@ public class FXOrders implements ISendOrder, Runnable {
     private boolean stopReceiving;
 
 
-    public static void main(String[]args) throws IOException {
-
-
-        String configFilename = Tool.getPersonalConfigFilename("config","OandaConnection");
-        PropertiesReader prop = PropertiesReader.createFromConfigFile(configFilename);
-
-        FXOrders fx = new FXOrders(prop);
-
-        fx.logon();
-
-        System.out.println("Init completed. Press enter to continue");
-        System.in.read();
-
-        OrderNew order = OrderNew.create()
-                .withBookSide(BookSide.ASK)
-                .withInternalAccount("test")
-                .withSize(Decimal.TWO)
-                .withLimit(Decimal.fromString("1.3160"))
-                .withProductId("OANDA_EURUSD")
-                ;
-        fx.sendOrderNew(order);
-
-        System.out.println("First order sent. Press enter to continue");
-        System.in.read();
-
-        fx.sendOrderNew(order);
-
-        System.out.println("Second order sent. Press enter to continue");
-        System.in.read();
-
-        fx.sendOrderCancel(order.createCancelOrder());
-
-        System.out.println("Order canceled. Press enter to continue");
-        System.in.read();
-
-
-        fx.getAccounts();
-        fx.getOrders();
-
-        fx.shutdown();
-    }
 
 } // class
