@@ -8,7 +8,7 @@ import org.yats.trading.*;
 public class LimitOrderBookSideTest implements IConsumeReceipt {
 
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canAddOrder()
     {
         bookBid.add(bid100At10);
@@ -16,7 +16,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert (2 == bookBid.getSize());
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canFindFirstBidRow()
     {
         bookBid.add(bid100At10);
@@ -25,7 +25,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(bid100At10.getLimit() == bidFront);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canFindFirstAskRow()
     {
         bookAsk.add(ask100At11);
@@ -33,7 +33,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(ask100At11.getLimit() == bookAsk.getFrontRowPrice());
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canMatchBidOrderIntoAskSide()
     {
         bookAsk.add(ask100At11);
@@ -43,7 +43,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(tradedAccount2==200);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canMatchAndHaveResidual()
     {
         bookAsk.add(ask100At11);
@@ -53,7 +53,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(lastBidReceipt.getResidualSize().isEqualTo(Decimal.fromDouble(100)));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCreateOfferBookSideForBidSide()
     {
         assert(bookBid.toOfferBookSide(10).toStringCSV().length()==0);
@@ -70,7 +70,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(bidSideString.compareTo(expected)==0);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCreateOfferBookSideForAskSide()
     {
         bookAsk.add(ask100At11);
@@ -86,7 +86,7 @@ public class LimitOrderBookSideTest implements IConsumeReceipt {
         assert(askSideString.compareTo(expected)==0);
     }
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         bookBid = new LimitOrderBookSide(BookSide.BID, this);
         bookAsk = new LimitOrderBookSide(BookSide.ASK, this);

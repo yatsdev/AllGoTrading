@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class DecimalTest {
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCompareTwoDecimals() {
         assert(0==Decimal.fromDouble(10).compareTo(Decimal.fromDouble(10)));
         assert(0!=Decimal.fromDouble(10).compareTo(Decimal.fromDouble(11)));
@@ -13,7 +13,7 @@ public class DecimalTest {
         assert(0 < Decimal.fromDouble(12).compareTo(Decimal.fromDouble(11)));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCreateFromStringInDifferentFormats() {
         assert(!Decimal.fromString("1,265.02").isEqualTo(Decimal.fromString("1265.01")));
         assert(Decimal.fromString("1,265.01").isEqualTo(Decimal.fromString("1265.01")));
@@ -21,21 +21,21 @@ public class DecimalTest {
         assert(Decimal.fromString("1265,0").isEqualTo(Decimal.fromString("1265")));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canInvert()
     {
         assert(Decimal.fromString("0.5").isEqualTo(Decimal.fromString("2").invert()));
         assert(Decimal.fromString("10").isEqualTo(Decimal.fromString("0.1").invert()));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canInvertAndRoundsInfiniteLongDecimalExpressions()
     {
         Decimal result = Decimal.fromString("3").invert();
         assert(Decimal.fromString("0.3333333333").isEqualTo(result));
     }
 
-        @Test
+        @Test(groups = { "integration", "inMemory" })
     public void canRound()
     {
         Decimal r1 = Decimal.fromDouble(1.0003).roundToTickSize(tickSize0001);
@@ -72,7 +72,7 @@ public class DecimalTest {
 
 
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         tickSize0001 = new Decimal("0.001");
         tickSize001 = new Decimal("0.01");

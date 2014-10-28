@@ -6,7 +6,7 @@ import org.yats.common.Decimal;
 
 public class OfferBookTest {
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertToAndFromCSV() {
         String csv = book.toStringCSV();
         OfferBook csvBook = OfferBook.fromStringCSV(csv);
@@ -14,7 +14,7 @@ public class OfferBookTest {
         assert(csv.compareTo(csv2)==0);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canGetSingleRowsFromBook() {
         assert(book.getDepth(BookSide.BID)==2);
         assert(book.getDepth(BookSide.ASK)==0);
@@ -24,7 +24,7 @@ public class OfferBookTest {
         assert(book.getBookRow(BookSide.BID, 1).isSize(Decimal.fromString("11")));
     }
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         book = new OfferBook();
         book.addBid("10", "22");

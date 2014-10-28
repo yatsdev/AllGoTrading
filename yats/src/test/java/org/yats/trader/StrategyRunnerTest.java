@@ -27,14 +27,14 @@ public class StrategyRunnerTest {
 
     private static String ACCOUNT = "testAccount";
 
-    @Test
+    @Test(groups = { "integration"})
     public void canDoSubscriptionForPriceData()
     {
         strategy.init();
         assert (strategyRunner.isProductSubscribed(TestPriceData.TEST_SAP_PID));
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canReceivePriceDataAndSendToStrategy()
     {
         assert (strategy.priceDataReceived == 0);
@@ -44,7 +44,7 @@ public class StrategyRunnerTest {
         assert (strategy.priceDataReceived == 1);
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canSendOrderAndReceivesReceipt()
     {
         strategy.sendBuyOrder();
@@ -53,7 +53,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 0);
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canSendMarketCrossingOrderAndReceivesFilledReceipt()
     {
         orderConnection.setFillOrderImmediately();
@@ -63,7 +63,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 5);
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canCancelOrder()
     {
         strategy.sendBuyOrder();
@@ -75,7 +75,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 0);
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canProcessPartialFill()
     {
         orderConnection.init();
@@ -92,7 +92,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 5);
     }
 
-    @Test
+    @Test(groups = { "integration"})
     public void canCalculatePositionSizeAndValue()
     {
         orderConnection.init();
@@ -110,7 +110,7 @@ public class StrategyRunnerTest {
     }
 
 
-    @Test
+    @Test(groups = { "integration"})
     public void canCallbackOnTime()
     {
         strategy.init();
@@ -122,7 +122,7 @@ public class StrategyRunnerTest {
         assert(strategy.isCalledBackByTimer());
     }
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         data1 = new PriceData(DateTime.now(DateTimeZone.UTC), TestPriceData.TEST_SAP_PID,
                 Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),

@@ -19,7 +19,7 @@ public class ProductStaticDataTest {
 
 
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canUseProductStaticData() {
         productStaticData.setProductDescription("Wal-Mart Stores, Inc. operates discount stores, supercenters, and neighborhood markets. The Company's discount stores and supercenters offer merchandise such as apparel, housewares, small appliances, electronics, and hardware. Walmart's markets offer a full-line supermarket and a limited assortment of general merchandise. The Company operates nationally and internationally."); //Bloomberg description
         productStaticData.setProductType("Equity");

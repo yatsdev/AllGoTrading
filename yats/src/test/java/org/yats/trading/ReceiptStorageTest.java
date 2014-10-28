@@ -10,7 +10,7 @@ public class ReceiptStorageTest {
 
     public static String filename = "canSerializeToCSVFileAndParseAgain.csv";
 
-//    @Test
+//    @Test(groups = { "integration", "inMemory" })
 //    public void canCalculateProductProfitForInternalAccountWithSnapshot()
 //    {
 //        int valueWithSnapshot = (int)storage.getValueForAccountProduct(INTERNAL_ACCOUNT1, product.getProductId());
@@ -18,13 +18,13 @@ public class ReceiptStorageTest {
 //
 //    }
 //
-//    @Test
+//    @Test(groups = { "integration", "inMemory" })
 //    public void canCalculateCurrentProductPositionOverAllInternalAccounts() {
 //        Position p = storage.getPositionForProduct(product.getProductId());
 //        assert (p.isSize(+1 +1 +1 +9 -2));
 //    }
 //
-//    @Test
+//    @Test(groups = { "integration", "inMemory" })
 //    public void canCalculateProductPositionForInternalAccount()
 //    {
 //        Position positionAccount1 = storage.getAccountPosition(new PositionRequest(INTERNAL_ACCOUNT1, product.getProductId()));
@@ -33,19 +33,19 @@ public class ReceiptStorageTest {
 //        assert (positionAccount2.isSize(9));
 //    }
 //
-//    @Test
+//    @Test(groups = { "integration", "inMemory" })
 //    public void canCalculateProductPositionForInternalAccountWithSnapshot() {
 //        storage.setPositionSnapshot(positionSnapshot);
 //        Position productPositionWithSnapshot = storage.getAccountPosition(positionRequest1);
 ////        assert(productPositionWithSnapshot.isSize(+1 + 1 + 1 -2 +10));
 //    }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canProcessReceipts() {
         assert (storage.getNumberOfReceipts() == 5);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canSerializeToCSVStringAndParseAgain()
     {
         String csv = storage.toStringCSV();
@@ -55,7 +55,7 @@ public class ReceiptStorageTest {
         assert (newStorage.getNumberOfReceipts() == 5);
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canSerializeToCSVFileAndParseAgain()
     {
         String csv = storage.toStringCSV();
@@ -68,7 +68,7 @@ public class ReceiptStorageTest {
         assert (newStorage.getNumberOfReceipts() == 5);
     }
     
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canSerializeToCSVFileAndParseAgainWithABigDecimalPrice()
     {
         Receipt receiptBidDecimal = Receipt.create()
@@ -83,7 +83,7 @@ public class ReceiptStorageTest {
     }
 
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         storage = new ReceiptStorageMem();
         processReceipts();

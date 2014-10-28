@@ -9,20 +9,20 @@ public class RateConverterTest {
     public static final Decimal SAP_SIZE = Decimal.fromString("2");
     public static final Decimal HKD_SIZE = Decimal.fromString("1000");
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInEURToEUR() {
         Position p1InEUR = converter.convert(p1, TestPriceData.TEST_EUR_PID);
         assert(p1InEUR.isSize(TestPriceData.TEST_SAP_LAST.multiply(SAP_SIZE)));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInEURToUSD() {
         Position p1InUSD = converter.convert(p1, TestPriceData.TEST_USD_PID);
         Decimal expectedSize = TestPriceData.TEST_SAP_LAST.multiply(SAP_SIZE).multiply(TestPriceData.TEST_EURUSD_LAST);
         assert(p1InUSD.isSize(expectedSize));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInEURToCHF() {
         Position p1InCHF = converter.convert(p1, TestPriceData.TEST_CHF_PID);
         Decimal expectedSize = TestPriceData.TEST_SAP_LAST
@@ -33,7 +33,7 @@ public class RateConverterTest {
         assert(p1InCHF.isSize(expectedSize));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCache() {
         Position p1InCHF = converter.convert(p1, TestPriceData.TEST_CHF_PID);
         assert(converter.getCacheHits()==0);
@@ -50,7 +50,7 @@ public class RateConverterTest {
         assert(p2InCHF.isSize(expectedSize));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInEURToGBPUsingInversionOfCurrencyPair() {
         Position p1InGBP = converter.convert(p1, TestPriceData.TEST_GBP_PID);
         Decimal expectedSize = TestPriceData.TEST_SAP_LAST
@@ -61,7 +61,7 @@ public class RateConverterTest {
         assert(p1InGBP.isSize(expectedSize));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInEURToNZDUsingShortestChainOfConversions() {
         converter.onPriceData(TestPriceData.TEST_XAUUSD);
         converter.onPriceData(TestPriceData.TEST_XAUXAG);
@@ -96,7 +96,7 @@ public class RateConverterTest {
         assert(p1InNZD.isSize(expectedSize));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canConvertPositionInHKDToSAPUsingShortestChainOfConversions() {
         converter.onPriceData(TestPriceData.TEST_XAUUSD);
         converter.onPriceData(TestPriceData.TEST_XAUXAG);
@@ -124,7 +124,7 @@ public class RateConverterTest {
         assert(converter.isChainInCache(p2.getProductId(), TestPriceData.TEST_SAP_PID));
     }
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         ProductList productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);
         converter = new RateConverter(productList);

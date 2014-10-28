@@ -1,7 +1,9 @@
 package org.yats.connectivity.oanda;
 
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 import org.yats.common.PropertiesReader;
+import org.yats.common.Tool;
 import org.yats.common.UniqueId;
 import org.yats.connectivity.oandarest.PriceFeed;
 import org.yats.trading.IConsumePriceData;
@@ -17,18 +19,18 @@ public class PriceFeedTest {
             "OANDA_EURCHF=EUR_CHF";
 
 //    Not really a test since it takes too long and depends on external connection.
-//    @Test
-//    public void canReceiveEURUSD()
-//    {
-//        Tool.sleepFor(5000);
-//        assert (consumer.getReceived() > 0);
-//        priceFeed.close();
-//        while(priceFeed.isRunning()) Tool.sleepABit();
-//        System.out.println("done.");
-//    }
+    @Test(groups = { "integration"})
+    public void canReceiveEURUSD()
+    {
+        Tool.sleepFor(5000);
+        assert (consumer.getReceived() > 0);
+        priceFeed.shutdown();
+        while(priceFeed.isRunning()) Tool.sleepABit();
+        System.out.println("done.");
+    }
 
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         PropertiesReader p = PropertiesReader.createFromConfigString(CONFIG);
         priceFeed = new PriceFeed(p);

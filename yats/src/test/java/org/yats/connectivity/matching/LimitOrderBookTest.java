@@ -8,7 +8,7 @@ import org.yats.trading.*;
 
 public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canMatchIntoEmptyBookCreatingMakerReceipts()
     {
         book.match(bid100At10);
@@ -16,7 +16,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (2 == book.getSize());
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCrossBookCreatingMakerOrderOnMatchingPrice()
     {
         book.match(ask100At11);
@@ -25,7 +25,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize(BookSide.BID));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void canCancelAskOrder()
     {
         book.match(ask100At11);
@@ -34,7 +34,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (0 == book.getSize());
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void cancelNotExistingOrderDoesNothing()
     {
         book.match(bid100At10);
@@ -43,7 +43,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize());
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void cancelBidOrderLeavingAsk()
     {
         book.match(bid100At10);
@@ -53,7 +53,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize(BookSide.ASK));
     }
 
-    @Test
+    @Test(groups = { "integration", "inMemory" })
     public void cancelBidOrderResultsInReceiptWithEndstateTrue()
     {
         book.match(bid100At10);
@@ -66,7 +66,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
     }
 
 
-    @BeforeMethod
+    @BeforeMethod(groups = { "integration", "inMemory" })
     public void setUp() {
         book = new LimitOrderBook(ProductTest.TEST_PRODUCT1_ID, this);
         bid100At10 = new OrderNew()
