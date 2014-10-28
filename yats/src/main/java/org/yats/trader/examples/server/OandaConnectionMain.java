@@ -23,7 +23,7 @@ import java.io.IOException;
 
 public class OandaConnectionMain implements IConsumePriceData {
 
-    final Logger log = LoggerFactory.getLogger(FixClientMain.class);
+    final Logger log = LoggerFactory.getLogger(OandaConnectionMain.class);
 
     public void go() throws InterruptedException, IOException
     {
