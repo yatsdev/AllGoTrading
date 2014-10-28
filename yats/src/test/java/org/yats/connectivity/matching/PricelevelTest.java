@@ -9,14 +9,14 @@ import org.yats.trading.*;
 public class PricelevelTest implements IConsumeReceipt {
 
 
-    @Test(groups = { "integration", "inMemory" }, expectedExceptions = CommonExceptions.ContainerEmptyException.class)
+    @Test(groups = { "inMemory" }, expectedExceptions = CommonExceptions.ContainerEmptyException.class)
     public void doesNotMatchNotCrossingOrders()
     {
         level.add(orderAsk1);
         level.match(orderBid1);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void matchesCrossingOrder()
     {
         level.add(orderAsk1);
@@ -24,7 +24,7 @@ public class PricelevelTest implements IConsumeReceipt {
         assert(2==receipts);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void matchesMultipleOrdersLeavesRest()
     {
         level.add(orderAsk1);
@@ -37,7 +37,7 @@ public class PricelevelTest implements IConsumeReceipt {
     }
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         Decimal levelPrice = Decimal.fromString("10");
         level = new PriceLevel(levelPrice, this);

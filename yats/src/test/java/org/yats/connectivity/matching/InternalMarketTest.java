@@ -13,7 +13,7 @@ import java.util.List;
 
 public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canInsertAndCancel() {
         market.sendOrderNew(bid133);
         market.sendOrderNew(ask135);
@@ -21,7 +21,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
         assert(lastPriceData.hasFrontRow(BookSide.BID, bid133.getAsRow()));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canHandleMultipleNonCrossingOrders() {
         OrderNew newBid = bid133;
         sendMultipleOrders(newBid, 99);
@@ -33,7 +33,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
         assert(lastPriceData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.01"))));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canProduceProductCounterReceipts() {
         OrderNew makerBid = createCopy(bid133);
         market.sendOrderNew(makerBid);
@@ -47,7 +47,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
 
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canHandleMultipleCrossingOrders() {
         OrderNew newBid = createCopy(bid133);
         sendMultipleOrders(newBid, 99);
@@ -60,7 +60,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
 //        assert(lastMarketData.hasFrontRow(BookSide.ASK, new BookRow(Decimal.ONE, Decimal.fromString("134.00"))));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canHandleOneOrderFillingMultipleOrders() {
         OrderNew newBid = createCopy(bid133);
         sendMultipleOrders(newBid, 99);
@@ -76,7 +76,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
         assert(lastPriceData.isBookSideEmpty(BookSide.ASK));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCancelMultipleOrdersTowardsFrontRow() {
         OrderNew newBid = createCopy(bid133);
         sendMultipleOrders(newBid, 99);
@@ -98,7 +98,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
         assert(mdCounter==99+99);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCancelMultipleOrdersStartingFrontRow() {
         OrderNew newAsk = createCopy(ask135);
         sendMultipleOrders(newAsk, 99);
@@ -136,7 +136,7 @@ public class InternalMarketTest implements IConsumeReceipt, IConsumePriceData {
         }
     }
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         ProductList products = ProductList.createFromFile(ProductList.PATH);
         market = new InternalMarket(ProductTest.TEST_EXTACCOUNT, ProductTest.TEST_MARKET);

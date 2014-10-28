@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class UniqueIdTest {
 
 
-        @Test(groups = { "integration", "inMemory" })
+        @Test(groups = { "inMemory" })
         public void canCompare()
         {
             UniqueId id2 = UniqueId.create();
@@ -14,7 +14,7 @@ public class UniqueIdTest {
             assert(id1.isSameAs(id1));
         }
 
-        @Test(groups = { "integration", "inMemory" })
+        @Test(groups = { "inMemory" })
         public void canCopy()
         {
             UniqueId id1Copy = UniqueId.createFromString(id1.toString());
@@ -22,7 +22,7 @@ public class UniqueIdTest {
         }
 
 
-        @BeforeMethod(groups = { "integration", "inMemory" })
+        @BeforeMethod(groups = { "inMemory" })
         public void setUp() {
             id1 = UniqueId.create();
         }

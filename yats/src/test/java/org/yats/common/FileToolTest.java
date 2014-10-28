@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class FileToolTest {
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canGetLineSeparator() {
         String newline = FileTool.getLineSeparator();
         if(Tool.isWindows())
@@ -15,7 +15,7 @@ public class FileToolTest {
     }
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setup() {
 
     }

@@ -12,6 +12,7 @@ import org.yats.trading.*;
 
 
 
+@Test(groups = { "inMemory" })
 public class StrategyRunnerTest {
 
     /*
@@ -27,14 +28,14 @@ public class StrategyRunnerTest {
 
     private static String ACCOUNT = "testAccount";
 
-    @Test(groups = { "integration"})
+    @Test
     public void canDoSubscriptionForPriceData()
     {
         strategy.init();
         assert (strategyRunner.isProductSubscribed(TestPriceData.TEST_SAP_PID));
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canReceivePriceDataAndSendToStrategy()
     {
         assert (strategy.priceDataReceived == 0);
@@ -44,7 +45,7 @@ public class StrategyRunnerTest {
         assert (strategy.priceDataReceived == 1);
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canSendOrderAndReceivesReceipt()
     {
         strategy.sendBuyOrder();
@@ -53,7 +54,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 0);
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canSendMarketCrossingOrderAndReceivesFilledReceipt()
     {
         orderConnection.setFillOrderImmediately();
@@ -63,7 +64,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 5);
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canCancelOrder()
     {
         strategy.sendBuyOrder();
@@ -75,7 +76,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 0);
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canProcessPartialFill()
     {
         orderConnection.init();
@@ -92,7 +93,7 @@ public class StrategyRunnerTest {
         assert (strategy.getPosition() == 5);
     }
 
-    @Test(groups = { "integration"})
+    @Test
     public void canCalculatePositionSizeAndValue()
     {
         orderConnection.init();
@@ -110,7 +111,7 @@ public class StrategyRunnerTest {
     }
 
 
-    @Test(groups = { "integration"})
+    @Test
     public void canCallbackOnTime()
     {
         strategy.init();
@@ -122,7 +123,7 @@ public class StrategyRunnerTest {
         assert(strategy.isCalledBackByTimer());
     }
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod
     public void setUp() {
         data1 = new PriceData(DateTime.now(DateTimeZone.UTC), TestPriceData.TEST_SAP_PID,
                 Decimal.fromDouble(10), Decimal.fromDouble(11), Decimal.fromDouble(11),

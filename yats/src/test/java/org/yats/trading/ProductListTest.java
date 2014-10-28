@@ -7,7 +7,7 @@ public class ProductListTest {
 
     public static final String PRODUCT_LIST_PATH = "config/CFDProductList.csv";
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canReadProductList()
     {
         assert (list.size()>0);
@@ -16,21 +16,21 @@ public class ProductListTest {
     }
 
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canFindSAPBySymbol()
     {
         Product productSAP = list.findBySymbol("TEST_SAP");
         assert (productSAP.getSymbol().compareTo("TEST_SAP")==0);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canFindSAPByProductId()
     {
         Product productSAP = list.getProductWith("4663789");
         assert (productSAP.getSymbol().compareTo("SAP")==0);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canFilterOnUnderlying()
     {
         IProvideProduct productsWithUnderlyingSGD = list.getProductsWithUnderlying("CCY_SGD");
@@ -38,7 +38,7 @@ public class ProductListTest {
         assert (productsWithUnderlyingSGD.values().size()< list.size() / 5);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canFilterOnUnit()
     {
         IProvideProduct productsWithUnderlyingSGD = list.getProductsWithUnit("CCY_SGD");
@@ -47,7 +47,7 @@ public class ProductListTest {
     }
 
 // appended route to all products with this:
-//    @Test(groups = { "integration", "inMemory" })
+//    @Test(groups = { "inMemory" })
 //    public void canWriteProductList()
 //    {
 //        list.writeWithAppend("config/CFDProductListOut.csv", ",RouteAGT");
@@ -55,7 +55,7 @@ public class ProductListTest {
 
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         list = new ProductList();
         list.read(PRODUCT_LIST_PATH);

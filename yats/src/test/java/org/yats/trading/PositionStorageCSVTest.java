@@ -9,7 +9,7 @@ public class PositionStorageCSVTest {
 
     private static String filename = "PositionStorageCSVTest.csv";
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canWriteAndReadLastCSV()
     {
         FileTool.deleteFile(filename);
@@ -28,7 +28,7 @@ public class PositionStorageCSVTest {
         FileTool.deleteFile(filename);
     }
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
 
     }

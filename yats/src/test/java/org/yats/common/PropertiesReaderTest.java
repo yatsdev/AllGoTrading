@@ -6,7 +6,7 @@ import org.testng.annotations.Test;
 public class PropertiesReaderTest {
 
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canReadBoolean()
     {
         assert (PropertiesReader.fromBooleanString("YES"));
@@ -18,7 +18,7 @@ public class PropertiesReaderTest {
         assert (!PropertiesReader.fromBooleanString("dontknow"));
     }
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
     }
 

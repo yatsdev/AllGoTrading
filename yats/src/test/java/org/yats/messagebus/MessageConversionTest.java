@@ -8,7 +8,7 @@ import org.yats.trading.*;
 
 public class MessageConversionTest {
 
-        @Test(groups = { "integration", "inMemory" })
+        @Test(groups = { "inMemory" })
         public void canConvertPositionRequest()
         {
             PositionRequestMsg m = PositionRequestMsg.fromPositionRequest(positionRequest);
@@ -18,7 +18,7 @@ public class MessageConversionTest {
             assert (m.toString().compareTo(m2.toString())==0);
         }
 
-        @Test(groups = { "integration", "inMemory" })
+        @Test(groups = { "inMemory" })
         public void canConvertKeyValueMessage()
         {
             KeyValueMsg m = new KeyValueMsg();
@@ -37,7 +37,7 @@ public class MessageConversionTest {
         }
 
 
-        @BeforeMethod(groups = { "integration", "inMemory" })
+        @BeforeMethod(groups = { "inMemory" })
         public void setUp() {
             positionRequest = new PositionRequest(ProductTest.ACCOUNT1, ProductTest.TEST_PRODUCT1_ID);
 

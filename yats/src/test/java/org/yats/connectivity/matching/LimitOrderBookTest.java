@@ -8,7 +8,7 @@ import org.yats.trading.*;
 
 public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canMatchIntoEmptyBookCreatingMakerReceipts()
     {
         book.match(bid100At10);
@@ -16,7 +16,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (2 == book.getSize());
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCrossBookCreatingMakerOrderOnMatchingPrice()
     {
         book.match(ask100At11);
@@ -25,7 +25,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize(BookSide.BID));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCancelAskOrder()
     {
         book.match(ask100At11);
@@ -34,7 +34,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (0 == book.getSize());
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void cancelNotExistingOrderDoesNothing()
     {
         book.match(bid100At10);
@@ -43,7 +43,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize());
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void cancelBidOrderLeavingAsk()
     {
         book.match(bid100At10);
@@ -53,7 +53,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
         assert (1 == book.getSize(BookSide.ASK));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void cancelBidOrderResultsInReceiptWithEndstateTrue()
     {
         book.match(bid100At10);
@@ -66,7 +66,7 @@ public class LimitOrderBookTest implements IConsumePriceDataAndReceipt {
     }
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         book = new LimitOrderBook(ProductTest.TEST_PRODUCT1_ID, this);
         bid100At10 = new OrderNew()

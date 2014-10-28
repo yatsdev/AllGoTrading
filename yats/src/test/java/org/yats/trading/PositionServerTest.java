@@ -8,18 +8,18 @@ import java.util.ArrayList;
 
 public class PositionServerTest {
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canProcessReceipts() {
         assert (positionServer.getNumberOfReceipts() == 5);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateCurrentPositionOverAllInternalAccounts() {
         Position p = positionServer.getPositionForAllAccounts(ProductTest.TEST_PRODUCT1_ID);
         assert (p.isSize(+1 +1 +1 +9 -2));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculatePositionForInternalAccount()
     {
         Position positionAccount1 = positionServer.getAccountPosition(new PositionRequest(ReceiptTest.INTERNAL_ACCOUNT1, ProductTest.TEST_PRODUCT1_ID));
@@ -28,14 +28,14 @@ public class PositionServerTest {
         assert (positionAccount2.isSize(9));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculatePositionForInternalAccountWithSnapshot() {
         positionServer.addPositionSnapshot(positionSnapshot);
         Position positionWithSnapshot = positionServer.getAccountPosition(positionRequest1);
         assert(positionWithSnapshot.isSize(+1 + 1 + 1 -2 +10));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateCounterPositionForLeveragedProduct() {
 
         PositionServer positionServer = new PositionServer();
@@ -56,7 +56,7 @@ public class PositionServerTest {
         assert(expectedCounterSize.isEqualTo(posCounter.getSize()));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void buyLowSellHighGivesProfit() {
         PositionServer positionServer = new PositionServer();
         positionServer.setProductList(productList);
@@ -71,7 +71,7 @@ public class PositionServerTest {
         assert(expectedCounterSize.isEqualTo(posCounter.getSize()));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void sellLowBuyHighGivesLoss() {
         PositionServer positionServer = new PositionServer();
         positionServer.setProductList(productList);
@@ -86,13 +86,13 @@ public class PositionServerTest {
     }
 
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canStorePositionSnapshot() {
         positionServer.onReceipt(ReceiptTest.RECEIPT1);
         assert(1==positionStorage.getSnapshotCount());
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canInitialiseFromPositionSnapshot() {
         PositionServer originalServer = new PositionServer();
         originalServer.setPositionStorage(positionStorage);
@@ -109,7 +109,7 @@ public class PositionServerTest {
     }
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         positionServer = new PositionServer();
         productList = ProductList.createFromFile(ProductListTest.PRODUCT_LIST_PATH);

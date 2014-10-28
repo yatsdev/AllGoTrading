@@ -17,12 +17,12 @@ import java.util.List;
 public class ExcelTest {
 
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canConnectWithDDEToReportsSheetAndRequestFirstRow() {
         assert(4 == sheetAccessReports.countKeysInFirstRow());
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canConnectWithDDEToReportsSheetAndRequestFirstColumn() {
         assert(5 == sheetAccessReports.countKeysInFirstColumn());
     }
@@ -31,7 +31,7 @@ public class ExcelTest {
     private static String TAB = "\t";
     private static String NL = "\r\n";
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canParseSettingsFromSheet() {
         sheetAccessSettings.init(APPLICATION_NAME, SETTINGS_SHEET_NAME);
         sheetAccessSettings.readSettingsRows();
@@ -50,7 +50,7 @@ public class ExcelTest {
             assert(second.get("testParam1").compareTo("11.11")==0);
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canPokeFirstRowOfMatrix() {
         List<MatrixItem> list = new ArrayList<MatrixItem>();
         String p1v1 = "17";
@@ -68,7 +68,7 @@ public class ExcelTest {
         assert( mockToReports.getLastPokeString().compareTo(expectedRow1)==0);
     }
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setup()
     {
         mockToReports = new MockExcelLinkReports();

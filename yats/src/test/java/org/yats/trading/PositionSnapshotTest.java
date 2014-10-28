@@ -7,7 +7,7 @@ import org.yats.common.Decimal;
 
 public class PositionSnapshotTest {
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateAccountPosition()
     {
         assert (isPositionCorrect(account1, productId1, 1));
@@ -15,7 +15,7 @@ public class PositionSnapshotTest {
         assert (isPositionCorrect(account1, productId3, 3));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateAccountPositionAfterAddingOtherSnapshot()
     {
         positionSnapshot.add(positionSnapshot2);
@@ -28,7 +28,7 @@ public class PositionSnapshotTest {
         return p1.isSize(size);
     }
 
-      @Test(groups = { "integration", "inMemory" })
+      @Test(groups = { "inMemory" })
     public void canCalculatePositionForAllAccountsAfterAddingOtherSnapshot()
     {
         positionSnapshot.add(positionSnapshot2);
@@ -39,7 +39,7 @@ public class PositionSnapshotTest {
         assert (p2.isSize(9));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateAllPositionsForOneAccount()
     {
         IProvidePosition positions = positionSnapshot.getAllPositionsForOneAccount(account1);
@@ -51,7 +51,7 @@ public class PositionSnapshotTest {
         assert(sum.isEqualTo(Decimal.fromDouble(6)));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateValuationForAccountProduct()
     {
         PositionRequest r = new PositionRequest(account1, productId1);
@@ -63,14 +63,14 @@ public class PositionSnapshotTest {
         assert(positionInUSD.getSize().isEqualTo(expected));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateValuationForAllPositions()
     {
         Position positionInEUR = positionSnapshot.getValueForAllPositions(TestPriceData.TEST_EUR_PID);
         assert(positionInEUR.getSize().isEqualTo(Decimal.fromString("6.2034298883348440")));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void canCalculateProfitFromDifferentSnapshots()
     {
         Position positionInUSD = positionSnapshot.getValueForAllPositions(TestPriceData.TEST_USD_PID);
@@ -79,7 +79,7 @@ public class PositionSnapshotTest {
         assert(profitInEUR.isSize(Decimal.ZERO,5));
     }
 
-    @Test(groups = { "integration", "inMemory" })
+    @Test(groups = { "inMemory" })
     public void verifyThatProfitFromSameSnapshotIsZero()
     {
         Position positionInUSD = positionSnapshot.getValueForAllPositions(TestPriceData.TEST_EUR_PID);
@@ -89,7 +89,7 @@ public class PositionSnapshotTest {
     }
 
 
-    @BeforeMethod(groups = { "integration", "inMemory" })
+    @BeforeMethod(groups = { "inMemory" })
     public void setUp() {
         productList = new ProductList();
         productList.read(ProductListTest.PRODUCT_LIST_PATH);
