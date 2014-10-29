@@ -29,20 +29,42 @@ public class Id2ReceiptMapTest {
             .withResidualSize(Decimal.ONE);
 
     @Test
-    public void whenIdsArePutInMap_canCountThem() {
-        assert(map.size()==2);
+    public void whenOrderIdsAreInMap_sizeOrderIds_countsThem() {
+        assert(map.sizeOrderIds()==2);
     }
 
     @Test
-    public void whenIdsArePutInMap_canGetThemByKey() {
+    public void whenOrderIdIsInMap_containsReceiptForOrderId_verifiesThis() {
+        assert(!map.containsReceiptForOrderId(orderId1 + "thisMakesIdInvalid"));
+        assert(map.containsReceiptForOrderId(orderId1));
+    }
+
+    @Test
+    public void whenOrderIdIsInMap_get_returnsTheAssociatedExternalId() {
         assert(map.get(orderId1).compareTo(externalId1)==0);
     }
 
+    @Test
+    public void whenExternalIdIsInMap_containsReceiptForExternalId_verifiesThis() {
+        assert(!map.containsReceiptForExternalId(externalId1+"thisMakesIdInvalid"));
+        assert(map.containsReceiptForExternalId(externalId1));
+    }
 
-    @BeforeMethod(groups = { "inMemory" })
+    @Test
+    public void whenOrderIdIsInMap_removeByOrderId_canRemoveIt() {
+        map.remove(orderId1);
+        assert(map.sizeOrderIds()==1);
+        assert(!map.containsReceiptForExternalId(externalId1));
+        assert(!map.containsReceiptForOrderId(orderId1));
+    }
+
+
+
+    @BeforeMethod
     public void setUp() {
         map = new Id2ReceiptMap();
         map.putOrderId2ExternalIdMapping(orderId1,externalId1);
+        map.putReceipt(externalId1, receipt1);
         map.putOrderId2ExternalIdMapping(orderId2,externalId2);
     }
 
