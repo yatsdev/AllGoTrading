@@ -1,9 +1,11 @@
 package org.yats.connectivity.oandarest;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
@@ -93,7 +95,7 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
         httpGet.setHeader(new BasicHeader("Authorization", "Bearer "+secret));
 
         System.out.println("Executing request: " + httpGet.getRequestLine());
-
+        httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 
         HttpResponse resp = httpClient.execute(httpGet);
         HttpEntity entity = resp.getEntity();
@@ -167,8 +169,10 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
         mapPidToSymbol = new ConcurrentHashMap<String, String>();
         subscriptionList = new ConcurrentHashMap<String, IConsumePriceData>();
         mapSymbolToPid = new ConcurrentHashMap<String, String>();
-        thread = new Thread(this);
         httpClient = new DefaultHttpClient();
+        proxy = new HttpHost("mnsproxy.mn-services.nl", 8080);
+        httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        thread = new Thread(this);
         stopReceiving = false;
         shutdown = false;
         running=true;
@@ -190,6 +194,7 @@ public class PriceFeed implements IProvidePriceFeed, Runnable {
     private ConcurrentHashMap<String, IConsumePriceData> subscriptionList;
     private ConcurrentHashMap<String, String> mapPidToSymbol;
     private ConcurrentHashMap<String, String> mapSymbolToPid;
+    private HttpHost proxy;
     IConsumePriceData priceDataConsumer;
 
 }

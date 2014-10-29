@@ -1,15 +1,13 @@
 package org.yats.connectivity.oandarest;
 
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
@@ -258,7 +256,10 @@ public class FXOrders implements ISendOrder, Runnable {
     public FXOrders(IProvideProperties _prop) {
         prop=_prop;
         httpPoll = new DefaultHttpClient();
+        HttpHost proxy = new HttpHost("mnsproxy.mn-services.nl", 8080);
+        httpPoll.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         httpStream = new DefaultHttpClient();
+        httpStream.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         oandaId2Receipt = new ConcurrentHashMap<String, Receipt>();
         orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
         oandaId2OrderMapFilename = "fxOrdersMap.txt";

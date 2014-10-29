@@ -8,6 +8,16 @@ import org.yats.common.Statistics;
 import org.yats.trader.StrategyBase;
 import org.yats.trading.*;
 
+import java.awt.print.Book;
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Observable;
+import java.util.Observer;
+
 /**
  * Created by macbook52 on 11/10/14.
  * Bollinger Bands consist of:
@@ -15,18 +25,290 @@ import org.yats.trading.*;
  * an N-period moving average (MA)
  * an upper band at K times an N-period standard deviation above the moving average (MA + Kσ)
  * a lower band at K times an N-period standard deviation below the moving average (MA − Kσ)
+ *
  */
-public class BollingerBands extends StrategyBase {
+
+public class BollingerBands extends StrategyBase  implements Observer  {
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(BollingerBands.class);
+    final int BOLLINGER_WINDOW_SIZE = 20;
+    final String LONG = "LONG";
+    final String SHORT = "SHORT";
+    final String NONE = "NONE";
+
+
+    private class PriceDataBollingerBands extends Observable {
+
+        PriceDataBollingerBands(String productId, int movingWindowSize){
+            this.productId = productId;
+            bollingerWindow = new BigInteger("" + movingWindowSize);
+            listIndex = BigInteger.ZERO;
+            triggeredTrade = NONE;
+            openTrade = NONE;
+            priceDataList = new LinkedList<PriceData>();
+
+        }
+
+        public void setTradeListener(Observer observer){
+            if(observer != null){
+                this.addObserver(observer);
+            }
+        }
+
+        public void addPrice(PriceData p)
+        {
+            int listCount = priceDataList.size();
+            listIndex = listIndex.add(BigInteger.ONE);
+            if(listCount < bollingerWindow.intValue())
+            {
+                if(priceDataList.size() == 0){
+                    priceDataList.add(p);
+                }
+                if(!priceDataList.peekFirst().isSameFrontRowPricesAs(p)){ // only Unique prices
+                    priceDataList.add(p);
+                }
+            }
+            else
+            {
+                if(!priceDataList.peekFirst().isSameFrontRowPricesAs(p)){ // only Unique prices
+                    triggerTrades(p);
+                    priceDataList.removeFirst();
+                    priceDataList.add(p);
+                }
+            }
+        }
+
+        private boolean isBidAboveUpperBand(PriceData p, double upperBand){
+            return p.getBid().toDouble() > upperBand ? true: false;
+        }
+
+        private boolean isAskBelowLowerBand(PriceData p, double lowerBand){
+            return p.getAsk().toDouble() < lowerBand ? true: false;
+        }
+
+        private boolean isMidBelowMean(PriceData p, double meanMid){
+            double priceMid = (p.getAsk().toDouble() + p.getBid().toDouble()) / 2.0;
+            return priceMid < meanMid ? true: false;
+        }
+
+        private boolean isMidAboveMean(PriceData p, double meanMid){
+             return !isMidBelowMean(p, meanMid);
+        }
+
+        private boolean isThereOpenLong(){
+            return openTrade.equals(LONG) ? true : false;
+        }
+
+        private boolean isThereOpenShort(){
+            return openTrade.equals(SHORT) ? true : false;
+        }
+
+        private void closeAlreadyOpenShort(){
+            this.openTrade = NONE;
+            this.triggeredTrade = LONG;
+        }
+
+
+        private boolean openLong(PriceData p){
+            String lastTradeTriggered = triggeredTrade;
+
+            if(isThereOpenShort() && isMidBelowMean(p,getPriceMean(BookSide.NULL))){
+                //
+                double tradeProfit = openShortBid - p.getAsk().toDouble();
+                if(tradeProfit > 0){
+                    log.info("(++) Profit: " + tradeProfit);
+                    closeAlreadyOpenShort();
+                }
+
+            }
+            if(!isThereOpenShort() && isAskBelowLowerBand(p,getLowerBollingerBand(BookSide.NULL))){
+                openLongAsk = p.getAsk().toDouble();
+                this.triggeredTrade = LONG;
+            }
+
+            if(lastTradeTriggered.equals(triggeredTrade)){
+                setChanged();
+                notifyObservers(productId);
+            }
+
+            return false;
+        }
+        private void closeAlreadyOpenLong(){
+            this.openTrade = NONE;
+            this.triggeredTrade = SHORT;
+        }
+
+        private boolean openShort(PriceData p){
+            String lastTradeTriggered = triggeredTrade;
+            if(isThereOpenLong() && isMidAboveMean(p,getPriceMean(BookSide.NULL))){
+                double tradeProfit = openLongAsk - p.getBid().toDouble();
+                if(tradeProfit > 0){
+                    log.info("(++) Profit: " + tradeProfit);
+                    closeAlreadyOpenLong();
+                }
+            }
+
+            if(!isThereOpenLong() && isBidAboveUpperBand(p,getLowerBollingerBand(BookSide.NULL))){
+                openShortBid = p.getBid().toDouble();
+                this.triggeredTrade = SHORT;
+            }
+
+            if(lastTradeTriggered.equals(triggeredTrade)){
+                setChanged();
+                notifyObservers(productId);
+            }
+            return false;
+        }
+
+        private void triggerTrades(PriceData p){
+            double bidPrice = p.getBid().toDouble();
+            double askPrice = p.getAsk().toDouble();
+            double upperBand = getUpperBollingerBand(BookSide.NULL);
+            double mean = getPriceMean(BookSide.NULL);
+            double lowerBand = getLowerBollingerBand(BookSide.NULL);
+
+            openLong(p);
+            openShort(p);
+
+
+
+        }
+
+        private double[] getPriceBids(){
+            if(listIndex.intValue() > bollingerWindow.intValue())
+            {
+                double[] listBids = new double[bollingerWindow.intValue()];
+                int iteratorIndex = 0;
+                Iterator<PriceData> priceDataIterator = priceDataList.iterator();
+                while(priceDataIterator.hasNext())
+                {
+                    listBids[iteratorIndex++]= priceDataIterator.next().getBid().toDouble();
+                }
+                return listBids;
+            }
+            return null;
+        }
+
+        private double[] getPriceAsks() {
+            if (listIndex.intValue() > bollingerWindow.intValue()) {
+                double[] listAsks = new double[bollingerWindow.intValue()];
+                int iteratorIndex = 0;
+                Iterator<PriceData> priceDataIterator = priceDataList.iterator();
+                while (priceDataIterator.hasNext()) {
+                    listAsks[iteratorIndex++] = priceDataIterator.next().getAsk().toDouble();
+                }
+                return listAsks;
+
+            }
+            return null;
+        }
+
+        private double[] getMidPrices(){
+            if (listIndex.intValue() > bollingerWindow.intValue()) {
+                double[] listMidPrices = new double[bollingerWindow.intValue()];
+                int iteratorIndex = 0;
+                Iterator<PriceData> priceDataIterator = priceDataList.iterator();
+                while (priceDataIterator.hasNext()) {
+                    PriceData priceData = priceDataIterator.next();
+                    listMidPrices[iteratorIndex++] = (priceData.getAsk().toDouble() + priceData.getBid().toDouble()) / 2.0;
+                }
+                return listMidPrices;
+
+            }
+            return null;
+        }
+
+        private double getPriceMean(BookSide bookSide){
+            Statistics priceStats;
+            if(bookSide.equals(BookSide.NULL)){
+                priceStats = new Statistics(getMidPrices());
+            }
+            else if(bookSide.equals(BookSide.ASK)){
+                priceStats = new Statistics(getPriceAsks());
+            }
+            else{
+                priceStats = new Statistics(getPriceBids());
+            }
+            return priceStats.getMean();
+        }
+
+        private double getStandardDev(BookSide bookSide){
+            Statistics priceStats = null;
+            if(bookSide.equals(BookSide.NULL)){
+                priceStats = new Statistics(getMidPrices());
+            }
+            else if(bookSide.equals(BookSide.ASK)){
+                priceStats = new Statistics(getPriceAsks());
+            }
+            else if (bookSide.equals(BookSide.BID)){
+                priceStats = new Statistics(getPriceBids());
+            }
+            return priceStats.getStdDev();
+        }
+
+        private double getUpperBollingerBand(BookSide bookSide){
+            upperBollingerBand = (getPriceMean(bookSide) + 2* getStandardDev(bookSide));
+            return upperBollingerBand;
+        }
+
+        private double getLowerBollingerBand(BookSide bookSide){
+            lowerBollingerBand = (getPriceMean(bookSide) - 2* getStandardDev(bookSide));
+            return lowerBollingerBand;
+        }
+
+        public  String toString(){
+            String returnString = "[" +  listIndex.intValue() + "]{" + this.productId + "} " + "Not Initiailized";
+            if(listIndex.intValue() > bollingerWindow.intValue()){
+                returnString  = "{ {" + this.productId + "}[" + listIndex.intValue() + "] prices with Mean [" + getPriceMean(BookSide.NULL)  + "] and Bands [" + getLowerBollingerBand(BookSide.NULL) + "," + getUpperBollingerBand(BookSide.NULL) + "] }";
+            }
+
+            return returnString;
+        }
+
+        public String getTriggeredTrade(){
+            return triggeredTrade;
+        }
+
+        public String getOpenTrade(){
+            return openTrade;
+        }
+
+        private String productId;
+        private LinkedList<PriceData> priceDataList;
+        private BigInteger listIndex;
+        private BigInteger bollingerWindow;
+        private double upperBollingerBand, lowerBollingerBand;
+        private  String triggeredTrade , openTrade;
+        double openLongAsk , openShortBid;
+    }
+
+
+    @Override
+    public void update(Observable priceDataBollingerBands, Object arg) {
+        String productId = (String) arg;
+        log.info("Notifying " + productId + " with open as " + ((PriceDataBollingerBands)priceDataBollingerBands).getOpenTrade() + " and closing trade " + ((PriceDataBollingerBands)priceDataBollingerBands).getTriggeredTrade());
+    }
 
     @Override
     public void onPriceDataForStrategy(PriceData priceData) {
         if (shuttingDown) return;
-        if (!priceData.hasProductId(tradeProductId)) return;
-        handlePriceDataBidSide(priceData);
+        if (!isInitialised()) return;
+
+        hasPriceData = false;
+        for(String tradeProductId : pidList) {
+            if (priceData.hasProductId(tradeProductId)) {
+                hasPriceData = true;
+            }
+        }
+        if(!hasPriceData) return;
+
+        log.info("Received price #" + counter + ":" + bollingerBandMap.get(priceData.getProductId()).toString());
+        bollingerBandMap.get(priceData.getProductId()).addPrice(priceData);
+        counter++;
+
+        //handlePriceDataBidSide(priceData);
     }
 
     @Override
@@ -62,8 +344,16 @@ public class BollingerBands extends StrategyBase {
     @Override
     public void onInitStrategy() {
         setInternalAccount(this.getClass().getSimpleName());
-        tradeProductId = getConfig("tradeProductId");
-        subscribe(tradeProductId);
+        tradeProductList = getConfig("productIdList");
+        String[] parts = tradeProductList.split(",");
+        pidList = Arrays.asList(parts);
+        bollingerBandMap = new ConcurrentHashMap<String, PriceDataBollingerBands>();
+        for(String tradeProductId : pidList) {
+            PriceDataBollingerBands bollingerBandForProduct = new PriceDataBollingerBands(tradeProductId,BOLLINGER_WINDOW_SIZE);
+            bollingerBandForProduct.setTradeListener(this);
+            bollingerBandMap.put(tradeProductId,bollingerBandForProduct);
+            subscribe(tradeProductId);
+        }
     }
 
     @Override
@@ -75,7 +365,9 @@ public class BollingerBands extends StrategyBase {
     private void handlePriceDataBidSide(PriceData priceData) {
 
 
-        //
+
+
+        /*
         Decimal bid = priceData.getBid();
         Decimal ask = priceData.getAsk();
         double midPrice = (bid.toDouble() + ask.toDouble()) / 2.0;
@@ -145,7 +437,7 @@ public class BollingerBands extends StrategyBase {
                     log.info("lowerBand: " + lowerBand);
             }
         }
-
+*/
 
     }
 
@@ -295,5 +587,13 @@ public class BollingerBands extends StrategyBase {
     private double shortOpenPrice, longOpenPrice;
     private double cumProfit;
     private double oldBidPrice, oldAskPrice, oldMidPrice;
+
+    private String tradeProductList;
+    private int counter;
+    private ConcurrentHashMap<String,PriceDataBollingerBands> bollingerBandMap;
+    private  List<String> pidList;
+    private boolean hasPriceData;
+
+
 
 }
