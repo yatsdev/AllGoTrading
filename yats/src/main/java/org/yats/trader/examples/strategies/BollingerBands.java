@@ -481,11 +481,18 @@ public class BollingerBands extends StrategyBase  implements Observer  {
     }
 
     private void openLongPosition(double askPrice){
-        if (!openLong) {
-            openLong = true;
-            longOpenPrice = askPrice;
-            log.info("(++) Open Long position at  [longOpenPrice]: " + longOpenPrice);
+        if(openShort){
+            closeShortPosition(askPrice);
         }
+        else{
+            if (!openLong) {
+                openLong = true;
+                longOpenPrice = askPrice;
+                log.info("(++) Open Long position at  [longOpenPrice]: " + longOpenPrice);
+            }
+
+        }
+
 
     }
 
@@ -499,6 +506,7 @@ public class BollingerBands extends StrategyBase  implements Observer  {
 
 
         if (openLong) {
+            log.info("(--) Current Trade [bidPrice - longOpenPrice]: " + bidPrice + "-" +  longOpenPrice);
             if ((bidPrice - longOpenPrice) > 0) {
                 openLong = false;
                 double tradeProfit = bidPrice - longOpenPrice;
@@ -516,12 +524,18 @@ public class BollingerBands extends StrategyBase  implements Observer  {
     }
 
     private void openShortPosition(double bidPrice){
-        if (!openShort) {
-            openShort = true;
-            shortOpenPrice = bidPrice;
-
-            log.info("(++) Open Short position at  [shortOpenPrice]: " + shortOpenPrice);
+        if(openLong){
+            closeLongPosition(bidPrice);
         }
+        else{
+            if (!openShort) {
+                openShort = true;
+                shortOpenPrice = bidPrice;
+
+                log.info("(++) Open Short position at  [shortOpenPrice]: " + shortOpenPrice);
+            }
+        }
+
 
     }
 
@@ -534,6 +548,7 @@ public class BollingerBands extends StrategyBase  implements Observer  {
 
      */
         if (openShort) {
+            log.info("(--) Current Trade [shortOpenPrice - askPrice]: " + shortOpenPrice + "-" +  askPrice);
             if ((shortOpenPrice - askPrice) > 0) {
                 openShort = false;
                 double tradeProfit = shortOpenPrice - askPrice; //Buy to close short
