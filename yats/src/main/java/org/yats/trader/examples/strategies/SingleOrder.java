@@ -72,6 +72,7 @@ public class SingleOrder extends StrategyBase {
         tradeProductId = getConfig("tradeProductId");
         subscribe(tradeProductId);
         position = getPositionForProduct(tradeProductId);
+        startStrategy();
     }
 
     @Override
