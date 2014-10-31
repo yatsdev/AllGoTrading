@@ -19,8 +19,22 @@ public class Id2ReceiptMap {
         return orderId2ExternalIdMap.size();
     }
 
-    public String get(String orderId) {
+    public int sizeExternalIds() {
+        return externalId2Receipt.size();
+    }
+
+
+    public String getExternalId(String orderId) {
         return orderId2ExternalIdMap.get(orderId);
+    }
+
+    public Receipt getReceipt(String orderId) {
+        String externalId = orderId2ExternalIdMap.get(orderId);
+        return getReceiptForExternalId(externalId);
+    }
+
+    public Receipt getReceiptForExternalId(String externalId) {
+        return externalId2Receipt.get(externalId);
     }
 
     public boolean containsReceiptForOrderId(String orderId) {
@@ -45,22 +59,42 @@ public class Id2ReceiptMap {
         externalId2Receipt.remove(externalId);
     }
 
-    public Id2ReceiptMap() {
-        externalId2OrderMapFilename ="";
-        orderId2ExternalIdMapFilename ="";
-        externalId2Receipt =new ConcurrentHashMap<String, Receipt>();
-        orderId2ExternalIdMap =new ConcurrentHashMap<String, String>();
+    public void storeToDisk() {
+        writeFileOrderId2OandaIdMap();
+        writeFileOandaId2ReceiptMap();
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
+    public void readFromDisk() {
+        init();
+        readFileOrderId2OandaIdMap();
+        readFileOandaId2ReceiptMap();
+    }
 
+    public void readFileOrderId2OandaIdMap() {
+        String csvString = FileTool.exists(orderId2ExternalIdMapFilename)
+                ? FileTool.readFromTextFile(orderId2ExternalIdMapFilename)
+                : "";
+        parseOrderId2ExternalIdMap(csvString);
+    }
 
-    private void writeFileOandaId2OrderMap() {
+    public void readFileOandaId2ReceiptMap() {
+        String csvString = FileTool.exists(externalId2OrderMapFilename)
+                ? FileTool.readFromTextFile(externalId2OrderMapFilename)
+                : "";
+        parseExternalId2OrderMap(csvString);
+    }
+
+    public void writeFileOandaId2ReceiptMap() {
         String csvString = toStringCSVExternalId2OrderMap();
         FileTool.writeToTextFile(externalId2OrderMapFilename, csvString, false);
     }
 
-    private String toStringCSVExternalId2OrderMap() {
+    public void writeFileOrderId2OandaIdMap() {
+        String csvString = toStringCSVOrderId2ExternalIdMap();
+        FileTool.writeToTextFile(orderId2ExternalIdMapFilename, csvString, false);
+    }
+
+    public String toStringCSVExternalId2OrderMap() {
         StringBuilder b = new StringBuilder();
         for(String key : externalId2Receipt.keySet()) {
             Receipt o = externalId2Receipt.get(key);
@@ -73,31 +107,12 @@ public class Id2ReceiptMap {
         return b.toString();
     }
 
-    private void writeFileOrderId2OandaIdMap() {
-        String csvString = toStringCSVOrderId2ExternalIdMap();
-        FileTool.writeToTextFile(orderId2ExternalIdMapFilename, csvString, false);
-    }
-
-    private void readFileOrderId2OandaIdMap() {
-        String csvString = FileTool.exists(orderId2ExternalIdMapFilename)
-                ? FileTool.readFromTextFile(orderId2ExternalIdMapFilename)
-                : "";
-        parseOrderId2ExternalIdMap(csvString);
-    }
-
-    private String toStringCSVOrderId2ExternalIdMap() {
+    public String toStringCSVOrderId2ExternalIdMap() {
         PropertiesReader r = PropertiesReader.createFromMap(orderId2ExternalIdMap);
         return r.toStringKeyValue();
     }
 
-    private void readFileOandaId2OrderMap() {
-        String csvString = FileTool.exists(externalId2OrderMapFilename)
-                ? FileTool.readFromTextFile(externalId2OrderMapFilename)
-                : "";
-        parseExternalId2OrderMap(csvString);
-    }
-
-    private void parseExternalId2OrderMap(String csv) {
+    public void parseExternalId2OrderMap(String csv) {
         String[] lines = csv.split(FileTool.getLineSeparator());
         Deserializer<ReceiptMsg> deserializer = new Deserializer<ReceiptMsg>(ReceiptMsg.class);
         for (String line : lines) {
@@ -109,13 +124,30 @@ public class Id2ReceiptMap {
         }
     }
 
-    private void parseOrderId2ExternalIdMap(String csv) {
+    public void parseOrderId2ExternalIdMap(String csv) {
         PropertiesReader r = PropertiesReader.createFromStringKeyValue(csv);
         ConcurrentHashMap<String, String> map = r.toMap();
         for(String key : map.keySet()) {
             orderId2ExternalIdMap.put(key, map.get(key));
         }
     }
+
+
+    public Id2ReceiptMap(String storagePrefix) {
+        externalId2OrderMapFilename =storagePrefix+"_extId2Receipt.txt";
+        orderId2ExternalIdMapFilename =storagePrefix+"_orderId2Receipt.txt";
+        init();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    private void init() {
+        externalId2Receipt =new ConcurrentHashMap<String, Receipt>();
+        orderId2ExternalIdMap =new ConcurrentHashMap<String, String>();
+    }
+
+
+
 
     private ConcurrentHashMap<String, Receipt> externalId2Receipt;
     private ConcurrentHashMap<String, String> orderId2ExternalIdMap;

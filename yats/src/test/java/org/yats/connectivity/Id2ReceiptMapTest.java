@@ -29,6 +29,11 @@ public class Id2ReceiptMapTest {
             .withResidualSize(Decimal.ONE);
 
     @Test
+    public void whenExternalIdsAreInMap_sizeExternalIds_countsThem() {
+        assert(map.sizeExternalIds()==1);
+    }
+
+    @Test
     public void whenOrderIdsAreInMap_sizeOrderIds_countsThem() {
         assert(map.sizeOrderIds()==2);
     }
@@ -40,8 +45,8 @@ public class Id2ReceiptMapTest {
     }
 
     @Test
-    public void whenOrderIdIsInMap_get_returnsTheAssociatedExternalId() {
-        assert(map.get(orderId1).compareTo(externalId1)==0);
+    public void whenOrderIdIsInMap_getExternalId_returnsTheAssociatedExternalId() {
+        assert(map.getExternalId(orderId1).compareTo(externalId1)==0);
     }
 
     @Test
@@ -58,11 +63,25 @@ public class Id2ReceiptMapTest {
         assert(!map.containsReceiptForOrderId(orderId1));
     }
 
+    @Test
+    public void whenExternalIdIsInMap_toStringCSVExternalId2OrderMap_canSerializeIt() {
+        assert(map.toStringCSVExternalId2OrderMap().length()>0);
+    }
 
+    @Test
+    public void whenExternalIdMapGotSerialized_parseExternalId2OrderMap_canDeserializeIt() {
+        String data = map.toStringCSVExternalId2OrderMap();
+        Id2ReceiptMap newMap = new Id2ReceiptMap("test");
+        newMap.parseExternalId2OrderMap(data);
+        String newCsv = newMap.getReceiptForExternalId(externalId1).toStringCSV();
+        String oldCsv = receipt1.toStringCSV();
+        assert(newCsv.compareTo(oldCsv)==0);
+    }
 
+    //////////////////////////////////////////////////////////////
     @BeforeMethod
     public void setUp() {
-        map = new Id2ReceiptMap();
+        map = new Id2ReceiptMap("test");
         map.putOrderId2ExternalIdMapping(orderId1,externalId1);
         map.putReceipt(externalId1, receipt1);
         map.putOrderId2ExternalIdMapping(orderId2,externalId2);

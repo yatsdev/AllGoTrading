@@ -20,15 +20,12 @@ import org.json.simple.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yats.common.*;
-import org.yats.messagebus.Deserializer;
-import org.yats.messagebus.Serializer;
-import org.yats.messagebus.messages.ReceiptMsg;
+import org.yats.connectivity.Id2ReceiptMap;
 import org.yats.trading.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class FXOrders implements ISendOrder, Runnable {
 
@@ -124,10 +121,9 @@ public class FXOrders implements ISendOrder, Runnable {
             }
             String oandaOrderId = extractServerOrderId(response);
             log.debug("created Oanda order with orderId="+orderNew.getOrderId()+" oandaId=" + oandaOrderId);
-            oandaId2Receipt.put(oandaOrderId, orderNew.createReceiptDefault().withExternalAccount(getOandaAccount()));
-            orderId2OandaIdMap.put(orderNew.getOrderId().toString(), oandaOrderId);
-            writeFileOandaId2OrderMap();
-            writeFileOrderId2OandaIdMap();
+            id2ReceiptMap.putOrderId2ExternalIdMapping(orderNew.getOrderId().toString(), oandaOrderId);
+            id2ReceiptMap.putReceipt(oandaOrderId, orderNew.createReceiptDefault().withExternalAccount(getOandaAccount()));
+            id2ReceiptMap.storeToDisk();
             EntityUtils.consume(response.getEntity());
             Receipt r = orderNew.createReceiptDefault().withEndState(false);
             receiptConsumer.onReceipt(r);
@@ -150,7 +146,7 @@ public class FXOrders implements ISendOrder, Runnable {
 
     @Override
     public void sendOrderCancel(OrderCancel orderCancel) {
-        boolean orderIdKnown = orderId2OandaIdMap.containsKey(orderCancel.getOrderId().toString());
+        boolean orderIdKnown = id2ReceiptMap.containsReceiptForOrderId(orderCancel.getOrderId().toString());
         if(!orderIdKnown) {
             String rejection = "No Oanda order id found for "+orderCancel.getOrderId();
             Receipt r = orderCancel.createReceiptDefault()
@@ -162,7 +158,7 @@ public class FXOrders implements ISendOrder, Runnable {
             return;
         }
 
-        String oandaOrderId = orderId2OandaIdMap.get(orderCancel.getOrderId().toString());
+        String oandaOrderId = id2ReceiptMap.getExternalId(orderCancel.getOrderId().toString());
 
 
         String urlString = getServerUrlApi()+"/v1/accounts/"+ getOandaAccount()+"/orders/"+oandaOrderId;
@@ -231,21 +227,19 @@ public class FXOrders implements ISendOrder, Runnable {
                             ? values.get("orderId").toString()
                             : values.get("id").toString();
                     String type = values.get("type").toString();
-                    if(!oandaId2Receipt.containsKey(id)) {
+                    if(!id2ReceiptMap.containsReceiptForExternalId(id)) {
                         log.error("OandaReceipt: got receipt for unknown order: "+msg);
                         continue;
                     }
-                    Receipt r  = oandaId2Receipt.get(id);
+                    Receipt r  = id2ReceiptMap.getReceiptForExternalId(id);
                     if(type.compareTo("LIMIT_ORDER_CREATE")==0){
                         log.info("OandaReceipt: LIMIT_ORDER_CREATE for "+id);
                     } else
                     if(type.compareTo("ORDER_CANCEL")==0) {
                         log.info("OandaReceipt: ORDER_CANCEL for "+id);
                         r=r.withEndState(true);
-                        oandaId2Receipt.remove(id);
-                        orderId2OandaIdMap.remove(r.getOrderId().toString());
-                        writeFileOandaId2OrderMap();
-                        writeFileOrderId2OandaIdMap();
+                        id2ReceiptMap.remove(r.getOrderId().toString());
+                        id2ReceiptMap.storeToDisk();
                     } else
                     if(type.compareTo("ORDER_FILLED")==0) {
                         log.info("OandaReceipt: ORDER_FILLED for "+id);
@@ -255,10 +249,8 @@ public class FXOrders implements ISendOrder, Runnable {
                         r.setTotalTradedSize(r.getTotalTradedSize().add(currentTradedSize));
                         if(r.isPartialFill()) log.info("Order filled partially: "+r.toString());
                         r.setEndState(!r.isPartialFill());
-                        oandaId2Receipt.remove(id);
-                        orderId2OandaIdMap.remove(r.getOrderId().toString());
-                        writeFileOandaId2OrderMap();
-                        writeFileOrderId2OandaIdMap();
+                        id2ReceiptMap.remove(r.getOrderId().toString());
+                        id2ReceiptMap.storeToDisk();
                     } else {
                         log.error("OandaReceipt: Unknown receipt type: "+msg);
                     }
@@ -291,8 +283,7 @@ public class FXOrders implements ISendOrder, Runnable {
 
     public void shutdown() {
         stopReceiving=true;
-        writeFileOandaId2OrderMap();
-        writeFileOrderId2OandaIdMap();
+        id2ReceiptMap.storeToDisk();
     }
 
     public void setReceiptConsumer(IConsumeReceipt _receiptConsumer) {
@@ -303,12 +294,9 @@ public class FXOrders implements ISendOrder, Runnable {
         prop=_prop;
         httpPoll = new DefaultHttpClient();
         httpStream = new DefaultHttpClient();
-        oandaId2Receipt = new ConcurrentHashMap<String, Receipt>();
-        orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
-        oandaId2OrderMapFilename = "fxOrdersMap.txt";
-        orderId2OandaIdMapFilename = "fxOandaIdMap.txt";
-        readFileOandaId2OrderMap();
-        readFileOrderId2OandaIdMap();
+        String idFileName = prop.exists("orderStorageFilename") ? prop.get("orderStorageFilename") : "OandaOrderMap";
+        id2ReceiptMap = new Id2ReceiptMap(idFileName);
+        id2ReceiptMap.readFromDisk();
 
         receiptConsumer = new IConsumeReceipt() {
             @Override
@@ -387,75 +375,15 @@ public class FXOrders implements ISendOrder, Runnable {
         return "";
     }
 
-    private void writeFileOandaId2OrderMap() {
-        String csvString = oandaId2OrderMapToStringCSV();
-        FileTool.writeToTextFile(oandaId2OrderMapFilename, csvString, false);
-    }
-
-    private String oandaId2OrderMapToStringCSV() {
-        StringBuilder b = new StringBuilder();
-        for(String key : oandaId2Receipt.keySet()) {
-            Receipt o = oandaId2Receipt.get(key);
-            b.append(key); b.append(";");
-            Serializer<ReceiptMsg> serializer = new Serializer<ReceiptMsg>();
-            String s = serializer.convertToString(ReceiptMsg.fromReceipt(o));
-            b.append(s);
-            b.append(FileTool.getLineSeparator());
-        }
-        return b.toString();
-    }
-
-    private void writeFileOrderId2OandaIdMap() {
-        String csvString = orderId2OandaIdMapToStringCSV();
-        FileTool.writeToTextFile(orderId2OandaIdMapFilename, csvString, false);
-    }
-
-    private void readFileOrderId2OandaIdMap() {
-        String csvString = FileTool.exists(orderId2OandaIdMapFilename)
-                ? FileTool.readFromTextFile(orderId2OandaIdMapFilename)
-                : "";
-        parseOrderId2OandaIdMap(csvString);
-    }
-
-    private String orderId2OandaIdMapToStringCSV() {
-        PropertiesReader r = PropertiesReader.createFromMap(orderId2OandaIdMap);
-        return r.toStringKeyValue();
-    }
-
-    private void readFileOandaId2OrderMap() {
-        String csvString = FileTool.exists(oandaId2OrderMapFilename)
-                ? FileTool.readFromTextFile(oandaId2OrderMapFilename)
-                : "";
-        parseOandaId2OrderMap(csvString);
-    }
-
-    private void parseOandaId2OrderMap(String csv) {
-        String[] lines = csv.split(FileTool.getLineSeparator());
-        Deserializer<ReceiptMsg> deserializer = new Deserializer<ReceiptMsg>(ReceiptMsg.class);
-        for (String line : lines) {
-            String[] parts = line.split(";");
-            if (parts.length < 2) continue;
-            ReceiptMsg m = deserializer.convertFromString(parts[1]);
-            Receipt o = m.toReceipt();
-            oandaId2Receipt.put(parts[0], o);
-        }
-    }
-
-    private void parseOrderId2OandaIdMap(String csv) {
-        PropertiesReader r = PropertiesReader.createFromStringKeyValue(csv);
-        ConcurrentHashMap<String, String> map = r.toMap();
-        for(String key : map.keySet()) {
-            orderId2OandaIdMap.put(key, map.get(key));
-        }
-    }
 
     private IProvideProperties prop;
     private DefaultHttpClient httpPoll;
     private DefaultHttpClient httpStream;
-    private ConcurrentHashMap<String, Receipt> oandaId2Receipt;
-    private ConcurrentHashMap<String, String> orderId2OandaIdMap;
-    private String orderId2OandaIdMapFilename;
-    private String oandaId2OrderMapFilename;
+//    private ConcurrentHashMap<String, Receipt> oandaId2Receipt;
+//    private ConcurrentHashMap<String, String> orderId2OandaIdMap;
+//    private String orderId2OandaIdMapFilename;
+//    private String oandaId2OrderMapFilename;
+    Id2ReceiptMap id2ReceiptMap;
     private IConsumeReceipt receiptConsumer;
     private Thread eventStreamThread;
     private boolean stopReceiving;
