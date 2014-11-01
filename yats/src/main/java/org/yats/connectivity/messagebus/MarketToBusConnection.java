@@ -54,6 +54,7 @@ public class MarketToBusConnection extends StrategyBase implements IAmCalledBack
     public void onInitStrategy()
     {
         setInternalAccount("marketToBusConnection");
+        startStrategy();
     }
 
     @Override
