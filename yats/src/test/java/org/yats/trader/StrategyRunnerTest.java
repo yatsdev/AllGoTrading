@@ -12,7 +12,7 @@ import org.yats.trading.*;
 
 
 
-@Test(groups = { "inMemory" })
+
 public class StrategyRunnerTest {
 
     /*
@@ -122,6 +122,8 @@ public class StrategyRunnerTest {
         }
         assert(strategy.isCalledBackByTimer());
     }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @BeforeMethod
     public void setUp() {
