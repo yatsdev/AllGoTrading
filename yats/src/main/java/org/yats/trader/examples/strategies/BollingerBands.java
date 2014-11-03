@@ -71,6 +71,7 @@ public class BollingerBands extends StrategyBase  implements Observer  {
                 }
                 if(!priceDataList.peekFirst().isSameFrontRowPricesAs(p)){ // only Unique prices
                     priceDataList.add(p);
+                    //sendOrder(BookSide.BID, p.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
                 }
             }
             else
@@ -86,18 +87,24 @@ public class BollingerBands extends StrategyBase  implements Observer  {
 
         }
 
+        private OrderNew sendOrder(BookSide side, Decimal bid, Decimal orderSize)
+        {
+            OrderNew order = OrderNew.create()
+                    .withProductId(productId)
+                    .withInternalAccount(getInternalAccount())
+                    .withBookSide(side)
+                    .withLimit(bid)
+                    .withSize(orderSize.multiply(Decimal.TEN));
+            sendNewOrder(order);
+            return order;
+        }
+
         private void askOrderAtLowerBandLimit(PriceData p){
             if(lastAskOrder.equals(OrderNew.NULL)){
-
-                lastAskOrder = OrderNew.create()
-                        .withProductId(productId)
-                        .withInternalAccount(getInternalAccount())
-                        .withBookSide(BookSide.ASK)
-                        .withLimit(Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL)))
-                        .withSize(Decimal.fromString("1000"));
-
+                Decimal lowerBollingerBand = Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL));
+                lowerBollingerBand = lowerBollingerBand.roundToDigits(3);
+                lastAskOrder = sendOrder(BookSide.ASK,lowerBollingerBand,Decimal.ONE);
                 this.askOrderAtLowerBandLimitReceipt = false;
-                sendNewOrder(lastAskOrder);
                 log.info("(++) Sending ASK Order: "+ lastAskOrder.toString());
 
             }
@@ -106,20 +113,13 @@ public class BollingerBands extends StrategyBase  implements Observer  {
                 if(this.askOrderAtLowerBandLimitReceipt){
                     OrderCancel o = lastAskOrder.createCancelOrder();
                     sendOrderCancel(o);
-                    lastAskOrder = OrderNew.NULL;
-                    lastAskOrder = OrderNew.create()
-                            .withProductId(productId)
-                            .withInternalAccount(getInternalAccount())
-                            .withBookSide(BookSide.ASK)
-                            .withLimit(Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL)))
-                            .withSize(Decimal.fromString("1000"));
+                    Decimal lowerBollingerBand = Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL));
+                    lowerBollingerBand = lowerBollingerBand.roundToDigits(3);
+                    lastAskOrder = sendOrder(BookSide.ASK,lowerBollingerBand,Decimal.ONE);
                     this.askOrderAtLowerBandLimitReceipt = false;
-                    sendNewOrder(lastAskOrder);
                     log.info("(++) Sending ASK Order: "+ lastAskOrder.toString());
 
                 }
-
-
 
 
             }
@@ -129,31 +129,23 @@ public class BollingerBands extends StrategyBase  implements Observer  {
         private void bidOrderAtUpperBandLimit(PriceData p){
             if(lastBidOrder.equals(OrderNew.NULL)){
 
-                lastBidOrder = OrderNew.create()
-                        .withProductId(productId)
-                        .withInternalAccount(getInternalAccount())
-                        .withBookSide(BookSide.BID)
-                        .withLimit(Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL)))
-                        .withSize(Decimal.fromString("1000"));
+                Decimal upperBollingerBand = Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL));
+                upperBollingerBand = upperBollingerBand.roundToDigits(3);
+                lastBidOrder = sendOrder(BookSide.BID,upperBollingerBand,Decimal.ONE);
                 this.bidOrderAtUpperBandLimitReceipt = false;
-                sendNewOrder(lastBidOrder);
                 log.info("(++) Sending BID Order: "+ lastBidOrder.toString());
 
             }
             else{
                 //cancel last bid order
                 if(this.bidOrderAtUpperBandLimitReceipt){
-                    OrderCancel o = lastAskOrder.createCancelOrder();
+                    OrderCancel o = lastBidOrder.createCancelOrder();
                     sendOrderCancel(o);
                     lastBidOrder = OrderNew.NULL;
-                    lastBidOrder = OrderNew.create()
-                            .withProductId(productId)
-                            .withInternalAccount(getInternalAccount())
-                            .withBookSide(BookSide.BID)
-                            .withLimit(Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL)))
-                            .withSize(Decimal.fromString("1000"));
+                    Decimal upperBollingerBand = Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL));
+                    upperBollingerBand = upperBollingerBand.roundToDigits(3);
+                    lastBidOrder = sendOrder(BookSide.BID,upperBollingerBand,Decimal.ONE);
                     this.bidOrderAtUpperBandLimitReceipt = false;
-                    sendNewOrder(lastBidOrder);
                     log.info("(++) Sending BID Order: "+ lastBidOrder.toString());
                 }
 
@@ -431,7 +423,7 @@ public class BollingerBands extends StrategyBase  implements Observer  {
         if (shuttingDown) return;
         if (receipt.getRejectReason().length() > 0) {
             log.error("Received rejection! Stopping for now!");
-            System.exit(-1);
+            //System.exit(-1);
         }
 
         boolean foundProductForReceipt = false;
@@ -448,18 +440,22 @@ public class BollingerBands extends StrategyBase  implements Observer  {
             log.error("Received receipt for unknown product: " + receipt);
             return;
         }
-        PriceDataBollingerBands pbands = bollingerBandMap.get(productId);
 
-        if (receipt.isForOrder(pbands.lastAskOrder)) {
-            pbands.askOrderAtLowerBandLimitReceipt = true;
+        if(foundProductForReceipt){
+            PriceDataBollingerBands pbands = bollingerBandMap.get(productId);
+
+            if (receipt.isForOrder(pbands.lastAskOrder)) {
+                pbands.askOrderAtLowerBandLimitReceipt = true;
+            }
+
+            if (receipt.isForOrder(pbands.lastBidOrder)) {
+                pbands.bidOrderAtUpperBandLimitReceipt = true;
+            }
+
+            log.debug("Received receipt: " + receipt);
+            //position = receipt.getPositionChangeOfBase().add(position);
         }
 
-        if (receipt.isForOrder(pbands.lastBidOrder)) {
-            pbands.bidOrderAtUpperBandLimitReceipt = true;
-        }
-
-        log.debug("Received receipt: " + receipt);
-        //position = receipt.getPositionChangeOfBase().add(position);
     }
 
     @Override

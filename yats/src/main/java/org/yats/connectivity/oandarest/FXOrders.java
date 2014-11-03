@@ -256,10 +256,10 @@ public class FXOrders implements ISendOrder, Runnable {
     public FXOrders(IProvideProperties _prop) {
         prop=_prop;
         httpPoll = new DefaultHttpClient();
-        HttpHost proxy = new HttpHost("mnsproxy.mn-services.nl", 8080);
-        httpPoll.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        //HttpHost proxy = new HttpHost("mnsproxy.mn-services.nl", 8080);
+        //httpPoll.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         httpStream = new DefaultHttpClient();
-        httpStream.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+//        httpStream.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
         oandaId2Receipt = new ConcurrentHashMap<String, Receipt>();
         orderId2OandaIdMap = new ConcurrentHashMap<String, String>();
         oandaId2OrderMapFilename = "fxOrdersMap.txt";
@@ -390,7 +390,7 @@ public class FXOrders implements ISendOrder, Runnable {
         String[] lines = csv.split(FileTool.getLineSeparator());
         Deserializer<ReceiptMsg> deserializer = new Deserializer<ReceiptMsg>(ReceiptMsg.class);
         for (String line : lines) {
-            String[] parts = line.split(";");
+            String[] parts = line.split(","); // was ;
             if (parts.length < 2) continue;
             ReceiptMsg m = deserializer.convertFromString(parts[1]);
             Receipt o = m.toReceipt();

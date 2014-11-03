@@ -43,8 +43,9 @@ public class StrategyToBusConnection implements IProvidePriceFeed, IProvideBulkP
     @Override
     public void sendOrderNew(OrderNew orderNew) {
         OrderNewMsg m = OrderNewMsg.createFromOrderNew(orderNew);
-        senderOrderNew.publish(m.getTopic(), m);
         log.debug("Published "+orderNew);
+        senderOrderNew.publish(m.getTopic(), m);
+        //log.debug("Published "+orderNew);
     }
 
     @Override
