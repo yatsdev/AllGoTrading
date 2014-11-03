@@ -123,7 +123,7 @@ public class FXOrders implements ISendOrder, Runnable {
             log.debug("created Oanda order with orderId="+orderNew.getOrderId()+" oandaId=" + oandaOrderId);
             id2ReceiptMap.putOrderId2ExternalIdMapping(orderNew.getOrderId().toString(), oandaOrderId);
             id2ReceiptMap.putReceipt(oandaOrderId, orderNew.createReceiptDefault().withExternalAccount(getOandaAccount()));
-            id2ReceiptMap.storeToDisk();
+            id2ReceiptMap.writeToFileJson("");
             EntityUtils.consume(response.getEntity());
             Receipt r = orderNew.createReceiptDefault().withEndState(false);
             receiptConsumer.onReceipt(r);
@@ -239,7 +239,7 @@ public class FXOrders implements ISendOrder, Runnable {
                         log.info("OandaReceipt: ORDER_CANCEL for "+id);
                         r=r.withEndState(true);
                         id2ReceiptMap.remove(r.getOrderId().toString());
-                        id2ReceiptMap.storeToDisk();
+                        id2ReceiptMap.writeToFileJson(storageFilename);
                     } else
                     if(type.compareTo("ORDER_FILLED")==0) {
                         log.info("OandaReceipt: ORDER_FILLED for "+id);
@@ -250,7 +250,7 @@ public class FXOrders implements ISendOrder, Runnable {
                         if(r.isPartialFill()) log.info("Order filled partially: "+r.toString());
                         r.setEndState(!r.isPartialFill());
                         id2ReceiptMap.remove(r.getOrderId().toString());
-                        id2ReceiptMap.storeToDisk();
+                        id2ReceiptMap.writeToFileJson(storageFilename);
                     } else {
                         log.error("OandaReceipt: Unknown receipt type: "+msg);
                     }
@@ -283,7 +283,7 @@ public class FXOrders implements ISendOrder, Runnable {
 
     public void shutdown() {
         stopReceiving=true;
-        id2ReceiptMap.storeToDisk();
+        id2ReceiptMap.writeToFileJson(storageFilename);
     }
 
     public void setReceiptConsumer(IConsumeReceipt _receiptConsumer) {
@@ -295,8 +295,7 @@ public class FXOrders implements ISendOrder, Runnable {
         httpPoll = new DefaultHttpClient();
         httpStream = new DefaultHttpClient();
         String idFileName = prop.exists("orderStorageFilename") ? prop.get("orderStorageFilename") : "OandaOrderMap";
-        id2ReceiptMap = new Id2ReceiptMap(idFileName);
-        id2ReceiptMap.readFromDisk();
+        id2ReceiptMap = Id2ReceiptMap.createFromFileJson(storageFilename);
 
         receiptConsumer = new IConsumeReceipt() {
             @Override
@@ -379,6 +378,7 @@ public class FXOrders implements ISendOrder, Runnable {
     private IProvideProperties prop;
     private DefaultHttpClient httpPoll;
     private DefaultHttpClient httpStream;
+    private String storageFilename = "FXOrderCache.json";
 //    private ConcurrentHashMap<String, Receipt> oandaId2Receipt;
 //    private ConcurrentHashMap<String, String> orderId2OandaIdMap;
 //    private String orderId2OandaIdMapFilename;
