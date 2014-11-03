@@ -18,7 +18,7 @@ public class OrderCancelMsg {
         m.timestamp = r.getTimestamp().toString();
         m.orderId=r.getOrderId().toString();
         m.productId = r.getProductId();
-        m.bookSide = r.getBookSide();
+        m.bookSideDirection = r.getBookSide().toDirection();
         return m;
     }
 
@@ -27,7 +27,7 @@ public class OrderCancelMsg {
                 .withTimestamp(DateTime.parse(timestamp))
                 .withOrderId(UniqueId.createFromString(orderId))
                 .withProductId(productId)
-                .withBookSide(bookSide);
+                .withBookSide(BookSide.fromDirection(bookSideDirection));
     }
 
     @Override
@@ -36,7 +36,7 @@ public class OrderCancelMsg {
                 "timestamp='" + timestamp + '\'' +
                 ", orderId='" + orderId + '\'' +
                 ", productId='" + productId + '\'' +
-                ", bookSide=" + bookSide +
+                ", bookSideDirection=" + bookSideDirection +
                 '}';
     }
 
@@ -48,12 +48,12 @@ public class OrderCancelMsg {
         if(timestamp.compareTo(data.timestamp)!=0) return false;
         if(orderId.compareTo(data.orderId)!=0) return false;
         if(productId.compareTo(data.productId)!=0) return false;
-        return bookSide.toDirection() == (data.bookSide.toDirection());
+        return bookSideDirection == (data.bookSideDirection);
     }
 
     public String timestamp;
     public String orderId;
     public String productId;
-    public BookSide bookSide;
+    public int bookSideDirection;
 
 } // class

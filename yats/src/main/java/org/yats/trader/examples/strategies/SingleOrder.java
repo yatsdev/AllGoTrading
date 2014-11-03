@@ -9,12 +9,18 @@ import org.yats.trading.*;
 
 import java.util.HashMap;
 
-public class SingleOrder extends StrategyBase {
+public class SingleOrder extends StrategyBase implements IAmCalledTimed  {
 
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
     final Logger log = LoggerFactory.getLogger(MarketFollow.class);
+
+
+    @Override
+    public void onTimerCallback() {
+        cancelOrders();
+    }
 
     @Override
     public void onPriceDataForStrategy(PriceData priceData)
@@ -26,6 +32,7 @@ public class SingleOrder extends StrategyBase {
 
         //sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
         sendOrder(BookSide.BID, priceData.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
+        addTimedCallback(5, this);
     }
 
 

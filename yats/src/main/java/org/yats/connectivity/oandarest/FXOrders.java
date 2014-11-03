@@ -123,7 +123,7 @@ public class FXOrders implements ISendOrder, Runnable {
             log.debug("created Oanda order with orderId="+orderNew.getOrderId()+" oandaId=" + oandaOrderId);
             id2ReceiptMap.putOrderId2ExternalIdMapping(orderNew.getOrderId().toString(), oandaOrderId);
             id2ReceiptMap.putReceipt(oandaOrderId, orderNew.createReceiptDefault().withExternalAccount(getOandaAccount()));
-            id2ReceiptMap.writeToFileJson("");
+            id2ReceiptMap.writeToFileJson(storageFilename);
             EntityUtils.consume(response.getEntity());
             Receipt r = orderNew.createReceiptDefault().withEndState(false);
             receiptConsumer.onReceipt(r);
