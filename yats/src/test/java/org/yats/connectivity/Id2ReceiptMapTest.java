@@ -92,15 +92,14 @@ public class Id2ReceiptMapTest {
     }
 
     @Test
-    public void whenExternalIdIsInMap_toStringCSVExternalId2OrderMap_canSerializeIt() {
-        assert(map.toStringCSVExternalId2OrderMap().length()>0);
+    public void whenExternalIdIsInMap_toStringJSon_canSerializeItToANotEmptyString() {
+        assert(map.toStringJSon().length()>0);
     }
 
     @Test
-    public void whenExternalIdMapGotSerialized_parseExternalId2OrderMap_canDeserializeIt() {
-        String data = map.toStringCSVExternalId2OrderMap();
-        Id2ReceiptMap newMap = new Id2ReceiptMap("test");
-        newMap.parseExternalId2OrderMap(data);
+    public void whenExternalIdMapGotSerializedToJson_createFromStringJson_canDeserializeIt() {
+        String data = map.toStringJSon();
+        Id2ReceiptMap newMap = Id2ReceiptMap.createFromStringJson(data);
         String newCsv = newMap.getReceiptForExternalId(externalId1).toStringCSV();
         String oldCsv = receipt1.toStringCSV();
         assert(newCsv.compareTo(oldCsv)==0);
@@ -131,7 +130,7 @@ public class Id2ReceiptMapTest {
     //////////////////////////////////////////////////////////////
     @BeforeMethod
     public void setUp() {
-        map = new Id2ReceiptMap("test");
+        map = new Id2ReceiptMap();
         map.putOrderId2ExternalIdMapping(orderId1,externalId1);
         map.putReceipt(externalId1, receipt1);
         map.putOrderId2ExternalIdMapping(orderId2,externalId2);
