@@ -78,8 +78,8 @@ public class BollingerBands extends StrategyBase  implements Observer  {
             {
                 if(!priceDataList.peekFirst().isSameFrontRowPricesAs(p)){ // only Unique prices
                     //triggerTrades(p);
-                    askOrderAtLowerBandLimit(p);
-                    bidOrderAtUpperBandLimit(p);
+                    buyOrderAtLowerBandLimit(p);
+                    sellOrderAtUpperBandLimit(p);
                     priceDataList.removeFirst();
                     priceDataList.add(p);
                 }
@@ -99,61 +99,78 @@ public class BollingerBands extends StrategyBase  implements Observer  {
             return order;
         }
 
-        private void askOrderAtLowerBandLimit(PriceData p){
-            if(lastAskOrder.equals(OrderNew.NULL)){
-                Decimal lowerBollingerBand = Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL));
-                lowerBollingerBand = lowerBollingerBand.roundToDigits(3);
-                lastAskOrder = sendOrder(BookSide.BID,lowerBollingerBand,Decimal.ONE);
-                this.askOrderAtLowerBandLimitReceipt = false;
-                log.info("(++) Sending ASK Order: "+ lastAskOrder.toString());
+        private void sendBuyOrder(){
+            Decimal lowerBollingerBand = Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL));
+            lowerBollingerBand = lowerBollingerBand.roundToDigits(3);
+            lastBidOrder = sendOrder(BookSide.BID,lowerBollingerBand,Decimal.ONE);
+            this.bidOrderAtUpperBandLimitReceipt = false;
+            log.info("(++) Sending Order {}"+ lastBidOrder.toString());
+        }
 
+        private void buyOrderAtLowerBandLimit(PriceData p){
+            if(!isThereOpenLong()){
+                if(lastBidOrder.equals(OrderNew.NULL)) sendBuyOrder();
+
+                if(this.bidOrderAtUpperBandLimitReceipt){
+                    OrderCancel o = lastBidOrder.createCancelOrder();
+                    sendOrderCancel(o);
+                    lastBidOrder = OrderNew.NULL;
+                    sendBuyOrder();
+                }
+
+            }
+            else {
+                //Existing open Long position
+                Decimal meanPrice = Decimal.fromDouble(getPriceMean(BookSide.NULL));
+
+                if (meanSellOrder.equals(OrderNew.NULL)) sendMeanSellOrder(meanPrice);
+
+                if (this.meanBuyOrderReceipt) {
+                    OrderCancel o = meanSellOrder.createCancelOrder();
+                    sendOrderCancel(o);
+                    meanSellOrder = OrderNew.NULL;
+                    sendMeanSellOrder(meanPrice);
+
+                }
+            }
+
+        }
+
+        private void sendMeanSellOrder(Decimal price){
+            meanSellOrder = sendOrder(BookSide.ASK,price,Decimal.ONE);
+            this.meanSellOrderReceipt = false;
+            log.info("(++) Sending Mean Order {}"+ lastBidOrder.toString());
+        }
+
+        private void sendMeanBuyOrder(Decimal price){
+            meanBuyOrder = sendOrder(BookSide.BID,price,Decimal.ONE);
+            this.meanBuyOrderReceipt = false;
+            log.info("(++) Sending Mean Order {}"+ lastBidOrder.toString());
+        }
+
+
+        private void sendSellOrder(){
+            Decimal upperBollingerBand = Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL));
+            upperBollingerBand = upperBollingerBand.roundToDigits(3);
+            lastAskOrder = sendOrder(BookSide.ASK,upperBollingerBand,Decimal.ONE);
+            this.askOrderAtLowerBandLimitReceipt = false;
+            log.info("(++) Sending Order {}"+ lastAskOrder.toString());
+
+        }
+
+        private void sellOrderAtUpperBandLimit(PriceData p){
+            if(lastAskOrder.equals(OrderNew.NULL)){
+                sendSellOrder();
             }
             else{
                 //cancel last bid order
                 if(this.askOrderAtLowerBandLimitReceipt){
                     OrderCancel o = lastAskOrder.createCancelOrder();
                     sendOrderCancel(o);
-                    Decimal lowerBollingerBand = Decimal.fromDouble(getLowerBollingerBand(BookSide.NULL));
-                    lowerBollingerBand = lowerBollingerBand.roundToDigits(3);
-                    lastAskOrder = sendOrder(BookSide.BID,lowerBollingerBand,Decimal.ONE);
-                    this.askOrderAtLowerBandLimitReceipt = false;
-                    log.info("(++) Sending ASK Order: "+ lastAskOrder.toString());
-
+                    lastAskOrder = OrderNew.NULL;
+                    sendSellOrder();
                 }
-
-
             }
-
-        }
-
-        private void bidOrderAtUpperBandLimit(PriceData p){
-            if(lastBidOrder.equals(OrderNew.NULL)){
-
-                Decimal upperBollingerBand = Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL));
-                upperBollingerBand = upperBollingerBand.roundToDigits(3);
-                lastBidOrder = sendOrder(BookSide.ASK,upperBollingerBand,Decimal.ONE);
-                this.bidOrderAtUpperBandLimitReceipt = false;
-                log.info("(++) Sending BID Order: "+ lastBidOrder.toString());
-
-            }
-            else{
-                //cancel last bid order
-                if(this.bidOrderAtUpperBandLimitReceipt){
-                    OrderCancel o = lastBidOrder.createCancelOrder();
-                    sendOrderCancel(o);
-                    lastBidOrder = OrderNew.NULL;
-                    Decimal upperBollingerBand = Decimal.fromDouble(getUpperBollingerBand(BookSide.NULL));
-                    upperBollingerBand = upperBollingerBand.roundToDigits(3);
-                    lastBidOrder = sendOrder(BookSide.ASK,upperBollingerBand,Decimal.ONE);
-                    this.bidOrderAtUpperBandLimitReceipt = false;
-                    log.info("(++) Sending BID Order: "+ lastBidOrder.toString());
-                }
-
-
-            }
-
-
-
         }
 
         private boolean isBidAboveUpperBand(PriceData p, double upperBand){
@@ -387,9 +404,10 @@ public class BollingerBands extends StrategyBase  implements Observer  {
         private BigInteger bollingerWindow;
         private double upperBollingerBand, lowerBollingerBand;
         private  String triggeredTrade , openTrade;
-        private OrderNew lastBidOrder, lastAskOrder;
+        private OrderNew lastBidOrder, lastAskOrder, meanBuyOrder, meanSellOrder;
         double openLongAsk , openShortBid , cumProfit;
         public boolean askOrderAtLowerBandLimitReceipt,bidOrderAtUpperBandLimitReceipt;
+        public boolean meanBuyOrderReceipt, meanSellOrderReceipt;
     }
 
 
@@ -446,10 +464,31 @@ public class BollingerBands extends StrategyBase  implements Observer  {
 
             if (receipt.isForOrder(pbands.lastAskOrder)) {
                 pbands.askOrderAtLowerBandLimitReceipt = true;
+                if(!pbands.isThereOpenLong() && receipt.isEndState()){
+                    pbands.openTrade = SHORT;
+                }
+
             }
 
             if (receipt.isForOrder(pbands.lastBidOrder)) {
                 pbands.bidOrderAtUpperBandLimitReceipt = true;
+                if(!pbands.isThereOpenShort() && receipt.isEndState()){
+                    pbands.openTrade = LONG;
+                }
+            }
+
+            if (receipt.isForOrder(pbands.meanBuyOrder)) {
+                pbands.meanBuyOrderReceipt = true;
+                if(pbands.isThereOpenShort() && receipt.isEndState() ){
+                    pbands.openTrade = NONE;
+                }
+            }
+
+            if (receipt.isForOrder(pbands.meanSellOrder)) {
+                pbands.meanSellOrderReceipt = true;
+                if(pbands.isThereOpenLong() && receipt.isEndState() ){
+                    pbands.openTrade = NONE;
+                }
             }
 
             log.debug("Received receipt: " + receipt);
