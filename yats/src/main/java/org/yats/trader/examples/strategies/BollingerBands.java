@@ -125,7 +125,7 @@ public class BollingerBands extends StrategyBase  implements Observer  {
 
                 if (meanSellOrder.equals(OrderNew.NULL)) sendMeanSellOrder(meanPrice);
 
-                if (this.meanBuyOrderReceipt) {
+                if (this.meanSellOrderReceipt) {
                     OrderCancel o = meanSellOrder.createCancelOrder();
                     sendOrderCancel(o);
                     meanSellOrder = OrderNew.NULL;
@@ -159,17 +159,31 @@ public class BollingerBands extends StrategyBase  implements Observer  {
         }
 
         private void sellOrderAtUpperBandLimit(PriceData p){
-            if(lastAskOrder.equals(OrderNew.NULL)){
-                sendSellOrder();
-            }
-            else{
-                //cancel last bid order
+            if(!isThereOpenShort()){
+                if(lastAskOrder.equals(OrderNew.NULL))sendSellOrder();
+
                 if(this.askOrderAtLowerBandLimitReceipt){
                     OrderCancel o = lastAskOrder.createCancelOrder();
                     sendOrderCancel(o);
                     lastAskOrder = OrderNew.NULL;
                     sendSellOrder();
                 }
+            }
+
+            else{
+                //Existing open Long position
+                Decimal meanPrice = Decimal.fromDouble(getPriceMean(BookSide.NULL));
+
+                if (meanBuyOrder.equals(OrderNew.NULL)) sendMeanBuyOrder(meanPrice);
+
+                if (this.meanBuyOrderReceipt) {
+                    OrderCancel o = meanBuyOrder.createCancelOrder();
+                    sendOrderCancel(o);
+                    meanBuyOrder = OrderNew.NULL;
+                    sendMeanSellOrder(meanPrice);
+
+                }
+
             }
         }
 
