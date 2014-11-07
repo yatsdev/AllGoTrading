@@ -61,6 +61,8 @@ import java.util.LinkedList;
 
                 priceDataList.add(p);
                 priceDataList.removeFirst();
+
+                assert(priceDataList.size() == 20);
             }
         }
 
@@ -106,7 +108,7 @@ import java.util.LinkedList;
                 orderSender.sendNewOrder(shortTrader.lastSentOrder);
             }
         }
-    }
+    } // working AAE 23:18 05.11.2014
 
     private void sendOrRenewLimitBuyOrder(OrderNew newOrder){
         if(!longTrader.openLimitFilled){
@@ -147,12 +149,13 @@ import java.util.LinkedList;
     private void sendOrRenewSellClosingOrder(OrderNew newCloseOrder){
         if(!shortTrader.closeLimitFilled){
             if(!closeSellSent) {
-                shortTrader.lastSentOrder =newCloseOrder;
+                shortTrader.closePositionOrder =newCloseOrder;
                 orderSender.sendNewOrder(newCloseOrder);
                 closeSellSent = true;
             }
-            if(shortTrader.lastSentOrderReceiptRecieved){
-                shortTrader.lastSentOrderReceiptRecieved = false;
+            if(shortTrader.closePositionReceiptRecieved){
+                shortTrader.closePositionReceiptRecieved = false;
+                shortTrader.closePositionOrder =newCloseOrder;
                 OrderCancel cancelOrder = shortTrader.lastSentOrder.createCancelOrder();
                 orderSender.sendOrderCancel(cancelOrder);
                 orderSender.sendNewOrder(newCloseOrder);

@@ -1,6 +1,9 @@
 package org.yats.trading;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yats.common.Decimal;
+import org.yats.trader.StrategyRunner;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -11,9 +14,15 @@ public class BollingerTrader {
 
     final static String productOrderSize = "1000";
     final int precisionForPrice = 5;
+    final Logger log = LoggerFactory.getLogger(StrategyRunner.class);
 
     public BollingerTrader(BollingerBandsForProduct bandsForProduct, BookSide bookSide){
         this.bandsForProduct = bandsForProduct;
+        resetVariables();
+        this._bookSide = bookSide;
+    }
+
+    private void resetVariables(){
         takePositionOrder = OrderNew.NULL;
         closePositionOrder = OrderNew.NULL;
         lastSentOrder = OrderNew.NULL;
@@ -23,7 +32,6 @@ public class BollingerTrader {
         lastSentOrderReceiptRecieved = false;
         openLimitFilled= false;
         closeLimitFilled = false;
-        this._bookSide = bookSide;
     }
 
     private OrderNew generateNewOrder(BookSide side, Decimal limitPrice)
@@ -57,20 +65,28 @@ public class BollingerTrader {
     }
 
     public void onReceipt(Receipt r){
-        if(r.isForOrder(lastSentOrder)){
-            lastSentOrderReceiptRecieved = true;
-            if(r.isEndState()){
-                if(!openLimitFilled){
-                    openLimitFilled = true;
-                    closeLimitFilled = !openLimitFilled;
-                    takePositionOrder = lastSentOrder;
-                }
-                if(openLimitFilled && !closeLimitFilled){
-                    closePositionOrder = lastSentOrder;
-                    closeLimitFilled = true;
-                    openLimitFilled = !closeLimitFilled;
-                }
+
+        if(r.isEndState() && r.getCurrentTradedSize().toInt() == 0){
+            log.info("Receipt Cancelled " + r.toString());
+        }
+
+        if(r.isEndState() && r.getTotalTradedSize().toInt() > 0){
+            log.info("Receipt filled " + r.toString());
+            if(r.isForOrder(lastSentOrder)){
+                lastSentOrderReceiptRecieved = true;
+                openLimitFilled = true;
+                takePositionOrder = lastSentOrder;
             }
+            if(r.isForOrder(closePositionOrder)){
+                resetVariables();
+            }
+        }
+
+        if(r.isForOrder(lastSentOrder)) {
+            lastSentOrderReceiptRecieved = true;
+        }
+        if(r.isForOrder(closePositionOrder)){
+            closePositionReceiptRecieved = true;
         }
     }
 
