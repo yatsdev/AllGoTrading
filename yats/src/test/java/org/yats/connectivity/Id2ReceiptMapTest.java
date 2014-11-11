@@ -105,27 +105,6 @@ public class Id2ReceiptMapTest {
         assert(newCsv.compareTo(oldCsv)==0);
     }
 
-    @Test
-    public void whenExternalIdMapGotSerialized_parseExternalId2OrderMap_canDeserializeBID() {
-        String data = map.toStringCSVExternalId2OrderMap();
-        Id2ReceiptMap newMap = new Id2ReceiptMap("testBID");
-        newMap.parseExternalId2OrderMap(data);
-        String newCsv = newMap.getReceiptForExternalId(externalIdBID).toStringCSV();
-        String oldCsv = defaultReceiptBID.toStringCSV();
-        assert(newCsv.compareTo(oldCsv)==0);
-    }
-
-    @Test
-    public void whenExternalIdMapGotSerialized_parseExternalId2OrderMap_canDeserializeASK() {
-        String data = map.toStringCSVExternalId2OrderMap();
-        Id2ReceiptMap newMap = new Id2ReceiptMap("testASK");
-        newMap.parseExternalId2OrderMap(data);
-        String newCsv = newMap.getReceiptForExternalId(externalIdASK).toStringCSV();
-        String oldCsv = defaultReceiptASK.toStringCSV();
-        assert(newCsv.compareTo(oldCsv)==0);
-    }
-
-
 
     //////////////////////////////////////////////////////////////
     @BeforeMethod

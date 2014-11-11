@@ -154,10 +154,10 @@ import java.util.LinkedList;
                 closeSellSent = true;
             }
             if(shortTrader.closePositionReceiptRecieved){
+                OrderCancel cancelOrder = shortTrader.closePositionOrder.createCancelOrder();
+                orderSender.sendOrderCancel(cancelOrder);
                 shortTrader.closePositionReceiptRecieved = false;
                 shortTrader.closePositionOrder =newCloseOrder;
-                OrderCancel cancelOrder = shortTrader.lastSentOrder.createCancelOrder();
-                orderSender.sendOrderCancel(cancelOrder);
                 orderSender.sendNewOrder(newCloseOrder);
 
             }
