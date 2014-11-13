@@ -32,6 +32,10 @@ public class BollingerTrader {
         lastSentOrderReceiptRecieved = false;
         openLimitFilled= false;
         closeLimitFilled = false;
+        firstTimeLegOneOrder = false;
+        firstTimeLegTwoOrder = false;
+
+
     }
 
     private OrderNew generateNewOrder(BookSide side, Decimal limitPrice)
@@ -96,7 +100,7 @@ public class BollingerTrader {
     public OrderCancel cancelledOrder;
     public boolean openPositionReceiptRecieved;
     public boolean closePositionReceiptRecieved, lastSentOrderReceiptRecieved;
-    public boolean openLimitFilled, closeLimitFilled;
+    public boolean openLimitFilled, closeLimitFilled, firstTimeLegOneOrder, firstTimeLegTwoOrder;
     public Decimal takeProfitPrice;
     private BookSide _bookSide;
 

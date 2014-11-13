@@ -75,7 +75,7 @@ import java.util.LinkedList;
         }
         else if(shortTrader.openLimitFilled ){
             OrderNew newCloseOrder = shortTrader.getCloseOrder();
-            sendOrRenewBuyClosingOrder(newCloseOrder);
+            sendOrRenewSellClosingOrder(newCloseOrder);
         }
     }
 
@@ -88,17 +88,17 @@ import java.util.LinkedList;
         }
         else if(longTrader.openLimitFilled ){
             OrderNew newCloseOrder = longTrader.getCloseOrder();
-            sendOrRenewSellClosingOrder(newCloseOrder);
+            sendOrRenewLimitBuyOrder(newCloseOrder);
          }
 
     } //Signed off AAE 23:45 05.11.2014
 
     private void sendOrRenewLimitSellOrder(OrderNew newOrder){
         if(!shortTrader.openLimitFilled){
-            if(!firstSellSent) {
+            if(!shortTrader.firstTimeLegOneOrder) {
                 shortTrader.lastSentOrder = newOrder;
                 orderSender.sendNewOrder(shortTrader.lastSentOrder);
-                firstSellSent = true;
+                shortTrader.firstTimeLegOneOrder = true;
             }
             if(shortTrader.lastSentOrderReceiptRecieved){
                 shortTrader.cancelledOrder = shortTrader.lastSentOrder.createCancelOrder();
@@ -112,10 +112,10 @@ import java.util.LinkedList;
 
     private void sendOrRenewLimitBuyOrder(OrderNew newOrder){
         if(!longTrader.openLimitFilled){
-            if(!firstBuySent) {
+            if(!longTrader.firstTimeLegOneOrder) {
                 longTrader.lastSentOrder = newOrder;
                 orderSender.sendNewOrder(longTrader.lastSentOrder);
-                firstBuySent = true;
+                longTrader.firstTimeLegOneOrder = true;
             }
             if(longTrader.lastSentOrderReceiptRecieved){
                 longTrader.cancelledOrder = longTrader.lastSentOrder.createCancelOrder();
@@ -130,10 +130,10 @@ import java.util.LinkedList;
     private void sendOrRenewBuyClosingOrder(OrderNew newCloseOrder){
 
         if(!longTrader.closeLimitFilled){
-            if(!closeBuySent) {
+            if(!longTrader.firstTimeLegTwoOrder) {
                 longTrader.lastSentOrder =newCloseOrder;
                 orderSender.sendNewOrder(newCloseOrder);
-                closeBuySent = true;
+                longTrader.firstTimeLegTwoOrder = true;
             }
             if(longTrader.lastSentOrderReceiptRecieved){
                 longTrader.lastSentOrderReceiptRecieved = false;
@@ -148,10 +148,10 @@ import java.util.LinkedList;
 
     private void sendOrRenewSellClosingOrder(OrderNew newCloseOrder){
         if(!shortTrader.closeLimitFilled){
-            if(!closeSellSent) {
+            if(!shortTrader.firstTimeLegTwoOrder) {
                 shortTrader.closePositionOrder =newCloseOrder;
                 orderSender.sendNewOrder(newCloseOrder);
-                closeSellSent = true;
+                shortTrader.firstTimeLegTwoOrder = true;
             }
             if(shortTrader.closePositionReceiptRecieved){
                 OrderCancel cancelOrder = shortTrader.closePositionOrder.createCancelOrder();
