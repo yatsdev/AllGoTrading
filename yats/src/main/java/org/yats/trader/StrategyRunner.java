@@ -18,7 +18,6 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
         IProvideTimedCallback, ISaveProperties
 
 {
-
     // the configuration file log4j.properties for Log4J has to be provided in the working directory
     // an example of such a file is at config/log4j.properties.
     // if Log4J gives error message that it need to be configured, copy this file to the working directory
