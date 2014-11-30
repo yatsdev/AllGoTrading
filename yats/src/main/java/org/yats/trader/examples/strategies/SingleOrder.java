@@ -30,8 +30,8 @@ public class SingleOrder extends StrategyBase implements IAmCalledTimed  {
         if(shuttingDown) return;
         startPrice = priceData;
 
-        //sendOrder(BookSide.ASK, marketData.getAsk().add(Decimal.ONE), Decimal.fromString("0.01"));
-        sendOrder(BookSide.BID, priceData.getBid().subtract(Decimal.fromString("0.001")), Decimal.fromString("1"));
+        //sendOrder(BookSide.ASK, priceData.getBid(), Decimal.fromString("1"));
+        sendOrder(BookSide.BID, priceData.getAsk(), Decimal.fromString("0.001"));
         addTimedCallback(5, this);
     }
 

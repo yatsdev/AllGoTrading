@@ -10,6 +10,8 @@ public class PriceData
 {
     public static PriceDataNULL NULL = new PriceDataNULL();
 
+
+
     public boolean hasProductId(String pid) {
         return productId.compareTo(pid) == 0;
     }

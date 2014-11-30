@@ -173,19 +173,19 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
     public void run() {
         try {
             while (!shutdown) {
-                log.info("waiting...");
+                //log.info("waiting...");
                 callWaitingStrategies();
 
                 String updatedProductId = updatedProductQueue.take();
 
 
-                log.info("settings...");
+                //log.info("settings...");
                 while(settingsQueue.size()>0) {
                     IProvideProperties p = settingsQueue.take();
                     for(IConsumeSettings c : settingsConsumers) { c.onSettings(p); }
                 }
 
-                log.info("receipts...");
+                //log.info("receipts...");
                 while(receiptQueue.size()>0){
                     Receipt r = receiptQueue.take();
                     for(IConsumeReceipt c : receiptConsumers) {
@@ -197,7 +197,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                     }
                 }
 
-                log.info("prices...");
+                //log.info("prices...");
                 PriceData newData = priceDataMap.remove(updatedProductId);
                 if(newData!=null) {
                     rateConverter.onPriceData(newData);
@@ -206,7 +206,7 @@ public class StrategyRunner implements IConsumeReceipt, ISendOrder,
                         md.onPriceData(newData);
                     }
                 }
-                log.info("done.");
+                //log.info("done.");
             }
         }catch(InterruptedException e) {
             log.error(e.getMessage());
