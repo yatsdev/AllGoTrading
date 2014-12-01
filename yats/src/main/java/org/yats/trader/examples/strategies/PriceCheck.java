@@ -136,6 +136,8 @@ public class PriceCheck extends StrategyBase{
 
     }
 
+
+
     private PriceData lastPrice;
     private EPRuntime cepRT;
 
@@ -147,11 +149,14 @@ public class PriceCheck extends StrategyBase{
 
     private Decimal upMove;
     private Decimal downMove;
+
+
+    private class CEPListener implements UpdateListener {
+
+        public void update(EventBean[] newData, EventBean[] oldData) {
+            System.out.println("Event received: " + newData[0].getUnderlying());
+        }
+    }
+
 } // class
 
-class CEPListener implements UpdateListener {
-
-    public void update(EventBean[] newData, EventBean[] oldData) {
-        System.out.println("Event received: " + newData[0].getUnderlying());
-    }
-}
