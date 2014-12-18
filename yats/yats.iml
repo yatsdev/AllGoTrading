@@ -29,6 +29,7 @@
     <orderEntry type="library" name="pretty-tools-JDDE-2.0.3" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.3" level="project" />
     <orderEntry type="library" name="com.espertech:esper:4.10.0" level="project" />
+    <orderEntry type="library" name="org.squirrelframework:squirrel-foundation:0.3.4" level="project" />
   </component>
 </module>
 

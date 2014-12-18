@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="org.squirrelframework:squirrel-foundation:0.3.4" type="repository">
+    <properties maven-id="org.squirrelframework:squirrel-foundation:0.3.4" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/squirrelframework/squirrel-foundation/0.3.4/squirrel-foundation-0.3.4.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/16.0.1/guava-16.0.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.12/log4j-1.2.12.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.6.1/slf4j-api-1.6.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mvel/mvel2/2.1.8.Final/mvel2-2.1.8.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
